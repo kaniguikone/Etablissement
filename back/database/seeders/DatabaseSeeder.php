@@ -68,6 +68,7 @@ class DatabaseSeeder extends Seeder
 
         Eleve::factory()->count(150)->create();
 
+
         Enseignant::factory()->count(55)->create()->each(function ($enseignant) use ($ids) {
             shuffle($ids);
             $enseignant->matieres()->attach(array_slice($ids, 0, rand(1, 3)));
