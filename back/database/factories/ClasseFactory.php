@@ -14,7 +14,8 @@ class ClasseFactory extends Factory
     public function definition()
     {
         return [
-             //   'num_classe' => $this->rand(1,5)->uniqid,
+            'salle_classe'        => 'Salle ' . $this->faker->regexify('[A-C][0-9]'),
+            'effectif_max_classe' => $this->faker->numberBetween(30, 45),
         ];
     }
 }

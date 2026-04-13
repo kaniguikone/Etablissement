@@ -1,0 +1,48 @@
+name: suivi_scolaire_parent
+description: Application mobile de suivi scolaire pour les parents d'élèves.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # HTTP
+  dio: ^5.4.0
+
+  # Stockage local
+  shared_preferences: ^2.2.3
+  flutter_secure_storage: ^9.0.0
+
+  # State management
+  provider: ^6.1.2
+
+  # Formatage dates
+  intl: ^0.19.0
+
+  # Icônes Material
+  cupertino_icons: ^1.0.6
+
+  # Ouvrir URLs dans le navigateur (paiement CinetPay)
+  url_launcher: ^6.3.0
+
+  # Téléchargement et ouverture de fichiers PDF
+  path_provider: ^2.1.4
+  open_file: ^3.3.2
+
+  # Web interop (remplacement dart:html)
+  web: ^1.1.0
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Propositions d'améliorations – Application de gestion scolaire</title>
+  <style>
+    body        { font-family: Calibri, Arial, sans-serif; font-size: 11pt; margin: 2.5cm; color: #222; }
+    h1          { font-size: 18pt; color: #1565C0; border-bottom: 2px solid #1565C0; padding-bottom: 6px; }
+    h2          { font-size: 14pt; color: #ffffff; padding: 6px 12px; margin-top: 24px; border-radius: 4px; }
+    h2.rouge    { background-color: #C62828; }
+    h2.orange   { background-color: #E65100; }
+    h2.jaune    { background-color: #F9A825; color: #222; }
+    h2.vert     { background-color: #2E7D32; }
+    h3          { font-size: 12pt; color: #1565C0; margin-bottom: 4px; }
+    p           { margin: 4px 0 10px 0; line-height: 1.5; }
+    ul          { margin: 4px 0 10px 20px; line-height: 1.6; }
+    table       { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 10.5pt; }
+    th          { background-color: #1565C0; color: #fff; padding: 7px 10px; text-align: left; }
+    td          { border: 1px solid #ccc; padding: 6px 10px; vertical-align: top; }
+    tr:nth-child(even) td { background-color: #f5f7fa; }
+    .badge      { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 9.5pt; font-weight: bold; color: #fff; }
+    .haute      { background-color: #C62828; }
+    .moyenne    { background-color: #E65100; }
+    .technique  { background-color: #F9A825; color: #222; }
+    .ux         { background-color: #2E7D32; }
+    .footer     { margin-top: 40px; font-size: 9pt; color: #888; border-top: 1px solid #ccc; padding-top: 8px; }
+    .intro      { background: #E3F2FD; border-left: 4px solid #1565C0; padding: 10px 16px; margin-bottom: 20px; border-radius: 0 4px 4px 0; }
+  </style>
+</head>
+<body>
+
+  <h1>Propositions d'améliorations<br/>Application de gestion scolaire</h1>
+
+  <div class="intro">
+    <p>
+      Ce document présente les recommandations formulées à l'issue de l'analyse complète de l'application
+      de gestion scolaire (backend Laravel 11, frontend React 18, application mobile Flutter).
+      Les améliorations sont classées par priorité et par domaine d'impact.
+    </p>
+    <p><strong>Date :</strong> Avril 2026 &nbsp;|&nbsp; <strong>Version :</strong> 1.0</p>
+  </div>
+
+  <!-- RÉSUMÉ -->
+  <h2 class="rouge">Synthèse des recommandations</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Recommandation</th>
+        <th>Priorité</th>
+        <th>Domaine</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>Sécurisation des mots de passe parents</td><td><span class="badge haute">Haute</span></td><td>Sécurité</td></tr>
+      <tr><td>2</td><td>Activation de l'authentification web</td><td><span class="badge haute">Haute</span></td><td>Sécurité</td></tr>
+      <tr><td>3</td><td>Validation des chevauchements horaires</td><td><span class="badge haute">Haute</span></td><td>Intégrité des données</td></tr>
+      <tr><td>4</td><td>Export bulletins en PDF</td><td><span class="badge moyenne">Moyenne</span></td><td>Fonctionnalité</td></tr>
+      <tr><td>5</td><td>Notifications push parents</td><td><span class="badge moyenne">Moyenne</span></td><td>Fonctionnalité</td></tr>
+      <tr><td>6</td><td>Gestion des paiements de scolarité</td><td><span class="badge moyenne">Moyenne</span></td><td>Fonctionnalité</td></tr>
+      <tr><td>7</td><td>Tableau de bord statistiques</td><td><span class="badge moyenne">Moyenne</span></td><td>Fonctionnalité</td></tr>
+      <tr><td>8</td><td>Pagination des listes</td><td><span class="badge technique">Technique</span></td><td>Performance</td></tr>
+      <tr><td>9</td><td>Tests automatisés</td><td><span class="badge technique">Technique</span></td><td>Qualité</td></tr>
+      <tr><td>10</td><td>Gestion du token expiré (mobile)</td><td><span class="badge technique">Technique</span></td><td>Fiabilité</td></tr>
+      <tr><td>11</td><td>Photo de profil élève</td><td><span class="badge ux">UX</span></td><td>Expérience utilisateur</td></tr>
+      <tr><td>12</td><td>Messagerie parent-établissement</td><td><span class="badge ux">UX</span></td><td>Communication</td></tr>
+      <tr><td>13</td><td>Calendrier scolaire</td><td><span class="badge ux">UX</span></td><td>Expérience utilisateur</td></tr>
+    </tbody>
+  </table>
+
+  <!-- PRIORITÉ HAUTE -->
+  <h2 class="rouge">🔴 Priorité haute — Sécurité &amp; Intégrité</h2>
+
+  <h3>1. Sécurisation des mots de passe parents</h3>
+  <p>
+    Le mot de passe par défaut <strong>« 12345 »</strong> est un placeholder fonctionnel mais insuffisant
+    pour une mise en production. Toute personne connaissant un numéro de téléphone d'un parent
+    peut accéder aux données de ses enfants.
+  </p>
+  <p><strong>Actions recommandées :</strong></p>
+  <ul>
+    <li>Générer un mot de passe aléatoire sécurisé à la création de chaque compte parent.</li>
+    <li>Transmettre ce mot de passe par SMS au numéro enregistré.</li>
+    <li>Ajouter un écran « Changer mon mot de passe » dans l'application mobile.</li>
+    <li>Imposer un changement de mot de passe à la première connexion.</li>
+  </ul>
+
+  <h3>2. Activation de l'authentification web (interface d'administration)</h3>
+  <p>
+    L'interface web React est actuellement accessible sans aucune connexion. Le code d'authentification
+    existe côté backend (<em>AuthController</em>, routes commentées) mais n'est pas activé.
+    N'importe qui accédant à l'URL peut consulter et modifier toutes les données scolaires.
+  </p>
+  <p><strong>Actions recommandées :</strong></p>
+  <ul>
+    <li>Décommenter les routes d'authentification dans <code>api.php</code>.</li>
+    <li>Activer le composant <em>Login.jsx</em> et <em>PrivateRoute.jsx</em> déjà présents dans le frontend.</li>
+    <li>Définir des rôles : Administrateur, Enseignant, Secrétariat.</li>
+  </ul>
+
+  <h3>3. Validation des chevauchements dans l'emploi du temps</h3>
+  <p>
+    Le système accepte actuellement la création de deux créneaux au même horaire pour la même classe,
+    ou le même enseignant affecté à deux classes simultanément.
+  </p>
+  <p><strong>Actions recommandées :</strong></p>
+  <ul>
+    <li>Ajouter une règle de validation côté backend : vérifier les chevauchements avant insertion.</li>
+    <li>Afficher un message d'erreur explicite dans le formulaire React.</li>
+  </ul>
+
+  <!-- PRIORITÉ MOYENNE -->
+  <h2 class="orange">🟠 Priorité moyenne — Fonctionnalités</h2>
+
+  <h3>4. Export des bulletins en PDF</h3>
+  <p>
+    Les parents visualisent les notes sur l'application mobile mais ne peuvent ni les imprimer
+    ni les archiver. Un export PDF officiel avec entête de l'établissement est attendu par les familles.
+  </p>
+  <p><strong>Actions recommandées :</strong></p>
+  <ul>
+    <li>Intégrer la librairie <em>barryvdh/laravel-dompdf</em> côté backend.</li>
+    <li>Créer un endpoint <code>GET /parent/enfant/{id}/bulletin/{periodeId}/pdf</code>.</li>
+    <li>Ajouter un bouton « Télécharger le bulletin » dans l'application mobile.</li>
+  </ul>
+
+  <h3>5. Notifications push pour les parents</h3>
+  <p>
+    Aucun système d'alerte n'informe les parents en temps réel des absences de leurs enfants,
+    des nouveaux devoirs ou des informations de l'établissement.
+  </p>
+  <p><strong>Actions recommandées :</strong></p>
+  <ul>
+    <li>Intégrer Firebase Cloud Messaging (FCM) côté backend et Flutter.</li>
+    <li>Déclencher une notification lors de la saisie d'une absence.</li>
+    <li>Notifier à la publication d'une nouvelle information établissement.</li>
+  </ul>
+
+  <h3>6. Gestion des paiements de scolarité</h3>
+  <p>
+    La table <em>scolarites</em> définit les échéances de paiement mais ne trace pas
+    les paiements effectués. Il est impossible de savoir quelles familles sont à jour.
+  </p>
+  <p><strong>Actions recommandées :</strong></p>
+  <ul>
+    <li>Créer une table <code>paiements</code> (montant, date, mode, parent_id, echéance_id).</li>
+    <li>Ajouter une interface de saisie des paiements dans le frontend.</li>
+    <li>Afficher le statut payé/impayé dans l'application mobile parent.</li>
+    <li>Générer des relances ou reçus PDF.</li>
+  </ul>
+
+  <h3>7. Tableau de bord statistiques (page d'accueil)</h3>
+  <p>
+    La page d'accueil de l'interface web est actuellement vide. Un tableau de bord
+    donnerait une vision globale de l'établissement en un coup d'œil.
+  </p>
+  <p><strong>Indicateurs suggérés :</strong></p>
+  <ul>
+    <li>Nombre total d'élèves, enseignants, classes.</li>
+    <li>Taux d'absence global et par classe.</li>
+    <li>Moyennes générales par niveau.</li>
+    <li>Prochains devoirs planifiés.</li>
+    <li>Dernières informations publiées.</li>
+  </ul>
+
+  <!-- QUALITÉ TECHNIQUE -->
+  <h2 class="jaune">🟡 Qualité technique</h2>
+
+  <h3>8. Pagination des listes</h3>
+  <p>
+    Plusieurs endpoints retournent l'intégralité des données (<code>::all()</code>) sans pagination.
+    Avec une croissance des données, cela entraînera des temps de chargement élevés et
+    une surcharge mémoire.
+  </p>
+  <p><strong>Actions recommandées :</strong></p>
+  <ul>
+    <li>Remplacer <code>::all()</code> par <code>::paginate(25)</code> sur les listes principales.</li>
+    <li>Adapter les composants React pour gérer la navigation entre pages.</li>
+  </ul>
+
+  <h3>9. Tests automatisés</h3>
+  <p>
+    Aucun test automatisé n'est en place. Toute modification du code présente un risque
+    de régression non détectée.
+  </p>
+  <p><strong>Actions recommandées :</strong></p>
+  <ul>
+    <li>Tests PHPUnit backend : authentification, calculs de moyennes, règles métier.</li>
+    <li>Tests d'intégration sur les routes API critiques (bulletin, assiduités).</li>
+    <li>Tests React sur les formulaires principaux (création élève, saisie notes).</li>
+  </ul>
+
+  <h3>10. Gestion de l'expiration du token (application mobile)</h3>
+  <p>
+    Lorsque le token Sanctum expire, l'application mobile reçoit une erreur 401
+    mais ne redirige pas automatiquement vers l'écran de connexion.
+    L'utilisateur reste bloqué sur un écran d'erreur.
+  </p>
+  <p><strong>Actions recommandées :</strong></p>
+  <ul>
+    <li>Ajouter un intercepteur Dio qui détecte les réponses 401.</li>
+    <li>Effacer le token stocké et rediriger vers l'écran de connexion.</li>
+    <li>Configurer une durée de vie raisonnable pour les tokens Sanctum.</li>
+  </ul>
+
+  <!-- UX -->
+  <h2 class="vert">🟢 Expérience utilisateur</h2>
+
+  <h3>11. Photo de profil de l'élève</h3>
+  <p>
+    L'application affiche un avatar généré avec l'initiale du nom. Une vraie photo
+    facilite l'identification des élèves, particulièrement utile pour les enseignants.
+  </p>
+  <p><strong>Actions recommandées :</strong></p>
+  <ul>
+    <li>Ajouter un champ <code>photo</code> sur la table <em>eleves</em>.</li>
+    <li>Gérer l'upload côté Laravel (<em>Storage::disk('public')</em>).</li>
+    <li>Afficher la photo dans l'application mobile et le frontend.</li>
+  </ul>
+
+  <h3>12. Messagerie parent-établissement</h3>
+  <p>
+    Les parents n'ont aucun moyen de contacter l'établissement via l'application.
+    Un système de messages simples réduirait les appels téléphoniques et centraliserait
+    les échanges.
+  </p>
+  <p><strong>Actions recommandées :</strong></p>
+  <ul>
+    <li>Créer une table <code>messages</code> (expéditeur, destinataire, contenu, date, lu).</li>
+    <li>Ajouter un écran « Messages » dans l'application mobile.</li>
+    <li>Ajouter une interface de réponse dans le frontend d'administration.</li>
+  </ul>
+
+  <h3>13. Calendrier scolaire</h3>
+  <p>
+    Les dates importantes (vacances, examens de passage, réunions parents-professeurs)
+    ne sont pas visibles dans l'application mobile. Les parents consultent d'autres sources.
+  </p>
+  <p><strong>Actions recommandées :</strong></p>
+  <ul>
+    <li>Créer une table <code>evenements</code> (titre, date_debut, date_fin, type).</li>
+    <li>Intégrer un vue calendrier dans l'application mobile Flutter.</li>
+    <li>Permettre à l'administration d'ajouter des événements depuis le frontend.</li>
+  </ul>
+
+  <!-- FEUILLE DE ROUTE -->
+  <h2 class="rouge">📅 Feuille de route suggérée</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Phase</th>
+        <th>Période</th>
+        <th>Recommandations incluses</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Phase 1</strong><br/>Sécurisation</td>
+        <td>1 – 2 mois</td>
+        <td>
+          #2 Authentification web<br/>
+          #3 Chevauchements horaires<br/>
+          #10 Token expiré mobile
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Phase 2</strong><br/>Fonctionnalités prioritaires</td>
+        <td>2 – 3 mois</td>
+        <td>
+          #4 Export PDF bulletins<br/>
+          #6 Gestion paiements<br/>
+          #7 Tableau de bord
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Phase 3</strong><br/>Engagement parents</td>
+        <td>3 – 4 mois</td>
+        <td>
+          #1 Mots de passe sécurisés<br/>
+          #5 Notifications push<br/>
+          #12 Messagerie<br/>
+          #13 Calendrier scolaire
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Phase 4</strong><br/>Qualité &amp; finitions</td>
+        <td>En continu</td>
+        <td>
+          #8 Pagination<br/>
+          #9 Tests automatisés<br/>
+          #11 Photos élèves
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="footer">
+    Document généré le 02/04/2026 — Application de gestion scolaire v1.0
+  </div>
+
+</body>
+</html>

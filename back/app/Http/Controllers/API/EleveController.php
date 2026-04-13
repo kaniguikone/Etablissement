@@ -5,81 +5,222 @@ namespace App\Http\Controllers\API;
 use App\Models\Eleve;
 use App\Models\Classe;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
 
 class EleveController extends Controller
 {
     public function listeEleves()
     {
-        $tousleseleves = Eleve::all();
-        
-        return response()->json($tousleseleves);
+        $eleves = Eleve::select('id', 'matricule_eleve', 'nom_eleve', 'prenoms_eleve', 'classe_id', 'statut_eleve')
+            ->with('classe:id,nom_classe,abbr_classe')
+            ->orderBy('nom_eleve')
+            ->get();
+
+        return response()->json($eleves);
     }
 
     public function ElevesNiveau($id)
     {
         $classes = Classe::where('niveau_id', '=', $id)->get('id');
-        
+
         $eleves_niveau = Eleve::with('classe')->whereIn('classe_id', $classes)->orderBy('id')->paginate(15);
 
         return response()->json($eleves_niveau);
     }
 
-    public function ElevesClasse ($id)
+    public function ElevesClasse($id)
     {
         $eleves_classe = Eleve::with('classe')->where('classe_id', '=', $id)->paginate(15);
 
         return response()->json($eleves_classe);
     }
 
-    public function index()
+    public function ElevesParent($id)
     {
-        $eleves = Eleve::with('classe')->paginate(15);
-        
-        return response()->json($eleves);
+        $eleves_parent = Eleve::with('classe')->where('parent_id', '=', $id)->get();
+
+        return response()->json($eleves_parent);
+    }
+
+    public function index(Request $request)
+    {
+        $query = Eleve::with('classe');
+
+        if ($request->filled('search')) {
+            $s = '%' . $request->search . '%';
+            $query->where(function ($q) use ($s) {
+                $q->where('nom_eleve', 'like', $s)
+                  ->orWhere('prenoms_eleve', 'like', $s)
+                  ->orWhere('matricule_eleve', 'like', $s);
+            });
+        }
+
+        return response()->json($query->orderBy('nom_eleve')->paginate(15));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'matricule_eleve' => "required",
-            'nom_eleve' => "required",
-            'prenoms_eleve' => "required",
-            'date_naissance_eleve' => "required",
-            'classe_id' => "required"
+            'matricule_eleve'      => 'required|string|max:50|unique:eleves,matricule_eleve',
+            'nom_eleve'            => 'required|string|max:100',
+            'prenoms_eleve'        => 'required|string|max:150',
+            'date_naissance_eleve' => 'required|date',
+            'classe_id'            => 'required|exists:classes,id',
+            'parent_id'            => 'nullable|exists:parents,id',
+            'photo_eleve'          => 'nullable|image|max:2048',
         ]);
+
+        $photoPath = null;
+        if ($request->hasFile('photo_eleve')) {
+            $photoPath = $request->file('photo_eleve')->store('photos/eleves', 'public');
+        }
 
         $eleve = Eleve::create([
-            'matricule_eleve' => $request->matricule_eleve,
-            'nom_eleve' => $request->nom_eleve,
-            'prenoms_eleve' => $request->prenoms_eleve,
+            'matricule_eleve'      => $request->matricule_eleve,
+            'nom_eleve'            => $request->nom_eleve,
+            'prenoms_eleve'        => $request->prenoms_eleve,
             'date_naissance_eleve' => $request->date_naissance_eleve,
-            'classe_id' => $request->classe_id
-        ]); 
-
-        return response()->json([
-            'status' => 'success',
-            'eleve'   => $eleve
+            'genre_eleve'          => $request->genre_eleve,
+            'lieu_naissance_eleve' => $request->lieu_naissance_eleve,
+            'nationalite_eleve'    => $request->nationalite_eleve,
+            'adresse_eleve'        => $request->adresse_eleve,
+            'photo_eleve'          => $photoPath,
+            'classe_id'            => $request->classe_id,
+            'parent_id'            => $request->parent_id,
         ]);
+
+        return response()->json(['status' => 'success', 'eleve' => $eleve], 201);
     }
 
     public function show($id)
     {
-        //$eleve = Eleve::where('id', '=', $id)->get();
-        
-        $eleve = Eleve::with('classe')->find($id);
-     
-        return response()->json($eleve);
+        return response()->json(Eleve::with('classe')->findOrFail($id));
     }
 
-    public function update(Request $request, Eleve $eleve)
+    public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'matricule_eleve'      => "required|string|max:50|unique:eleves,matricule_eleve,{$id}",
+            'nom_eleve'            => 'required|string|max:100',
+            'prenoms_eleve'        => 'required|string|max:150',
+            'date_naissance_eleve' => 'required|date',
+            'classe_id'            => 'required|exists:classes,id',
+            'parent_id'            => 'nullable|exists:parents,id',
+            'photo_eleve'          => 'nullable|image|max:2048',
+        ]);
+
+        $eleve = Eleve::findOrFail($id);
+
+        $data = [
+            'matricule_eleve'      => $request->matricule_eleve,
+            'nom_eleve'            => $request->nom_eleve,
+            'prenoms_eleve'        => $request->prenoms_eleve,
+            'date_naissance_eleve' => $request->date_naissance_eleve,
+            'genre_eleve'          => $request->genre_eleve,
+            'lieu_naissance_eleve' => $request->lieu_naissance_eleve,
+            'nationalite_eleve'    => $request->nationalite_eleve,
+            'adresse_eleve'        => $request->adresse_eleve,
+            'classe_id'            => $request->classe_id,
+            'parent_id'            => $request->parent_id,
+        ];
+
+        if ($request->hasFile('photo_eleve')) {
+            if ($eleve->photo_eleve) {
+                Storage::disk('public')->delete($eleve->photo_eleve);
+            }
+            $data['photo_eleve'] = $request->file('photo_eleve')->store('photos/eleves', 'public');
+        }
+
+        $eleve->update($data);
+
+        return response()->json(['status' => 'success', 'eleve' => $eleve]);
     }
 
-    public function destroy(Eleve $eleve)
+    public function updatePhoto(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'photo_eleve' => 'required|image|max:2048',
+        ]);
+
+        $eleve = Eleve::findOrFail($id);
+
+        // Supprimer l'ancienne photo
+        if ($eleve->photo_eleve) {
+            Storage::disk('public')->delete($eleve->photo_eleve);
+        }
+
+        $path = $request->file('photo_eleve')->store('photos/eleves', 'public');
+        $eleve->update(['photo_eleve' => $path]);
+
+        return response()->json([
+            'status'    => 'success',
+            'photo_url' => $eleve->photo_url,
+        ]);
     }
 
+    public function destroy(string $id)
+    {
+        $eleve = Eleve::findOrFail($id);
+        if ($eleve->photo_eleve) {
+            Storage::disk('public')->delete($eleve->photo_eleve);
+        }
+        $eleve->delete();
+
+        return response()->json(['status' => 'success']);
+    }
+
+    /**
+     * Export CSV de la liste des élèves.
+     * Filtres: classe_id, niveau_id, search
+     */
+    public function exportCsv(Request $request)
+    {
+        $query = Eleve::with('classe.niveau');
+
+        if ($request->filled('search')) {
+            $s = '%' . $request->search . '%';
+            $query->where(function ($q) use ($s) {
+                $q->where('nom_eleve', 'like', $s)
+                  ->orWhere('prenoms_eleve', 'like', $s)
+                  ->orWhere('matricule_eleve', 'like', $s);
+            });
+        }
+
+        if ($request->filled('classe_id')) {
+            $query->where('classe_id', $request->classe_id);
+        }
+
+        if ($request->filled('niveau_id')) {
+            $query->whereHas('classe', fn($q) => $q->where('niveau_id', $request->niveau_id));
+        }
+
+        $eleves   = $query->orderBy('nom_eleve')->get();
+        $filename = 'eleves_' . date('Y-m-d') . '.csv';
+
+        return response()->streamDownload(function () use ($eleves) {
+            $handle = fopen('php://output', 'w');
+            fputs($handle, "\xEF\xBB\xBF"); // BOM UTF-8 pour Excel
+            fputcsv($handle, [
+                'Matricule', 'Nom', 'Prénoms', 'Sexe',
+                'Date de naissance', 'Lieu de naissance', 'Nationalité',
+                'Classe', 'Niveau', 'Adresse',
+            ], ';');
+            foreach ($eleves as $e) {
+                fputcsv($handle, [
+                    $e->matricule_eleve,
+                    $e->nom_eleve,
+                    $e->prenoms_eleve,
+                    $e->genre_eleve,
+                    $e->date_naissance_eleve,
+                    $e->lieu_naissance_eleve,
+                    $e->nationalite_eleve,
+                    $e->classe?->nom_classe,
+                    $e->classe?->niveau?->libelle_niveau,
+                    $e->adresse_eleve,
+                ], ';');
+            }
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
 }

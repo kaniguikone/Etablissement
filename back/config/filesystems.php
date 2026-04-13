@@ -44,6 +44,13 @@ return [
             'throw' => false,
         ],
 
+        // Stockage des APKs (un fichier par tenant : {tenant_id}.apk)
+        'apk' => [
+            'driver' => 'local',
+            'root'   => storage_path('app/apk'),
+            'throw'  => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

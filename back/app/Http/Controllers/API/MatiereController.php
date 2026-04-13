@@ -8,11 +8,6 @@ use Illuminate\Http\Request;
 
 class MatiereController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $matieres = Matiere::all();
@@ -20,48 +15,49 @@ class MatiereController extends Controller
         return response()->json($matieres);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'abbr_matiere'        => 'required',
+            'libelle_matiere'     => 'required',
+            'description_matiere' => 'required',
+        ]);
+
+        $matiere = Matiere::create([
+            'abbr_matiere'        => $request->abbr_matiere,
+            'libelle_matiere'     => $request->libelle_matiere,
+            'description_matiere' => $request->description_matiere,
+        ]);
+
+        return response()->json(['status' => 'success', 'matiere' => $matiere], 201);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Matiere  $matiere
-     * @return \Illuminate\Http\Response
-     */
     public function show(Matiere $matiere)
     {
         return response()->json($matiere);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Matiere  $matiere
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, Matiere $matiere)
     {
-        //
+        $request->validate([
+            'abbr_matiere'        => 'required',
+            'libelle_matiere'     => 'required',
+            'description_matiere' => 'required',
+        ]);
+
+        $matiere->update([
+            'abbr_matiere'        => $request->abbr_matiere,
+            'libelle_matiere'     => $request->libelle_matiere,
+            'description_matiere' => $request->description_matiere,
+        ]);
+
+        return response()->json(['status' => 'success', 'matiere' => $matiere]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Matiere  $matiere
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(Matiere $matiere)
     {
-        //
+        $matiere->delete();
+
+        return response()->json(['status' => 'success']);
     }
 }

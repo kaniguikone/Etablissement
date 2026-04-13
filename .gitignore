@@ -1,0 +1,22 @@
+# Dépendances Composer (racine)
+/vendor/
+
+# Fichiers Tinker/Psy Shell
+bcrypt('password')])
+back/bcrypt('password')])
+
+# Fichiers d'environnement frontend
+front/.env
+front/.env.local
+front/.env.*.local
+
+# Répertoire Claude Code local
+.claude/
+
+# Node modules
+front/node_modules/
+mobile/node_modules/
+
+# Build
+front/dist/
+mobile/dist/

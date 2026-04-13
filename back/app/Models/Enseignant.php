@@ -2,22 +2,46 @@
 
 namespace App\Models;
 
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Laravel\Sanctum\HasApiTokens;
 
-class Enseignant extends Model
+class Enseignant extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, HasApiTokens;
 
-    protected $fillable = ["matricule_enseignant","nom_enseignant","prenoms_enseignant"];
+    public $timestamps = false;
+
+    protected $fillable = [
+        "matricule_enseignant", "numero_enseignant", "nom_enseignant", "prenoms_enseignant",
+        "genre_enseignant", "telephone_enseignant", "email_enseignant",
+        "date_naissance_enseignant", "date_embauche_enseignant", "statut_enseignant",
+        "password",
+    ];
+
+    protected $hidden = ['password'];
+
+    protected $casts = [
+        'password'                   => 'hashed',
+        'date_naissance_enseignant'  => 'date',
+        'date_embauche_enseignant'   => 'date',
+    ];
 
     public function matieres()
     {
-        return $this->belongsToMany(Matiere::class);
+        return $this->belongsToMany(Matiere::class, 'classe_enseignant_matiere')
+                    ->distinct();
     }
 
     public function classes()
     {
-        return $this->belongsToMany(Classe::class);
+        return $this->belongsToMany(Classe::class, 'classe_enseignant_matiere')
+                    ->distinct();
+    }
+
+    public function classesMatieresTable()
+    {
+        return DB::table('classe_enseignant_matiere')->where('enseignant_id', $this->id);
     }
 }

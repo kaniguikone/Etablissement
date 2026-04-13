@@ -1,25 +1,44 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useLocation } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
+import { ConfirmProvider } from './context/ConfirmContext';
+import { EtablissementProvider } from './context/EtablissementContext';
+import { NotificationProvider } from './context/NotificationContext';
+import Menu from './components/Menu';
+import RoutesMenu from './route/RoutesMenu';
+
+const AppInterne = () => {
+    const { user }   = useAuth();
+    const location   = useLocation();
+    const surLogin   = location.pathname === '/login';
+
+    return (
+        <div>
+            {user && !surLogin && <Menu />}
+            <div style={user && !surLogin ? {
+                marginLeft: 310,
+                minHeight: '100vh',
+            } : {}}>
+                <RoutesMenu />
+            </div>
+        </div>
+    );
+};
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      
-    </>
-  )
+    return (
+        <ToastProvider>
+            <ConfirmProvider>
+                <EtablissementProvider>
+                    <AuthProvider>
+                        <NotificationProvider>
+                            <AppInterne />
+                        </NotificationProvider>
+                    </AuthProvider>
+                </EtablissementProvider>
+            </ConfirmProvider>
+        </ToastProvider>
+    );
 }
 
-export default App
+export default App;

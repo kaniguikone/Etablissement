@@ -9,8 +9,17 @@ class Niveau extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
+    protected $fillable = ['nom_niveau', 'abbr_niveau'];
+
     public function classes()
     {
         return $this->hasMany(Classe::class);
+    }
+
+    public function scolarites()
+    {
+        return $this->hasMany(Scolarites::class);
     }
 }

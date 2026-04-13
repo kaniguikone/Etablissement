@@ -8,11 +8,6 @@ use Illuminate\Http\Request;
 
 class NiveauController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $niveaux = Niveau::all();
@@ -20,48 +15,45 @@ class NiveauController extends Controller
         return response()->json($niveaux);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nom_niveau'  => 'required',
+            'abbr_niveau' => 'required',
+        ]);
+
+        $niveau = Niveau::create([
+            'nom_niveau'  => $request->nom_niveau,
+            'abbr_niveau' => $request->abbr_niveau,
+        ]);
+
+        return response()->json(['status' => 'success', 'niveau' => $niveau], 201);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Niveau  $niveau
-     * @return \Illuminate\Http\Response
-     */
     public function show(Niveau $niveau)
     {
-        //
+        return response()->json($niveau);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Niveau  $niveau
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, Niveau $niveau)
     {
-        //
+        $request->validate([
+            'nom_niveau'  => 'required',
+            'abbr_niveau' => 'required',
+        ]);
+
+        $niveau->update([
+            'nom_niveau'  => $request->nom_niveau,
+            'abbr_niveau' => $request->abbr_niveau,
+        ]);
+
+        return response()->json(['status' => 'success', 'niveau' => $niveau]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Niveau  $niveau
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(Niveau $niveau)
     {
-        //
+        $niveau->delete();
+
+        return response()->json(['status' => 'success']);
     }
 }
