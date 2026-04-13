@@ -3,7 +3,6 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useEtablissement } from '../context/EtablissementContext';
 import { useNotifications } from '../context/NotificationContext';
-import NotificationsPanel from './notifications/NotificationsPanel';
 
 // Définition des groupes de menu avec les permissions requises
 // permissions: null = tous les connectés, sinon tableau de clés de permission
@@ -311,9 +310,6 @@ const Menu = () => {
                         />
                     ))}
                 </nav>
-
-                {/* Panel notifications (slide-out) */}
-                <NotificationsPanel />
 
                 {/* Déconnexion */}
                 <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: 'auto' }}>

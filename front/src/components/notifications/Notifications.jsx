@@ -4,13 +4,13 @@ import { useNotifications } from '../../context/NotificationContext';
 const ICONES = {
     absence:         { icon: 'fas fa-user-times',        couleur: '#dc3545', label: 'Absence'       },
     bulletin:        { icon: 'fas fa-file-alt',           couleur: '#0d6efd', label: 'Bulletin'      },
-    paiement_retard: { icon: 'fas fa-exclamation-circle', couleur: '#fd7e14', label: 'Paiement'      },
+    paiement:        { icon: 'fas fa-exclamation-circle', couleur: '#fd7e14', label: 'Paiement'      },
     information:     { icon: 'fas fa-info-circle',        couleur: '#0dcaf0', label: 'Information'   },
     devoir:          { icon: 'fas fa-pencil-alt',         couleur: '#6f42c1', label: 'Devoir'        },
     inscription:     { icon: 'fas fa-user-check',         couleur: '#198754', label: 'Inscription'   },
 };
 
-const FILTRES = ['tous', 'non_lues', 'absence', 'bulletin', 'paiement_retard', 'information', 'devoir', 'inscription'];
+const FILTRES = ['tous', 'non_lues', 'absence', 'bulletin', 'paiement', 'information', 'devoir', 'inscription'];
 
 const Notifications = () => {
     const { notifications, loading, fetchNotifications, marquerLue, marquerToutesLues, supprimer, nonLues } = useNotifications();

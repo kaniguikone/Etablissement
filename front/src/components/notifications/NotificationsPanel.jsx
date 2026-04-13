@@ -1,11 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../../context/NotificationContext';
 
 const ICONES = {
     absence:       { icon: 'fas fa-user-times',    couleur: '#dc3545' },
     bulletin:      { icon: 'fas fa-file-alt',       couleur: '#0d6efd' },
-    paiement_retard: { icon: 'fas fa-exclamation-circle', couleur: '#fd7e14' },
+    paiement:        { icon: 'fas fa-exclamation-circle', couleur: '#fd7e14' },
     information:   { icon: 'fas fa-info-circle',   couleur: '#0dcaf0' },
     devoir:        { icon: 'fas fa-pencil-alt',    couleur: '#6f42c1' },
     inscription:   { icon: 'fas fa-user-check',    couleur: '#198754' },

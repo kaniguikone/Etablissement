@@ -5,6 +5,7 @@ import { ConfirmProvider } from './context/ConfirmContext';
 import { EtablissementProvider } from './context/EtablissementContext';
 import { NotificationProvider } from './context/NotificationContext';
 import Menu from './components/Menu';
+import NotificationsPanel from './components/notifications/NotificationsPanel';
 import RoutesMenu from './route/RoutesMenu';
 
 const AppInterne = () => {
@@ -15,6 +16,7 @@ const AppInterne = () => {
     return (
         <div>
             {user && !surLogin && <Menu />}
+            {user && !surLogin && <NotificationsPanel />}
             <div style={user && !surLogin ? {
                 marginLeft: 310,
                 minHeight: '100vh',
