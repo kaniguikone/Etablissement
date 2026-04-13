@@ -1,11 +1,18 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 const PrivateRoute = ({ children, permissions }) => {
-    const { user, peutAcceder } = useAuth();
+    const { user, peutAcceder, estGroupe } = useAuth();
+    const location = useLocation();
 
     if (!user) {
         return <Navigate to="/login" replace />;
+    }
+
+    // Un admin groupe qui tente d'accéder aux pages école → redirige vers son dashboard
+    const surPageEcole = !location.pathname.startsWith('/groupe');
+    if (estGroupe && surPageEcole) {
+        return <Navigate to="/groupe" replace />;
     }
 
     if (permissions && !peutAcceder(permissions)) {

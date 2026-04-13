@@ -48,6 +48,10 @@ return [
             'driver' => 'sanctum',
             'provider' => 'enseignants',
         ],
+        'group_admin' => [
+            'driver' => 'sanctum',
+            'provider' => 'group_admins',
+        ],
     ],
 
     /*
@@ -79,6 +83,10 @@ return [
         'enseignants' => [
             'driver' => 'eloquent',
             'model' => App\Models\Enseignant::class,
+        ],
+        'group_admins' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\GroupAdmin::class,
         ],
 
         // 'users' => [

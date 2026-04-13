@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 use Stancl\Tenancy\Contracts\TenantWithDatabase;
 use Stancl\Tenancy\Database\Concerns\HasDatabase;
@@ -29,7 +30,13 @@ class Tenant extends BaseTenant implements TenantWithDatabase
             'plan',
             'actif',
             'date_expiration',
+            'group_id',
         ];
+    }
+
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(Group::class);
     }
 
     protected $casts = [
@@ -48,6 +55,7 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         'plan',
         'actif',
         'date_expiration',
+        'group_id',
     ];
 
     // Forcer la clé primaire en string non auto-incrémentée

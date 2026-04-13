@@ -5,22 +5,22 @@ import { ConfirmProvider } from './context/ConfirmContext';
 import { EtablissementProvider } from './context/EtablissementContext';
 import { NotificationProvider } from './context/NotificationContext';
 import Menu from './components/Menu';
+import MenuGroupe from './components/groupe/MenuGroupe';
 import NotificationsPanel from './components/notifications/NotificationsPanel';
 import RoutesMenu from './route/RoutesMenu';
 
 const AppInterne = () => {
-    const { user }   = useAuth();
-    const location   = useLocation();
-    const surLogin   = location.pathname === '/login';
+    const { user, estGroupe } = useAuth();
+    const location = useLocation();
+    const surLogin = location.pathname === '/login';
+
+    const connecte = user && !surLogin;
 
     return (
         <div>
-            {user && !surLogin && <Menu />}
-            {user && !surLogin && <NotificationsPanel />}
-            <div style={user && !surLogin ? {
-                marginLeft: 310,
-                minHeight: '100vh',
-            } : {}}>
+            {connecte && (estGroupe ? <MenuGroupe /> : <Menu />)}
+            {connecte && !estGroupe && <NotificationsPanel />}
+            <div style={connecte ? { marginLeft: 310, minHeight: '100vh' } : {}}>
                 <RoutesMenu />
             </div>
         </div>

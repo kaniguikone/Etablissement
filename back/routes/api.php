@@ -3,6 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\SuperAdmin\SuperAdminAuthController;
 use App\Http\Controllers\API\SuperAdmin\TenantController;
+use App\Http\Controllers\API\Group\GroupAuthController;
+use App\Http\Controllers\API\Group\GroupDashboardController;
+use App\Http\Controllers\API\Group\GroupTenantController;
 
 /*
 |--------------------------------------------------------------------------
@@ -11,6 +14,25 @@ use App\Http\Controllers\API\SuperAdmin\TenantController;
 | Ces routes s'appliquent au domaine central uniquement.
 | Elles permettent de gérer les établissements (tenants).
 */
+
+// ─── Auth Group Admin ────────────────────────────────────────────────────────
+Route::post('/group/login', [GroupAuthController::class, 'login']);
+
+Route::middleware('auth:sanctum')->prefix('group')->group(function () {
+    Route::post('/logout', [GroupAuthController::class, 'logout']);
+    Route::get('/me',      [GroupAuthController::class, 'me']);
+
+    // Dashboard consolidé
+    Route::get('/dashboard', [GroupDashboardController::class, 'stats']);
+
+    // Gestion des écoles du groupe
+    Route::get('/ecoles',                  [GroupTenantController::class, 'index']);
+    Route::get('/ecoles/{id}',             [GroupTenantController::class, 'show']);
+    Route::get('/ecoles/{id}/stats',       [GroupTenantController::class, 'stats']);
+    Route::get('/ecoles/{id}/enseignants/liste', [GroupTenantController::class, 'listeEnseignants']);
+    Route::get('/ecoles/{id}/enseignants',       [GroupTenantController::class, 'enseignants']);
+    Route::get('/ecoles/{id}/eleves',            [GroupTenantController::class, 'eleves']);
+});
 
 // ─── Auth Super-Admin ────────────────────────────────────────────────────────
 Route::post('/superadmin/login', [SuperAdminAuthController::class, 'login']);

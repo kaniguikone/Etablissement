@@ -1,6 +1,12 @@
 import { Routes, Route } from 'react-router-dom';
 import PrivateRoute from '../components/auth/PrivateRoute';
 import LoginPage from '../components/auth/LoginPage';
+import DashboardGroupe from '../components/groupe/DashboardGroupe';
+import ListeEcoles from '../components/groupe/ListeEcoles';
+import DetailsEcole from '../components/groupe/DetailsEcole';
+import ActivitesEnseignants from '../components/groupe/ActivitesEnseignants';
+import FinancesGroupe from '../components/groupe/FinancesGroupe';
+import ActivitesEleves from '../components/groupe/ActivitesEleves';
 import MonProfil from '../components/auth/MonProfil';
 
 import Accueil from '../components/Accueil';
@@ -111,6 +117,14 @@ const RoutesMenu = () => (
         <Routes>
             {/* Page de connexion — publique */}
             <Route path="/login" element={<LoginPage />} />
+
+            {/* ── Espace Groupe Scolaire ─────────────────────────────────── */}
+            <Route path="/groupe"                  element={<PrivateRoute><DashboardGroupe /></PrivateRoute>} />
+            <Route path="/groupe/ecoles"          element={<PrivateRoute><ListeEcoles /></PrivateRoute>} />
+            <Route path="/groupe/ecoles/:id"      element={<PrivateRoute><DetailsEcole /></PrivateRoute>} />
+            <Route path="/groupe/enseignants"     element={<PrivateRoute><ActivitesEnseignants /></PrivateRoute>} />
+            <Route path="/groupe/finances"        element={<PrivateRoute><FinancesGroupe /></PrivateRoute>} />
+            <Route path="/groupe/eleves"          element={<PrivateRoute><ActivitesEleves /></PrivateRoute>} />
 
             {/* Tableau de bord */}
             <Route path="/" element={<PrivateRoute><Accueil /></PrivateRoute>} />

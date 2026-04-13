@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 const LoginPage = () => {
-    const { connexion } = useAuth();
+    const { connexion, connexionGroupe } = useAuth();
     const navigate = useNavigate();
 
+    const [mode, setMode]         = useState('school'); // 'school' | 'group'
     const [email, setEmail]       = useState('');
     const [password, setPassword] = useState('');
     const [afficher, setAfficher] = useState(false);
@@ -17,10 +18,15 @@ const LoginPage = () => {
         setErreur('');
         setChargement(true);
         try {
-            await connexion(email, password);
-            navigate('/');
+            if (mode === 'group') {
+                await connexionGroupe(email, password);
+                navigate('/groupe');
+            } else {
+                await connexion(email, password);
+                navigate('/');
+            }
         } catch (err) {
-            setErreur(err.response?.data?.message || 'Erreur de connexion.');
+            setErreur(err.response?.data?.message || 'Identifiants incorrects.');
         } finally {
             setChargement(false);
         }
@@ -34,7 +40,7 @@ const LoginPage = () => {
             justifyContent: 'center',
             background: 'linear-gradient(135deg, #1a56a0 0%, #0d3b73 100%)',
         }}>
-            <div className="card shadow-lg" style={{ width: '100%', maxWidth: 420, borderRadius: 16 }}>
+            <div className="card shadow-lg" style={{ width: '100%', maxWidth: 440, borderRadius: 16 }}>
                 <div className="card-body p-5">
 
                     {/* En-tête */}
@@ -44,10 +50,44 @@ const LoginPage = () => {
                             background: '#1a56a0', display: 'inline-flex',
                             alignItems: 'center', justifyContent: 'center', marginBottom: 12,
                         }}>
-                            <i className="fas fa-school text-white" style={{ fontSize: 28 }} />
+                            <i className={`fas ${mode === 'group' ? 'fa-layer-group' : 'fa-school'} text-white`} style={{ fontSize: 26 }} />
                         </div>
                         <h4 className="fw-bold mb-1">Suivi Scolaire</h4>
-                        <p className="text-muted small">Espace Administration</p>
+                        <p className="text-muted small">
+                            {mode === 'group' ? 'Espace Groupe Scolaire' : 'Espace Administration'}
+                        </p>
+                    </div>
+
+                    {/* Sélecteur de mode */}
+                    <div className="d-flex mb-4" style={{
+                        background: '#f1f5f9', borderRadius: 10, padding: 4,
+                    }}>
+                        <button
+                            type="button"
+                            onClick={() => { setMode('school'); setErreur(''); }}
+                            style={{
+                                flex: 1, border: 'none', borderRadius: 8, padding: '8px 0',
+                                fontWeight: 600, fontSize: 13, cursor: 'pointer', transition: 'all .2s',
+                                background: mode === 'school' ? '#fff' : 'transparent',
+                                color: mode === 'school' ? '#1a56a0' : '#6c757d',
+                                boxShadow: mode === 'school' ? '0 1px 4px rgba(0,0,0,.1)' : 'none',
+                            }}
+                        >
+                            <i className="fas fa-school me-2" />Établissement
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => { setMode('group'); setErreur(''); }}
+                            style={{
+                                flex: 1, border: 'none', borderRadius: 8, padding: '8px 0',
+                                fontWeight: 600, fontSize: 13, cursor: 'pointer', transition: 'all .2s',
+                                background: mode === 'group' ? '#fff' : 'transparent',
+                                color: mode === 'group' ? '#1a56a0' : '#6c757d',
+                                boxShadow: mode === 'group' ? '0 1px 4px rgba(0,0,0,.1)' : 'none',
+                            }}
+                        >
+                            <i className="fas fa-layer-group me-2" />Groupe scolaire
+                        </button>
                     </div>
 
                     {erreur && (
