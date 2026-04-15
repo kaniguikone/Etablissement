@@ -18,7 +18,7 @@ class Etablissement extends Model
 
     public function getLogoUrlAttribute(): ?string
     {
-        return $this->logo ? asset('storage/' . $this->logo) : null;
+        return $this->logo ? url('/api/public-storage/' . $this->logo) : null;
     }
 
     /**

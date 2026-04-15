@@ -6,6 +6,7 @@ use App\Http\Controllers\API\SuperAdmin\TenantController;
 use App\Http\Controllers\API\Group\GroupAuthController;
 use App\Http\Controllers\API\Group\GroupDashboardController;
 use App\Http\Controllers\API\Group\GroupTenantController;
+use App\Http\Controllers\API\Group\TemplateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,6 +36,12 @@ Route::middleware('auth:sanctum')->prefix('group')->group(function () {
     Route::get('/ecoles/{id}/eleves/liste',                       [GroupTenantController::class, 'listeEleves']);
     Route::get('/ecoles/{id}/eleves/{eleveId}/detail',            [GroupTenantController::class, 'eleveDetail']);
     Route::get('/ecoles/{id}/eleves',                             [GroupTenantController::class, 'eleves']);
+
+    // Templates de données scolaires
+    Route::get('/templates',                                      [TemplateController::class, 'index']);
+    Route::get('/templates/{type}',                               [TemplateController::class, 'show']);
+    Route::put('/templates/{type}',                               [TemplateController::class, 'update']);
+    Route::post('/ecoles/{tenantId}/apply-template',              [TemplateController::class, 'appliquer']);
 });
 
 // ─── Auth Super-Admin ────────────────────────────────────────────────────────

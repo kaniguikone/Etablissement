@@ -201,10 +201,14 @@ const Bulletin = () => {
     const telechargerPdf = async () => {
         try {
             const r = await api.get(`/bulletin/${eleveId}/${periodeId}/pdf`, { responseType: 'blob' });
+            const periode = periodes.find((p) => String(p.id) === String(periodeId));
+            const labelPeriode = periode?.code_periode ?? periode?.abbr_libelle_periode ?? periodeId;
+            const nomFichier = `bulletin_${bulletin.eleve.nom_eleve.toLowerCase()}_${bulletin.eleve.prenoms_eleve.toLowerCase()}_${labelPeriode}_${periode?.annee ?? ''}.pdf`
+                .replace(/\s+/g, '_');
             const url  = URL.createObjectURL(new Blob([r.data], { type: 'application/pdf' }));
             const lien = document.createElement('a');
             lien.href  = url;
-            lien.download = `bulletin_${bulletin.eleve.nom_eleve}_${bulletin.eleve.prenoms_eleve}.pdf`.toLowerCase().replace(/\s+/g, '_');
+            lien.download = nomFichier;
             lien.click();
             URL.revokeObjectURL(url);
         } catch (err) {

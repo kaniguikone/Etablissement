@@ -6,7 +6,10 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #222; }
 
-    .header { text-align: center; margin-bottom: 16px; border-bottom: 2px solid #2c3e50; padding-bottom: 10px; }
+    .header { margin-bottom: 16px; border-bottom: 2px solid #2c3e50; padding-bottom: 10px; display: table; width: 100%; }
+    .header-logo { display: table-cell; vertical-align: middle; width: 110px; padding-right: 12px; }
+    .header-logo img { width: 100px; height: 100px; object-fit: contain; }
+    .header-text { display: table-cell; vertical-align: middle; text-align: center; }
     .header h1 { font-size: 18px; color: #2c3e50; text-transform: uppercase; }
     .header h2 { font-size: 14px; color: #34495e; margin-top: 4px; }
     .header p  { font-size: 11px; color: #7f8c8d; margin-top: 2px; }
@@ -50,22 +53,25 @@
 <body>
 
 <div class="header">
-    @if($etablissement?->logo_base64)
-    <div style="margin-bottom:6px">
-        <img src="{{ $etablissement->logo_base64 }}" alt="Logo" style="max-height:55px; max-width:150px; object-fit:contain" />
+    <div class="header-logo">
+        @if($etablissement?->logo_base64)
+        <img src="{{ $etablissement->logo_base64 }}" alt="Logo" />
+        @endif
     </div>
-    @endif
-    <h1>{{ $etablissement?->nom ?? 'Établissement Scolaire' }}</h1>
-    @if($etablissement?->slogan)
-    <p style="font-style:italic;color:#7f8c8d;margin:2px 0">{{ $etablissement->slogan }}</p>
-    @endif
-    <h2>Bulletin de notes — {{ $periode->libelle_periode }} — Année {{ $periode->annee }}</h2>
-    <p>
-        @if($etablissement?->adresse){{ $etablissement->adresse }}@if($etablissement?->ville), {{ $etablissement->ville }}@endif — @endif
-        @if($etablissement?->telephone)Tél. : {{ $etablissement->telephone }} @endif
-        @if($etablissement?->email) | {{ $etablissement->email }}@endif
-    </p>
-    <p>Édité le {{ now()->format('d/m/Y') }}</p>
+    <div class="header-text">
+        <h1>{{ $etablissement?->nom ?? 'Établissement Scolaire' }}</h1>
+        @if($etablissement?->slogan)
+        <p style="font-style:italic;color:#7f8c8d;margin:2px 0">{{ $etablissement->slogan }}</p>
+        @endif
+        <h2>Bulletin de notes — {{ $periode->libelle_periode }} — Année {{ $periode->annee }}</h2>
+        <p>
+            @if($etablissement?->adresse){{ $etablissement->adresse }}@if($etablissement?->ville), {{ $etablissement->ville }}@endif — @endif
+            @if($etablissement?->telephone)Tél. : {{ $etablissement->telephone }} @endif
+            @if($etablissement?->email) | {{ $etablissement->email }}@endif
+        </p>
+        <p>Édité le {{ now()->format('d/m/Y') }}</p>
+    </div>
+    <div class="header-logo"></div>
 </div>
 
 <div class="eleve-info">
@@ -88,10 +94,15 @@
 <table class="notes">
     <thead>
         <tr>
-            <th style="width:35%">Matière</th>
-            <th style="width:8%">Coeff</th>
-            <th style="width:27%">Moyenne</th>
-            <th style="width:30%">Appréciation</th>
+            <th style="width:30%">Matière</th>
+            <th style="width:7%">Coeff</th>
+            @if($estDerniereperiode)
+            <th style="width:20%">Moy. Trimestre</th>
+            <th style="width:20%">Moy. Annuelle</th>
+            @else
+            <th style="width:23%">Moyenne</th>
+            @endif
+            <th>Appréciation</th>
         </tr>
     </thead>
     <tbody>
@@ -99,6 +110,8 @@
             @php
                 $moy = $info['moyenne'];
                 $coeff = $info['coeff_matiere'] ?? 1;
+                $moyAnn = $estDerniereperiode ? ($parMatiereAnnuelle[$matiere]['moyenne'] ?? null) : null;
+
                 $classe = 'moyenne';
                 $appreciation = '—';
                 if ($moy !== null) {
@@ -113,6 +126,9 @@
                 <td class="matiere">{{ $matiere }}</td>
                 <td style="text-align:center;color:#64748b">{{ $coeff }}</td>
                 <td class="{{ $classe }}">{{ $moy !== null ? number_format($moy, 2) : '—' }}/20</td>
+                @if($estDerniereperiode)
+                <td class="moyenne" style="font-weight:bold">{{ $moyAnn !== null ? number_format($moyAnn, 2) : '—' }}/20</td>
+                @endif
                 <td>{{ $appreciation }}</td>
             </tr>
         @endforeach
@@ -122,12 +138,13 @@
 @php
     $mention = '—';
     $mentionClasse = '';
-    if ($moyenneGenerale !== null) {
-        if ($moyenneGenerale >= 16)      { $mention = 'Très bien';    $mentionClasse = 'mention-tb'; }
-        elseif ($moyenneGenerale >= 14)  { $mention = 'Bien';          $mentionClasse = 'mention-b'; }
-        elseif ($moyenneGenerale >= 12)  { $mention = 'Assez bien';    $mentionClasse = 'mention-ab'; }
-        elseif ($moyenneGenerale >= 10)  { $mention = 'Passable';      $mentionClasse = 'mention-p'; }
-        else                             { $mention = 'Insuffisant';   $mentionClasse = 'mention-i'; }
+    $refMoy = $estDerniereperiode ? $moyenneAnnuelle : $moyenneGenerale;
+    if ($refMoy !== null) {
+        if ($refMoy >= 16)      { $mention = 'Très bien';   $mentionClasse = 'mention-tb'; }
+        elseif ($refMoy >= 14)  { $mention = 'Bien';         $mentionClasse = 'mention-b'; }
+        elseif ($refMoy >= 12)  { $mention = 'Assez bien';   $mentionClasse = 'mention-ab'; }
+        elseif ($refMoy >= 10)  { $mention = 'Passable';     $mentionClasse = 'mention-p'; }
+        else                    { $mention = 'Insuffisant';  $mentionClasse = 'mention-i'; }
     }
 @endphp
 
@@ -135,11 +152,22 @@
     <h3>Récapitulatif</h3>
     <table class="recap">
         <tr>
-            <td class="label">Moyenne générale</td>
+            <td class="label">Moy. du trimestre</td>
             <td><strong>{{ $moyenneGenerale !== null ? number_format($moyenneGenerale, 2) . '/20' : '—' }}</strong></td>
+            @if($estDerniereperiode)
+            <td class="label">Moy. annuelle</td>
+            <td><strong style="font-size:13px">{{ $moyenneAnnuelle !== null ? number_format($moyenneAnnuelle, 2) . '/20' : '—' }}</strong></td>
+            @else
             <td class="label">Mention</td>
             <td><span class="mention {{ $mentionClasse }}">{{ $mention }}</span></td>
+            @endif
         </tr>
+        @if($estDerniereperiode)
+        <tr>
+            <td class="label">Mention annuelle</td>
+            <td colspan="3"><span class="mention {{ $mentionClasse }}">{{ $mention }}</span></td>
+        </tr>
+        @endif
     </table>
 </div>
 

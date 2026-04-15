@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useEtablissement } from '../context/EtablissementContext';
-import { useNotifications } from '../context/NotificationContext';
 
 // Définition des groupes de menu avec les permissions requises
 // permissions: null = tous les connectés, sinon tableau de clés de permission
@@ -193,13 +192,10 @@ const MenuGroup = ({ group, open, onToggle }) => {
 };
 
 const Menu = () => {
-    const { user, peutAcceder, deconnexion } = useAuth();
+    const { peutAcceder } = useAuth();
     const { etablissement } = useEtablissement();
-    const { nonLues, ouvrirPanel } = useNotifications();
-    const location  = useLocation();
-    const navigate  = useNavigate();
+    const location = useLocation();
 
-    // Filtrer les groupes selon les permissions de l'utilisateur connecté
     const groupesFiltres = GROUPES.filter(g =>
         !g.permissions || peutAcceder(g.permissions)
     );
@@ -209,17 +205,13 @@ const Menu = () => {
     );
     const [openIndex, setOpenIndex] = useState(initialOpen);
 
-    const handleDeconnexion = async () => {
-        await deconnexion();
-        navigate('/login');
-    };
-
     return (
         <div className="wrapper-menu">
             <div className="sidebar">
                 {/* En-tête établissement */}
                 <div style={{
-                    padding: '14px 16px 10px',
+                    padding: '0 14px',
+                    height: 66,
                     borderBottom: '1px solid rgba(255,255,255,0.12)',
                     display: 'flex',
                     alignItems: 'center',
@@ -227,7 +219,7 @@ const Menu = () => {
                     flexShrink: 0,
                 }}>
                     <div style={{
-                        width: 40, height: 40, borderRadius: 8, overflow: 'hidden',
+                        width: 46, height: 46, borderRadius: 10, overflow: 'hidden',
                         flexShrink: 0, background: 'rgba(255,255,255,0.15)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
@@ -252,56 +244,6 @@ const Menu = () => {
                     </div>
                 </div>
 
-                {/* Profil */}
-                <div className="profile">
-                    <div style={{
-                        width: 56, height: 56, borderRadius: '50%',
-                        background: '#1a56a0', display: 'inline-flex',
-                        alignItems: 'center', justifyContent: 'center', marginBottom: 8,
-                        overflow: 'hidden', border: '2px solid rgba(255,255,255,0.3)',
-                        flexShrink: 0,
-                    }}>
-                        {user?.photo_url ? (
-                            <img
-                                src={user.photo_url}
-                                alt={user.name}
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            />
-                        ) : (
-                            <i className="fas fa-user text-white" style={{ fontSize: 24 }} />
-                        )}
-                    </div>
-                    <h3 style={{ fontSize: 15, marginBottom: 2 }}>{user?.name || '—'}</h3>
-                    <p style={{ fontSize: 12, opacity: 0.8 }}>{user?.role_label || ''}</p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4 }}>
-                        <NavLink to="/MonProfil" style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
-                            <i className="fas fa-pen me-1" />Mon profil
-                        </NavLink>
-                        {/* Cloche notifications */}
-                        <button
-                            onClick={ouvrirPanel}
-                            title="Notifications"
-                            style={{
-                                background: 'none', border: 'none', cursor: 'pointer',
-                                color: 'rgba(255,255,255,0.7)', position: 'relative', padding: 4,
-                            }}
-                        >
-                            <i className="fas fa-bell" style={{ fontSize: 15 }} />
-                            {nonLues > 0 && (
-                                <span style={{
-                                    position: 'absolute', top: 0, right: 0,
-                                    background: '#dc3545', color: '#fff',
-                                    borderRadius: '50%', width: 16, height: 16,
-                                    fontSize: 9, display: 'flex', alignItems: 'center',
-                                    justifyContent: 'center', fontWeight: 700,
-                                }}>
-                                    {nonLues > 99 ? '99+' : nonLues}
-                                </span>
-                            )}
-                        </button>
-                    </div>
-                </div>
-
                 {/* Navigation */}
                 <nav className="text-left">
                     {groupesFiltres.map((group, i) => (
@@ -314,21 +256,6 @@ const Menu = () => {
                     ))}
                 </nav>
 
-                {/* Déconnexion */}
-                <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: 'auto', flexShrink: 0 }}>
-                    <button
-                        onClick={handleDeconnexion}
-                        style={{
-                            width: '100%', background: 'rgba(255,255,255,0.1)',
-                            border: 'none', color: 'white', borderRadius: 8,
-                            padding: '8px 12px', cursor: 'pointer', fontSize: 13,
-                            display: 'flex', alignItems: 'center', gap: 8,
-                        }}
-                    >
-                        <i className="fas fa-sign-out-alt" />
-                        Se déconnecter
-                    </button>
-                </div>
             </div>
         </div>
     );

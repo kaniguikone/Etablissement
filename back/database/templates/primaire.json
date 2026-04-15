@@ -1,0 +1,109 @@
+{
+  "meta": {
+    "nom": "École Primaire — Système ivoirien",
+    "description": "CP1 / CP2 / CE1 / CE2 / CM1 / CM2 — Pas de séries",
+    "type": "primaire"
+  },
+
+  "niveaux": [
+    { "nom_niveau": "CP1", "abbr_niveau": "CP1", "ordre": 1 },
+    { "nom_niveau": "CP2", "abbr_niveau": "CP2", "ordre": 2 },
+    { "nom_niveau": "CE1", "abbr_niveau": "CE1", "ordre": 3 },
+    { "nom_niveau": "CE2", "abbr_niveau": "CE2", "ordre": 4 },
+    { "nom_niveau": "CM1", "abbr_niveau": "CM1", "ordre": 5 },
+    { "nom_niveau": "CM2", "abbr_niveau": "CM2", "ordre": 6 }
+  ],
+
+  "series": [],
+
+  "matieres": [
+    { "libelle_matiere": "Lecture",                        "abbr_matiere": "LEC"  },
+    { "libelle_matiere": "Écriture",                       "abbr_matiere": "ECR"  },
+    { "libelle_matiere": "Grammaire et Conjugaison",       "abbr_matiere": "GC"   },
+    { "libelle_matiere": "Vocabulaire et Orthographe",     "abbr_matiere": "VO"   },
+    { "libelle_matiere": "Calcul",                         "abbr_matiere": "CALC" },
+    { "libelle_matiere": "Géométrie",                      "abbr_matiere": "GEO"  },
+    { "libelle_matiere": "Éveil Scientifique",             "abbr_matiere": "EVSC" },
+    { "libelle_matiere": "Histoire-Géographie",            "abbr_matiere": "HG"   },
+    { "libelle_matiere": "Éducation Physique et Sportive", "abbr_matiere": "EPS"  },
+    { "libelle_matiere": "Dessin",                         "abbr_matiere": "DESS" },
+    { "libelle_matiere": "Anglais",                        "abbr_matiere": "ANG"  }
+  ],
+
+  "type_devoirs": [
+    { "code_type_devoir": "DC",   "description_type_devoir": "Devoir de Classe" },
+    { "code_type_devoir": "DM",   "description_type_devoir": "Devoir Maison" },
+    { "code_type_devoir": "COMP", "description_type_devoir": "Composition" }
+  ],
+
+  "periodes_trimestre": [
+    { "libelle_periode": "1er Trimestre", "abbr_libelle_periode": "T1", "code_periode": "T1" },
+    { "libelle_periode": "2ème Trimestre","abbr_libelle_periode": "T2", "code_periode": "T2" },
+    { "libelle_periode": "3ème Trimestre","abbr_libelle_periode": "T3", "code_periode": "T3" }
+  ],
+
+  "periodes_semestre": [
+    { "libelle_periode": "1er Semestre", "abbr_libelle_periode": "S1", "code_periode": "S1" },
+    { "libelle_periode": "2ème Semestre","abbr_libelle_periode": "S2", "code_periode": "S2" }
+  ],
+
+  "niveau_series": [],
+
+  "chapitres": [],
+
+  "niveau_matieres": [
+    { "niveau": "CP1", "serie": null, "matiere": "Lecture",                        "coefficient": 4, "heures_semaine": 5 },
+    { "niveau": "CP1", "serie": null, "matiere": "Écriture",                       "coefficient": 3, "heures_semaine": 4 },
+    { "niveau": "CP1", "serie": null, "matiere": "Calcul",                         "coefficient": 3, "heures_semaine": 4 },
+    { "niveau": "CP1", "serie": null, "matiere": "Dessin",                         "coefficient": 1, "heures_semaine": 2 },
+    { "niveau": "CP1", "serie": null, "matiere": "Éducation Physique et Sportive", "coefficient": 1, "heures_semaine": 2 },
+
+    { "niveau": "CP2", "serie": null, "matiere": "Lecture",                        "coefficient": 4, "heures_semaine": 5 },
+    { "niveau": "CP2", "serie": null, "matiere": "Écriture",                       "coefficient": 3, "heures_semaine": 4 },
+    { "niveau": "CP2", "serie": null, "matiere": "Grammaire et Conjugaison",       "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "CP2", "serie": null, "matiere": "Calcul",                         "coefficient": 3, "heures_semaine": 4 },
+    { "niveau": "CP2", "serie": null, "matiere": "Dessin",                         "coefficient": 1, "heures_semaine": 2 },
+    { "niveau": "CP2", "serie": null, "matiere": "Éducation Physique et Sportive", "coefficient": 1, "heures_semaine": 2 },
+
+    { "niveau": "CE1", "serie": null, "matiere": "Lecture",                        "coefficient": 4, "heures_semaine": 4 },
+    { "niveau": "CE1", "serie": null, "matiere": "Grammaire et Conjugaison",       "coefficient": 3, "heures_semaine": 3 },
+    { "niveau": "CE1", "serie": null, "matiere": "Vocabulaire et Orthographe",     "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "CE1", "serie": null, "matiere": "Calcul",                         "coefficient": 4, "heures_semaine": 4 },
+    { "niveau": "CE1", "serie": null, "matiere": "Géométrie",                      "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "CE1", "serie": null, "matiere": "Éveil Scientifique",             "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "CE1", "serie": null, "matiere": "Dessin",                         "coefficient": 1, "heures_semaine": 2 },
+    { "niveau": "CE1", "serie": null, "matiere": "Éducation Physique et Sportive", "coefficient": 1, "heures_semaine": 2 },
+
+    { "niveau": "CE2", "serie": null, "matiere": "Lecture",                        "coefficient": 4, "heures_semaine": 4 },
+    { "niveau": "CE2", "serie": null, "matiere": "Grammaire et Conjugaison",       "coefficient": 3, "heures_semaine": 3 },
+    { "niveau": "CE2", "serie": null, "matiere": "Vocabulaire et Orthographe",     "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "CE2", "serie": null, "matiere": "Calcul",                         "coefficient": 4, "heures_semaine": 4 },
+    { "niveau": "CE2", "serie": null, "matiere": "Géométrie",                      "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "CE2", "serie": null, "matiere": "Éveil Scientifique",             "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "CE2", "serie": null, "matiere": "Histoire-Géographie",            "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "CE2", "serie": null, "matiere": "Dessin",                         "coefficient": 1, "heures_semaine": 2 },
+    { "niveau": "CE2", "serie": null, "matiere": "Éducation Physique et Sportive", "coefficient": 1, "heures_semaine": 2 },
+
+    { "niveau": "CM1", "serie": null, "matiere": "Lecture",                        "coefficient": 4, "heures_semaine": 4 },
+    { "niveau": "CM1", "serie": null, "matiere": "Grammaire et Conjugaison",       "coefficient": 3, "heures_semaine": 3 },
+    { "niveau": "CM1", "serie": null, "matiere": "Vocabulaire et Orthographe",     "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "CM1", "serie": null, "matiere": "Calcul",                         "coefficient": 4, "heures_semaine": 4 },
+    { "niveau": "CM1", "serie": null, "matiere": "Géométrie",                      "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "CM1", "serie": null, "matiere": "Éveil Scientifique",             "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "CM1", "serie": null, "matiere": "Histoire-Géographie",            "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "CM1", "serie": null, "matiere": "Anglais",                        "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "CM1", "serie": null, "matiere": "Dessin",                         "coefficient": 1, "heures_semaine": 2 },
+    { "niveau": "CM1", "serie": null, "matiere": "Éducation Physique et Sportive", "coefficient": 1, "heures_semaine": 2 },
+
+    { "niveau": "CM2", "serie": null, "matiere": "Lecture",                        "coefficient": 4, "heures_semaine": 4 },
+    { "niveau": "CM2", "serie": null, "matiere": "Grammaire et Conjugaison",       "coefficient": 3, "heures_semaine": 3 },
+    { "niveau": "CM2", "serie": null, "matiere": "Vocabulaire et Orthographe",     "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "CM2", "serie": null, "matiere": "Calcul",                         "coefficient": 4, "heures_semaine": 4 },
+    { "niveau": "CM2", "serie": null, "matiere": "Géométrie",                      "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "CM2", "serie": null, "matiere": "Éveil Scientifique",             "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "CM2", "serie": null, "matiere": "Histoire-Géographie",            "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "CM2", "serie": null, "matiere": "Anglais",                        "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "CM2", "serie": null, "matiere": "Dessin",                         "coefficient": 1, "heures_semaine": 2 },
+    { "niveau": "CM2", "serie": null, "matiere": "Éducation Physique et Sportive", "coefficient": 1, "heures_semaine": 2 }
+  ]
+}

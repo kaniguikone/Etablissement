@@ -7,6 +7,8 @@ import DetailsEcole from '../components/groupe/DetailsEcole';
 import ActivitesEnseignants from '../components/groupe/ActivitesEnseignants';
 import FinancesGroupe from '../components/groupe/FinancesGroupe';
 import ActivitesEleves from '../components/groupe/ActivitesEleves';
+import GestionTemplates from '../components/groupe/GestionTemplates';
+import EditionTemplate from '../components/groupe/EditionTemplate';
 import MonProfil from '../components/auth/MonProfil';
 
 import Accueil from '../components/Accueil';
@@ -127,6 +129,8 @@ const RoutesMenu = () => (
             <Route path="/groupe/enseignants"     element={<PrivateRoute><ActivitesEnseignants /></PrivateRoute>} />
             <Route path="/groupe/finances"        element={<PrivateRoute><FinancesGroupe /></PrivateRoute>} />
             <Route path="/groupe/eleves"          element={<PrivateRoute><ActivitesEleves /></PrivateRoute>} />
+            <Route path="/groupe/templates"           element={<PrivateRoute><GestionTemplates /></PrivateRoute>} />
+            <Route path="/groupe/templates/:type"     element={<PrivateRoute><EditionTemplate /></PrivateRoute>} />
 
             {/* Tableau de bord */}
             <Route path="/" element={<PrivateRoute><Accueil /></PrivateRoute>} />

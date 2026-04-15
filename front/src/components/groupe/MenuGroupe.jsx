@@ -87,6 +87,12 @@ const MenuGroupe = () => {
                                 <span className="item">Élèves</span>
                             </NavLink>
                         </li>
+                        <li>
+                            <NavLink to="/groupe/templates">
+                                <span className="icon"><i className="fas fa-database" /></span>
+                                <span className="item">Modèles de données</span>
+                            </NavLink>
+                        </li>
                     </ul>
                 </nav>
 

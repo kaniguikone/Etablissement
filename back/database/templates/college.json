@@ -1,0 +1,121 @@
+{
+  "meta": {
+    "nom": "Collège — Système ivoirien",
+    "description": "6ème / 5ème / 4ème / 3ème — Coefficients BEPC",
+    "type": "college"
+  },
+
+  "niveaux": [
+    { "nom_niveau": "6ème", "abbr_niveau": "6e", "ordre": 1 },
+    { "nom_niveau": "5ème", "abbr_niveau": "5e", "ordre": 2 },
+    { "nom_niveau": "4ème", "abbr_niveau": "4e", "ordre": 3 },
+    { "nom_niveau": "3ème", "abbr_niveau": "3e", "ordre": 4 }
+  ],
+
+  "series": [],
+
+  "matieres": [
+    { "libelle_matiere": "Composition",         "abbr_matiere": "COMP"  },
+    { "libelle_matiere": "Orthographe",         "abbr_matiere": "ORTH"  },
+    { "libelle_matiere": "Oral Français",       "abbr_matiere": "ORAL"  },
+    { "libelle_matiere": "Anglais",             "abbr_matiere": "ANG"   },
+    { "libelle_matiere": "Allemand",            "abbr_matiere": "ALL"   },
+    { "libelle_matiere": "Espagnol",            "abbr_matiere": "ESP"   },
+    { "libelle_matiere": "Histoire-Géographie", "abbr_matiere": "HG"    },
+    { "libelle_matiere": "Mathématiques",       "abbr_matiere": "MATHS" },
+    { "libelle_matiere": "Sciences Physiques",  "abbr_matiere": "SP"    },
+    { "libelle_matiere": "SVT",                 "abbr_matiere": "SVT"   },
+    { "libelle_matiere": "E.P.S",               "abbr_matiere": "EPS"   },
+    { "libelle_matiere": "EDHC",                "abbr_matiere": "EDHC"  },
+    { "libelle_matiere": "Arts Plastiques",     "abbr_matiere": "ARTS"  },
+    { "libelle_matiere": "Musique",             "abbr_matiere": "MUS"   },
+    { "libelle_matiere": "TIC",                 "abbr_matiere": "TIC"   },
+    { "libelle_matiere": "Conduite",            "abbr_matiere": "COND"  }
+  ],
+
+  "type_devoirs": [
+    { "code_type_devoir": "DC",   "description_type_devoir": "Devoir de Classe" },
+    { "code_type_devoir": "DM",   "description_type_devoir": "Devoir Maison" },
+    { "code_type_devoir": "IC",   "description_type_devoir": "Interrogation de Cours" },
+    { "code_type_devoir": "COMP", "description_type_devoir": "Composition" }
+  ],
+
+  "periodes_trimestre": [
+    { "libelle_periode": "1er Trimestre",  "abbr_libelle_periode": "T1", "code_periode": "T1" },
+    { "libelle_periode": "2ème Trimestre", "abbr_libelle_periode": "T2", "code_periode": "T2" },
+    { "libelle_periode": "3ème Trimestre", "abbr_libelle_periode": "T3", "code_periode": "T3" }
+  ],
+
+  "periodes_semestre": [
+    { "libelle_periode": "1er Semestre",  "abbr_libelle_periode": "S1", "code_periode": "S1" },
+    { "libelle_periode": "2ème Semestre", "abbr_libelle_periode": "S2", "code_periode": "S2" }
+  ],
+
+  "niveau_series": [],
+
+  "chapitres": [],
+
+  "niveau_matieres": [
+    { "niveau": "6ème", "serie": null, "matiere": "Composition",         "coefficient": 3, "heures_semaine": 4 },
+    { "niveau": "6ème", "serie": null, "matiere": "Orthographe",         "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "6ème", "serie": null, "matiere": "Oral Français",       "coefficient": 1, "heures_semaine": 1 },
+    { "niveau": "6ème", "serie": null, "matiere": "Anglais",             "coefficient": 3, "heures_semaine": 3 },
+    { "niveau": "6ème", "serie": null, "matiere": "Histoire-Géographie", "coefficient": 3, "heures_semaine": 3 },
+    { "niveau": "6ème", "serie": null, "matiere": "Mathématiques",       "coefficient": 4, "heures_semaine": 4 },
+    { "niveau": "6ème", "serie": null, "matiere": "SVT",                 "coefficient": 3, "heures_semaine": 3 },
+    { "niveau": "6ème", "serie": null, "matiere": "E.P.S",               "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "6ème", "serie": null, "matiere": "EDHC",                "coefficient": 1, "heures_semaine": 1 },
+    { "niveau": "6ème", "serie": null, "matiere": "Arts Plastiques",     "coefficient": 1, "heures_semaine": 2 },
+    { "niveau": "6ème", "serie": null, "matiere": "Musique",             "coefficient": 1, "heures_semaine": 1 },
+    { "niveau": "6ème", "serie": null, "matiere": "TIC",                 "coefficient": 1, "heures_semaine": 1 },
+    { "niveau": "6ème", "serie": null, "matiere": "Conduite",            "coefficient": 1, "heures_semaine": 0 },
+
+    { "niveau": "5ème", "serie": null, "matiere": "Composition",         "coefficient": 3, "heures_semaine": 4 },
+    { "niveau": "5ème", "serie": null, "matiere": "Orthographe",         "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "5ème", "serie": null, "matiere": "Oral Français",       "coefficient": 1, "heures_semaine": 1 },
+    { "niveau": "5ème", "serie": null, "matiere": "Anglais",             "coefficient": 3, "heures_semaine": 3 },
+    { "niveau": "5ème", "serie": null, "matiere": "Espagnol",            "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "5ème", "serie": null, "matiere": "Histoire-Géographie", "coefficient": 3, "heures_semaine": 3 },
+    { "niveau": "5ème", "serie": null, "matiere": "Mathématiques",       "coefficient": 4, "heures_semaine": 4 },
+    { "niveau": "5ème", "serie": null, "matiere": "Sciences Physiques",  "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "5ème", "serie": null, "matiere": "SVT",                 "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "5ème", "serie": null, "matiere": "E.P.S",               "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "5ème", "serie": null, "matiere": "EDHC",                "coefficient": 1, "heures_semaine": 1 },
+    { "niveau": "5ème", "serie": null, "matiere": "Arts Plastiques",     "coefficient": 1, "heures_semaine": 2 },
+    { "niveau": "5ème", "serie": null, "matiere": "Musique",             "coefficient": 1, "heures_semaine": 1 },
+    { "niveau": "5ème", "serie": null, "matiere": "TIC",                 "coefficient": 1, "heures_semaine": 1 },
+    { "niveau": "5ème", "serie": null, "matiere": "Conduite",            "coefficient": 1, "heures_semaine": 0 },
+
+    { "niveau": "4ème", "serie": null, "matiere": "Composition",         "coefficient": 3, "heures_semaine": 4 },
+    { "niveau": "4ème", "serie": null, "matiere": "Orthographe",         "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "4ème", "serie": null, "matiere": "Oral Français",       "coefficient": 1, "heures_semaine": 1 },
+    { "niveau": "4ème", "serie": null, "matiere": "Anglais",             "coefficient": 3, "heures_semaine": 3 },
+    { "niveau": "4ème", "serie": null, "matiere": "Espagnol",            "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "4ème", "serie": null, "matiere": "Histoire-Géographie", "coefficient": 3, "heures_semaine": 3 },
+    { "niveau": "4ème", "serie": null, "matiere": "Mathématiques",       "coefficient": 4, "heures_semaine": 4 },
+    { "niveau": "4ème", "serie": null, "matiere": "Sciences Physiques",  "coefficient": 3, "heures_semaine": 3 },
+    { "niveau": "4ème", "serie": null, "matiere": "SVT",                 "coefficient": 3, "heures_semaine": 3 },
+    { "niveau": "4ème", "serie": null, "matiere": "E.P.S",               "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "4ème", "serie": null, "matiere": "EDHC",                "coefficient": 1, "heures_semaine": 1 },
+    { "niveau": "4ème", "serie": null, "matiere": "Arts Plastiques",     "coefficient": 1, "heures_semaine": 2 },
+    { "niveau": "4ème", "serie": null, "matiere": "Musique",             "coefficient": 1, "heures_semaine": 1 },
+    { "niveau": "4ème", "serie": null, "matiere": "TIC",                 "coefficient": 1, "heures_semaine": 1 },
+    { "niveau": "4ème", "serie": null, "matiere": "Conduite",            "coefficient": 1, "heures_semaine": 0 },
+
+    { "niveau": "3ème", "serie": null, "matiere": "Composition",         "coefficient": 3, "heures_semaine": 4 },
+    { "niveau": "3ème", "serie": null, "matiere": "Orthographe",         "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "3ème", "serie": null, "matiere": "Oral Français",       "coefficient": 1, "heures_semaine": 1 },
+    { "niveau": "3ème", "serie": null, "matiere": "Anglais",             "coefficient": 3, "heures_semaine": 3 },
+    { "niveau": "3ème", "serie": null, "matiere": "Espagnol",            "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "3ème", "serie": null, "matiere": "Histoire-Géographie", "coefficient": 3, "heures_semaine": 3 },
+    { "niveau": "3ème", "serie": null, "matiere": "Mathématiques",       "coefficient": 4, "heures_semaine": 4 },
+    { "niveau": "3ème", "serie": null, "matiere": "Sciences Physiques",  "coefficient": 3, "heures_semaine": 3 },
+    { "niveau": "3ème", "serie": null, "matiere": "SVT",                 "coefficient": 3, "heures_semaine": 3 },
+    { "niveau": "3ème", "serie": null, "matiere": "E.P.S",               "coefficient": 2, "heures_semaine": 2 },
+    { "niveau": "3ème", "serie": null, "matiere": "EDHC",                "coefficient": 1, "heures_semaine": 1 },
+    { "niveau": "3ème", "serie": null, "matiere": "Arts Plastiques",     "coefficient": 1, "heures_semaine": 2 },
+    { "niveau": "3ème", "serie": null, "matiere": "Musique",             "coefficient": 1, "heures_semaine": 1 },
+    { "niveau": "3ème", "serie": null, "matiere": "TIC",                 "coefficient": 1, "heures_semaine": 1 },
+    { "niveau": "3ème", "serie": null, "matiere": "Conduite",            "coefficient": 1, "heures_semaine": 0 }
+  ]
+}

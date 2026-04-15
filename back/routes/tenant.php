@@ -74,6 +74,14 @@ Route::middleware([
         return response()->file($fullPath, ['Cache-Control' => 'private, max-age=86400']);
     })->where('path', '.*');
 
+    // ─── Fichiers publics du stockage tenant (logos, etc.) ──────────────────
+    Route::get('/public-storage/{path}', function (string $path) {
+        $normalized = preg_replace('/\.\.\/|\.\.\\\\/', '', $path);
+        $fullPath   = storage_path('app/public/' . $normalized);
+        if (!file_exists($fullPath)) abort(404);
+        return response()->file($fullPath, ['Cache-Control' => 'public, max-age=86400']);
+    })->where('path', '.*');
+
     // ─── Établissement (public — apps mobiles avant login) ──────────────────
     Route::get('/etablissement', [EtablissementController::class, 'show']);
 
