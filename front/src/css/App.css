@@ -2,11 +2,8 @@
   text-align: left;
 }
 
-/* Annuler le margin-left d'AdminLTE sur .content-wrapper (on gère le layout nous-mêmes) */
-.content-wrapper {
-  margin-left: 0 !important;
-  min-height: unset !important;
-  background-color: transparent !important;
+.page-wrapper {
+  padding: 16px;
 }
 
 .logo {

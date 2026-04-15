@@ -37,6 +37,7 @@ import DetailsEnseignant from '../components/enseignants/DetailsEnseignant';
 import DetailsClasse from '../components/classes/DetailsClasse';
 import DetailsNiveau from '../components/niveaux/DetailsNiveau';
 import DetailsMatiere from '../components/matieres/DetailsMatiere';
+import ConfigurationMatieres from '../components/matieres/ConfigurationMatieres';
 import DetailsPeriode from '../components/periodes/DetailsPeriode';
 import DetailsParent from '../components/parents/DetailsParent';
 import DetailsScolarite from '../components/scolarites/DetailsScolarite';
@@ -50,6 +51,7 @@ import ListeAssiduites from '../components/assiduites/ListeAssiduites';
 import FeuillePresence from '../components/assiduites/FeuillePresence';
 import DetailsAssiduite from '../components/assiduites/DetailsAssiduite';
 
+import ListeSeries from '../components/series/ListeSeries';
 import ListeTypeDevoirs from '../components/typedevoirs/ListeTypeDevoirs';
 import NouveauTypeDevoir from '../components/typedevoirs/NouveauTypeDevoir';
 import DetailsTypeDevoir from '../components/typedevoirs/DetailsTypeDevoir';
@@ -155,7 +157,9 @@ const RoutesMenu = () => (
             <Route path="/Matieres"           element={<PrivateRoute permissions={R_PARAM}><ListeMatieres /></PrivateRoute>} />
             <Route path="/NouvelleMatiere"    element={<PrivateRoute permissions={R_PARAM}><NouvelleMatiere /></PrivateRoute>} />
             <Route path="/DetailsMatiere/:id" element={<PrivateRoute permissions={R_PARAM}><DetailsMatiere /></PrivateRoute>} />
+            <Route path="/ConfigMatieres"     element={<PrivateRoute permissions={R_PARAM}><ConfigurationMatieres /></PrivateRoute>} />
 
+            <Route path="/Series"                element={<PrivateRoute permissions={R_PARAM}><ListeSeries /></PrivateRoute>} />
             <Route path="/TypeDevoirs"           element={<PrivateRoute permissions={R_PARAM}><ListeTypeDevoirs /></PrivateRoute>} />
             <Route path="/NouveauTypeDevoir"     element={<PrivateRoute permissions={R_PARAM}><NouveauTypeDevoir /></PrivateRoute>} />
             <Route path="/DetailsTypeDevoir/:id" element={<PrivateRoute permissions={R_PARAM}><DetailsTypeDevoir /></PrivateRoute>} />

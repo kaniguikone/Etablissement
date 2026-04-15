@@ -80,7 +80,7 @@ const FeuillePresence = () => {
     const filtreComplet = filtre.classe_id && filtre.matiere_id && filtre.periode_id && filtre.date;
 
     return (
-        <section className="content content-wrapper">
+        <section className="page-wrapper">
             <div className="container-fluid mb-2 border">
                 <h4 className="mt-2 mb-3">Feuille de présence</h4>
 

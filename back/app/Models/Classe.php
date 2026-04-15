@@ -13,7 +13,7 @@ class Classe extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'num_classe', 'nom_classe', 'abbr_classe', 'niveau_id',
+        'num_classe', 'nom_classe', 'abbr_classe', 'niveau_id', 'serie_id',
         'salle_classe', 'effectif_max_classe', 'professeur_principal_id',
     ];
 
@@ -25,6 +25,11 @@ class Classe extends Model
     public function niveau()
     {
         return $this->belongsTo(Niveau::class);
+    }
+
+    public function serie()
+    {
+        return $this->belongsTo(\App\Models\Serie::class);
     }
 
     public function professeurPrincipal()

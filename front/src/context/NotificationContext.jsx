@@ -7,7 +7,7 @@ const NotificationContext = createContext(null);
 const POLL_INTERVAL = 30_000; // 30 secondes
 
 export const NotificationProvider = ({ children }) => {
-    const { user } = useAuth();
+    const { user, estGroupe } = useAuth();
     const [nonLues, setNonLues]       = useState(0);
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading]       = useState(false);
@@ -17,7 +17,7 @@ export const NotificationProvider = ({ children }) => {
     // ── Polling du badge ─────────────────────────────────────────────────────
 
     const fetchBadge = useCallback(async () => {
-        if (!user) return;
+        if (!user || estGroupe) return;
         try {
             const { data } = await axios.get('/notifications/non-lues');
             setNonLues(data.count ?? 0);
@@ -27,7 +27,7 @@ export const NotificationProvider = ({ children }) => {
     }, [user]);
 
     useEffect(() => {
-        if (!user) {
+        if (!user || estGroupe) {
             setNonLues(0);
             return;
         }

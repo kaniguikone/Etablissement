@@ -12,6 +12,7 @@ class GroupAdmin extends Authenticatable
 {
     use HasApiTokens;
 
+    protected $connection = 'mysql';
     protected $table = 'group_admins';
 
     protected $fillable = [

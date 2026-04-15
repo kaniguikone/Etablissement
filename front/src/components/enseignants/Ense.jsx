@@ -1,4 +1,4 @@
-<section className="content content-wrapper">
+<section className="page-wrapper">
     <div className="container-fluid mb-2 border ">
         <div >
             <div>

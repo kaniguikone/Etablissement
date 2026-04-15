@@ -305,7 +305,7 @@ const Accueil = () => {
                 : 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)';
 
     return (
-        <section className="content content-wrapper">
+        <section className="page-wrapper">
             <div className="container-fluid py-3 px-3">
 
                 {/* ── En-tête personnalisé ── */}

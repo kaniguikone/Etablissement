@@ -4,6 +4,34 @@ import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 import { useConfirm } from '../../context/ConfirmContext';
 
+const normaliserNiveau = (abbr) => {
+    if (!abbr) return '';
+    return abbr
+        .toUpperCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace('IEME', 'EME');
+};
+
+const genererNoms = (niveaux, series, { niveau_id, serie_id, num_classe }) => {
+    const niveau = niveaux.find(n => String(n.id) === String(niveau_id));
+    const serie  = series.find(s => String(s.id) === String(serie_id));
+    if (!niveau || !num_classe) return null;
+
+    const nomNiv  = niveau.nom_niveau;
+    const codeNiv = normaliserNiveau(niveau.abbr_niveau ?? niveau.nom_niveau);
+
+    if (serie) {
+        return {
+            nom_classe:  `${nomNiv} ${serie.nom}${num_classe}`,
+            abbr_classe: `${codeNiv} ${serie.nom}${num_classe}`,
+        };
+    }
+    return {
+        nom_classe:  `${nomNiv} ${num_classe}`,
+        abbr_classe: `${codeNiv}-${num_classe}`,
+    };
+};
+
 const DetailsClasse = () => {
     const { toast }    = useToast();
     const { confirmer }= useConfirm();
@@ -13,47 +41,88 @@ const DetailsClasse = () => {
     const [enseignants, setEnseignants]                 = useState([]);
     const [enseignantsFiltres, setEnseignantsFiltres]   = useState([]);
     const [matieres, setMatieres]                       = useState([]);
+    const [series, setSeries]                           = useState([]);
     const [affectations, setAffectations]               = useState([]);
     const [ajout, setAjout]                             = useState({ matiere_id: '', enseignant_id: '' });
     const [ajoutEnCours, setAjoutEnCours]               = useState(false);
+    const [saving, setSaving]                           = useState(false);
+    const [nomModifie, setNomModifie]                   = useState(false);
     const [form, setForm]                   = useState({
-        num_classe: '', nom_classe: '', abbr_classe: '', niveau_id: '',
+        num_classe: '', nom_classe: '', abbr_classe: '', niveau_id: '', serie_id: '',
         salle_classe: '', effectif_max_classe: '', professeur_principal_id: '',
     });
 
     const chargerAffectations = () =>
         api.get(`/classeMatieresEnseignants/${id}`).then((r) => setAffectations(r.data)).catch((err) => console.error('Erreur chargement:', err));
 
-    useEffect(() => {
-        api.get(`/classes/${id}`).then((res) => {
-            const c = res.data;
-            setForm({
-                num_classe:               c.num_classe               || '',
-                nom_classe:               c.nom_classe               || '',
-                abbr_classe:              c.abbr_classe              || '',
-                niveau_id:                c.niveau_id                || '',
-                salle_classe:             c.salle_classe             || '',
-                effectif_max_classe:      c.effectif_max_classe      || '',
-                professeur_principal_id:  c.professeur_principal_id  || '',
-            });
-        }).catch(() => toast.error('Impossible de charger les données de cette classe.'));
+    const appliquerClasse = (c) => {
+        setNomModifie(false);
+        setForm({
+            num_classe:               String(c.num_classe               ?? ''),
+            nom_classe:               c.nom_classe               || '',
+            abbr_classe:              c.abbr_classe              || '',
+            niveau_id:                String(c.niveau_id         ?? ''),
+            serie_id:                 String(c.serie_id          ?? ''),
+            salle_classe:             c.salle_classe             || '',
+            effectif_max_classe:      String(c.effectif_max_classe ?? ''),
+            professeur_principal_id:  String(c.professeur_principal_id ?? ''),
+        });
+    };
 
+    const chargerClasse = () =>
+        api.get(`/classes/${id}`)
+            .then((res) => appliquerClasse(res.data))
+            .catch(() => toast.error('Impossible de charger les données de cette classe.'));
+
+    useEffect(() => {
+        chargerClasse();
         api.get('/niveaux').then((r) => setNiveaux(r.data)).catch((err) => console.error('Erreur chargement:', err));
         api.get('/enseignantsTout').then((r) => setEnseignants(r.data)).catch((err) => console.error('Erreur chargement:', err));
         api.get('/matieres').then((r) => setMatieres(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/config-matieres').then((r) => setSeries(r.data.series ?? [])).catch(() => {});
         chargerAffectations();
     }, [id]);
 
-    const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        const next = { ...form, [name]: value };
+
+        if (name === 'nom_classe' || name === 'abbr_classe') {
+            setNomModifie(true);
+            setForm(next);
+            return;
+        }
+
+        if (!nomModifie && (name === 'niveau_id' || name === 'serie_id' || name === 'num_classe')) {
+            const gen = genererNoms(niveaux, series, next);
+            if (gen) {
+                next.nom_classe  = gen.nom_classe;
+                next.abbr_classe = gen.abbr_classe;
+            }
+        }
+
+        setForm(next);
+    };
+
+    const autoLabel = (champ) => !nomModifie && form[champ] && (
+        <span className="text-muted ms-1" style={{ fontSize: 11 }}>
+            <i className="fas fa-magic me-1" />auto
+        </span>
+    );
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        setSaving(true);
         api.put(`/classes/${id}`, form)
-            .then(() => { toast.success('Modifications enregistrées.'); navigate('/Classes'); })
+            .then(() => {
+                toast.success('Modifications enregistrées.');
+                navigate('/Classes');
+            })
             .catch((err) => {
                 if (err.response?.data?.errors)
                     toast.error(Object.values(err.response.data.errors).flat().join(' '));
                 else toast.error("Une erreur est survenue lors de la mise à jour.");
+                setSaving(false);
             });
     };
 
@@ -89,7 +158,7 @@ const DetailsClasse = () => {
     };
 
     return (
-        <section className="content content-wrapper">
+        <section className="page-wrapper">
             <div className="container bg-light mb-2 border">
                 <div className="d-flex justify-content-between mb-2 border">
                     <h2 className="mt-2 container mb-1">Détails de la classe</h2>
@@ -98,23 +167,30 @@ const DetailsClasse = () => {
                     <fieldset className="row g-3">
 
                         <div className="col-md-4">
-                            <label className="form-label">Numéro de classe *</label>
-                            <input type="text" className="form-control form-control-sm" name="num_classe" value={form.num_classe} onChange={handleChange} required />
-                        </div>
-                        <div className="col-md-4">
-                            <label className="form-label">Nom de la classe *</label>
-                            <input type="text" className="form-control form-control-sm" name="nom_classe" value={form.nom_classe} onChange={handleChange} required />
-                        </div>
-                        <div className="col-md-4">
-                            <label className="form-label">Abréviation *</label>
-                            <input type="text" className="form-control form-control-sm" name="abbr_classe" value={form.abbr_classe} onChange={handleChange} required />
-                        </div>
-                        <div className="col-md-4">
                             <label className="form-label">Niveau *</label>
                             <select className="form-select form-select-sm" name="niveau_id" value={form.niveau_id} onChange={handleChange} required>
                                 <option value="">Sélectionner un niveau</option>
                                 {niveaux.map((n) => <option key={n.id} value={n.id}>{n.nom_niveau}</option>)}
                             </select>
+                        </div>
+                        <div className="col-md-4">
+                            <label className="form-label">Série <span className="text-muted">(optionnelle)</span></label>
+                            <select className="form-select form-select-sm" name="serie_id" value={form.serie_id} onChange={handleChange}>
+                                <option value="">— Aucune série —</option>
+                                {series.map((s) => <option key={s.id} value={s.id}>{s.nom}{s.description ? ` — ${s.description}` : ''}</option>)}
+                            </select>
+                        </div>
+                        <div className="col-md-4">
+                            <label className="form-label">Numéro de classe *</label>
+                            <input type="text" className="form-control form-control-sm" name="num_classe" value={form.num_classe} onChange={handleChange} required />
+                        </div>
+                        <div className="col-md-4">
+                            <label className="form-label">Nom de la classe * {autoLabel('nom_classe')}</label>
+                            <input type="text" className="form-control form-control-sm" name="nom_classe" value={form.nom_classe} onChange={handleChange} required />
+                        </div>
+                        <div className="col-md-4">
+                            <label className="form-label">Abréviation * {autoLabel('abbr_classe')}</label>
+                            <input type="text" className="form-control form-control-sm" name="abbr_classe" value={form.abbr_classe} onChange={handleChange} required />
                         </div>
                         <div className="col-md-4">
                             <label className="form-label">Salle</label>
@@ -124,7 +200,7 @@ const DetailsClasse = () => {
                             <label className="form-label">Effectif maximum</label>
                             <input type="number" className="form-control form-control-sm" name="effectif_max_classe" value={form.effectif_max_classe} onChange={handleChange} min="1" />
                         </div>
-                        <div className="col-md-12">
+                        <div className="col-md-8">
                             <label className="form-label">Professeur principal</label>
                             <select className="form-select form-select-sm" name="professeur_principal_id" value={form.professeur_principal_id} onChange={handleChange}>
                                 <option value="">Aucun</option>
@@ -137,7 +213,10 @@ const DetailsClasse = () => {
                     </fieldset>
                     <div className="d-flex justify-content-end mb-3 gap-2 mt-3">
                         <NavLink to="/Classes" className="btn btn-secondary">Retour</NavLink>
-                        <button type="submit" className="btn btn-primary">Enregistrer</button>
+                        <button type="submit" className="btn btn-primary" disabled={saving}>
+                            {saving && <span className="spinner-border spinner-border-sm me-1" />}
+                            Enregistrer
+                        </button>
                     </div>
                 </form>
 
@@ -145,7 +224,6 @@ const DetailsClasse = () => {
                 <hr />
                 <h5 className="mt-3 mb-3">Enseignants affectés à cette classe</h5>
 
-                {/* Tableau des affectations existantes */}
                 {affectations.length === 0 ? (
                     <p className="text-muted small">Aucun enseignant affecté pour l'instant.</p>
                 ) : (

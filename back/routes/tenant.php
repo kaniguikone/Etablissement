@@ -45,6 +45,8 @@ use App\Http\Controllers\API\SalleController;
 use App\Http\Controllers\API\RemplacementController;
 use App\Http\Controllers\API\MessageController;
 use App\Http\Controllers\API\RdvController;
+use App\Http\Controllers\API\ConfigurationMatieresController;
+use App\Http\Controllers\API\ExportMoyennesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -190,8 +192,8 @@ Route::middleware([
 
         Route::get('/annees-scolaires-public', [ArchivageController::class, 'index']);
 
-        Route::get('/niveaux',               [NiveauController::class,    'index']);
-        Route::get('/niveaux/{id}',          [NiveauController::class,    'show']);
+        Route::get('/niveaux',      [NiveauController::class, 'index']);
+        Route::get('/niveaux/{id}', [NiveauController::class, 'show']);
         Route::get('/matieres',              [MatiereController::class,   'index']);
         Route::get('/typeDevoirs',           [TypeDevoirController::class,'index']);
         Route::get('/periodes',              [PeriodeController::class,   'index']);
@@ -224,11 +226,27 @@ Route::middleware([
             Route::put('/volumesHoraires/{id}',          [VolumeHoraireController::class, 'update'])->where('id', '[0-9]+');
             Route::delete('/volumesHoraires/{id}',       [VolumeHoraireController::class, 'destroy'])->where('id', '[0-9]+');
 
-            Route::apiResource('niveaux',     NiveauController::class)->except(['index', 'show']);
+            // Configuration matières / niveaux / classes
+            Route::get('/config-matieres',                          [ConfigurationMatieresController::class, 'index']);
+            Route::post('/config-matieres/etablissement',           [ConfigurationMatieresController::class, 'saveEtablissement']);
+            Route::post('/config-matieres/series',                  [ConfigurationMatieresController::class, 'storeSerie']);
+            Route::put('/config-matieres/series/{id}',              [ConfigurationMatieresController::class, 'updateSerie']);
+            Route::delete('/config-matieres/series/{id}',           [ConfigurationMatieresController::class, 'destroySerie']);
+            Route::post('/config-matieres/groupes',                 [ConfigurationMatieresController::class, 'storeGroupe']);
+            Route::put('/config-matieres/groupes/{id}',             [ConfigurationMatieresController::class, 'updateGroupe']);
+            Route::delete('/config-matieres/groupes/{id}',          [ConfigurationMatieresController::class, 'destroyGroupe']);
+            Route::post('/config-matieres/niveaux/{id}',            [ConfigurationMatieresController::class, 'saveNiveau']);
+            Route::post('/config-matieres/classes/{id}',            [ConfigurationMatieresController::class, 'saveClasse']);
+
+            Route::post('/niveaux',          [NiveauController::class, 'store']);
+            Route::put('/niveaux/{id}',      [NiveauController::class, 'update']);
+            Route::delete('/niveaux/{id}',   [NiveauController::class, 'destroy']);
             Route::apiResource('matieres',    MatiereController::class)->except(['index']);
             Route::apiResource('typeDevoirs', TypeDevoirController::class)->except(['index']);
             Route::apiResource('periodes',    PeriodeController::class)->except(['index']);
-            Route::apiResource('classes',     ClasseController::class)->except(['index', 'show']);
+            Route::put('/classes/{id}',    [ClasseController::class, 'update']);
+            Route::delete('/classes/{id}', [ClasseController::class, 'destroy']);
+            Route::post('/classes',        [ClasseController::class, 'store']);
         });
 
         Route::middleware('permission:inscriptions')->group(function () {
@@ -300,7 +318,8 @@ Route::middleware([
             Route::get('/bulletin/{eleveId}/{periodeId}',     [NoteController::class,        'bulletin']);
             Route::get('/bulletin/{eleveId}/{periodeId}/pdf', [BulletinPdfController::class, 'telecharger']);
             Route::post('/bulletin/{eleveId}/{periodeId}/notifier', [NoteController::class,  'notifierBulletin']);
-            Route::get('/notes/{periodeId}/export',           [NoteController::class,        'exportCsv']);
+            Route::get('/notes/{periodeId}/export',                    [NoteController::class,        'exportCsv']);
+            Route::get('/export/moyennes/{niveauId}/{periodeId}',      [ExportMoyennesController::class, 'export']);
         });
 
         Route::middleware('permission:finances')->group(function () {

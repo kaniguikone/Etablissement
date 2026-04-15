@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Group extends Model
 {
+    protected $connection = 'mysql';
     protected $table = 'groups';
 
     protected $fillable = [

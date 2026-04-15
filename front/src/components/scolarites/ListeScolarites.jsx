@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import api from '../../api/axios';
 import Pagination from '../shared/Pagination';
 import { useToast } from '../../context/ToastContext';
@@ -8,6 +8,7 @@ import { useConfirm } from '../../context/ConfirmContext';
 const ListeScolarites = () => {
     const { toast } = useToast();
     const { confirmer } = useConfirm();
+    const location = useLocation();
     const [scolarites, setScolarites] = useState([]);
     const [niveaux, setNiveaux] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -18,7 +19,7 @@ const ListeScolarites = () => {
     useEffect(() => {
         listerScolarites(1);
         api.get('/niveaux').then((res) => setNiveaux(res.data)).catch((err) => console.error('Erreur chargement:', err));
-    }, []);
+    }, [location.key]);
 
     const listerScolarites = (page = 1) => {
         setChargement(true);
@@ -64,7 +65,7 @@ const ListeScolarites = () => {
     };
 
     return (
-        <section className="content content-wrapper">
+        <section className="page-wrapper">
             <div className="container-fluid mb-2 border">
                 <div className="d-flex justify-content-between align-items-center mt-2 mb-2">
                     <h4 className="mb-0">

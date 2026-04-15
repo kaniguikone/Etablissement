@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import api from "../../api/axios";
 import Pagination from '../shared/Pagination';
 import { useToast } from '../../context/ToastContext';
@@ -8,6 +8,7 @@ import { useConfirm } from '../../context/ConfirmContext';
 const ListeClasses = () => {
     const { toast } = useToast();
     const { confirmer } = useConfirm();
+    const location = useLocation();
     const [classes, setClasses]     = useState([]);
     const [niveaux, setNiveaux]     = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -18,9 +19,11 @@ const ListeClasses = () => {
     const [chargement, setChargement] = useState(true);
 
     useEffect(() => {
+        setRecherche('');
+        setFiltreNiveau('');
         api.get('/niveaux').then(res => setNiveaux(res.data)).catch((err) => console.error('Erreur chargement:', err));
         charger(1, '', '');
-    }, []);
+    }, [location.key]);
 
     const charger = (page, search, niveau) => {
         setChargement(true);
@@ -64,7 +67,7 @@ const ListeClasses = () => {
     };
 
     return (
-        <section className="content content-wrapper">
+        <section className="page-wrapper">
             <div className="container-fluid mb-2 border">
                 <div className="d-flex justify-content-between align-items-center mt-2 mb-2">
                     <h4 className="mb-0">
@@ -112,12 +115,13 @@ const ListeClasses = () => {
                                 <th>Nom</th>
                                 <th>Abréviation</th>
                                 <th>Niveau</th>
+                                <th>Série</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {classes.length === 0 && (
-                                <tr><td colSpan={5} className="text-center text-muted py-3">Aucune classe trouvée.</td></tr>
+                                <tr><td colSpan={6} className="text-center text-muted py-3">Aucune classe trouvée.</td></tr>
                             )}
                             {classes.map((classe, i) => (
                                 <tr key={classe.id}>
@@ -125,6 +129,7 @@ const ListeClasses = () => {
                                     <td>{classe.nom_classe}</td>
                                     <td><span className="badge bg-light text-dark border">{classe.abbr_classe}</span></td>
                                     <td>{classe.niveau?.nom_niveau}</td>
+                                    <td>{classe.serie ? <span className="badge bg-secondary">{classe.serie.nom}</span> : <span className="text-muted">—</span>}</td>
                                     <td>
                                         <NavLink to={`/DetailsClasse/${classe.id}`} className="btn btn-primary btn-sm me-1">Voir</NavLink>
                                         <button type="button" className="btn btn-danger btn-sm" onClick={() => supprimerClasse(classe.id)}>Supprimer</button>

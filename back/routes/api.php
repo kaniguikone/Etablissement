@@ -29,9 +29,12 @@ Route::middleware('auth:sanctum')->prefix('group')->group(function () {
     Route::get('/ecoles',                  [GroupTenantController::class, 'index']);
     Route::get('/ecoles/{id}',             [GroupTenantController::class, 'show']);
     Route::get('/ecoles/{id}/stats',       [GroupTenantController::class, 'stats']);
-    Route::get('/ecoles/{id}/enseignants/liste', [GroupTenantController::class, 'listeEnseignants']);
-    Route::get('/ecoles/{id}/enseignants',       [GroupTenantController::class, 'enseignants']);
-    Route::get('/ecoles/{id}/eleves',            [GroupTenantController::class, 'eleves']);
+    Route::get('/ecoles/{id}/enseignants/liste',                   [GroupTenantController::class, 'listeEnseignants']);
+    Route::get('/ecoles/{id}/enseignants/{enseignantId}/detail',  [GroupTenantController::class, 'profDetail']);
+    Route::get('/ecoles/{id}/enseignants',                        [GroupTenantController::class, 'enseignants']);
+    Route::get('/ecoles/{id}/eleves/liste',                       [GroupTenantController::class, 'listeEleves']);
+    Route::get('/ecoles/{id}/eleves/{eleveId}/detail',            [GroupTenantController::class, 'eleveDetail']);
+    Route::get('/ecoles/{id}/eleves',                             [GroupTenantController::class, 'eleves']);
 });
 
 // ─── Auth Super-Admin ────────────────────────────────────────────────────────

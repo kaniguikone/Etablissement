@@ -153,6 +153,176 @@ class GroupTenantController extends Controller
     }
 
     /**
+     * Détail complet d'un enseignant : pédagogie, programme, emploi du temps.
+     */
+    public function profDetail(Request $request, string $id, int $enseignantId): JsonResponse
+    {
+        $tenant = $request->user()->group->tenants()->findOrFail($id);
+
+        $periodeId = $request->query('periode_id');
+
+        tenancy()->initialize($tenant);
+
+        // Infos de base
+        $ens = \DB::table('enseignants')->where('id', $enseignantId)->first();
+        if (!$ens) {
+            tenancy()->end();
+            return response()->json(['message' => 'Enseignant introuvable.'], 404);
+        }
+
+        // Paires classe/matière de l'enseignant
+        $paires = \DB::table('classe_enseignant_matiere')
+            ->join('classes',  'classes.id',  '=', 'classe_enseignant_matiere.classe_id')
+            ->join('matieres', 'matieres.id', '=', 'classe_enseignant_matiere.matiere_id')
+            ->where('enseignant_id', $enseignantId)
+            ->select('classe_enseignant_matiere.classe_id', 'classe_enseignant_matiere.matiere_id',
+                     'classes.abbr_classe', 'classes.nom_classe', 'matieres.libelle_matiere')
+            ->get();
+
+        // Types de devoirs
+        $typesDevoirs = \DB::table('type_devoirs')
+            ->select('id', 'code_type_devoir', 'description_type_devoir')
+            ->get()
+            ->keyBy('id');
+
+        // ── Onglet A : Pédagogie par classe ──────────────────────────────────
+        $pedagogie = $paires->groupBy('classe_id')->map(function ($items) use ($periodeId, $typesDevoirs) {
+            $item       = $items->first();
+            $classeId   = $item->classe_id;
+            $matiereIds = $items->pluck('matiere_id')->unique()->toArray();
+
+            $qD = \DB::table('devoirs')
+                ->whereIn('matiere_id', $matiereIds)
+                ->where('classe_id', $classeId)
+                ->when($periodeId, fn($q) => $q->where('periode_id', $periodeId));
+
+            $devoirs   = (clone $qD)->get();
+            $devoirIds = $devoirs->pluck('id');
+
+            $parType = $devoirs->groupBy('type_devoir_id')->map(fn($d) => [
+                'type'       => $typesDevoirs[$d->first()->type_devoir_id]->code_type_devoir ?? '—',
+                'nb'         => $d->count(),
+                'avec_notes' => \DB::table('notes')->whereIn('devoir_id', $d->pluck('id'))->distinct('devoir_id')->count('devoir_id'),
+            ])->values();
+
+            $nbDevoirs    = $devoirs->count();
+            $devoirsNotes = \DB::table('notes')->whereIn('devoir_id', $devoirIds)->distinct('devoir_id')->count('devoir_id');
+            $tauxSaisie   = $nbDevoirs > 0 ? round(($devoirsNotes / $nbDevoirs) * 100, 1) : 0;
+
+            return [
+                'classe_id'   => $classeId,
+                'abbr_classe' => $item->abbr_classe,
+                'nom_classe'  => $item->nom_classe,
+                'matieres'    => $items->pluck('libelle_matiere')->unique()->values(),
+                'nb_devoirs'  => $nbDevoirs,
+                'taux_saisie' => $tauxSaisie,
+                'par_type'    => $parType,
+            ];
+        })->values();
+
+        // ── Onglet B : Suivi programme par classe ─────────────────────────────
+        $programme = $paires->groupBy('classe_id')->map(function ($items) use ($enseignantId, $periodeId) {
+            $item       = $items->first();
+            $classeId   = $item->classe_id;
+            $matiereIds = $items->pluck('matiere_id')->unique()->toArray();
+
+            // Niveau de la classe (les chapitres sont définis par matière ET par niveau)
+            $niveauId = \DB::table('classes')->where('id', $classeId)->value('niveau_id');
+
+            // Tous les chapitres définis pour ces matières et ce niveau (source de vérité)
+            $tousChapitres = \DB::table('chapitres_matiere')
+                ->join('matieres', 'matieres.id', '=', 'chapitres_matiere.matiere_id')
+                ->whereIn('chapitres_matiere.matiere_id', $matiereIds)
+                ->where('chapitres_matiere.niveau_id', $niveauId)
+                ->select('chapitres_matiere.id as chapitre_id', 'chapitres_matiere.titre',
+                         'chapitres_matiere.ordre', 'matieres.libelle_matiere')
+                ->orderBy('matieres.libelle_matiere')
+                ->orderBy('chapitres_matiere.ordre')
+                ->get();
+
+            // Dernière progression par chapitre (pour cet enseignant / classe / période)
+            $progMap = \DB::table('progressions')
+                ->where('enseignant_id', $enseignantId)
+                ->where('classe_id', $classeId)
+                ->when($periodeId, fn($q) => $q->where('periode_id', $periodeId))
+                ->select('chapitre_id', 'statut', 'date_seance')
+                ->orderBy('date_seance', 'desc')
+                ->get()
+                ->groupBy('chapitre_id')
+                ->map(fn($rows) => $rows->first());
+
+            // Fusion : chaque chapitre reçoit son statut (null = non commencé)
+            $chapitresEnrichis = $tousChapitres->map(fn($ch) => [
+                'titre'            => $ch->titre,
+                'statut'           => $progMap[$ch->chapitre_id]->statut ?? null,
+                'date'             => $progMap[$ch->chapitre_id]->date_seance ?? null,
+                'libelle_matiere'  => $ch->libelle_matiere,
+            ]);
+
+            $parMatiere = $chapitresEnrichis->groupBy('libelle_matiere')->map(fn($rows, $mat) => [
+                'matiere'   => $mat,
+                'fait'      => $rows->where('statut', 'fait')->count(),
+                'en_cours'  => $rows->where('statut', 'en_cours')->count(),
+                'reporte'   => $rows->where('statut', 'reporte')->count(),
+                'chapitres' => $rows->map(fn($r) => [
+                    'titre'  => $r['titre'],
+                    'statut' => $r['statut'],
+                    'date'   => $r['date'],
+                ])->values(),
+            ])->values();
+
+            return [
+                'classe_id'      => $classeId,
+                'abbr_classe'    => $item->abbr_classe,
+                'nom_classe'     => $item->nom_classe,
+                'par_matiere'    => $parMatiere,
+                'total_fait'     => $chapitresEnrichis->where('statut', 'fait')->count(),
+                'total_en_cours' => $chapitresEnrichis->where('statut', 'en_cours')->count(),
+                'total_reporte'  => $chapitresEnrichis->where('statut', 'reporte')->count(),
+            ];
+        })->values();
+
+        // ── Onglet C : Emploi du temps ────────────────────────────────────────
+        $jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+        $creneaux = \DB::table('emploi_du_temps')
+            ->join('classes',  'classes.id',  '=', 'emploi_du_temps.classe_id')
+            ->join('matieres', 'matieres.id', '=', 'emploi_du_temps.matiere_id')
+            ->leftJoin('salles', 'salles.id', '=', 'emploi_du_temps.salle_id')
+            ->where('emploi_du_temps.enseignant_id', $enseignantId)
+            ->select(
+                'emploi_du_temps.id',
+                'emploi_du_temps.jour',
+                'emploi_du_temps.heure_debut',
+                'emploi_du_temps.heure_fin',
+                'classes.abbr_classe',
+                'matieres.libelle_matiere',
+                'salles.nom as nom_salle'
+            )
+            ->get()
+            ->groupBy('jour')
+            ->sortKeysUsing(fn($a, $b) => array_search($a, $jours) <=> array_search($b, $jours));
+
+        $emploiDuTemps = collect($jours)->mapWithKeys(fn($j) => [
+            $j => ($creneaux[$j] ?? collect())->sortBy('heure_debut')->values()
+        ]);
+
+        tenancy()->end();
+
+        return response()->json([
+            'enseignant' => [
+                'id'     => $ens->id,
+                'nom'    => $ens->nom_enseignant . ' ' . $ens->prenoms_enseignant,
+                'statut' => $ens->statut_enseignant,
+                'email'  => $ens->email_enseignant,
+                'tel'    => $ens->telephone_enseignant,
+            ],
+            'pedagogie'     => $pedagogie,
+            'programme'     => $programme,
+            'emploi_du_temps' => $emploiDuTemps,
+        ]);
+    }
+
+    /**
      * Liste légère des enseignants d'une école (id + nom uniquement).
      */
     public function listeEnseignants(Request $request, string $id): JsonResponse
@@ -164,16 +334,44 @@ class GroupTenantController extends Controller
         $enseignants = \DB::table('enseignants')
             ->select('id', 'nom_enseignant', 'prenoms_enseignant', 'statut_enseignant')
             ->orderBy('nom_enseignant')
+            ->get();
+
+        // Matières par enseignant (depuis la DB tenant)
+        $matiereParEns = \DB::table('classe_enseignant_matiere')
+            ->select('enseignant_id', 'matiere_id')
+            ->distinct()
             ->get()
-            ->map(fn($e) => [
-                'id'  => $e->id,
-                'nom' => $e->nom_enseignant . ' ' . $e->prenoms_enseignant,
-                'statut' => $e->statut_enseignant,
-            ]);
+            ->groupBy('enseignant_id')
+            ->map(fn($rows) => $rows->pluck('matiere_id')->unique()->values());
+
+        // Liste globale des matières présentes dans le tenant
+        $matiereIds = \DB::table('classe_enseignant_matiere')->distinct()->pluck('matiere_id');
+        $matieres = \DB::table('matieres')
+            ->whereIn('id', $matiereIds)
+            ->select('id', 'libelle_matiere')
+            ->orderBy('libelle_matiere')
+            ->get();
+
+        // Périodes (trimestres) du tenant
+        $periodes = \DB::table('periodes')
+            ->select('id', 'libelle_periode', 'abbr_libelle_periode', 'annee', 'date_debut', 'date_fin')
+            ->orderBy('date_debut', 'desc')
+            ->get();
+
+        $result = $enseignants->map(fn($e) => [
+            'id'       => $e->id,
+            'nom'      => $e->nom_enseignant . ' ' . $e->prenoms_enseignant,
+            'statut'   => $e->statut_enseignant,
+            'matieres' => $matiereParEns[$e->id] ?? [],
+        ]);
 
         tenancy()->end();
 
-        return response()->json($enseignants);
+        return response()->json([
+            'enseignants' => $result,
+            'matieres'    => $matieres,
+            'periodes'    => $periodes,
+        ]);
     }
 
     /**
@@ -307,6 +505,166 @@ class GroupTenantController extends Controller
             'tenant'      => $tenant->only(['id', 'nom', 'ville', 'plan', 'actif']),
             'mois'        => $mois,
             'enseignants' => $result->values(),
+        ]);
+    }
+
+    /**
+     * Liste légère : classes + élèves + périodes pour les filtres cascade.
+     */
+    public function listeEleves(Request $request, string $id): JsonResponse
+    {
+        $tenant = $request->user()->group->tenants()->findOrFail($id);
+
+        tenancy()->initialize($tenant);
+
+        $classes = \DB::table('classes')
+            ->select('id', 'abbr_classe', 'nom_classe', 'niveau_id')
+            ->orderBy('abbr_classe')
+            ->get();
+
+        $eleves = \DB::table('eleves')
+            ->select('id', 'nom_eleve', 'prenoms_eleve', 'classe_id', 'statut_eleve')
+            ->orderBy('nom_eleve')
+            ->get()
+            ->map(fn($e) => [
+                'id'       => $e->id,
+                'nom'      => $e->nom_eleve . ' ' . $e->prenoms_eleve,
+                'classe_id'=> $e->classe_id,
+                'statut'   => $e->statut_eleve,
+            ]);
+
+        $periodes = \DB::table('periodes')
+            ->select('id', 'libelle_periode', 'abbr_libelle_periode', 'annee', 'date_debut', 'date_fin')
+            ->orderBy('date_debut', 'desc')
+            ->get();
+
+        tenancy()->end();
+
+        return response()->json([
+            'classes'  => $classes,
+            'eleves'   => $eleves,
+            'periodes' => $periodes,
+        ]);
+    }
+
+    /**
+     * Détail complet d'un élève : notes, assiduité, finances.
+     */
+    public function eleveDetail(Request $request, string $id, int $eleveId): JsonResponse
+    {
+        $tenant = $request->user()->group->tenants()->findOrFail($id);
+
+        $periodeId = $request->query('periode_id');
+
+        tenancy()->initialize($tenant);
+
+        // Infos élève
+        $e = \DB::table('eleves')
+            ->join('classes', 'eleves.classe_id', '=', 'classes.id')
+            ->where('eleves.id', $eleveId)
+            ->select('eleves.id', 'eleves.nom_eleve', 'eleves.prenoms_eleve',
+                     'eleves.statut_eleve',
+                     'classes.abbr_classe', 'classes.nom_classe', 'classes.niveau_id')
+            ->first();
+
+        if (!$e) {
+            tenancy()->end();
+            return response()->json(['message' => 'Élève introuvable.'], 404);
+        }
+
+        // ── Notes par matière ─────────────────────────────────────────────────
+        $notesRaw = \DB::table('notes')
+            ->join('devoirs',      'notes.devoir_id',       '=', 'devoirs.id')
+            ->join('matieres',     'matieres.id',           '=', 'devoirs.matiere_id')
+            ->join('type_devoirs', 'type_devoirs.id',       '=', 'devoirs.type_devoir_id')
+            ->where('notes.eleve_id', $eleveId)
+            ->when($periodeId, fn($q) => $q->where('devoirs.periode_id', $periodeId))
+            ->select(
+                'matieres.libelle_matiere',
+                'type_devoirs.code_type_devoir as type',
+                'devoirs.date_devoir',
+                'notes.note'
+            )
+            ->orderBy('matieres.libelle_matiere')
+            ->orderBy('devoirs.date_devoir')
+            ->get();
+
+        $notes = $notesRaw->groupBy('libelle_matiere')->map(fn($rows, $mat) => [
+            'matiere'  => $mat,
+            'moyenne'  => round($rows->avg('note'), 2),
+            'nb_notes' => $rows->count(),
+            'devoirs'  => $rows->map(fn($r) => [
+                'type'  => $r->type,
+                'note'  => (float) $r->note,
+                'date'  => $r->date_devoir,
+            ])->values(),
+        ])->values();
+
+        // ── Assiduité par matière ─────────────────────────────────────────────
+        $assRaw = \DB::table('assiduites')
+            ->join('matieres', 'matieres.id', '=', 'assiduites.matiere_id')
+            ->where('assiduites.eleve_id', $eleveId)
+            ->when($periodeId, function ($q) use ($periodeId) {
+                $periode = \DB::table('periodes')->where('id', $periodeId)->first();
+                if ($periode) {
+                    $q->whereBetween('assiduites.date_assiduite', [$periode->date_debut, $periode->date_fin]);
+                }
+            })
+            ->select(
+                'matieres.libelle_matiere',
+                'assiduites.statut',
+                'assiduites.date_assiduite'
+            )
+            ->orderBy('matieres.libelle_matiere')
+            ->orderBy('assiduites.date_assiduite')
+            ->get();
+
+        $assiduite = $assRaw->groupBy('libelle_matiere')->map(fn($rows, $mat) => [
+            'matiere'  => $mat,
+            'absences' => $rows->where('statut', 'absent')->count(),
+            'retards'  => $rows->where('statut', 'retard')->count(),
+            'details'  => $rows->whereIn('statut', ['absent', 'retard'])->map(fn($r) => [
+                'statut' => $r->statut,
+                'date'   => $r->date_assiduite,
+            ])->values(),
+        ])->values();
+
+        // ── Finances ──────────────────────────────────────────────────────────
+        $du = (float) \DB::table('scolarites')
+            ->where('niveau_id', $e->niveau_id)
+            ->sum('montant_echeance');
+
+        $paiements = \DB::table('paiements')
+            ->where('eleve_id', $eleveId)
+            ->select('montant_paye', 'created_at')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $totalPaye = (float) $paiements->sum('montant_paye');
+        $reste     = max(0, $du - $totalPaye);
+
+        tenancy()->end();
+
+        return response()->json([
+            'eleve' => [
+                'id'         => $e->id,
+                'nom'        => $e->nom_eleve . ' ' . $e->prenoms_eleve,
+                'statut'     => $e->statut_eleve,
+                'abbr_classe'=> $e->abbr_classe,
+                'nom_classe' => $e->nom_classe,
+            ],
+            'notes'     => $notes,
+            'assiduite' => $assiduite,
+            'finances'  => [
+                'total_du'   => $du,
+                'total_paye' => $totalPaye,
+                'reste'      => $reste,
+                'a_jour'     => $totalPaye >= $du,
+                'paiements'  => $paiements->map(fn($p) => [
+                    'montant' => (float) $p->montant_paye,
+                    'date'    => $p->created_at,
+                ])->values(),
+            ],
         ]);
     }
 

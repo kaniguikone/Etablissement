@@ -82,7 +82,7 @@ const SaisieNotes = () => {
 
     if (chargement) {
         return (
-            <section className="content content-wrapper">
+            <section className="page-wrapper">
                 <div className="text-center my-5">
                     <div className="spinner-border text-primary" role="status">
                         <span className="visually-hidden">Chargement...</span>
@@ -93,7 +93,7 @@ const SaisieNotes = () => {
     }
 
     return (
-        <section className="content content-wrapper">
+        <section className="page-wrapper">
             <div className="container-fluid mb-2 border">
                 <div className="d-flex justify-content-between align-items-center mt-2 mb-3 border-bottom pb-2">
                     <div>

@@ -11,7 +11,7 @@ class Niveau extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['nom_niveau', 'abbr_niveau'];
+    protected $fillable = ['nom_niveau', 'abbr_niveau', 'ordre'];
 
     public function classes()
     {

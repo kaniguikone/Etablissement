@@ -23,11 +23,35 @@ body{
     height: 100%;
     padding: 20px 0;
     transition: all 0.5s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.wrapper-menu .sidebar nav {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.wrapper-menu .sidebar nav::-webkit-scrollbar {
+    width: 6px;
+}
+.wrapper-menu .sidebar nav::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.2);
+}
+.wrapper-menu .sidebar nav::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.5);
+    border-radius: 3px;
+}
+.wrapper-menu .sidebar nav::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.8);
 }
 
 .wrapper-menu .sidebar .profile{
     margin-bottom: 30px;
     text-align: center;
+    flex-shrink: 0;
 }
 
 .wrapper-menu .sidebar .profile img{

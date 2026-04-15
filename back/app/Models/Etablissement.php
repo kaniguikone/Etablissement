@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Etablissement extends Model
 {
@@ -27,8 +28,9 @@ class Etablissement extends Model
     public function getLogoBase64Attribute(): ?string
     {
         if (!$this->logo) return null;
-        $path = storage_path('app/public/' . $this->logo);
-        if (!file_exists($path)) return null;
+        // Storage::disk('public') pointe vers le bon chemin tenant (stancl/tenancy switche le disk)
+        if (!Storage::disk('public')->exists($this->logo)) return null;
+        $path = Storage::disk('public')->path($this->logo);
         $mime = mime_content_type($path) ?: 'image/png';
         return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
     }

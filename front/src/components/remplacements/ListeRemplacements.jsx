@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 import { useConfirm } from '../../context/ConfirmContext';
@@ -13,6 +13,7 @@ const STATUTS = {
 const ListeRemplacements = () => {
     const { toast } = useToast();
     const { confirmer } = useConfirm();
+    const location = useLocation();
 
     const [remplacements, setRemplacements] = useState([]);
     const [dashboard, setDashboard] = useState(null);
@@ -47,7 +48,7 @@ const ListeRemplacements = () => {
         }
     };
 
-    useEffect(() => { charger(); }, [filtre]);
+    useEffect(() => { charger(); }, [filtre, location.key]);
 
     const supprimer = async (id) => {
         if (!await confirmer('Supprimer ce remplacement ?')) return;

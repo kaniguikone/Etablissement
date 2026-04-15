@@ -88,16 +88,17 @@
 <table class="notes">
     <thead>
         <tr>
-            <th style="width:40%">Matière</th>
-            <th style="width:30%">Moyenne</th>
+            <th style="width:35%">Matière</th>
+            <th style="width:8%">Coeff</th>
+            <th style="width:27%">Moyenne</th>
             <th style="width:30%">Appréciation</th>
         </tr>
     </thead>
     <tbody>
-        @php $somMoyennes = 0; $nbMatieres = 0; @endphp
         @foreach($parMatiere as $matiere => $info)
             @php
                 $moy = $info['moyenne'];
+                $coeff = $info['coeff_matiere'] ?? 1;
                 $classe = 'moyenne';
                 $appreciation = '—';
                 if ($moy !== null) {
@@ -106,11 +107,11 @@
                     elseif ($moy >= 12)  { $classe = 'moyenne passable'; $appreciation = 'Assez bien'; }
                     elseif ($moy >= 10)  { $classe = 'moyenne passable'; $appreciation = 'Passable'; }
                     else                 { $classe = 'moyenne faible';   $appreciation = 'Insuffisant'; }
-                    $somMoyennes += $moy; $nbMatieres++;
                 }
             @endphp
             <tr>
                 <td class="matiere">{{ $matiere }}</td>
+                <td style="text-align:center;color:#64748b">{{ $coeff }}</td>
                 <td class="{{ $classe }}">{{ $moy !== null ? number_format($moy, 2) : '—' }}/20</td>
                 <td>{{ $appreciation }}</td>
             </tr>
@@ -119,7 +120,6 @@
 </table>
 
 @php
-    $moyenneGenerale = $nbMatieres > 0 ? round($somMoyennes / $nbMatieres, 2) : null;
     $mention = '—';
     $mentionClasse = '';
     if ($moyenneGenerale !== null) {

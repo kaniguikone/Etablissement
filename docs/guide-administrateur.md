@@ -45,7 +45,7 @@ Respectez cet ordre lors de la mise en place initiale :
 | Finances | Paiements, scolarités, reçus |
 | Communication | Informations, messagerie |
 
----
+
 
 ## 2. Paramétrage de l'établissement
 

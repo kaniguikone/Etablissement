@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import api, { backendUrl } from "../../api/axios";
 import Pagination from "../shared/Pagination";
 import { useToast } from '../../context/ToastContext';
@@ -8,6 +8,7 @@ import { useConfirm } from '../../context/ConfirmContext';
 const ListeEleves = () => {
     const { toast } = useToast();
     const { confirmer } = useConfirm();
+    const location = useLocation();
     const [eleves, setEleves] = useState([]);
     const [niveaux, setNiveaux] = useState([]);
     const [classes, setClasses] = useState([]);
@@ -23,7 +24,7 @@ const ListeEleves = () => {
         charger(1, '', '', '');
         api.get('/niveaux').then((res) => setNiveaux(res.data)).catch((err) => console.error('Erreur chargement:', err));
         api.get('/classesTout').then((res) => setClasses(res.data)).catch((err) => console.error('Erreur chargement:', err));
-    }, []);
+    }, [location.key]);
 
     const charger = (page, niveau, classe, search) => {
         setChargement(true);
@@ -99,7 +100,7 @@ const ListeEleves = () => {
     };
 
     return (
-        <section className="content content-wrapper">
+        <section className="page-wrapper">
             <div className="container-fluid mb-2 border">
                 <div className="d-flex justify-content-between align-items-center mt-2 mb-2">
                     <h4 className="mb-0">

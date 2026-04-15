@@ -44,7 +44,7 @@ const DetailsMatiere = () => {
     };
 
     return (
-        <section className="content content-wrapper">
+        <section className="page-wrapper">
             <div className="container bg-light mb-2 border">
                 <div className="d-flex justify-content-between mb-2 border">
                     <h2 className="mt-2 container mb-1">Détails de la matière</h2>

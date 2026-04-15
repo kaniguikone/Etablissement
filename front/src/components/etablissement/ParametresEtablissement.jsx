@@ -70,7 +70,7 @@ const ParametresEtablissement = () => {
 
     if (chargement) {
         return (
-            <section className="content content-wrapper">
+            <section className="page-wrapper">
                 <div className="container-fluid text-center py-5">
                     <div className="spinner-border text-primary" />
                 </div>
@@ -79,7 +79,7 @@ const ParametresEtablissement = () => {
     }
 
     return (
-        <section className="content content-wrapper">
+        <section className="page-wrapper">
             <div className="container-fluid mb-2 border">
                 <div className="d-flex justify-content-between align-items-center mt-2 mb-3">
                     <h4 className="mb-0">Paramètres de l'établissement</h4>

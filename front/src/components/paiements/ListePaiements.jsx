@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import api from '../../api/axios';
 import Pagination from '../shared/Pagination';
 import { useToast } from '../../context/ToastContext';
@@ -18,13 +18,14 @@ const telechargerFichier = async (apiUrl, nomFichier, type = 'application/octet-
 const ListePaiements = () => {
     const { toast } = useToast();
     const { confirmer } = useConfirm();
+    const location = useLocation();
     const [paiements, setPaiements]     = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [lastPage, setLastPage]       = useState(1);
     const [recherche, setRecherche]     = useState('');
     const [chargement, setChargement]   = useState(true);
 
-    useEffect(() => { charger(1, ''); }, []);
+    useEffect(() => { charger(1, ''); }, [location.key]);
 
     const charger = (page, search) => {
         setChargement(true);
@@ -70,7 +71,7 @@ const ListePaiements = () => {
     };
 
     return (
-        <section className="content content-wrapper">
+        <section className="page-wrapper">
             <div className="container-fluid mb-2 border">
                 <div className="d-flex justify-content-between align-items-center mt-2 mb-2">
                     <h4 className="mb-0">

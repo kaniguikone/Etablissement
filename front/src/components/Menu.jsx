@@ -127,7 +127,9 @@ const GROUPES = [
             { to: '/Niveaux',       icon: 'fas fa-layer-group',  label: 'Niveaux' },
             { to: '/Classes',       icon: 'fas fa-school',       label: 'Classes' },
             { to: '/Matieres',      icon: 'fas fa-book',         label: 'Matières' },
-            { to: '/TypeDevoirs',   icon: 'fas fa-tags',         label: 'Types de devoirs' },
+            { to: '/ConfigMatieres',icon: 'fas fa-sliders-h',     label: 'Config. matières/niveaux' },
+            { to: '/Series',        icon: 'fas fa-graduation-cap', label: 'Séries' },
+            { to: '/TypeDevoirs',   icon: 'fas fa-tags',           label: 'Types de devoirs' },
             { to: '/Periodes',      icon: 'fas fa-calendar-alt', label: 'Périodes' },
             { to: '/Salles',        icon: 'fas fa-door-open',    label: 'Salles' },
             { to: '/VolumeHoraire', icon: 'fas fa-clock',        label: 'Volumes horaires' },
@@ -222,6 +224,7 @@ const Menu = () => {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 10,
+                    flexShrink: 0,
                 }}>
                     <div style={{
                         width: 40, height: 40, borderRadius: 8, overflow: 'hidden',
@@ -312,7 +315,7 @@ const Menu = () => {
                 </nav>
 
                 {/* Déconnexion */}
-                <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: 'auto' }}>
+                <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: 'auto', flexShrink: 0 }}>
                     <button
                         onClick={handleDeconnexion}
                         style={{

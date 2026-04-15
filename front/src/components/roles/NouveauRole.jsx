@@ -70,7 +70,7 @@ const NouveauRole = () => {
     };
 
     return (
-        <section className="content content-wrapper">
+        <section className="page-wrapper">
             <div className="container-fluid mb-2">
                 <div className="row justify-content-center">
                     <div className="col-md-7">

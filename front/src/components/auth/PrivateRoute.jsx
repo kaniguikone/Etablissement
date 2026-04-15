@@ -17,7 +17,7 @@ const PrivateRoute = ({ children, permissions }) => {
 
     if (permissions && !peutAcceder(permissions)) {
         return (
-            <div className="content content-wrapper d-flex align-items-center justify-content-center" style={{ minHeight: '60vh' }}>
+            <div className="page-wrapper d-flex align-items-center justify-content-center" style={{ minHeight: '60vh' }}>
                 <div className="text-center">
                     <i className="fas fa-ban text-danger" style={{ fontSize: 64 }} />
                     <h4 className="mt-3">Accès refusé</h4>

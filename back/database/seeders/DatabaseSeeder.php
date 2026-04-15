@@ -19,10 +19,29 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // ── Nettoyage des tables existantes ──────────────────────────────────
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        foreach ([
+            'sanctions', 'calendriers', 'notifications', 'recus_paiements',
+            'impaies', 'volume_horaires', 'progressions', 'chapitres_matiere',
+            'emploi_du_temps', 'paiements', 'notes', 'devoirs', 'assiduites',
+            'scolarites', 'informations', 'type_devoirs', 'personal_access_tokens',
+            'eleves', 'parents', 'enseignants', 'classe_enseignant_matiere',
+            'classes', 'niveaux', 'matieres', 'periodes', 'etablissements',
+            'users', 'roles', 'salles',
+        ] as $table) {
+            if (\Illuminate\Support\Facades\Schema::hasTable($table)) {
+                \Illuminate\Support\Facades\DB::table($table)->truncate();
+            }
+        }
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
         // ── Matières ─────────────────────────────────────────────────────────
         $matieres = [
             ['MATH', 'Mathématiques'],
-            ['FR',   'Français'],
+            ['CFR',   'Composition Française'],
+            ['OTG',   'Orthographe'],
+            ['OFR',   'Oral Français'],
             ['ANG',  'Anglais'],
             ['SVT',  'Sciences de Vie et de la Terre'],
             ['HG',   'Histoire-Géographie'],
@@ -33,6 +52,9 @@ class DatabaseSeeder extends Seeder
             ['PHI',  'Philosophie'],      // 1ère et Tle uniquement
             ['ALL',  'Allemand'],         // à partir de 4ième, pas avec ESP
             ['ESP',  'Espagnol'],         // à partir de 4ième, pas avec ALL
+            ['TIC', 'Techniques de l\'Information et de la Comunication'],
+            ['EDHC', 'EDHC'],
+            ['CDT', 'Conduite']
         ];
         foreach ($matieres as [$abbr, $libelle]) {
             Matiere::create([
@@ -44,16 +66,16 @@ class DatabaseSeeder extends Seeder
 
         // ── Niveaux ──────────────────────────────────────────────────────────
         $niveaux = [
-            ['Sixième',    '6ième'],
-            ['Cinquième',  '5ième'],
-            ['Quatrième',  '4ième'],
-            ['Troisième',  '3ième'],
-            ['Seconde',    '2nde'],
-            ['Première',   '1ère'],
-            ['Terminale',  'Tle'],
+            ['Sixième',   '6ème',  1],
+            ['Cinquième', '5ème',  2],
+            ['Quatrième', '4ème',  3],
+            ['Troisième', '3ème',  4],
+            ['Seconde',   '2nde',  5],
+            ['Première',  '1ère',  6],
+            ['Terminale', 'Tle',   7],
         ];
-        foreach ($niveaux as [$nom, $abbr]) {
-            Niveau::create(['nom_niveau' => $nom, 'abbr_niveau' => $abbr]);
+        foreach ($niveaux as [$nom, $abbr, $ordre]) {
+            Niveau::create(['nom_niveau' => $nom, 'abbr_niveau' => $abbr, 'ordre' => $ordre]);
         }
 
         // ── Périodes ─────────────────────────────────────────────────────────
@@ -223,5 +245,6 @@ class DatabaseSeeder extends Seeder
         $this->call(NotificationSeeder::class);
         $this->call(CalendrierSeeder::class);
         $this->call(SanctionSeeder::class);
+        $this->call(GroupSeeder::class);
     }
 }

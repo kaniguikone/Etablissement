@@ -78,7 +78,7 @@ const DetailsEleve = () => {
     };
 
     return (
-        <section className="content content-wrapper">
+        <section className="page-wrapper">
             <div className="container bg-light mb-2 border">
                 <div className="d-flex justify-content-between align-items-center mb-2 border px-3">
                     <h2 className="mt-2 mb-1">Détails de l'élève</h2>

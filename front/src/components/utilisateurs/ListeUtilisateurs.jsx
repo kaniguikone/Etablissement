@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 import { useConfirm } from '../../context/ConfirmContext';
@@ -15,10 +15,11 @@ const BADGE_ROLE = {
 const ListeUtilisateurs = () => {
     const { toast } = useToast();
     const { confirmer } = useConfirm();
+    const location = useLocation();
     const [utilisateurs, setUtilisateurs] = useState([]);
     const [chargement, setChargement]     = useState(true);
 
-    useEffect(() => { charger(); }, []);
+    useEffect(() => { charger(); }, [location.key]);
 
     const charger = () => {
         setChargement(true);
@@ -38,7 +39,7 @@ const ListeUtilisateurs = () => {
     };
 
     return (
-        <section className="content content-wrapper">
+        <section className="page-wrapper">
             <div className="container-fluid mb-2 border">
                 <div className="d-flex justify-content-between align-items-center mt-2 mb-3">
                     <h4 className="mb-0">

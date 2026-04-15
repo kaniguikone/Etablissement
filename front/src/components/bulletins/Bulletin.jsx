@@ -34,6 +34,112 @@ const mention = (moy) => {
     return 'Insuffisant';
 };
 
+/* ── Section export Excel par niveau ───────────────────────────────────────── */
+const ExportMoyennes = ({ niveaux, periodes }) => {
+    const { toast } = useToast();
+    const [exportNiveauId,  setExportNiveauId]  = useState('');
+    const [exportPeriodeId, setExportPeriodeId] = useState('');
+    const [exportEnCours,   setExportEnCours]   = useState(false);
+
+    const normaliserNiveau = (abbr) => {
+        if (!abbr) return '';
+        return abbr
+            .toUpperCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // supprimer accents
+            .replace('IEME', 'EME');
+    };
+
+    const ordinalTrimestre = (code) => {
+        if (!code) return '';
+        const map = { T1: '1er', T2: '2e', T3: '3e' };
+        return map[code.toUpperCase()] ?? code;
+    };
+
+    const telechargerExcel = async () => {
+        if (!exportNiveauId || !exportPeriodeId) return;
+        setExportEnCours(true);
+        try {
+            const r = await api.get(
+                `/export/moyennes/${exportNiveauId}/${exportPeriodeId}`,
+                { responseType: 'blob' }
+            );
+            const niveau  = niveaux.find(n => String(n.id) === String(exportNiveauId));
+            const periode = periodes.find(p => String(p.id) === String(exportPeriodeId));
+            const abbrNiv = normaliserNiveau(niveau?.abbr_niveau ?? niveau?.nom_niveau ?? '');
+            const ordinal = ordinalTrimestre(periode?.code_periode ?? '');
+            const nomFichier = `ACTU_MOYENNE ${ordinal} Trimestre ${abbrNiv}.xlsx`;
+
+            const url  = URL.createObjectURL(new Blob([r.data], {
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            }));
+            const lien = document.createElement('a');
+            lien.href     = url;
+            lien.download = nomFichier;
+            lien.click();
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            const msg = await lireErreurBlob(err);
+            toast.error(msg);
+        } finally {
+            setExportEnCours(false);
+        }
+    };
+
+    return (
+        <div className="card border-0 shadow-sm mt-4" style={{ borderRadius: 12 }}>
+            <div className="card-header bg-white border-0 px-4 pt-3 pb-2">
+                <span className="fw-bold">
+                    <i className="fas fa-file-excel me-2 text-success" />
+                    Export Excel — Moyennes par niveau
+                </span>
+                <div className="text-muted small mt-1">
+                    Génère un fichier Excel avec toutes les moyennes des élèves d'un niveau pour une période donnée.
+                    <br />
+                    <span className="text-warning"><i className="fas fa-info-circle me-1" /></span>
+                    <strong>21</strong> = élève sans note · <strong>22</strong> = matière non enseignée à ce niveau/série
+                </div>
+            </div>
+            <div className="card-body">
+                <div className="row g-3 align-items-end">
+                    <div className="col-md-4">
+                        <label className="form-label small fw-semibold">Niveau</label>
+                        <select className="form-select form-select-sm"
+                            value={exportNiveauId}
+                            onChange={e => setExportNiveauId(e.target.value)}>
+                            <option value="">— Sélectionner un niveau —</option>
+                            {niveaux.map(n => (
+                                <option key={n.id} value={n.id}>{n.nom_niveau}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="col-md-4">
+                        <label className="form-label small fw-semibold">Période</label>
+                        <select className="form-select form-select-sm"
+                            value={exportPeriodeId}
+                            onChange={e => setExportPeriodeId(e.target.value)}>
+                            <option value="">— Sélectionner une période —</option>
+                            {periodes.map(p => (
+                                <option key={p.id} value={p.id}>{p.libelle_periode} — {p.annee}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="col-md-4">
+                        <button
+                            className="btn btn-success btn-sm d-flex align-items-center gap-2"
+                            onClick={telechargerExcel}
+                            disabled={!exportNiveauId || !exportPeriodeId || exportEnCours}>
+                            {exportEnCours
+                                ? <span className="spinner-border spinner-border-sm" />
+                                : <i className="fas fa-file-excel" />}
+                            Télécharger Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const Bulletin = () => {
     const { toast } = useToast();
     const [niveaux, setNiveaux]   = useState([]);
@@ -106,19 +212,13 @@ const Bulletin = () => {
         }
     };
 
-    const moyenneGenerale = () => {
-        if (!bulletin) return null;
-        const moyennes = Object.values(bulletin.parMatiere)
-            .map((m) => m.moyenne)
-            .filter((m) => m !== null);
-        if (!moyennes.length) return null;
-        return (moyennes.reduce((s, m) => s + m, 0) / moyennes.length).toFixed(2);
-    };
-
-    const moy = moyenneGenerale();
+    // Utilise la moyenne pondérée retournée par l'API (Σ moy×coeff / Σ coeff)
+    const moy = bulletin?.moyenneGenerale != null
+        ? parseFloat(bulletin.moyenneGenerale).toFixed(2)
+        : null;
 
     return (
-        <section className="content content-wrapper">
+        <section className="page-wrapper">
             <div className="container-fluid mb-2 border">
                 <div className="d-flex justify-content-between align-items-center mt-2 mb-3">
                     <h4 className="mb-0">Bulletins de notes</h4>
@@ -197,6 +297,7 @@ const Bulletin = () => {
                                 <thead className="table-dark">
                                     <tr>
                                         <th>Matière</th>
+                                        <th style={{ width: 60 }} className="text-center">Coeff</th>
                                         <th>Notes</th>
                                         <th style={{ width: 100 }}>Moyenne</th>
                                         <th style={{ width: 130 }}>Appréciation</th>
@@ -206,6 +307,7 @@ const Bulletin = () => {
                                     {Object.entries(bulletin.parMatiere).map(([matiere, info]) => (
                                         <tr key={matiere}>
                                             <td className="fw-bold">{matiere}</td>
+                                            <td className="text-center text-muted">{info.coeff_matiere ?? 1}</td>
                                             <td>
                                                 {info.notes.map((n, i) => (
                                                     <span key={i} className="me-2">
@@ -224,7 +326,7 @@ const Bulletin = () => {
                                 </tbody>
                                 <tfoot className="table-secondary">
                                     <tr>
-                                        <td colSpan={2} className="text-end fw-bold">Moyenne générale</td>
+                                        <td colSpan={3} className="text-end fw-bold">Moyenne générale pondérée</td>
                                         <td className="text-center">
                                             <span className={`badge ${BADGE_MOY(parseFloat(moy))} fs-6`}>{moy}/20</span>
                                         </td>
@@ -235,6 +337,9 @@ const Bulletin = () => {
                         )}
                     </div>
                 )}
+
+                <hr className="my-4" />
+                <ExportMoyennes niveaux={niveaux} periodes={periodes} />
             </div>
         </section>
     );

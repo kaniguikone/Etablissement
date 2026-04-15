@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 import { useConfirm } from '../../context/ConfirmContext';
@@ -15,6 +15,7 @@ const TYPES = {
 const ListeSalles = () => {
     const { toast } = useToast();
     const { confirmer } = useConfirm();
+    const location = useLocation();
 
     const [salles, setSalles] = useState([]);
     const [chargement, setChargement] = useState(true);
@@ -34,7 +35,7 @@ const ListeSalles = () => {
         }
     };
 
-    useEffect(() => { charger(); }, [filtreType]);
+    useEffect(() => { charger(); }, [filtreType, location.key]);
 
     const supprimer = async (salle) => {
         const ok = await confirmer(`Supprimer la salle "${salle.nom}" ?`);

@@ -51,7 +51,7 @@ const NouvelleInscription = () => {
     };
 
     return (
-        <section className="content content-wrapper">
+        <section className="page-wrapper">
             <div className="container mb-2 border">
                 <div className="d-flex justify-content-between align-items-center mt-2 mb-3">
                     <h4 className="mb-0">Nouvelle inscription (établissement)</h4>

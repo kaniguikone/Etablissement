@@ -939,7 +939,7 @@ const Statistiques = () => {
         : 'Toutes périodes';
 
     return (
-        <section className="content content-wrapper">
+        <section className="page-wrapper">
             <div className="container-fluid py-3 px-3">
 
                 {/* ── En-tête ── */}

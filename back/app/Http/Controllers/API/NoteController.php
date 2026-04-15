@@ -10,6 +10,7 @@ use App\Models\Devoir;
 use App\Models\Periodes;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class NoteController extends Controller
 {
@@ -102,9 +103,9 @@ class NoteController extends Controller
      */
     public function bulletin(string $eleveId, string $periodeId)
     {
-        $eleve = Eleve::with('classe.niveau')->findOrFail($eleveId);
-
+        $eleve    = Eleve::with('classe.niveau')->findOrFail($eleveId);
         $niveauId = $eleve->classe?->niveau_id;
+        $serieId  = $eleve->classe?->serie_id;
 
         $notes = Note::with(['devoir.matiere', 'devoir.typeDevoir'])
             ->whereHas('devoir', function ($q) use ($periodeId, $eleve, $niveauId) {
@@ -117,26 +118,66 @@ class NoteController extends Controller
             ->where('eleve_id', $eleveId)
             ->get();
 
+        // Coefficients des matières pour ce niveau+série
+        $coefficients = $this->coefficientsMatiere($niveauId, $serieId);
+
         // Grouper par matière
         $parMatiere = $notes->groupBy(fn($n) => $n->devoir->matiere->libelle_matiere)
-            ->map(function ($notesMatiere) {
+            ->map(function ($notesMatiere) use ($coefficients) {
+                $matiereId    = $notesMatiere->first()->devoir->matiere_id;
+                $coeffMatiere = $coefficients[$matiereId] ?? 1.0;
+
                 $totalCoeff   = $notesMatiere->sum(fn($n) => (float) $n->devoir->coeff_devoir);
                 $moyenneCoeff = $notesMatiere->sum(fn($n) => (float) $n->note * (float) $n->devoir->coeff_devoir);
                 $moyenne      = $totalCoeff > 0 ? round($moyenneCoeff / $totalCoeff, 2) : null;
+
                 return [
-                    'notes'   => $notesMatiere->map(fn($n) => [
+                    'notes'         => $notesMatiere->map(fn($n) => [
                         'type'  => $n->devoir->typeDevoir->code_type_devoir,
                         'coeff' => (float) $n->devoir->coeff_devoir,
                         'note'  => $n->note !== null ? (float) $n->note : null,
                     ])->values(),
-                    'moyenne' => $moyenne,
+                    'moyenne'       => $moyenne,
+                    'coeff_matiere' => $coeffMatiere,
                 ];
             });
 
+        // Moyenne générale pondérée par coefficient matière
+        $avecMoyenne     = $parMatiere->filter(fn($m) => $m['moyenne'] !== null);
+        $sommePonderee   = $avecMoyenne->sum(fn($m) => $m['moyenne'] * $m['coeff_matiere']);
+        $sommeCoeffs     = $avecMoyenne->sum(fn($m) => $m['coeff_matiere']);
+        $moyenneGenerale = $sommeCoeffs > 0 ? round($sommePonderee / $sommeCoeffs, 2) : null;
+
         return response()->json([
-            'eleve'       => $eleve,
-            'parMatiere'  => $parMatiere,
+            'eleve'           => $eleve,
+            'parMatiere'      => $parMatiere,
+            'moyenneGenerale' => $moyenneGenerale,
         ]);
+    }
+
+    /**
+     * Retourne les coefficients matière pour un niveau+série donnés.
+     * Priorité : ligne avec serie_id correspondant > ligne sans serie_id.
+     */
+    private function coefficientsMatiere(?int $niveauId, ?int $serieId): array
+    {
+        if (!$niveauId) return [];
+
+        $rows = DB::table('niveau_matieres')
+            ->where('niveau_id', $niveauId)
+            ->whereIn('serie_id', array_filter([$serieId, null]))
+            ->select('matiere_id', 'serie_id', 'coefficient')
+            ->get();
+
+        $result = [];
+        foreach ($rows as $r) {
+            $mid = $r->matiere_id;
+            // Préférer la ligne avec la série exacte
+            if (!isset($result[$mid]) || ($r->serie_id !== null && $serieId !== null)) {
+                $result[$mid] = (float) ($r->coefficient ?? 1);
+            }
+        }
+        return $result;
     }
 
     /**

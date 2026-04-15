@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 import { useConfirm } from '../../context/ConfirmContext';
@@ -14,6 +14,7 @@ const ORIGINE = { parent: '📱 Parent', etablissement: '🏫 Établissement' };
 
 const ListeInscriptions = () => {
     const { toast } = useToast();
+    const location = useLocation();
     const [demandes, setDemandes]   = useState([]);
     const [filtre, setFiltre]       = useState('');
     const [chargement, setChargement] = useState(true);
@@ -26,7 +27,7 @@ const ListeInscriptions = () => {
             .catch(() => { toast.error('Impossible de charger les demandes.'); setChargement(false); });
     };
 
-    useEffect(() => { charger(filtre); }, [filtre]);
+    useEffect(() => { charger(filtre); }, [filtre, location.key]);
 
     const rejeter = (id) => {
         const motif = window.prompt('Motif du rejet (facultatif) :') ?? '';
@@ -38,7 +39,7 @@ const ListeInscriptions = () => {
     const nbAttente = demandes.filter(d => d.statut === 'en_attente').length;
 
     return (
-        <section className="content content-wrapper">
+        <section className="page-wrapper">
             <div className="container-fluid mb-2 border">
                 <div className="d-flex justify-content-between align-items-center mt-2 mb-3">
                     <h4 className="mb-0">

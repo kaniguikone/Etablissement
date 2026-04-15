@@ -84,7 +84,7 @@ const FinancesGroupe = () => {
     const enRetard   = eleves.filter(e => !e.a_jour).length;
 
     return (
-        <div className="container-fluid py-4" style={{ maxWidth: 1100 }}>
+        <div className="container-fluid py-4">
 
             <div className="mb-4">
                 <h4 className="fw-bold mb-1">

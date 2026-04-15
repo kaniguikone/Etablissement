@@ -11,7 +11,7 @@ class ClasseController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Classe::with('niveau');
+        $query = Classe::with('niveau', 'serie');
 
         if ($request->search) {
             $search = '%' . $request->search . '%';
@@ -56,6 +56,7 @@ class ClasseController extends Controller
             'nom_classe'              => $request->nom_classe,
             'abbr_classe'             => $request->abbr_classe,
             'niveau_id'               => $request->niveau_id,
+            'serie_id'                => $request->serie_id ?: null,
             'salle_classe'            => $request->salle_classe,
             'effectif_max_classe'     => $request->effectif_max_classe,
             'professeur_principal_id' => $request->professeur_principal_id ?: null,
@@ -66,7 +67,7 @@ class ClasseController extends Controller
 
     public function show($id)
     {
-        $classe = Classe::with('niveau')->find($id);
+        $classe = Classe::with('niveau', 'serie')->find($id);
 
         return response()->json($classe);
     }
@@ -185,7 +186,7 @@ class ClasseController extends Controller
         return response()->json(null, 204);
     }
 
-    public function update(Request $request, Classe $classe)
+    public function update(Request $request, $id)
     {
         $request->validate([
             'num_classe'  => 'required',
@@ -194,22 +195,23 @@ class ClasseController extends Controller
             'niveau_id'   => 'required|exists:niveaux,id',
         ]);
 
-        $classe->update([
+        DB::table('classes')->where('id', $id)->update([
             'num_classe'              => $request->num_classe,
             'nom_classe'              => $request->nom_classe,
             'abbr_classe'             => $request->abbr_classe,
             'niveau_id'               => $request->niveau_id,
+            'serie_id'                => $request->serie_id ?: null,
             'salle_classe'            => $request->salle_classe,
-            'effectif_max_classe'     => $request->effectif_max_classe,
+            'effectif_max_classe'     => $request->effectif_max_classe ?: null,
             'professeur_principal_id' => $request->professeur_principal_id ?: null,
         ]);
 
-        return response()->json(['status' => 'success', 'classe' => $classe]);
+        return response()->json(['status' => 'success', 'classe' => DB::table('classes')->where('id', $id)->first()]);
     }
 
-    public function destroy(Classe $classe)
+    public function destroy($id)
     {
-        $classe->delete();
+        DB::table('classes')->where('id', $id)->delete();
 
         return response()->json(['status' => 'success']);
     }

@@ -74,7 +74,7 @@ const TableauImpayes = () => {
     const count = data?.count ?? 0;
 
     return (
-        <section className="content content-wrapper">
+        <section className="page-wrapper">
             <div className="container-fluid mb-2 border">
                 {/* En-tête */}
                 <div className="d-flex justify-content-between align-items-center mt-2 mb-3">
