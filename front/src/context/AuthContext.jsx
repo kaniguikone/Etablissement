@@ -13,8 +13,8 @@ export const AuthProvider = ({ children }) => {
     // Connexion admin école (tenant)
     const connexion = useCallback(async (email, password) => {
         const res = await api.post('/login', { email, password });
-        const { token: tok, user: u } = res.data;
-        const userAvecType = { ...u, _type: 'school' };
+        const { token: tok, user: u, group_id, group_nom } = res.data;
+        const userAvecType = { ...u, _type: 'school', group_id: group_id ?? null, group_nom: group_nom ?? null };
         localStorage.setItem('token', tok);
         localStorage.setItem('user', JSON.stringify(userAvecType));
         setToken(tok);
@@ -46,7 +46,9 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     }, [user]);
 
-    const estGroupe = user?._type === 'group';
+    const estGroupe      = user?._type === 'group';
+    const estDansGroupe  = user?._type === 'school' && !!user?.group_id;
+    const groupeNom      = user?.group_nom ?? null;
 
     /**
      * Vérifie si l'utilisateur a au moins une des permissions demandées.
@@ -61,7 +63,7 @@ export const AuthProvider = ({ children }) => {
     }, [user, estGroupe]);
 
     return (
-        <AuthContext.Provider value={{ user, token, connexion, connexionGroupe, deconnexion, peutAcceder, estGroupe }}>
+        <AuthContext.Provider value={{ user, token, connexion, connexionGroupe, deconnexion, peutAcceder, estGroupe, estDansGroupe, groupeNom }}>
             {children}
         </AuthContext.Provider>
     );

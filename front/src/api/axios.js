@@ -7,9 +7,19 @@ import axios from 'axios';
  */
 const getBase = () => {
     const hostname = window.location.hostname;
+
+    // Sous-domaine .localhost (ex: lycee-test.localhost, ecole-independante.localhost)
+    // → l'API tourne sur le même hostname, port 80 (WAMP)
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1' && hostname.endsWith('.localhost')) {
+        return `http://${hostname}`;
+    }
+
+    // localhost pur → utilise VITE_API_URL
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
         return (import.meta.env.VITE_API_URL || 'http://localhost:8000/api').replace(/\/api$/, '');
     }
+
+    // Production → même domaine
     const protocol = window.location.protocol;
     const port = window.location.port ? `:${window.location.port}` : '';
     return `${protocol}//${hostname}${port}`;

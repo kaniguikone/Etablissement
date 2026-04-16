@@ -2,11 +2,19 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
+// Vrai si on est sur le domaine central (localhost pur ou domaine racine en prod)
+// Faux si on est sur un sous-domaine tenant (lycee-test.localhost, ecole.mondomaine.ci…)
+const estDomaineCentral = () => {
+    const hostname = window.location.hostname;
+    return hostname === 'localhost' || hostname === '127.0.0.1';
+};
+
 const LoginPage = () => {
     const { connexion, connexionGroupe } = useAuth();
     const navigate = useNavigate();
 
-    const [mode, setMode]         = useState('school'); // 'school' | 'group'
+    const domaineCentral = estDomaineCentral();
+    const [mode, setMode]         = useState(domaineCentral ? 'group' : 'school'); // 'school' | 'group'
     const [email, setEmail]       = useState('');
     const [password, setPassword] = useState('');
     const [afficher, setAfficher] = useState(false);
@@ -54,41 +62,30 @@ const LoginPage = () => {
                         </div>
                         <h4 className="fw-bold mb-1">Suivi Scolaire</h4>
                         <p className="text-muted small">
-                            {mode === 'group' ? 'Espace Groupe Scolaire' : 'Espace Administration'}
+                            {domaineCentral ? 'Espace Groupe Scolaire' : 'Espace Administration'}
                         </p>
                     </div>
 
-                    {/* Sélecteur de mode */}
-                    <div className="d-flex mb-4" style={{
-                        background: '#f1f5f9', borderRadius: 10, padding: 4,
-                    }}>
-                        <button
-                            type="button"
-                            onClick={() => { setMode('school'); setErreur(''); }}
-                            style={{
-                                flex: 1, border: 'none', borderRadius: 8, padding: '8px 0',
-                                fontWeight: 600, fontSize: 13, cursor: 'pointer', transition: 'all .2s',
-                                background: mode === 'school' ? '#fff' : 'transparent',
-                                color: mode === 'school' ? '#1a56a0' : '#6c757d',
-                                boxShadow: mode === 'school' ? '0 1px 4px rgba(0,0,0,.1)' : 'none',
-                            }}
-                        >
-                            <i className="fas fa-school me-2" />Établissement
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => { setMode('group'); setErreur(''); }}
-                            style={{
-                                flex: 1, border: 'none', borderRadius: 8, padding: '8px 0',
-                                fontWeight: 600, fontSize: 13, cursor: 'pointer', transition: 'all .2s',
-                                background: mode === 'group' ? '#fff' : 'transparent',
-                                color: mode === 'group' ? '#1a56a0' : '#6c757d',
-                                boxShadow: mode === 'group' ? '0 1px 4px rgba(0,0,0,.1)' : 'none',
-                            }}
-                        >
-                            <i className="fas fa-layer-group me-2" />Groupe scolaire
-                        </button>
-                    </div>
+                    {/* Sélecteur de mode — uniquement sur les sous-domaines tenant */}
+                    {!domaineCentral && (
+                        <div className="d-flex mb-4" style={{
+                            background: '#f1f5f9', borderRadius: 10, padding: 4,
+                        }}>
+                            <button
+                                type="button"
+                                onClick={() => { setMode('school'); setErreur(''); }}
+                                style={{
+                                    flex: 1, border: 'none', borderRadius: 8, padding: '8px 0',
+                                    fontWeight: 600, fontSize: 13, cursor: 'pointer', transition: 'all .2s',
+                                    background: mode === 'school' ? '#fff' : 'transparent',
+                                    color: mode === 'school' ? '#1a56a0' : '#6c757d',
+                                    boxShadow: mode === 'school' ? '0 1px 4px rgba(0,0,0,.1)' : 'none',
+                                }}
+                            >
+                                <i className="fas fa-school me-2" />Établissement
+                            </button>
+                        </div>
+                    )}
 
                     {erreur && (
                         <div className="alert alert-danger py-2 small">

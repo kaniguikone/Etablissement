@@ -47,6 +47,7 @@ use App\Http\Controllers\API\MessageController;
 use App\Http\Controllers\API\RdvController;
 use App\Http\Controllers\API\ConfigurationMatieresController;
 use App\Http\Controllers\API\ExportMoyennesController;
+use App\Http\Controllers\API\SelfTemplateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -224,6 +225,10 @@ Route::middleware([
             Route::delete('/salles/{id}',       [SalleController::class, 'destroy']);
             Route::get('/salles/{id}/planning', [SalleController::class, 'planning']);
         });
+
+        // ─── Démarrage rapide — établissements indépendants ──────────────────
+        Route::get('/templates',              [SelfTemplateController::class, 'index']);
+        Route::post('/self/apply-template',   [SelfTemplateController::class, 'appliquer']);
 
         Route::middleware('permission:parametrage')->group(function () {
             Route::put('/etablissement',        [EtablissementController::class, 'update']);

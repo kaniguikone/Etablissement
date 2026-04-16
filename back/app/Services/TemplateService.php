@@ -114,7 +114,7 @@ class TemplateService
                     $id = DB::table('matieres')->insertGetId([
                         'libelle_matiere'     => $m['libelle_matiere'],
                         'abbr_matiere'        => $m['abbr_matiere'],
-                        'description_matiere' => null,
+                        'description_matiere' => $m['libelle_matiere'],
                     ]);
                     $stats['matieres']++;
                 } else {
@@ -144,14 +144,17 @@ class TemplateService
                     ->where('annee', $annee)
                     ->first();
                 if (!$existing) {
+                    // Dates par défaut : septembre → juin de l'année scolaire
+                    $dateDebut = $p['date_debut'] ?? "{$anneeDebut}-09-01";
+                    $dateFin   = $p['date_fin']   ?? "{$anneeFin}-06-30";
                     DB::table('periodes')->insert([
                         'annee_scolaire_id'    => $anneeScolaireId,
                         'libelle_periode'      => $p['libelle_periode'],
                         'abbr_libelle_periode' => $p['abbr_libelle_periode'],
                         'code_periode'         => $p['code_periode'],
                         'annee'                => $annee,
-                        'date_debut'           => null,
-                        'date_fin'             => null,
+                        'date_debut'           => $dateDebut,
+                        'date_fin'             => $dateFin,
                     ]);
                     $stats['periodes']++;
                 }

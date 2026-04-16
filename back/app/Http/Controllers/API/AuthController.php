@@ -28,9 +28,13 @@ class AuthController extends Controller
 
         $token = $user->createToken('backoffice')->plainTextToken;
 
+        $tenant = tenant();
+
         return response()->json([
-            'token' => $token,
-            'user'  => $this->formatUser($user),
+            'token'      => $token,
+            'user'       => $this->formatUser($user),
+            'group_id'   => $tenant?->group_id,
+            'group_nom'  => $tenant?->group?->nom,
         ]);
     }
 
