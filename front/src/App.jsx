@@ -6,6 +6,7 @@ import { EtablissementProvider } from './context/EtablissementContext';
 import { NotificationProvider } from './context/NotificationContext';
 import Menu from './components/Menu';
 import MenuGroupe from './components/groupe/MenuGroupe';
+import MenuEnseignant from './components/enseignant/MenuEnseignant';
 import Topbar, { TOPBAR_HEIGHT } from './components/Topbar';
 import NotificationsPanel from './components/notifications/NotificationsPanel';
 import RoutesMenu from './route/RoutesMenu';
@@ -13,22 +14,29 @@ import RoutesMenu from './route/RoutesMenu';
 const SIDEBAR_WIDTH = 310;
 
 const AppInterne = () => {
-    const { user, estGroupe } = useAuth();
+    const { user, estGroupe, estEnseignant } = useAuth();
     const location = useLocation();
     const surLogin = location.pathname === '/login';
 
     const connecte = user && !surLogin;
 
+    const renderMenu = () => {
+        if (!connecte) return null;
+        if (estGroupe)     return <MenuGroupe />;
+        if (estEnseignant) return <MenuEnseignant />;
+        return <Menu />;
+    };
+
     return (
         <div>
-            {connecte && (estGroupe ? <MenuGroupe /> : <Menu />)}
-            {connecte && !estGroupe && (
+            {renderMenu()}
+            {connecte && !estGroupe && !estEnseignant && (
                 <>
                     <Topbar sidebarWidth={SIDEBAR_WIDTH} />
                     <NotificationsPanel />
                 </>
             )}
-            <div style={connecte ? { marginLeft: SIDEBAR_WIDTH, marginTop: TOPBAR_HEIGHT, minHeight: '100vh' } : {}}>
+            <div style={connecte ? { marginLeft: SIDEBAR_WIDTH, marginTop: estEnseignant ? 0 : TOPBAR_HEIGHT, minHeight: '100vh' } : {}}>
                 <RoutesMenu />
             </div>
         </div>

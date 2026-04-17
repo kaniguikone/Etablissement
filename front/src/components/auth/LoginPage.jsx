@@ -10,7 +10,7 @@ const estDomaineCentral = () => {
 };
 
 const LoginPage = () => {
-    const { connexion, connexionGroupe } = useAuth();
+    const { connexion, connexionEnseignant, connexionGroupe } = useAuth();
     const navigate = useNavigate();
 
     const domaineCentral = estDomaineCentral();
@@ -29,6 +29,10 @@ const LoginPage = () => {
             if (mode === 'group') {
                 await connexionGroupe(email, password);
                 navigate('/groupe');
+            } else if (!email.includes('@')) {
+                // Numéro enseignant → portail enseignant
+                await connexionEnseignant(email, password);
+                navigate('/enseignant');
             } else {
                 await connexion(email, password);
                 navigate('/');
@@ -96,13 +100,15 @@ const LoginPage = () => {
 
                     <form onSubmit={handleSubmit}>
                         <div className="mb-3">
-                            <label className="form-label small fw-semibold">Adresse e-mail</label>
+                            <label className="form-label small fw-semibold">
+                                {domaineCentral ? 'Adresse e-mail' : 'Email ou numéro enseignant'}
+                            </label>
                             <div className="input-group">
                                 <span className="input-group-text"><i className="fas fa-envelope text-muted" /></span>
                                 <input
-                                    type="email"
+                                    type="text"
                                     className="form-control"
-                                    placeholder="exemple@etablissement.ci"
+                                    placeholder={domaineCentral ? 'exemple@etablissement.ci' : 'Email ou numéro enseignant'}
                                     value={email}
                                     onChange={e => setEmail(e.target.value)}
                                     required

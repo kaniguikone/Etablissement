@@ -197,7 +197,6 @@ class MessageController extends Controller
     private function typeEtId(Request $request): array
     {
         $user = $request->user();
-        // Le modèle connecté est Enseignant ou Parents selon le guard
         if ($user instanceof Enseignant) return ['enseignant', $user->id];
         if ($user instanceof Parents)    return ['parent',     $user->id];
         // Back-office : admin ne fait que lire

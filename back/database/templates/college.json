@@ -15,22 +15,22 @@
   "series": [],
 
   "matieres": [
-    { "libelle_matiere": "Composition",         "abbr_matiere": "COMP"  },
+    { "libelle_matiere": "Composition Française","abbr_matiere": "CFR"  },
     { "libelle_matiere": "Orthographe",         "abbr_matiere": "ORTH"  },
-    { "libelle_matiere": "Oral Français",       "abbr_matiere": "ORAL"  },
+    { "libelle_matiere": "Oral Français",       "abbr_matiere": "OFR"  },
     { "libelle_matiere": "Anglais",             "abbr_matiere": "ANG"   },
     { "libelle_matiere": "Allemand",            "abbr_matiere": "ALL"   },
     { "libelle_matiere": "Espagnol",            "abbr_matiere": "ESP"   },
     { "libelle_matiere": "Histoire-Géographie", "abbr_matiere": "HG"    },
     { "libelle_matiere": "Mathématiques",       "abbr_matiere": "MATHS" },
-    { "libelle_matiere": "Sciences Physiques",  "abbr_matiere": "SP"    },
-    { "libelle_matiere": "SVT",                 "abbr_matiere": "SVT"   },
-    { "libelle_matiere": "E.P.S",               "abbr_matiere": "EPS"   },
-    { "libelle_matiere": "EDHC",                "abbr_matiere": "EDHC"  },
+    { "libelle_matiere": "Sciences Physiques et Chimie",  "abbr_matiere": "SPC"    },
+    { "libelle_matiere": "Science de la Vie et de la Terre", "abbr_matiere": "SVT"   },
+    { "libelle_matiere": "Education Physique et Sportive",   "abbr_matiere": "EPS"   },
+    { "libelle_matiere": "Éducation aux Droits de l’Homme et à la Citoyenneté", "abbr_matiere": "EDHC"  },
     { "libelle_matiere": "Arts Plastiques",     "abbr_matiere": "ARTS"  },
     { "libelle_matiere": "Musique",             "abbr_matiere": "MUS"   },
-    { "libelle_matiere": "TIC",                 "abbr_matiere": "TIC"   },
-    { "libelle_matiere": "Conduite",            "abbr_matiere": "COND"  }
+    { "libelle_matiere": "Techniques de l'Information et de la Comunication", "abbr_matiere": "TIC"   },
+    { "libelle_matiere": "Conduite",            "abbr_matiere": "CDT"  }
   ],
 
   "type_devoirs": [

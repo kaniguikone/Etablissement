@@ -21,6 +21,17 @@ export const AuthProvider = ({ children }) => {
         setUser(userAvecType);
     }, []);
 
+    // Connexion enseignant via numéro de téléphone
+    const connexionEnseignant = useCallback(async (numero, password) => {
+        const res = await api.post('/enseignant/login', { numero_enseignant: numero, password });
+        const { token: tok, enseignant } = res.data;
+        const userAvecType = { ...enseignant, _type: 'enseignant' };
+        localStorage.setItem('token', tok);
+        localStorage.setItem('user', JSON.stringify(userAvecType));
+        setToken(tok);
+        setUser(userAvecType);
+    }, []);
+
     // Connexion admin groupe (domaine central)
     const connexionGroupe = useCallback(async (email, password) => {
         const res = await centralApi.post('/group/login', { email, password });
@@ -47,6 +58,7 @@ export const AuthProvider = ({ children }) => {
     }, [user]);
 
     const estGroupe      = user?._type === 'group';
+    const estEnseignant  = user?._type === 'enseignant';
     const estDansGroupe  = user?._type === 'school' && !!user?.group_id;
     const groupeNom      = user?.group_nom ?? null;
 
@@ -63,7 +75,7 @@ export const AuthProvider = ({ children }) => {
     }, [user, estGroupe]);
 
     return (
-        <AuthContext.Provider value={{ user, token, connexion, connexionGroupe, deconnexion, peutAcceder, estGroupe, estDansGroupe, groupeNom }}>
+        <AuthContext.Provider value={{ user, token, connexion, connexionEnseignant, connexionGroupe, deconnexion, peutAcceder, estGroupe, estEnseignant, estDansGroupe, groupeNom }}>
             {children}
         </AuthContext.Provider>
     );

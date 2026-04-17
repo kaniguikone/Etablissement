@@ -1,16 +1,17 @@
+import '../services/storage_service.dart';
+
 class ApiConfig {
   // ─── URL serveur ─────────────────────────────────────────────────────────
-  // Définie à la compilation via --dart-define=API_HOST=lycee-moderne.monapp.ci
+  // Priorité : valeur sauvegardée dans StorageService (configurée au premier
+  // lancement ou via deep link), sinon fallback sur --dart-define pour le dev.
   //
-  // Exemples :
+  // Exemples dev :
   //   flutter run  --dart-define=API_HOST=192.168.1.18:8000   (appareil physique Wi-Fi)
   //   flutter run  --dart-define=API_HOST=10.0.2.2:8000       (émulateur Android)
-  //   flutter build apk --dart-define=API_HOST=lycee.monapp.ci (production HTTPS)
   //
-  static const String _host = String.fromEnvironment(
-    'API_HOST',
-    defaultValue: 'localhost:8000',
-  );
+  static String get _host =>
+      StorageService.getCachedServerUrl() ??
+      const String.fromEnvironment('API_HOST', defaultValue: 'localhost:8000');
 
   // En dev (port explicite ou localhost) → http. En production → https.
   static String get _scheme =>

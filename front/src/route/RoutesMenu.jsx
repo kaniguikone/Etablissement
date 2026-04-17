@@ -104,6 +104,16 @@ import NouveauRole from '../components/roles/NouveauRole';
 import Notifications from '../components/notifications/Notifications';
 import ArchivageWizard from '../components/archivage/ArchivageWizard';
 
+import EnseignantDashboard    from '../components/enseignant/EnseignantDashboard';
+import EnseignantDevoirs      from '../components/enseignant/EnseignantDevoirs';
+import EnseignantPresence     from '../components/enseignant/EnseignantPresence';
+import EnseignantProgramme    from '../components/enseignant/EnseignantProgramme';
+import EnseignantEmploi       from '../components/enseignant/EnseignantEmploi';
+import EnseignantRemplacements from '../components/enseignant/EnseignantRemplacements';
+import EnseignantMessagerie   from '../components/enseignant/EnseignantMessagerie';
+import EnseignantRdv          from '../components/enseignant/EnseignantRdv';
+import EnseignantInformations from '../components/enseignant/EnseignantInformations';
+
 // Rôles constants pour éviter les répétitions
 const R_STATS     = ['pedagogie', 'finances'];
 const R_PARAM     = ['parametrage'];
@@ -121,6 +131,17 @@ const RoutesMenu = () => (
         <Routes>
             {/* Page de connexion — publique */}
             <Route path="/login" element={<LoginPage />} />
+
+            {/* ── Espace Enseignant ─────────────────────────────────────── */}
+            <Route path="/enseignant"               element={<PrivateRoute><EnseignantDashboard /></PrivateRoute>} />
+            <Route path="/enseignant/devoirs"       element={<PrivateRoute><EnseignantDevoirs /></PrivateRoute>} />
+            <Route path="/enseignant/presence"      element={<PrivateRoute><EnseignantPresence /></PrivateRoute>} />
+            <Route path="/enseignant/programme"     element={<PrivateRoute><EnseignantProgramme /></PrivateRoute>} />
+            <Route path="/enseignant/emploi"        element={<PrivateRoute><EnseignantEmploi /></PrivateRoute>} />
+            <Route path="/enseignant/remplacements" element={<PrivateRoute><EnseignantRemplacements /></PrivateRoute>} />
+            <Route path="/enseignant/messagerie"    element={<PrivateRoute><EnseignantMessagerie /></PrivateRoute>} />
+            <Route path="/enseignant/rdv"           element={<PrivateRoute><EnseignantRdv /></PrivateRoute>} />
+            <Route path="/enseignant/informations"  element={<PrivateRoute><EnseignantInformations /></PrivateRoute>} />
 
             {/* ── Espace Groupe Scolaire ─────────────────────────────────── */}
             <Route path="/groupe"                  element={<PrivateRoute><DashboardGroupe /></PrivateRoute>} />

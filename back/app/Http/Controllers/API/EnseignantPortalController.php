@@ -482,7 +482,7 @@ class EnseignantPortalController extends Controller
         return response()->json(null, 204);
     }
 
-    // ── Utilitaire ───────────────────────────────────────────────────────────
+    // ── Utilitaires ──────────────────────────────────────────────────────────
 
     private function verifierAccesClasse(int $enseignantId, int $classeId): void
     {

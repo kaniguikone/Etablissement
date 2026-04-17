@@ -29,6 +29,9 @@ dependencies:
   # Ouvrir URLs dans le navigateur (paiement CinetPay)
   url_launcher: ^6.3.0
 
+  # Deep links (ouvrir l'app depuis un lien HTTP)
+  app_links: ^6.0.0
+
   # Téléchargement et ouverture de fichiers PDF
   path_provider: ^2.1.4
   open_file: ^3.3.2

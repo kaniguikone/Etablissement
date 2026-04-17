@@ -11,7 +11,7 @@ class ApiService {
   ApiService._internal() {
     _dio = Dio(
       BaseOptions(
-        baseUrl: ApiConfig.baseUrl,
+        baseUrl: ApiConfig.baseUrl, // lu dynamiquement depuis StorageService
         connectTimeout: ApiConfig.connectTimeout,
         receiveTimeout: ApiConfig.receiveTimeout,
         headers: {'Accept': 'application/json'},
@@ -48,6 +48,11 @@ class ApiService {
         },
       ),
     );
+  }
+
+  /// À appeler après avoir changé l'URL serveur (onboarding ou deep link).
+  void resetBaseUrl() {
+    _dio.options.baseUrl = ApiConfig.baseUrl;
   }
 
   // ─── Auth Parent ────────────────────────────────────────────────────────────

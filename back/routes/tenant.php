@@ -93,7 +93,8 @@ Route::middleware([
     // ─── CinetPay webhook (public) ───────────────────────────────────────────
     Route::post('/paiements/notify', [CinetPayController::class, 'notify']);
 
-    // ─── Portail Enseignant (mobile) ─────────────────────────────────────────
+    // ─── Portail Enseignant (mobile + web) ──────────────────────────────────
+    // auth:sanctum résout Enseignant (token mobile) ou User (token web avec enseignant_id)
     Route::post('/enseignant/login', [EnseignantAuthController::class, 'login']);
     Route::middleware('auth:sanctum')->prefix('enseignant')->group(function () {
         Route::get('/notifications',                [NotificationController::class, 'index']);

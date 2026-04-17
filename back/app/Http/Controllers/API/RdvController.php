@@ -34,7 +34,7 @@ class RdvController extends Controller
 
     public function creerCreneau(Request $request)
     {
-        $enseignant = $request->user();
+        $enseignantId = $request->user()->id;
 
         $request->validate([
             'date_creneau' => 'required|date|after_or_equal:today',
@@ -45,7 +45,7 @@ class RdvController extends Controller
         ]);
 
         $creneau = CreneauRdv::create([
-            'enseignant_id' => $enseignant->id,
+            'enseignant_id' => $enseignantId,
             'date_creneau'  => $request->date_creneau,
             'heure_debut'   => $request->heure_debut,
             'heure_fin'     => $request->heure_fin,

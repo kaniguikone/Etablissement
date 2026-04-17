@@ -52,15 +52,15 @@ class AuthController extends Controller
     private function formatUser(User $user): array
     {
         return [
-            'id'          => $user->id,
-            'name'        => $user->name,
-            'email'       => $user->email,
-            'telephone'   => $user->telephone,
-            'photo_url'   => $user->photo_url,
-            'role_id'     => $user->role_id,
-            'role_label'  => $user->role?->label ?? '—',
-            'permissions' => $user->role?->permissions ?? [],
-            'super'       => $user->estSuperAdmin(),
+            'id'             => $user->id,
+            'name'           => $user->name,
+            'email'          => $user->email,
+            'telephone'      => $user->telephone,
+            'photo_url'      => $user->photo_url,
+            'role_id'        => $user->role_id,
+            'role_label'     => $user->role?->label ?? '—',
+            'permissions'    => $user->role?->permissions ?? [],
+            'super'          => $user->estSuperAdmin(),
         ];
     }
 }
