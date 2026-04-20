@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
-import { useConfirm } from '../../context/ConfirmContext';
 
 const STATUTS = {
     en_attente: { label: 'En attente', cls: 'bg-warning text-dark' },
@@ -14,7 +13,6 @@ const heure = (str) => str?.slice(0, 5) ?? '—';
 
 const EnseignantRdv = () => {
     const { toast } = useToast();
-    const { confirmer } = useConfirm();
 
     const [onglet, setOnglet]             = useState('reservations');
     const [reservations, setReservations] = useState([]);
@@ -24,18 +22,18 @@ const EnseignantRdv = () => {
     const [modalCreneau, setModalCreneau] = useState(false);
     const [formCreneau, setFormCreneau]   = useState({ date_creneau: '', heure_debut: '', heure_fin: '' });
     const [saving, setSaving]             = useState(false);
+    const [confirmSuppr, setConfirmSuppr] = useState(null); // id du créneau à supprimer
+    const [suppression, setSuppression]   = useState(false);
 
     const charger = async () => {
         setChargement(true);
         try {
-            const [{ data: r }, { data: c }] = await Promise.all([
+            const [resR, resC] = await Promise.allSettled([
                 api.get('/enseignant/rdv/reservations'),
                 api.get('/enseignant/rdv/creneaux'),
             ]);
-            setReservations(r);
-            setCreneaux(c);
-        } catch {
-            toast('Erreur chargement.', 'danger');
+            if (resR.status === 'fulfilled') setReservations(resR.value.data);
+            if (resC.status === 'fulfilled') setCreneaux(resC.value.data);
         } finally {
             setChargement(false);
         }
@@ -65,25 +63,36 @@ const EnseignantRdv = () => {
         e.preventDefault();
         setSaving(true);
         try {
-            await api.post('/enseignant/rdv/creneaux', formCreneau);
-            toast('Créneau créé.', 'success');
+            const { data: nouveau } = await api.post('/enseignant/rdv/creneaux', formCreneau);
+            setCreneaux(prev => [...prev, { ...nouveau, reserve: false }]
+                .sort((a, b) => a.date_creneau > b.date_creneau ? 1 : a.date_creneau < b.date_creneau ? -1 : (a.heure_debut > b.heure_debut ? 1 : -1)));
             setModalCreneau(false);
             setFormCreneau({ date_creneau: '', heure_debut: '', heure_fin: '' });
-            charger();
+            setOnglet('creneaux');
+            toast('Créneau créé.', 'success');
         } catch (err) {
-            toast(err.response?.data?.message ?? 'Erreur.', 'danger');
-        } finally { setSaving(false); }
+            const errors = err.response?.data?.errors;
+            const msg = errors
+                ? Object.values(errors).flat().join(' ')
+                : (err.response?.data?.message ?? 'Erreur lors de la création.');
+            toast(msg, 'danger');
+        } finally {
+            setSaving(false);
+        }
     };
 
-    const supprimerCreneau = async (id) => {
-        const ok = await confirmer('Supprimer ce créneau ?');
-        if (!ok) return;
+    const supprimerCreneau = async () => {
+        if (!confirmSuppr) return;
+        setSuppression(true);
         try {
-            await api.delete(`/enseignant/rdv/creneaux/${id}`);
+            await api.delete(`/enseignant/rdv/creneaux/${confirmSuppr}`);
+            setCreneaux(prev => prev.filter(c => c.id !== confirmSuppr));
+            setConfirmSuppr(null);
             toast('Créneau supprimé.', 'success');
-            charger();
         } catch (err) {
-            toast(err.response?.data?.message ?? 'Erreur.', 'danger');
+            toast(err.response?.data?.message ?? 'Erreur lors de la suppression.', 'danger');
+        } finally {
+            setSuppression(false);
         }
     };
 
@@ -207,7 +216,7 @@ const EnseignantRdv = () => {
                                             </div>
                                             {!c.reserve && (
                                                 <button className="btn btn-sm btn-outline-danger py-1 px-2"
-                                                    onClick={() => supprimerCreneau(c.id)}>
+                                                    onClick={() => setConfirmSuppr(c.id)}>
                                                     <i className="fas fa-trash" />
                                                 </button>
                                             )}
@@ -218,6 +227,31 @@ const EnseignantRdv = () => {
                         </div>
                     )}
                 </>
+            )}
+
+            {/* Modal confirmation suppression */}
+            {confirmSuppr && (
+                <div className="modal show d-block" style={{ background: 'rgba(0,0,0,.4)' }}>
+                    <div className="modal-dialog modal-sm">
+                        <div className="modal-content">
+                            <div className="modal-body text-center py-4">
+                                <i className="fas fa-trash fa-2x text-danger mb-3 d-block" />
+                                <p className="mb-0">Supprimer ce créneau ?</p>
+                            </div>
+                            <div className="modal-footer justify-content-center border-0 pt-0">
+                                <button className="btn btn-outline-secondary btn-sm"
+                                    onClick={() => setConfirmSuppr(null)} disabled={suppression}>
+                                    Annuler
+                                </button>
+                                <button className="btn btn-danger btn-sm"
+                                    onClick={supprimerCreneau} disabled={suppression}>
+                                    {suppression && <span className="spinner-border spinner-border-sm me-1" />}
+                                    Supprimer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
 
             {/* Modal nouveau créneau */}

@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import '../main.dart' show navigatorKey;
+import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../services/storage_service.dart';
 
@@ -24,6 +26,19 @@ class AuthProvider extends ChangeNotifier {
   bool get isParent         => _role == UserRole.parent;
 
   final _authService = AuthService();
+
+  AuthProvider() {
+    ApiService.onUnauthorized = () {
+      _status = AuthStatus.unauthenticated;
+      _role   = null;
+      _nom    = null;
+      _prenom = null;
+      _numero = null;
+      _id     = null;
+      notifyListeners();
+      navigatorKey.currentState?.popUntil((route) => route.isFirst);
+    };
+  }
 
   Future<void> checkAuth() async {
     final loggedIn = await _authService.isLoggedIn();

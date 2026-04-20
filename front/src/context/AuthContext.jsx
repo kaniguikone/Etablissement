@@ -25,7 +25,12 @@ export const AuthProvider = ({ children }) => {
     const connexionEnseignant = useCallback(async (numero, password) => {
         const res = await api.post('/enseignant/login', { numero_enseignant: numero, password });
         const { token: tok, enseignant } = res.data;
-        const userAvecType = { ...enseignant, _type: 'enseignant' };
+        const userAvecType = {
+            ...enseignant,
+            _type: 'enseignant',
+            name: `${enseignant.prenoms ?? ''} ${enseignant.nom ?? ''}`.trim(),
+            role_label: 'Enseignant',
+        };
         localStorage.setItem('token', tok);
         localStorage.setItem('user', JSON.stringify(userAvecType));
         setToken(tok);

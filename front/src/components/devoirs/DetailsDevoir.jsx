@@ -3,6 +3,12 @@ import { NavLink, useParams, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 
+const formatDateCode = (dateStr) => {
+    if (!dateStr) return '';
+    const [y, m, d] = dateStr.split('-');
+    return `${d}${m}${y.slice(2)}`;
+};
+
 const DetailsDevoir = () => {
     const { toast } = useToast();
     const { id } = useParams();
@@ -10,21 +16,21 @@ const DetailsDevoir = () => {
     const [classes, setClasses]         = useState([]);
     const [niveaux, setNiveaux]         = useState([]);
     const [matieres, setMatieres]       = useState([]);
-    const [periodes, setPeriodes]       = useState([]);
     const [typeDevoirs, setTypeDevoirs] = useState([]);
     const [portee, setPortee]           = useState('classe');
+    const [periodeInfo, setPeriodeInfo]     = useState(null);
+    const [periodeErreur, setPeriodeErreur] = useState('');
 
     const [form, setForm] = useState({
         code_devoir: '', date_devoir: '', coeff_devoir: '',
         type_devoir_id: '', matiere_id: '',
-        classe_id: '', niveau_id: '', periode_id: '',
+        classe_id: '', niveau_id: '',
     });
 
     useEffect(() => {
         api.get('/classesTout').then((res) => setClasses(res.data)).catch((err) => console.error('Erreur chargement:', err));
         api.get('/niveaux').then((res) => setNiveaux(res.data)).catch((err) => console.error('Erreur chargement:', err));
         api.get('/matieres').then((res) => setMatieres(res.data)).catch((err) => console.error('Erreur chargement:', err));
-        api.get('/periodes').then((res) => setPeriodes(res.data)).catch((err) => console.error('Erreur chargement:', err));
         api.get('/typeDevoirs').then((res) => setTypeDevoirs(res.data)).catch((err) => console.error('Erreur chargement:', err));
         api.get(`/devoirs/${id}`)
             .then((res) => {
@@ -38,11 +44,49 @@ const DetailsDevoir = () => {
                     matiere_id:     d.matiere_id     || '',
                     classe_id:      d.classe_id      || '',
                     niveau_id:      d.niveau_id      || '',
-                    periode_id:     d.periode_id     || '',
                 });
             })
             .catch(() => toast.error('Impossible de charger les données de ce devoir.'));
     }, [id]);
+
+    // Auto-résolution de la période depuis la date
+    useEffect(() => {
+        if (!form.date_devoir) { setPeriodeInfo(null); setPeriodeErreur(''); return; }
+        api.get('/periodes/parDate', { params: { date: form.date_devoir } })
+            .then(({ data }) => {
+                if (data) { setPeriodeInfo(data); setPeriodeErreur(''); }
+                else { setPeriodeInfo(null); setPeriodeErreur("Cette date n'appartient à aucune période scolaire."); }
+            })
+            .catch(() => setPeriodeErreur('Impossible de vérifier la période.'));
+    }, [form.date_devoir]);
+
+    // Re-génération du code si les champs clés changent
+    useEffect(() => {
+        if (!form.type_devoir_id || !form.matiere_id) return;
+
+        const type    = typeDevoirs.find((t) => String(t.id) === String(form.type_devoir_id));
+        const matiere = matieres.find((m) => String(m.id) === String(form.matiere_id));
+
+        let cibleAbbr = '';
+        if (portee === 'classe' && form.classe_id) {
+            const classe = classes.find((c) => String(c.id) === String(form.classe_id));
+            cibleAbbr = classe?.abbr_classe || '';
+        } else if (portee === 'niveau' && form.niveau_id) {
+            const niveau = niveaux.find((n) => String(n.id) === String(form.niveau_id));
+            cibleAbbr = niveau?.abbr_niveau || '';
+        }
+
+        if (!type || !matiere || !cibleAbbr) return;
+
+        const parts = [type.code_type_devoir, matiere.abbr_matiere, cibleAbbr];
+        const dateCode = formatDateCode(form.date_devoir);
+        if (dateCode) parts.push(dateCode);
+        const base = parts.join('-');
+
+        api.get(`/devoirs/prochainCode?base=${encodeURIComponent(base)}`)
+            .then((res) => setForm((prev) => ({ ...prev, code_devoir: res.data.code })))
+            .catch((err) => console.error('Erreur chargement:', err));
+    }, [form.type_devoir_id, form.matiere_id, form.classe_id, form.niveau_id, form.date_devoir, portee]);
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -55,6 +99,10 @@ const DetailsDevoir = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (!periodeInfo) {
+            toast.error(periodeErreur || "Veuillez choisir une date dans une période scolaire.");
+            return;
+        }
         const payload = {
             ...form,
             classe_id: portee === 'classe' ? form.classe_id : '',
@@ -102,12 +150,15 @@ const DetailsDevoir = () => {
                         </div>
                         <div className="mb-3 col-md-4">
                             <label className="form-label">Période</label>
-                            <select className="form-select" name="periode_id" value={form.periode_id} onChange={handleChange}>
-                                <option value="">Sélectionner</option>
-                                {periodes.map((p) => (
-                                    <option key={p.id} value={p.id}>{p.libelle_periode} — {p.annee}</option>
-                                ))}
-                            </select>
+                            <div className="form-control bg-white d-flex align-items-center" style={{ minHeight: 38 }}>
+                                {periodeInfo ? (
+                                    <span className="badge bg-primary fs-6">{periodeInfo.libelle_periode} — {periodeInfo.annee}</span>
+                                ) : periodeErreur ? (
+                                    <span className="text-danger small">{periodeErreur}</span>
+                                ) : (
+                                    <span className="text-muted small">Automatique selon la date</span>
+                                )}
+                            </div>
                         </div>
 
                         <div className="mb-3 col-md-12">
@@ -162,7 +213,7 @@ const DetailsDevoir = () => {
                     </fieldset>
                     <div className="d-flex justify-content-end mb-3 gap-2">
                         <NavLink to="/Devoirs" className="btn btn-secondary">Retour</NavLink>
-                        <button type="submit" className="btn btn-primary">Enregistrer</button>
+                        <button type="submit" className="btn btn-primary" disabled={!!periodeErreur}>Enregistrer</button>
                     </div>
                 </form>
             </div>

@@ -30,13 +30,13 @@ const AppInterne = () => {
     return (
         <div>
             {renderMenu()}
-            {connecte && !estGroupe && !estEnseignant && (
+            {connecte && !estGroupe && (
                 <>
                     <Topbar sidebarWidth={SIDEBAR_WIDTH} />
                     <NotificationsPanel />
                 </>
             )}
-            <div style={connecte ? { marginLeft: SIDEBAR_WIDTH, marginTop: estEnseignant ? 0 : TOPBAR_HEIGHT, minHeight: '100vh' } : {}}>
+            <div style={connecte ? { marginLeft: SIDEBAR_WIDTH, marginTop: TOPBAR_HEIGHT, minHeight: '100vh' } : {}}>
                 <RoutesMenu />
             </div>
         </div>

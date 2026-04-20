@@ -11,33 +11,38 @@ const STATUTS = {
 const EnseignantPresence = () => {
     const { toast } = useToast();
 
-    const [classes, setClasses]   = useState([]); // classesMatieres
-    const [periodes, setPeriodes] = useState([]);
-    const [selection, setSelection] = useState(''); // "classeId:matiereId"
-    const [periodeId, setPeriodeId] = useState('');
+    const [classes, setClasses]   = useState([]);
+    const [selection, setSelection] = useState('');
     const [date, setDate]         = useState(new Date().toISOString().slice(0, 10));
     const [eleves, setEleves]     = useState([]);
     const [statuts, setStatuts]   = useState({});
     const [chargement, setChargement] = useState(false);
     const [sauvegarde, setSauvegarde] = useState(false);
+    const [periodeInfo, setPeriodeInfo]     = useState(null);
+    const [periodeErreur, setPeriodeErreur] = useState('');
 
     useEffect(() => {
-        Promise.all([
-            api.get('/enseignant/classes'),
-            api.get('/enseignant/periodes'),
-        ]).then(([{ data: c }, { data: p }]) => {
-            setClasses(c);
-            setPeriodes(p);
-        });
+        api.get('/enseignant/classes').then(({ data }) => setClasses(data));
     }, []);
 
-    const chargerEleves = async (sel = selection, pid = periodeId, d = date) => {
-        if (!sel || !pid) return;
+    // Auto-résolution de la période depuis la date
+    useEffect(() => {
+        if (!date) { setPeriodeInfo(null); setPeriodeErreur(''); return; }
+        api.get('/enseignant/periodes/parDate', { params: { date } })
+            .then(({ data }) => {
+                if (data) { setPeriodeInfo(data); setPeriodeErreur(''); }
+                else { setPeriodeInfo(null); setPeriodeErreur("Cette date n'appartient à aucune période scolaire."); setEleves([]); }
+            })
+            .catch(() => setPeriodeErreur('Impossible de vérifier la période.'));
+    }, [date]);
+
+    const chargerEleves = async (sel = selection, d = date) => {
+        if (!sel) return;
         const [classeId, matiereId] = sel.split(':');
         setChargement(true);
         try {
             const { data } = await api.get('/enseignant/assiduites', {
-                params: { classe_id: classeId, matiere_id: matiereId, periode_id: pid, date: d },
+                params: { classe_id: classeId, matiere_id: matiereId, date: d },
             });
             setEleves(data);
             const map = {};
@@ -51,22 +56,20 @@ const EnseignantPresence = () => {
     };
 
     const handleChange = (field, val) => {
-        if (field === 'selection') { setSelection(val); chargerEleves(val, periodeId, date); }
-        if (field === 'periodeId') { setPeriodeId(val); chargerEleves(selection, val, date); }
-        if (field === 'date')      { setDate(val);      chargerEleves(selection, periodeId, val); }
+        if (field === 'selection') { setSelection(val); chargerEleves(val, date); }
+        if (field === 'date')      { setDate(val);      chargerEleves(selection, val); }
     };
 
     const setStatut = (eleveId, statut) => setStatuts(s => ({ ...s, [eleveId]: statut }));
 
     const enregistrer = async () => {
-        if (!selection || !periodeId || eleves.length === 0) return;
+        if (!selection || eleves.length === 0) return;
         const [classeId, matiereId] = selection.split(':');
         setSauvegarde(true);
         try {
             await api.post('/enseignant/assiduites', {
                 classe_id: classeId,
                 matiere_id: matiereId,
-                periode_id: periodeId,
                 date,
                 assiduites: eleves.map(e => ({
                     eleve_id: e.eleve_id,
@@ -76,13 +79,12 @@ const EnseignantPresence = () => {
             });
             toast('Présences enregistrées.', 'success');
         } catch {
-            toast('Erreur lors de l\'enregistrement.', 'danger');
+            toast("Erreur lors de l'enregistrement.", 'danger');
         } finally {
             setSauvegarde(false);
         }
     };
 
-    // Libellé "Classe · Matière"
     const labelClasseMatiere = (cm) => `${cm.nom_classe} · ${cm.libelle_matiere}`;
     const classesMatieres = classes.map(c => ({
         key: `${c.classe_id}:${c.matiere_id}`,
@@ -118,18 +120,22 @@ const EnseignantPresence = () => {
                                 ))}
                             </select>
                         </div>
-                        <div className="col-md-4">
-                            <label className="form-label small fw-semibold">Période</label>
-                            <select className="form-select form-select-sm"
-                                value={periodeId} onChange={e => handleChange('periodeId', e.target.value)}>
-                                <option value="">— Sélectionner —</option>
-                                {periodes.map(p => <option key={p.id} value={p.id}>{p.libelle_periode}</option>)}
-                            </select>
-                        </div>
                         <div className="col-md-3">
                             <label className="form-label small fw-semibold">Date</label>
                             <input type="date" className="form-control form-control-sm"
                                 value={date} onChange={e => handleChange('date', e.target.value)} />
+                        </div>
+                        <div className="col-md-4">
+                            <label className="form-label small fw-semibold">Période</label>
+                            <div className="form-control form-control-sm bg-white d-flex align-items-center" style={{ minHeight: 31 }}>
+                                {periodeInfo ? (
+                                    <span className="badge bg-primary">{periodeInfo.libelle_periode}</span>
+                                ) : periodeErreur ? (
+                                    <span className="text-danger" style={{ fontSize: 12 }}>{periodeErreur}</span>
+                                ) : (
+                                    <span className="text-muted" style={{ fontSize: 12 }}>Automatique selon la date</span>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -140,7 +146,7 @@ const EnseignantPresence = () => {
             ) : eleves.length === 0 ? (
                 <div className="text-center text-muted py-5">
                     <i className="fas fa-users fa-3x mb-3 opacity-25 d-block" />
-                    {!selection || !periodeId ? 'Sélectionnez une classe, une matière et une période' : 'Aucun élève trouvé'}
+                    {!selection ? 'Sélectionnez une classe et une matière' : periodeErreur ? periodeErreur : 'Aucun élève trouvé'}
                 </div>
             ) : (
                 <>

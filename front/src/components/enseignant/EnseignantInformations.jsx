@@ -52,12 +52,12 @@ const EnseignantInformations = () => {
                                     </div>
                                     <div style={{ flex: 1, minWidth: 0 }}>
                                         <div className="d-flex justify-content-between align-items-start mb-1">
-                                            <div className="fw-bold">{info.titre_info}</div>
+                                            <div className="fw-bold">{info.titre}</div>
                                             <span className="text-muted small ms-3 flex-shrink-0">{fmt(info.date_info)}</span>
                                         </div>
-                                        {info.contenu_info && (
+                                        {info.contenu && (
                                             <div className="small text-muted" style={{ whiteSpace: 'pre-wrap' }}>
-                                                {info.contenu_info}
+                                                {info.contenu}
                                             </div>
                                         )}
                                         <span className="badge mt-2" style={{

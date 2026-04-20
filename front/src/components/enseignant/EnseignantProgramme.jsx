@@ -4,7 +4,7 @@ import { useToast } from '../../context/ToastContext';
 
 const STATUTS = {
     fait:     { label: 'Fait',     bg: '#e8f5e9', color: '#2e7d32', icon: 'fa-check-circle' },
-    en_cours: { label: 'En cours', bg: '#fff8e1', color: '#f57f17', icon: 'fa-timelapse' },
+    en_cours: { label: 'En cours', bg: '#fff8e1', color: '#f57f17', icon: 'fa-spinner' },
     reporte:  { label: 'Reporté',  bg: '#ffebee', color: '#c62828', icon: 'fa-pause-circle' },
 };
 
@@ -93,10 +93,9 @@ const EnseignantProgramme = () => {
         }
     };
 
-    const classesMatieres = classes.map(c => ({
-        key: `${c.classe_id}:${c.matiere_id}`,
-        label: `${c.nom_classe} · ${c.libelle_matiere}`,
-    }));
+    const classesMatieres = [...new Map(
+        classes.map(c => [`${c.classe_id}:${c.matiere_id}`, { key: `${c.classe_id}:${c.matiere_id}`, label: `${c.nom_classe} · ${c.libelle_matiere}` }])
+    ).values()];
 
     const fait    = chapitres.filter(c => c.progression?.statut === 'fait').length;
     const enCours = chapitres.filter(c => c.progression?.statut === 'en_cours').length;

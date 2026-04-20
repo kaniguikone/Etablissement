@@ -11,20 +11,19 @@ const DetailsAssiduite = () => {
     const navigate = useNavigate();
     const [eleves, setEleves]   = useState([]);
     const [matieres, setMatieres] = useState([]);
-    const [periodes, setPeriodes] = useState([]);
+    const [periodeInfo, setPeriodeInfo]     = useState(null);
+    const [periodeErreur, setPeriodeErreur] = useState('');
     const [form, setForm] = useState({
         date_assiduite: '',
         statut:         'present',
         remarque:       '',
         eleve_id:       '',
         matiere_id:     '',
-        periode_id:     '',
     });
 
     useEffect(() => {
         api.get('/elevesTout').then((r) => setEleves(r.data)).catch((err) => console.error('Erreur chargement:', err));
         api.get('/matieres').then((r) => setMatieres(r.data)).catch((err) => console.error('Erreur chargement:', err));
-        api.get('/periodes').then((r) => setPeriodes(r.data)).catch((err) => console.error('Erreur chargement:', err));
         api.get(`/assiduites/${id}`)
             .then((r) => {
                 const a = r.data;
@@ -34,16 +33,30 @@ const DetailsAssiduite = () => {
                     remarque:       a.remarque || '',
                     eleve_id:       a.eleve_id || '',
                     matiere_id:     a.matiere_id || '',
-                    periode_id:     a.periode_id || '',
                 });
             })
             .catch(() => toast.error('Impossible de charger les données.'));
     }, [id]);
 
+    // Auto-résolution de la période depuis la date
+    useEffect(() => {
+        if (!form.date_assiduite) { setPeriodeInfo(null); setPeriodeErreur(''); return; }
+        api.get('/periodes/parDate', { params: { date: form.date_assiduite } })
+            .then(({ data }) => {
+                if (data) { setPeriodeInfo(data); setPeriodeErreur(''); }
+                else { setPeriodeInfo(null); setPeriodeErreur("Cette date n'appartient à aucune période scolaire."); }
+            })
+            .catch(() => setPeriodeErreur('Impossible de vérifier la période.'));
+    }, [form.date_assiduite]);
+
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (!periodeInfo) {
+            toast.error(periodeErreur || "Veuillez choisir une date dans une période scolaire.");
+            return;
+        }
         api.put(`/assiduites/${id}`, form)
             .then(() => { toast.success('Modifications enregistrées.'); navigate('/Assiduites'); })
             .catch((err) => {
@@ -93,15 +106,20 @@ const DetailsAssiduite = () => {
                         </div>
                         <div className="mb-3 col-md-6">
                             <label className="form-label">Période</label>
-                            <select className="form-select" name="periode_id" value={form.periode_id} onChange={handleChange} required>
-                                <option value="">Sélectionner</option>
-                                {periodes.map((p) => <option key={p.id} value={p.id}>{p.libelle_periode} — {p.annee}</option>)}
-                            </select>
+                            <div className="form-control bg-white d-flex align-items-center" style={{ minHeight: 38 }}>
+                                {periodeInfo ? (
+                                    <span className="badge bg-primary fs-6">{periodeInfo.libelle_periode} — {periodeInfo.annee}</span>
+                                ) : periodeErreur ? (
+                                    <span className="text-danger small">{periodeErreur}</span>
+                                ) : (
+                                    <span className="text-muted small">Automatique selon la date</span>
+                                )}
+                            </div>
                         </div>
                     </fieldset>
                     <div className="d-flex justify-content-end mb-3 gap-2">
                         <NavLink to="/Assiduites" className="btn btn-secondary">Retour</NavLink>
-                        <button type="submit" className="btn btn-primary">Enregistrer</button>
+                        <button type="submit" className="btn btn-primary" disabled={!!periodeErreur}>Enregistrer</button>
                     </div>
                 </form>
             </div>

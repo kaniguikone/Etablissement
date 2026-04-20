@@ -116,7 +116,9 @@ Route::middleware([
         Route::post('/assiduites',            [EnseignantPortalController::class, 'sauvegarderPresences']);
         Route::get('/emploi',                 [EnseignantPortalController::class, 'emploiDuTemps']);
         Route::get('/periodes',               [EnseignantPortalController::class, 'periodes']);
+        Route::get('/periodes/parDate',       [PeriodeController::class,          'parDate']);
         Route::get('/typeDevoirs',            [EnseignantPortalController::class, 'typeDevoirs']);
+        Route::get('/devoirs/prochainCode',   [DevoirController::class, 'prochainCode']);
         Route::get('/informations',           [EnseignantPortalController::class, 'informations']);
         Route::get('/progression',            [EnseignantPortalController::class, 'progression']);
         Route::post('/progression',           [EnseignantPortalController::class, 'sauvegarderProgression']);
@@ -207,6 +209,7 @@ Route::middleware([
         Route::get('/matieres',              [MatiereController::class,   'index']);
         Route::get('/typeDevoirs',           [TypeDevoirController::class,'index']);
         Route::get('/periodes',              [PeriodeController::class,   'index']);
+        Route::get('/periodes/parDate',      [PeriodeController::class,   'parDate']);
         Route::get('/classesTout',           [ClasseController::class,    'listeclasses']);
         Route::get('/classesNiveaux/{id}',   [ClasseController::class,    'ChoixNiveau']);
         Route::get('/niveauClasse/{id}',     [ClasseController::class,    'niveauClasse']);

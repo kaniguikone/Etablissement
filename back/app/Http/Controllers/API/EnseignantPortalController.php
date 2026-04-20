@@ -39,6 +39,7 @@ class EnseignantPortalController extends Controller
                 'm.id as matiere_id', 'm.libelle_matiere', 'm.abbr_matiere',
                 'n.id as niveau_id', 'n.nom_niveau as libelle_niveau'
             )
+            ->distinct()
             ->orderBy('cl.nom_classe')
             ->get();
 
@@ -113,10 +114,16 @@ class EnseignantPortalController extends Controller
             'coeff_devoir'   => 'required|numeric|min:0',
             'type_devoir_id' => 'required|exists:type_devoirs,id',
             'matiere_id'     => 'required|exists:matieres,id',
-            'periode_id'     => 'nullable|exists:periodes,id',
             'classe_id'      => 'nullable|exists:classes,id',
             'niveau_id'      => 'nullable|exists:niveaux,id',
         ]);
+
+        $periode = $this->resoudrePeriode($request->date_devoir);
+        if (!$periode) {
+            return response()->json([
+                'errors' => ['date_devoir' => ['Cette date n\'appartient à aucune période scolaire.']]
+            ], 422);
+        }
 
         $devoir = Devoir::create([
             'code_devoir'    => $request->code_devoir,
@@ -124,7 +131,7 @@ class EnseignantPortalController extends Controller
             'coeff_devoir'   => $request->coeff_devoir,
             'type_devoir_id' => $request->type_devoir_id,
             'matiere_id'     => $request->matiere_id,
-            'periode_id'     => $request->periode_id,
+            'periode_id'     => $periode->id,
             'classe_id'      => $request->classe_id ?: null,
             'niveau_id'      => $request->niveau_id ?: null,
         ]);
@@ -146,10 +153,16 @@ class EnseignantPortalController extends Controller
             'coeff_devoir'   => 'required|numeric|min:0',
             'type_devoir_id' => 'required|exists:type_devoirs,id',
             'matiere_id'     => 'required|exists:matieres,id',
-            'periode_id'     => 'nullable|exists:periodes,id',
             'classe_id'      => 'nullable|exists:classes,id',
             'niveau_id'      => 'nullable|exists:niveaux,id',
         ]);
+
+        $periode = $this->resoudrePeriode($request->date_devoir);
+        if (!$periode) {
+            return response()->json([
+                'errors' => ['date_devoir' => ['Cette date n\'appartient à aucune période scolaire.']]
+            ], 422);
+        }
 
         $devoir->update([
             'code_devoir'    => $request->code_devoir,
@@ -157,7 +170,7 @@ class EnseignantPortalController extends Controller
             'coeff_devoir'   => $request->coeff_devoir,
             'type_devoir_id' => $request->type_devoir_id,
             'matiere_id'     => $request->matiere_id,
-            'periode_id'     => $request->periode_id,
+            'periode_id'     => $periode->id,
             'classe_id'      => $request->classe_id ?: null,
             'niveau_id'      => $request->niveau_id ?: null,
         ]);
@@ -239,16 +252,22 @@ class EnseignantPortalController extends Controller
         $request->validate([
             'classe_id'  => 'required|exists:classes,id',
             'matiere_id' => 'required|exists:matieres,id',
-            'periode_id' => 'required|exists:periodes,id',
             'date'       => 'required|date',
         ]);
+
+        $periode = $this->resoudrePeriode($request->date);
+        if (!$periode) {
+            return response()->json([
+                'errors' => ['date' => ['Cette date n\'appartient à aucune période scolaire.']]
+            ], 422);
+        }
 
         $eleves = Eleve::where('classe_id', $request->classe_id)
             ->orderBy('nom_eleve')
             ->get();
 
         $assiduites = Assiduites::where('matiere_id', $request->matiere_id)
-            ->where('periode_id', $request->periode_id)
+            ->where('periode_id', $periode->id)
             ->where('date_assiduite', $request->date)
             ->whereIn('eleve_id', $eleves->pluck('id'))
             ->get()
@@ -276,13 +295,19 @@ class EnseignantPortalController extends Controller
         $request->validate([
             'classe_id'          => 'required|exists:classes,id',
             'matiere_id'         => 'required|exists:matieres,id',
-            'periode_id'         => 'required|exists:periodes,id',
             'date'               => 'required|date',
             'assiduites'         => 'required|array',
             'assiduites.*.eleve_id' => 'required|exists:eleves,id',
             'assiduites.*.statut'   => 'required|in:present,absent,retard',
             'assiduites.*.remarque' => 'nullable|string|max:255',
         ]);
+
+        $periode = $this->resoudrePeriode($request->date);
+        if (!$periode) {
+            return response()->json([
+                'errors' => ['date' => ['Cette date n\'appartient à aucune période scolaire.']]
+            ], 422);
+        }
 
         $notifService = app(NotificationService::class);
 
@@ -293,7 +318,7 @@ class EnseignantPortalController extends Controller
         // Pré-charger les assiduités existantes pour cette session
         $existantes = Assiduites::where([
             'matiere_id'     => $request->matiere_id,
-            'periode_id'     => $request->periode_id,
+            'periode_id'     => $periode->id,
             'date_assiduite' => $request->date,
         ])->whereIn('eleve_id', $eleveIds)->get()->keyBy('eleve_id');
 
@@ -304,7 +329,7 @@ class EnseignantPortalController extends Controller
                 [
                     'eleve_id'       => $item['eleve_id'],
                     'matiere_id'     => $request->matiere_id,
-                    'periode_id'     => $request->periode_id,
+                    'periode_id'     => $periode->id,
                     'date_assiduite' => $request->date,
                 ],
                 [
@@ -397,7 +422,10 @@ class EnseignantPortalController extends Controller
         $enseignant = $request->user();
         $this->verifierAccesClasse($enseignant->id, $request->classe_id);
 
+        $niveauId = \App\Models\Classe::findOrFail($request->classe_id)->niveau_id;
+
         $chapitres = ChapitreMatiere::where('matiere_id', $request->matiere_id)
+            ->where('niveau_id', $niveauId)
             ->orderBy('ordre')
             ->get();
 
@@ -483,6 +511,13 @@ class EnseignantPortalController extends Controller
     }
 
     // ── Utilitaires ──────────────────────────────────────────────────────────
+
+    private function resoudrePeriode(string $date): ?Periodes
+    {
+        return Periodes::whereDate('date_debut', '<=', $date)
+            ->whereDate('date_fin', '>=', $date)
+            ->first();
+    }
 
     private function verifierAccesClasse(int $enseignantId, int $classeId): void
     {

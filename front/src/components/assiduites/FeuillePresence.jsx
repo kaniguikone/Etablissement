@@ -12,18 +12,31 @@ const FeuillePresence = () => {
     const { toast } = useToast();
     const [classes, setClasses]   = useState([]);
     const [matieres, setMatieres] = useState([]);
-    const [periodes, setPeriodes] = useState([]);
-    const [filtre, setFiltre]     = useState({ classe_id: '', matiere_id: '', periode_id: '', date: '' });
+    const [filtre, setFiltre]     = useState({ classe_id: '', matiere_id: '', date: '' });
     const [lignes, setLignes]     = useState([]);
     const [chargement, setChargement]   = useState(false);
     const [sauvegarde, setSauvegarde]   = useState(false);
     const [feuilleChargee, setFeuilleChargee] = useState(false);
+    const [periodeInfo, setPeriodeInfo]     = useState(null);
+    const [periodeErreur, setPeriodeErreur] = useState('');
 
     useEffect(() => {
         api.get('/classesTout').then((r) => setClasses(r.data)).catch((err) => console.error('Erreur chargement:', err));
         api.get('/matieres').then((r) => setMatieres(r.data)).catch((err) => console.error('Erreur chargement:', err));
-        api.get('/periodes').then((r) => setPeriodes(r.data)).catch((err) => console.error('Erreur chargement:', err));
     }, []);
+
+    // Auto-résolution de la période depuis la date
+    useEffect(() => {
+        if (!filtre.date) { setPeriodeInfo(null); setPeriodeErreur(''); return; }
+        api.get('/periodes/parDate', { params: { date: filtre.date } })
+            .then(({ data }) => {
+                if (data) { setPeriodeInfo(data); setPeriodeErreur(''); }
+                else { setPeriodeInfo(null); setPeriodeErreur("Cette date n'appartient à aucune période scolaire."); }
+            })
+            .catch(() => setPeriodeErreur('Impossible de vérifier la période.'));
+        setFeuilleChargee(false);
+        setLignes([]);
+    }, [filtre.date]);
 
     const handleFiltreChange = (e) => {
         setFiltre({ ...filtre, [e.target.name]: e.target.value });
@@ -59,7 +72,6 @@ const FeuillePresence = () => {
         setSauvegarde(true);
         api.post('/assiduitesSauvegarder', {
             matiere_id:     filtre.matiere_id,
-            periode_id:     filtre.periode_id,
             date_assiduite: filtre.date,
             assiduites:     lignes.map((l) => ({
                 eleve_id: l.eleve_id,
@@ -77,7 +89,7 @@ const FeuillePresence = () => {
             });
     };
 
-    const filtreComplet = filtre.classe_id && filtre.matiere_id && filtre.periode_id && filtre.date;
+    const filtreComplet = filtre.classe_id && filtre.matiere_id && filtre.date && !!periodeInfo;
 
     return (
         <section className="page-wrapper">
@@ -100,16 +112,21 @@ const FeuillePresence = () => {
                             {matieres.map((m) => <option key={m.id} value={m.id}>{m.libelle_matiere}</option>)}
                         </select>
                     </div>
-                    <div className="col-md-3">
-                        <label className="form-label">Période</label>
-                        <select className="form-select form-select-sm" name="periode_id" value={filtre.periode_id} onChange={handleFiltreChange} required>
-                            <option value="">Sélectionner</option>
-                            {periodes.map((p) => <option key={p.id} value={p.id}>{p.libelle_periode} — {p.annee}</option>)}
-                        </select>
-                    </div>
                     <div className="col-md-2">
                         <label className="form-label">Date</label>
                         <input type="date" className="form-control form-control-sm" name="date" value={filtre.date} onChange={handleFiltreChange} required />
+                    </div>
+                    <div className="col-md-3">
+                        <label className="form-label">Période</label>
+                        <div className="form-control form-control-sm bg-white d-flex align-items-center" style={{ minHeight: 31 }}>
+                            {periodeInfo ? (
+                                <span className="badge bg-primary">{periodeInfo.libelle_periode} — {periodeInfo.annee}</span>
+                            ) : periodeErreur ? (
+                                <span className="text-danger" style={{ fontSize: 12 }}>{periodeErreur}</span>
+                            ) : (
+                                <span className="text-muted" style={{ fontSize: 12 }}>Automatique selon la date</span>
+                            )}
+                        </div>
                     </div>
                     <div className="col-md-1">
                         <button type="submit" className="btn btn-primary btn-sm w-100" disabled={!filtreComplet || chargement}>

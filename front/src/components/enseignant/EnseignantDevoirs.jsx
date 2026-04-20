@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
-import { useConfirm } from '../../context/ConfirmContext';
 
 const PALETTE = ['#1565C0', '#2E7D32', '#C62828', '#F57F17', '#00838F', '#6A1B9A'];
 
+const formatDateCode = (dateStr) => {
+    if (!dateStr) return '';
+    const [y, m, d] = dateStr.split('-');
+    return `${d}${m}${y.slice(2)}`;
+};
+
 const EnseignantDevoirs = () => {
     const { toast } = useToast();
-    const { confirmer } = useConfirm();
 
     const [devoirs, setDevoirs]     = useState([]);
     const [periodes, setPeriodes]   = useState([]);
@@ -18,10 +22,12 @@ const EnseignantDevoirs = () => {
 
     // Modal
     const [modal, setModal]         = useState(false);
-    const [edition, setEdition]     = useState(null); // null = nouveau
+    const [edition, setEdition]     = useState(null);
     const [sauvegarde, setSauvegarde] = useState(false);
-    const vide = { code_devoir: '', date_devoir: '', coeff_devoir: 1, type_devoir_id: '', matiere_id: '', periode_id: '', classe_id: '', niveau_id: '' };
+    const vide = { code_devoir: '', date_devoir: '', coeff_devoir: 1, type_devoir_id: '', matiere_id: '', classe_id: '', niveau_id: '' };
     const [form, setForm]           = useState(vide);
+    const [modalPeriodeInfo, setModalPeriodeInfo]     = useState(null);
+    const [modalPeriodeErreur, setModalPeriodeErreur] = useState('');
 
     // Saisie notes
     const [devoirNotes, setDevoirNotes] = useState(null);
@@ -30,18 +36,37 @@ const EnseignantDevoirs = () => {
     const [classesNiveau, setClassesNiveau] = useState([]);
     const [sauvegardeNotes, setSauvegardeNotes] = useState(false);
 
-    // Matières & classes issues des affectations
-    const classesMatieres = classes;
     const matieresUniques = [...new Map(classes.map(c => [c.matiere_id, { id: c.matiere_id, label: c.libelle_matiere }])).values()];
     const classesUniques  = [...new Map(classes.map(c => [c.classe_id, { id: c.classe_id, label: c.nom_classe }])).values()];
 
-    const charger = () => {
-        setChargement(true);
-        api.get('/enseignant/devoirs', { params: { periode_id: periodeId || undefined } })
-            .then(({ data }) => setDevoirs(data))
-            .catch(() => toast('Erreur chargement devoirs.', 'danger'))
-            .finally(() => setChargement(false));
-    };
+    // Auto-résolution de la période dans le modal
+    useEffect(() => {
+        if (!form.date_devoir) { setModalPeriodeInfo(null); setModalPeriodeErreur(''); return; }
+        api.get('/enseignant/periodes/parDate', { params: { date: form.date_devoir } })
+            .then(({ data }) => {
+                if (data) { setModalPeriodeInfo(data); setModalPeriodeErreur(''); }
+                else { setModalPeriodeInfo(null); setModalPeriodeErreur("Cette date n'appartient à aucune période scolaire."); }
+            })
+            .catch(() => setModalPeriodeErreur('Impossible de vérifier la période.'));
+    }, [form.date_devoir]);
+
+    // Auto-génération du code (type + matière + classe + date JJMMAA)
+    useEffect(() => {
+        const type    = typeDevoirs.find(t => String(t.id) === String(form.type_devoir_id));
+        const matiere = classes.find(c => String(c.matiere_id) === String(form.matiere_id));
+        const classe  = classes.find(c => String(c.classe_id) === String(form.classe_id));
+
+        if (!type || !matiere || !classe) return;
+
+        const parts = [type.code_type_devoir, matiere.abbr_matiere, classe.abbr_classe];
+        const dateCode = formatDateCode(form.date_devoir);
+        if (dateCode) parts.push(dateCode);
+        const base = parts.join('-');
+
+        api.get(`/enseignant/devoirs/prochainCode?base=${encodeURIComponent(base)}`)
+            .then(({ data }) => setForm(f => ({ ...f, code_devoir: data.code })))
+            .catch(() => {});
+    }, [form.type_devoir_id, form.matiere_id, form.classe_id, form.date_devoir]);
 
     useEffect(() => {
         Promise.all([
@@ -57,6 +82,14 @@ const EnseignantDevoirs = () => {
 
     useEffect(() => { charger(); }, [periodeId]);
 
+    const charger = () => {
+        setChargement(true);
+        api.get('/enseignant/devoirs', { params: { periode_id: periodeId || undefined } })
+            .then(({ data }) => setDevoirs(data))
+            .catch(() => toast('Erreur chargement devoirs.', 'danger'))
+            .finally(() => setChargement(false));
+    };
+
     const ouvrirModal = (devoir = null) => {
         setEdition(devoir);
         setForm(devoir ? {
@@ -65,7 +98,6 @@ const EnseignantDevoirs = () => {
             coeff_devoir:   devoir.coeff_devoir,
             type_devoir_id: devoir.type_devoir_id,
             matiere_id:     devoir.matiere_id,
-            periode_id:     devoir.periode_id ?? '',
             classe_id:      devoir.classe_id ?? '',
             niveau_id:      devoir.niveau_id ?? '',
         } : vide);
@@ -74,6 +106,10 @@ const EnseignantDevoirs = () => {
 
     const sauvegarder = async (e) => {
         e.preventDefault();
+        if (!modalPeriodeInfo) {
+            toast(modalPeriodeErreur || "Veuillez choisir une date dans une période scolaire.", 'danger');
+            return;
+        }
         setSauvegarde(true);
         try {
             if (edition) {
@@ -211,7 +247,7 @@ const EnseignantDevoirs = () => {
                 </button>
             </div>
 
-            {/* Filtre période */}
+            {/* Filtre période (pour la liste) */}
             <div className="mb-3">
                 <select className="form-select form-select-sm w-auto"
                     value={periodeId} onChange={e => setPeriodeId(e.target.value)}>
@@ -292,7 +328,7 @@ const EnseignantDevoirs = () => {
                                     <select className="form-select form-select-sm" required
                                         value={form.type_devoir_id} onChange={e => setForm(f => ({ ...f, type_devoir_id: e.target.value }))}>
                                         <option value="">— Choisir —</option>
-                                        {typeDevoirs.map(t => <option key={t.id} value={t.id}>{t.libelle_type}</option>)}
+                                        {typeDevoirs.map(t => <option key={t.id} value={t.id}>{t.code_type_devoir}</option>)}
                                     </select>
                                 </div>
                                 <div className="col-md-6">
@@ -318,16 +354,20 @@ const EnseignantDevoirs = () => {
                                 </div>
                                 <div className="col-md-4">
                                     <label className="form-label small fw-semibold">Période</label>
-                                    <select className="form-select form-select-sm"
-                                        value={form.periode_id} onChange={e => setForm(f => ({ ...f, periode_id: e.target.value }))}>
-                                        <option value="">— Aucune —</option>
-                                        {periodes.map(p => <option key={p.id} value={p.id}>{p.libelle_periode}</option>)}
-                                    </select>
+                                    <div className="form-control form-control-sm bg-white d-flex align-items-center" style={{ minHeight: 31 }}>
+                                        {modalPeriodeInfo ? (
+                                            <span className="badge bg-primary">{modalPeriodeInfo.libelle_periode}</span>
+                                        ) : modalPeriodeErreur ? (
+                                            <span className="text-danger" style={{ fontSize: 12 }}>{modalPeriodeErreur}</span>
+                                        ) : (
+                                            <span className="text-muted" style={{ fontSize: 12 }}>Automatique selon la date</span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => setModal(false)}>Annuler</button>
-                                <button type="submit" className="btn btn-primary btn-sm" disabled={sauvegarde}>
+                                <button type="submit" className="btn btn-primary btn-sm" disabled={sauvegarde || !!modalPeriodeErreur}>
                                     {sauvegarde && <span className="spinner-border spinner-border-sm me-1" />}
                                     {edition ? 'Enregistrer' : 'Créer'}
                                 </button>

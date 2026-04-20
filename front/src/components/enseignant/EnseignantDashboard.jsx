@@ -33,7 +33,7 @@ const EnseignantDashboard = () => {
 
     return (
         <div className="container-fluid py-4">
-            <h4 className="mb-1 fw-bold">Bonjour, {user?.name?.split(' ')[0] ?? 'Professeur'} 👋</h4>
+            <h4 className="mb-1 fw-bold">Bonjour Professeur {user?.name ?? ''} 👋</h4>
             <p className="text-muted mb-4">Voici un résumé de votre activité</p>
 
             {/* KPIs */}

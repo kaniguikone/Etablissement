@@ -67,12 +67,21 @@ class DevoirController extends Controller
             'matiere_id'     => 'required|exists:matieres,id',
             'classe_id'      => 'nullable|exists:classes,id',
             'niveau_id'      => 'nullable|exists:niveaux,id',
-            'periode_id'     => 'nullable|exists:periodes,id',
         ]);
 
         if (!$request->filled('classe_id') && !$request->filled('niveau_id')) {
             return response()->json([
                 'errors' => ['cible' => ['Veuillez sélectionner une classe ou un niveau.']]
+            ], 422);
+        }
+
+        $periode = \App\Models\Periodes::whereDate('date_debut', '<=', $request->date_devoir)
+            ->whereDate('date_fin', '>=', $request->date_devoir)
+            ->first();
+
+        if (!$periode) {
+            return response()->json([
+                'errors' => ['date_devoir' => ['Cette date n\'appartient à aucune période scolaire.']]
             ], 422);
         }
 
@@ -84,7 +93,7 @@ class DevoirController extends Controller
             'matiere_id'     => $request->matiere_id,
             'classe_id'      => $request->filled('classe_id') ? $request->classe_id : null,
             'niveau_id'      => $request->filled('niveau_id') ? $request->niveau_id : null,
-            'periode_id'     => $request->filled('periode_id') ? $request->periode_id : null,
+            'periode_id'     => $periode->id,
         ]);
 
         $devoir->load(['typeDevoir', 'matiere', 'classe', 'niveau', 'periode']);
@@ -112,12 +121,21 @@ class DevoirController extends Controller
             'matiere_id'     => 'required|exists:matieres,id',
             'classe_id'      => 'nullable|exists:classes,id',
             'niveau_id'      => 'nullable|exists:niveaux,id',
-            'periode_id'     => 'nullable|exists:periodes,id',
         ]);
 
         if (!$request->filled('classe_id') && !$request->filled('niveau_id')) {
             return response()->json([
                 'errors' => ['cible' => ['Veuillez sélectionner une classe ou un niveau.']]
+            ], 422);
+        }
+
+        $periode = \App\Models\Periodes::whereDate('date_debut', '<=', $request->date_devoir)
+            ->whereDate('date_fin', '>=', $request->date_devoir)
+            ->first();
+
+        if (!$periode) {
+            return response()->json([
+                'errors' => ['date_devoir' => ['Cette date n\'appartient à aucune période scolaire.']]
             ], 422);
         }
 
@@ -130,7 +148,7 @@ class DevoirController extends Controller
             'matiere_id'     => $request->matiere_id,
             'classe_id'      => $request->filled('classe_id') ? $request->classe_id : null,
             'niveau_id'      => $request->filled('niveau_id') ? $request->niveau_id : null,
-            'periode_id'     => $request->filled('periode_id') ? $request->periode_id : null,
+            'periode_id'     => $periode->id,
         ]);
 
         $devoir->load(['typeDevoir', 'matiere', 'classe', 'niveau', 'periode']);

@@ -15,8 +15,21 @@ import 'theme/app_theme.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    debugPrint('=== FLUTTER ERROR ===');
+    debugPrint(details.exceptionAsString());
+    debugPrint(details.stack.toString());
+  };
+
   // Charge l'URL serveur depuis le stockage sécurisé avant de démarrer l'app
-  await StorageService.loadServerUrl();
+  try {
+    await StorageService.loadServerUrl();
+  } catch (e) {
+    // Stockage corrompu → réinitialisation
+    debugPrint('=== STORAGE ERROR: $e ===');
+    await StorageService.clearAll();
+  }
   ApiService().resetBaseUrl();
 
   runApp(
@@ -31,12 +44,15 @@ Future<void> main() async {
   );
 }
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
 class SuiviScolaireApp extends StatelessWidget {
   const SuiviScolaireApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'Suivi Scolaire',
       theme: AppTheme.theme,
       debugShowCheckedModeBanner: false,
@@ -98,7 +114,8 @@ class _AuthGateState extends State<_AuthGate> {
   //
   Future<void> _applyTenantFromUri(Uri uri) async {
     final host = uri.host;
-    if (host.isEmpty) return;
+    // Ignorer les URLs sans chemin de deep link valide (ex: URL de l'app Flutter Web elle-même)
+    if (host.isEmpty || !uri.path.startsWith('/dl')) return;
     await StorageService.saveServerUrl(host);
     ApiService().resetBaseUrl();
   }

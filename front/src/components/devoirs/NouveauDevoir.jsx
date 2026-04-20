@@ -3,35 +3,51 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 
+const formatDateCode = (dateStr) => {
+    if (!dateStr) return '';
+    const [y, m, d] = dateStr.split('-');
+    return `${d}${m}${y.slice(2)}`;
+};
+
 const NouveauDevoir = () => {
     const { toast } = useToast();
     const navigate = useNavigate();
     const [classes, setClasses]         = useState([]);
     const [niveaux, setNiveaux]         = useState([]);
     const [matieres, setMatieres]       = useState([]);
-    const [periodes, setPeriodes]       = useState([]);
     const [typeDevoirs, setTypeDevoirs] = useState([]);
-    const [portee, setPortee]           = useState('classe'); // 'classe' | 'niveau'
+    const [portee, setPortee]           = useState('classe');
+    const [periodeInfo, setPeriodeInfo]     = useState(null);
+    const [periodeErreur, setPeriodeErreur] = useState('');
 
     const [form, setForm] = useState({
         code_devoir: '', date_devoir: '', coeff_devoir: '',
         type_devoir_id: '', matiere_id: '',
-        classe_id: '', niveau_id: '', periode_id: '',
+        classe_id: '', niveau_id: '',
     });
 
     useEffect(() => {
         api.get('/classesTout').then((res) => setClasses(res.data)).catch((err) => console.error('Erreur chargement:', err));
         api.get('/niveaux').then((res) => setNiveaux(res.data)).catch((err) => console.error('Erreur chargement:', err));
         api.get('/matieres').then((res) => setMatieres(res.data)).catch((err) => console.error('Erreur chargement:', err));
-        api.get('/periodes').then((res) => setPeriodes(res.data)).catch((err) => console.error('Erreur chargement:', err));
         api.get('/typeDevoirs').then((res) => setTypeDevoirs(res.data)).catch((err) => console.error('Erreur chargement:', err));
     }, []);
 
-    // Génération automatique du code quand les champs clés sont remplis
+    // Auto-résolution de la période depuis la date
+    useEffect(() => {
+        if (!form.date_devoir) { setPeriodeInfo(null); setPeriodeErreur(''); return; }
+        api.get('/periodes/parDate', { params: { date: form.date_devoir } })
+            .then(({ data }) => {
+                if (data) { setPeriodeInfo(data); setPeriodeErreur(''); }
+                else { setPeriodeInfo(null); setPeriodeErreur("Cette date n'appartient à aucune période scolaire."); }
+            })
+            .catch(() => setPeriodeErreur('Impossible de vérifier la période.'));
+    }, [form.date_devoir]);
+
+    // Génération automatique du code (type + matière + cible + date JJMMAA)
     useEffect(() => {
         const type    = typeDevoirs.find((t) => String(t.id) === String(form.type_devoir_id));
         const matiere = matieres.find((m) => String(m.id) === String(form.matiere_id));
-        const periode = periodes.find((p) => String(p.id) === String(form.periode_id));
 
         let cibleAbbr = '';
         if (portee === 'classe' && form.classe_id) {
@@ -45,13 +61,14 @@ const NouveauDevoir = () => {
         if (!type || !matiere || !cibleAbbr) return;
 
         const parts = [type.code_type_devoir, matiere.abbr_matiere, cibleAbbr];
-        if (periode?.code_periode) parts.push(periode.code_periode);
+        const dateCode = formatDateCode(form.date_devoir);
+        if (dateCode) parts.push(dateCode);
         const base = parts.join('-');
 
         api.get(`/devoirs/prochainCode?base=${encodeURIComponent(base)}`)
             .then((res) => setForm((prev) => ({ ...prev, code_devoir: res.data.code })))
             .catch((err) => console.error('Erreur chargement:', err));
-    }, [form.type_devoir_id, form.matiere_id, form.classe_id, form.niveau_id, form.periode_id, portee]);
+    }, [form.type_devoir_id, form.matiere_id, form.classe_id, form.niveau_id, form.date_devoir, portee]);
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -64,6 +81,10 @@ const NouveauDevoir = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (!periodeInfo) {
+            toast.error(periodeErreur || "Veuillez choisir une date dans une période scolaire.");
+            return;
+        }
         const payload = {
             ...form,
             classe_id: portee === 'classe' ? form.classe_id : '',
@@ -108,15 +129,17 @@ const NouveauDevoir = () => {
                         </div>
                         <div className="mb-3 col-md-4">
                             <label className="form-label">Période</label>
-                            <select className="form-select" name="periode_id" value={form.periode_id} onChange={handleChange}>
-                                <option value="">Sélectionner</option>
-                                {periodes.map((p) => (
-                                    <option key={p.id} value={p.id}>{p.libelle_periode} — {p.annee}</option>
-                                ))}
-                            </select>
+                            <div className="form-control bg-white d-flex align-items-center" style={{ minHeight: 38 }}>
+                                {periodeInfo ? (
+                                    <span className="badge bg-primary fs-6">{periodeInfo.libelle_periode} — {periodeInfo.annee}</span>
+                                ) : periodeErreur ? (
+                                    <span className="text-danger small">{periodeErreur}</span>
+                                ) : (
+                                    <span className="text-muted small">Automatique selon la date</span>
+                                )}
+                            </div>
                         </div>
 
-                        {/* Portée : Classe ou Niveau */}
                         <div className="mb-3 col-md-12">
                             <label className="form-label">Ce devoir concerne</label>
                             <div className="d-flex gap-3">
@@ -156,7 +179,7 @@ const NouveauDevoir = () => {
                         <div className="mb-3 col-md-6">
                             <label className="form-label">Code du devoir</label>
                             <input type="text" className="form-control" name="code_devoir" value={form.code_devoir} onChange={handleChange} required placeholder="Généré automatiquement" />
-                            <div className="form-text text-muted">Généré selon le type, la matière, la cible et la période. Modifiable.</div>
+                            <div className="form-text text-muted">Généré selon le type, la matière, la cible et la date. Modifiable.</div>
                         </div>
 
                         <div className="mb-3 col-md-6">
@@ -170,7 +193,7 @@ const NouveauDevoir = () => {
                     </fieldset>
                     <div className="d-flex justify-content-end mb-3 gap-2">
                         <NavLink to="/Devoirs" className="btn btn-secondary">Annuler</NavLink>
-                        <button type="submit" className="btn btn-primary">Enregistrer</button>
+                        <button type="submit" className="btn btn-primary" disabled={!!periodeErreur}>Enregistrer</button>
                     </div>
                 </form>
             </div>

@@ -38,9 +38,10 @@ class RdvController extends Controller
 
         $request->validate([
             'date_creneau' => 'required|date|after_or_equal:today',
-            'heure_debut'  => 'required|date_format:H:i',
-            'heure_fin'    => ['required', 'date_format:H:i', function ($attr, $val, $fail) use ($request) {
-                if ($val <= $request->heure_debut) $fail("L'heure de fin doit être après l'heure de début.");
+            'heure_debut'  => 'required|date_format:H:i,H:i:s',
+            'heure_fin'    => ['required', 'date_format:H:i,H:i:s', function ($attr, $val, $fail) use ($request) {
+                if (substr($val, 0, 5) <= substr($request->heure_debut, 0, 5))
+                    $fail("L'heure de fin doit être après l'heure de début.");
             }],
         ]);
 

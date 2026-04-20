@@ -1,10 +1,14 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../config/api_config.dart';
+import '../models/periode.dart';
 import 'storage_service.dart';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
   factory ApiService() => _instance;
+
+  static VoidCallback? onUnauthorized;
 
   late final Dio _dio;
 
@@ -31,15 +35,17 @@ class ApiService {
         onError: (DioException e, handler) async {
           final statusCode = e.response?.statusCode;
           if (statusCode == 401 || statusCode == 403) {
-            // Token expiré ou accès refusé : déconnecter
-            await StorageService.clearAll();
-            // Propager une exception claire pour que l'UI redirige vers login
+            final isLoginEndpoint = e.requestOptions.path.contains('/login');
+            if (!isLoginEndpoint) {
+              await StorageService.clearAll();
+              onUnauthorized?.call();
+            }
             handler.reject(DioException(
               requestOptions: e.requestOptions,
               response: e.response,
               type: DioExceptionType.badResponse,
               message: statusCode == 401
-                  ? 'Session expirée. Veuillez vous reconnecter.'
+                  ? (isLoginEndpoint ? 'Identifiants incorrects.' : 'Session expirée. Veuillez vous reconnecter.')
                   : 'Accès non autorisé.',
             ));
           } else {
@@ -125,16 +131,23 @@ class ApiService {
     await _dio.post(ApiConfig.enseignantSauvegarderNotes(devoirId), data: {'notes': notes});
   }
 
+  Future<Periode?> getPeriodeParDate(String date) async {
+    final response = await _dio.get(
+      ApiConfig.enseignantPeriodesParDate,
+      queryParameters: {'date': date},
+    );
+    if (response.data == null) return null;
+    return Periode.fromJson(response.data as Map<String, dynamic>);
+  }
+
   Future<List<dynamic>> getFeuillePresence({
     required int classeId,
     required int matiereId,
-    required int periodeId,
     required String date,
   }) async {
     final response = await _dio.get(ApiConfig.enseignantAssiduites, queryParameters: {
       'classe_id':  classeId,
       'matiere_id': matiereId,
-      'periode_id': periodeId,
       'date':       date,
     });
     return response.data as List<dynamic>;
@@ -204,7 +217,7 @@ class ApiService {
   }
 
   Future<String> getProchainCode(String base) async {
-    final response = await _dio.get('/devoirs/prochainCode', queryParameters: {'base': base});
+    final response = await _dio.get('/enseignant/devoirs/prochainCode', queryParameters: {'base': base});
     return (response.data as Map<String, dynamic>)['code'] as String? ?? base;
   }
 

@@ -16,12 +16,12 @@ class PresenceScreenState extends State<PresenceScreen> {
   final _api = ApiService();
 
   List<ClasseMatiere> _classes = [];
-  List<Periode> _periodes = [];
   ClasseMatiere? _selection;
-  Periode? _periode;
   DateTime _date = DateTime.now();
   List<Map<String, dynamic>> _eleves = [];
   Map<int, String> _statuts = {};
+  Periode? _periodeInfo;
+  String? _periodeErreur;
 
   bool _loadingData = true;
   bool _loadingEleves = false;
@@ -32,17 +32,14 @@ class PresenceScreenState extends State<PresenceScreen> {
   void initState() {
     super.initState();
     _loadData();
+    _fetchPeriodeFromDate(_date.toIso8601String().substring(0, 10));
   }
 
   Future<void> _loadData() async {
     try {
-      final results = await Future.wait([
-        _api.getClassesEnseignant(),
-        _api.getPeriodesEnseignant(),
-      ]);
+      final data = await _api.getClassesEnseignant();
       setState(() {
-        _classes  = results[0].map((e) => ClasseMatiere.fromJson(e)).toList();
-        _periodes = results[1].map((e) => Periode.fromJson(e)).toList();
+        _classes     = data.map((e) => ClasseMatiere.fromJson(e)).toList();
         _loadingData = false;
       });
     } catch (e) {
@@ -50,14 +47,25 @@ class PresenceScreenState extends State<PresenceScreen> {
     }
   }
 
+  Future<void> _fetchPeriodeFromDate(String date) async {
+    try {
+      final periode = await _api.getPeriodeParDate(date);
+      setState(() {
+        _periodeInfo   = periode;
+        _periodeErreur = periode == null ? "Cette date n'appartient à aucune période scolaire." : null;
+      });
+    } catch (_) {
+      setState(() { _periodeErreur = 'Impossible de vérifier la période.'; });
+    }
+  }
+
   Future<void> _loadEleves() async {
-    if (_selection == null || _periode == null) return;
+    if (_selection == null) return;
     setState(() { _loadingEleves = true; _error = null; });
     try {
       final data = await _api.getFeuillePresence(
         classeId:  _selection!.classeId,
         matiereId: _selection!.matiereId,
-        periodeId: _periode!.id,
         date:      _date.toIso8601String().substring(0, 10),
       );
       final eleves = data.cast<Map<String, dynamic>>();
@@ -76,7 +84,7 @@ class PresenceScreenState extends State<PresenceScreen> {
   }
 
   Future<void> sauvegarder() async {
-    if (_selection == null || _periode == null || _eleves.isEmpty) return;
+    if (_selection == null || _eleves.isEmpty) return;
     setState(() { _saving = true; _error = null; });
     try {
       final assiduites = _eleves.map((e) {
@@ -91,7 +99,6 @@ class PresenceScreenState extends State<PresenceScreen> {
       await _api.sauvegarderPresences({
         'classe_id':  _selection!.classeId,
         'matiere_id': _selection!.matiereId,
-        'periode_id': _periode!.id,
         'date':       _date.toIso8601String().substring(0, 10),
         'assiduites': assiduites,
       });
@@ -150,24 +157,34 @@ class PresenceScreenState extends State<PresenceScreen> {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  // Période
+                  // Période (affichage automatique)
                   Expanded(
-                    child: DropdownButtonFormField<Periode>(
-                      initialValue: _periode,
-                      decoration: const InputDecoration(
-                        labelText: 'Période',
-                        prefixIcon: Icon(Icons.event_note),
-                        isDense: true,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey[400]!),
+                        borderRadius: BorderRadius.circular(4),
                       ),
-                      items: _periodes.map((p) => DropdownMenuItem(
-                        value: p,
-                        child: Text(p.abbr ?? p.libelle, style: const TextStyle(fontSize: 13)),
-                      )).toList(),
-                      onChanged: (p) {
-                        setState(() => _periode = p);
-                        _loadEleves();
-                      },
+                      child: Row(
+                        children: [
+                          Icon(Icons.event_note, size: 18, color: Colors.grey[600]),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _periodeInfo != null
+                                  ? _periodeInfo!.label
+                                  : (_periodeErreur ?? 'Période auto'),
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: _periodeInfo != null
+                                    ? Colors.blue[700]
+                                    : (_periodeErreur != null ? Colors.red : Colors.grey),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -182,6 +199,8 @@ class PresenceScreenState extends State<PresenceScreen> {
                       );
                       if (d != null) {
                         setState(() => _date = d);
+                        final dateStr = d.toIso8601String().substring(0, 10);
+                        await _fetchPeriodeFromDate(dateStr);
                         _loadEleves();
                       }
                     },
@@ -240,8 +259,8 @@ class PresenceScreenState extends State<PresenceScreen> {
                           const SizedBox(height: 12),
                           Text(
                             _selection == null
-                                ? 'Sélectionnez une classe et une période'
-                                : 'Aucun élève trouvé',
+                                ? 'Sélectionnez une classe et une matière'
+                                : (_periodeErreur ?? 'Aucun élève trouvé'),
                             style: TextStyle(color: Colors.grey[500]),
                             textAlign: TextAlign.center,
                           ),

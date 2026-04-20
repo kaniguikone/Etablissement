@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/notification_model.dart';
 import '../services/notification_service.dart';
+import '../services/storage_service.dart';
 
 class NotificationProvider extends ChangeNotifier {
   final NotificationService _service = NotificationService();
@@ -23,6 +24,11 @@ class NotificationProvider extends ChangeNotifier {
     _pollTimer = Timer.periodic(const Duration(seconds: 30), (_) => _fetchBadge());
   }
 
+  void stopPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = null;
+  }
+
   @override
   void dispose() {
     _pollTimer?.cancel();
@@ -32,6 +38,8 @@ class NotificationProvider extends ChangeNotifier {
   // ── Badge (polling léger) ─────────────────────────────────────────────────
 
   Future<void> _fetchBadge() async {
+    final token = await StorageService.getToken();
+    if (token == null) return;
     final count = await _service.fetchNonLues(prefix: _prefix);
     if (count != _nonLues) {
       _nonLues = count;

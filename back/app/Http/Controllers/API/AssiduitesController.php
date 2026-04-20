@@ -28,16 +28,25 @@ class AssiduitesController extends Controller
         $request->validate([
             'classe_id'  => 'required|exists:classes,id',
             'matiere_id' => 'required|exists:matieres,id',
-            'periode_id' => 'required|exists:periodes,id',
             'date'       => 'required|date',
         ]);
+
+        $periode = \App\Models\Periodes::whereDate('date_debut', '<=', $request->date)
+            ->whereDate('date_fin', '>=', $request->date)
+            ->first();
+
+        if (!$periode) {
+            return response()->json([
+                'errors' => ['date' => ['Cette date n\'appartient à aucune période scolaire.']]
+            ], 422);
+        }
 
         $eleves = Eleve::where('classe_id', $request->classe_id)
             ->orderBy('nom_eleve')
             ->get();
 
         $assiduites = Assiduites::where('matiere_id', $request->matiere_id)
-            ->where('periode_id', $request->periode_id)
+            ->where('periode_id', $periode->id)
             ->where('date_assiduite', $request->date)
             ->whereIn('eleve_id', $eleves->pluck('id'))
             ->get()
@@ -66,7 +75,6 @@ class AssiduitesController extends Controller
     {
         $request->validate([
             'matiere_id'           => 'required|exists:matieres,id',
-            'periode_id'           => 'required|exists:periodes,id',
             'date_assiduite'       => 'required|date',
             'assiduites'           => 'required|array',
             'assiduites.*.eleve_id' => 'required|exists:eleves,id',
@@ -74,13 +82,23 @@ class AssiduitesController extends Controller
             'assiduites.*.remarque' => 'nullable|string|max:255',
         ]);
 
+        $periode = \App\Models\Periodes::whereDate('date_debut', '<=', $request->date_assiduite)
+            ->whereDate('date_fin', '>=', $request->date_assiduite)
+            ->first();
+
+        if (!$periode) {
+            return response()->json([
+                'errors' => ['date_assiduite' => ['Cette date n\'appartient à aucune période scolaire.']]
+            ], 422);
+        }
+
         $notifService = app(NotificationService::class);
 
         foreach ($request->assiduites as $item) {
             $existing = Assiduites::where([
                 'eleve_id'       => $item['eleve_id'],
                 'matiere_id'     => $request->matiere_id,
-                'periode_id'     => $request->periode_id,
+                'periode_id'     => $periode->id,
                 'date_assiduite' => $request->date_assiduite,
             ])->first();
 
@@ -90,7 +108,7 @@ class AssiduitesController extends Controller
                 [
                     'eleve_id'       => $item['eleve_id'],
                     'matiere_id'     => $request->matiere_id,
-                    'periode_id'     => $request->periode_id,
+                    'periode_id'     => $periode->id,
                     'date_assiduite' => $request->date_assiduite,
                 ],
                 [
@@ -164,12 +182,22 @@ class AssiduitesController extends Controller
             'remarque'       => 'nullable|string|max:255',
             'eleve_id'       => 'required|exists:eleves,id',
             'matiere_id'     => 'required|exists:matieres,id',
-            'periode_id'     => 'required|exists:periodes,id',
         ]);
 
-        $assiduite = Assiduites::create($request->only([
-            'date_assiduite', 'statut', 'remarque', 'eleve_id', 'matiere_id', 'periode_id',
-        ]));
+        $periode = \App\Models\Periodes::whereDate('date_debut', '<=', $request->date_assiduite)
+            ->whereDate('date_fin', '>=', $request->date_assiduite)
+            ->first();
+
+        if (!$periode) {
+            return response()->json([
+                'errors' => ['date_assiduite' => ['Cette date n\'appartient à aucune période scolaire.']]
+            ], 422);
+        }
+
+        $assiduite = Assiduites::create(array_merge(
+            $request->only(['date_assiduite', 'statut', 'remarque', 'eleve_id', 'matiere_id']),
+            ['periode_id' => $periode->id]
+        ));
 
         return response()->json($assiduite->load(['eleve', 'matiere', 'periode']), 201);
     }
@@ -182,13 +210,23 @@ class AssiduitesController extends Controller
             'remarque'       => 'nullable|string|max:255',
             'eleve_id'       => 'required|exists:eleves,id',
             'matiere_id'     => 'required|exists:matieres,id',
-            'periode_id'     => 'required|exists:periodes,id',
         ]);
 
+        $periode = \App\Models\Periodes::whereDate('date_debut', '<=', $request->date_assiduite)
+            ->whereDate('date_fin', '>=', $request->date_assiduite)
+            ->first();
+
+        if (!$periode) {
+            return response()->json([
+                'errors' => ['date_assiduite' => ['Cette date n\'appartient à aucune période scolaire.']]
+            ], 422);
+        }
+
         $assiduite = Assiduites::findOrFail($id);
-        $assiduite->update($request->only([
-            'date_assiduite', 'statut', 'remarque', 'eleve_id', 'matiere_id', 'periode_id',
-        ]));
+        $assiduite->update(array_merge(
+            $request->only(['date_assiduite', 'statut', 'remarque', 'eleve_id', 'matiere_id']),
+            ['periode_id' => $periode->id]
+        ));
 
         return response()->json($assiduite->load(['eleve', 'matiere', 'periode']));
     }

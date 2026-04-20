@@ -69,7 +69,8 @@ class ApiConfig {
   static const String enseignantDevoirs     = '/enseignant/devoirs';
   static const String enseignantAssiduites  = '/enseignant/assiduites';
   static const String enseignantEmploi      = '/enseignant/emploi';
-  static const String enseignantPeriodes    = '/enseignant/periodes';
+  static const String enseignantPeriodes        = '/enseignant/periodes';
+  static const String enseignantPeriodesParDate = '/enseignant/periodes/parDate';
   static const String enseignantTypeDevoirs = '/enseignant/typeDevoirs';
   static const String enseignantInfos       = '/enseignant/informations';
 

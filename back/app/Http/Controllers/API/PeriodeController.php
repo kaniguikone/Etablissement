@@ -39,6 +39,17 @@ class PeriodeController extends Controller
         return response()->json($periode, 201);
     }
 
+    public function parDate(Request $request)
+    {
+        $request->validate(['date' => 'required|date']);
+
+        $periode = Periodes::whereDate('date_debut', '<=', $request->date)
+            ->whereDate('date_fin', '>=', $request->date)
+            ->first();
+
+        return response()->json($periode);
+    }
+
     public function show(string $id)
     {
         $periode = Periodes::findOrFail($id);

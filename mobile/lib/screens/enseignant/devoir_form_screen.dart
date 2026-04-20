@@ -3,6 +3,7 @@ import '../../services/api_service.dart';
 import '../../models/devoir.dart';
 import '../../models/classe_matiere.dart';
 import '../../models/periode.dart';
+
 class DevoirFormScreen extends StatefulWidget {
   final Devoir? devoir; // null = création
   const DevoirFormScreen({super.key, this.devoir});
@@ -20,18 +21,26 @@ class _DevoirFormScreenState extends State<DevoirFormScreen> {
   final _coeffCtrl = TextEditingController();
 
   List<ClasseMatiere> _classes = [];
-  List<Periode> _periodes = [];
   List<Map<String, dynamic>> _typeDevoirs = [];
 
   ClasseMatiere? _classeMatiere;
-  Periode? _periode;
   int? _typeDevoirId;
+
+  Periode? _periodeInfo;
+  String? _periodeErreur;
 
   bool _loading = false;
   bool _loadingData = true;
   String? _error;
 
   bool get _estModification => widget.devoir != null;
+
+  String _formatDateCode(String dateStr) {
+    if (dateStr.isEmpty) return '';
+    final parts = dateStr.split('-');
+    if (parts.length != 3) return '';
+    return '${parts[2]}${parts[1]}${parts[0].substring(2)}'; // JJMMAA
+  }
 
   @override
   void initState() {
@@ -51,17 +60,14 @@ class _DevoirFormScreenState extends State<DevoirFormScreen> {
     try {
       final results = await Future.wait([
         _api.getClassesEnseignant(),
-        _api.getPeriodesEnseignant(),
         _api.getTypeDevoirs(),
       ]);
       setState(() {
         _classes     = results[0].map((e) => ClasseMatiere.fromJson(e)).toList();
-        _periodes    = results[1].map((e) => Periode.fromJson(e)).toList();
-        _typeDevoirs = results[2].map((e) => e as Map<String, dynamic>).toList();
+        _typeDevoirs = results[1].map((e) => e as Map<String, dynamic>).toList();
         _loadingData = false;
       });
 
-      // Pré-remplir si modification
       if (_estModification) {
         final d = widget.devoir!;
         _codeCtrl.text  = d.code;
@@ -72,14 +78,27 @@ class _DevoirFormScreenState extends State<DevoirFormScreen> {
           (cm) => cm.classeId == d.classeId && cm.matiereId == d.matiereId,
           orElse: () => _classes.first,
         );
-        _periode = _periodes.firstWhere(
-          (p) => p.id == d.periodeId,
-          orElse: () => _periodes.first,
-        );
-        // En modification on conserve le code existant
+        if (d.date.isNotEmpty) _fetchPeriodeFromDate(d.date);
       }
     } catch (e) {
       setState(() { _error = e.toString(); _loadingData = false; });
+    }
+  }
+
+  Future<void> _fetchPeriodeFromDate(String date) async {
+    if (date.isEmpty) {
+      setState(() { _periodeInfo = null; _periodeErreur = null; });
+      return;
+    }
+    try {
+      final periode = await _api.getPeriodeParDate(date);
+      setState(() {
+        _periodeInfo   = periode;
+        _periodeErreur = periode == null ? "Cette date n'appartient à aucune période scolaire." : null;
+      });
+      if (periode != null) _generateCode();
+    } catch (_) {
+      setState(() { _periodeErreur = 'Impossible de vérifier la période.'; });
     }
   }
 
@@ -91,12 +110,12 @@ class _DevoirFormScreenState extends State<DevoirFormScreen> {
       orElse: () => <String, dynamic>{},
     );
     final typeCode = (type['code_type_devoir'] as String? ?? '').toUpperCase();
-    final abbr  = _classeMatiere!.abbrMatiere.toUpperCase();
-    final cible = _classeMatiere!.abbrClasse.toUpperCase();
-    final per   = _periode?.code?.toUpperCase() ?? '';
+    final abbr     = _classeMatiere!.abbrMatiere.toUpperCase();
+    final cible    = _classeMatiere!.abbrClasse.toUpperCase();
+    final dateCode = _formatDateCode(_dateCtrl.text);
 
     final parts = [typeCode, abbr, cible];
-    if (per.isNotEmpty) parts.add(per);
+    if (dateCode.isNotEmpty) parts.add(dateCode);
     final base = parts.join('-');
 
     try {
@@ -113,6 +132,10 @@ class _DevoirFormScreenState extends State<DevoirFormScreen> {
       setState(() => _error = 'Sélectionnez une classe et matière.');
       return;
     }
+    if (_periodeInfo == null) {
+      setState(() => _error = _periodeErreur ?? "Veuillez choisir une date dans une période scolaire.");
+      return;
+    }
     setState(() { _loading = true; _error = null; });
 
     final data = {
@@ -122,7 +145,6 @@ class _DevoirFormScreenState extends State<DevoirFormScreen> {
       'type_devoir_id': _typeDevoirId,
       'matiere_id':     _classeMatiere!.matiereId,
       'classe_id':      _classeMatiere!.classeId,
-      'periode_id':     _periode?.id,
     };
 
     try {
@@ -204,36 +226,6 @@ class _DevoirFormScreenState extends State<DevoirFormScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  // Période
-                  DropdownButtonFormField<Periode>(
-                    initialValue: _periode,
-                    decoration: const InputDecoration(
-                      labelText: 'Période',
-                      prefixIcon: Icon(Icons.calendar_view_month),
-                    ),
-                    items: _periodes.map((p) => DropdownMenuItem(
-                      value: p,
-                      child: Text(p.label),
-                    )).toList(),
-                    onChanged: (p) {
-                      setState(() => _periode = p);
-                      _generateCode();
-                    },
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Code
-                  TextFormField(
-                    controller: _codeCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Code du devoir',
-                      prefixIcon: Icon(Icons.tag),
-                      helperText: 'Généré automatiquement, modifiable',
-                    ),
-                    validator: (v) => v == null || v.trim().isEmpty ? 'Requis' : null,
-                  ),
-                  const SizedBox(height: 12),
-
                   // Date
                   TextFormField(
                     controller: _dateCtrl,
@@ -250,9 +242,51 @@ class _DevoirFormScreenState extends State<DevoirFormScreen> {
                         lastDate: DateTime(2030),
                       );
                       if (d != null) {
-                        _dateCtrl.text = d.toIso8601String().substring(0, 10);
+                        final dateStr = d.toIso8601String().substring(0, 10);
+                        setState(() => _dateCtrl.text = dateStr);
+                        await _fetchPeriodeFromDate(dateStr);
                       }
                     },
+                    validator: (v) => v == null || v.trim().isEmpty ? 'Requis' : null,
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Période (affichage automatique)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey[400]!),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.calendar_view_month, color: Colors.grey, size: 20),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _periodeInfo != null
+                              ? Text(_periodeInfo!.label,
+                                  style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.w500))
+                              : Text(
+                                  _periodeErreur ?? 'Période automatique selon la date',
+                                  style: TextStyle(
+                                    color: _periodeErreur != null ? Colors.red : Colors.grey,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Code
+                  TextFormField(
+                    controller: _codeCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Code du devoir',
+                      prefixIcon: Icon(Icons.tag),
+                      helperText: 'Généré automatiquement, modifiable',
+                    ),
                     validator: (v) => v == null || v.trim().isEmpty ? 'Requis' : null,
                   ),
                   const SizedBox(height: 12),
