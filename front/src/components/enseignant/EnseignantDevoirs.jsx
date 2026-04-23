@@ -86,7 +86,7 @@ const EnseignantDevoirs = () => {
         setChargement(true);
         api.get('/enseignant/devoirs', { params: { periode_id: periodeId || undefined } })
             .then(({ data }) => setDevoirs(data))
-            .catch(() => toast('Erreur chargement devoirs.', 'danger'))
+            .catch(() => toast.error('Erreur chargement devoirs.'))
             .finally(() => setChargement(false));
     };
 
@@ -101,28 +101,39 @@ const EnseignantDevoirs = () => {
             classe_id:      devoir.classe_id ?? '',
             niveau_id:      devoir.niveau_id ?? '',
         } : vide);
+        setModalPeriodeInfo(null);
+        setModalPeriodeErreur('');
         setModal(true);
+    };
+
+    const fermerModal = () => {
+        setModal(false);
+        charger();
     };
 
     const sauvegarder = async (e) => {
         e.preventDefault();
         if (!modalPeriodeInfo) {
-            toast(modalPeriodeErreur || "Veuillez choisir une date dans une période scolaire.", 'danger');
+            toast.error(modalPeriodeErreur || "Veuillez choisir une date dans une période scolaire.");
             return;
         }
         setSauvegarde(true);
         try {
             if (edition) {
                 await api.put(`/enseignant/devoirs/${edition.id}`, form);
-                toast('Devoir modifié.', 'success');
+                toast.success('Devoir modifié.');
             } else {
                 await api.post('/enseignant/devoirs', form);
-                toast('Devoir créé.', 'success');
+                toast.success('Devoir créé.');
             }
             setModal(false);
             charger();
         } catch (err) {
-            toast(err.response?.data?.message ?? 'Erreur.', 'danger');
+            const data = err.response?.data;
+            const msg = data?.message
+                ?? (data?.errors ? Object.values(data.errors).flat().join(' ') : null)
+                ?? 'Erreur lors de la sauvegarde.';
+            toast.error(msg);
         } finally {
             setSauvegarde(false);
         }
@@ -144,7 +155,7 @@ const EnseignantDevoirs = () => {
             setClassesNiveau(data.classes_niveau ?? []);
             if (classeId) setClasseNotesId(classeId);
         } catch {
-            toast('Erreur chargement notes.', 'danger');
+            toast.error('Erreur chargement notes.');
         }
     };
 
@@ -153,10 +164,10 @@ const EnseignantDevoirs = () => {
         try {
             const payload = notes.map(n => ({ eleve_id: n.eleve_id, note: n._note !== undefined ? n._note : n.note }));
             await api.post(`/enseignant/devoir/${devoirNotes.id}/notes`, { notes: payload });
-            toast('Notes enregistrées.', 'success');
+            toast.success('Notes enregistrées.');
             setDevoirNotes(null);
         } catch {
-            toast('Erreur sauvegarde notes.', 'danger');
+            toast.error('Erreur sauvegarde notes.');
         } finally {
             setSauvegardeNotes(false);
         }
@@ -310,7 +321,7 @@ const EnseignantDevoirs = () => {
                         <form className="modal-content" onSubmit={sauvegarder}>
                             <div className="modal-header">
                                 <h5 className="modal-title">{edition ? 'Modifier le devoir' : 'Nouveau devoir'}</h5>
-                                <button type="button" className="btn-close" onClick={() => setModal(false)} />
+                                <button type="button" className="btn-close" onClick={fermerModal} />
                             </div>
                             <div className="modal-body row g-3">
                                 <div className="col-md-6">
@@ -366,7 +377,7 @@ const EnseignantDevoirs = () => {
                                 </div>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => setModal(false)}>Annuler</button>
+                                <button type="button" className="btn btn-outline-secondary btn-sm" onClick={fermerModal}>Annuler</button>
                                 <button type="submit" className="btn btn-primary btn-sm" disabled={sauvegarde || !!modalPeriodeErreur}>
                                     {sauvegarde && <span className="spinner-border spinner-border-sm me-1" />}
                                     {edition ? 'Enregistrer' : 'Créer'}

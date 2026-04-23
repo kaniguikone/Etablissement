@@ -171,7 +171,7 @@ class _ReservationsTabState extends State<_ReservationsTab> {
                     children: [
                       Expanded(
                         child: Text(
-                          '${parent?['prenom'] ?? ''} ${parent?['nom'] ?? ''}'.trim(),
+                          '${parent?['prenoms'] ?? parent?['prenom'] ?? ''} ${parent?['nom'] ?? ''}'.trim(),
                           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                         ),
                       ),

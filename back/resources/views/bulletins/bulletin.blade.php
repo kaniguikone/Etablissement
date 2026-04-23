@@ -88,19 +88,28 @@
             <td class="label">Date de naissance :</td>
             <td>{{ $eleve->date_naissance_eleve }}</td>
         </tr>
+        <tr>
+            <td class="label">Rang :</td>
+            <td><strong>{{ $rang !== null ? $rang . 'er/' . $effectif : '—' }}</strong></td>
+            <td class="label">Effectif :</td>
+            <td>{{ $effectif ?? '—' }}</td>
+        </tr>
     </table>
 </div>
 
 <table class="notes">
     <thead>
         <tr>
-            <th style="width:30%">Matière</th>
-            <th style="width:7%">Coeff</th>
+            <th style="width:26%">Matière</th>
+            <th style="width:6%">Coeff</th>
             @if($estDerniereperiode)
-            <th style="width:20%">Moy. Trimestre</th>
-            <th style="width:20%">Moy. Annuelle</th>
+            <th style="width:13%">Moy. T3</th>
+            <th style="width:7%">Rg T3</th>
+            <th style="width:13%">Moy. Ann.</th>
+            <th style="width:7%">Rg Ann.</th>
             @else
-            <th style="width:23%">Moyenne</th>
+            <th style="width:16%">Moyenne</th>
+            <th style="width:7%">Rang</th>
             @endif
             <th>Appréciation</th>
         </tr>
@@ -108,9 +117,10 @@
     <tbody>
         @foreach($parMatiere as $matiere => $info)
             @php
-                $moy = $info['moyenne'];
-                $coeff = $info['coeff_matiere'] ?? 1;
+                $moy    = $info['moyenne'];
+                $coeff  = $info['coeff_matiere'] ?? 1;
                 $moyAnn = $estDerniereperiode ? ($parMatiereAnnuelle[$matiere]['moyenne'] ?? null) : null;
+                $rangAnn = $estDerniereperiode ? ($parMatiereAnnuelle[$matiere]['rang'] ?? null) : null;
 
                 $classe = 'moyenne';
                 $appreciation = '—';
@@ -127,7 +137,11 @@
                 <td style="text-align:center;color:#64748b">{{ $coeff }}</td>
                 <td class="{{ $classe }}">{{ $moy !== null ? number_format($moy, 2) : '—' }}/20</td>
                 @if($estDerniereperiode)
+                <td style="text-align:center;color:#64748b">{{ $info['rang'] !== null ? $info['rang'] . 'er' : '—' }}</td>
                 <td class="moyenne" style="font-weight:bold">{{ $moyAnn !== null ? number_format($moyAnn, 2) : '—' }}/20</td>
+                <td style="text-align:center;color:#2c3e50;font-weight:bold">{{ $rangAnn !== null ? $rangAnn . 'er' : '—' }}</td>
+                @else
+                <td style="text-align:center;color:#64748b">{{ $info['rang'] !== null ? $info['rang'] . 'er' : '—' }}</td>
                 @endif
                 <td>{{ $appreciation }}</td>
             </tr>

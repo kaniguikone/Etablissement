@@ -13,6 +13,7 @@ const FeuillePresence = () => {
     const [classes, setClasses]   = useState([]);
     const [matieres, setMatieres] = useState([]);
     const [filtre, setFiltre]     = useState({ classe_id: '', matiere_id: '', date: '' });
+    const [heures, setHeures]     = useState({ heure_debut: '', heure_fin: '' });
     const [lignes, setLignes]     = useState([]);
     const [chargement, setChargement]   = useState(false);
     const [sauvegarde, setSauvegarde]   = useState(false);
@@ -44,12 +45,27 @@ const FeuillePresence = () => {
         setLignes([]);
     };
 
+    const calculerDuree = (debut, fin) => {
+        if (!debut || !fin) return null;
+        const [hD, mD] = debut.split(':').map(Number);
+        const [hF, mF] = fin.split(':').map(Number);
+        const minutes = (hF * 60 + mF) - (hD * 60 + mD);
+        if (minutes <= 0) return null;
+        const h = Math.floor(minutes / 60);
+        const m = minutes % 60;
+        return m === 0 ? `${h}h` : `${h}h${String(m).padStart(2, '0')}`;
+    };
+
     const chargerFeuille = (e) => {
         e.preventDefault();
         setChargement(true);
         api.get('/assiduitesFeuille', { params: filtre })
             .then((r) => {
-                setLignes(r.data);
+                setLignes(r.data.lignes);
+                setHeures({
+                    heure_debut: r.data.heure_debut ?? '',
+                    heure_fin:   r.data.heure_fin   ?? '',
+                });
                 setFeuilleChargee(true);
                 setChargement(false);
             })
@@ -73,6 +89,8 @@ const FeuillePresence = () => {
         api.post('/assiduitesSauvegarder', {
             matiere_id:     filtre.matiere_id,
             date_assiduite: filtre.date,
+            heure_debut:    heures.heure_debut || null,
+            heure_fin:      heures.heure_fin   || null,
             assiduites:     lignes.map((l) => ({
                 eleve_id: l.eleve_id,
                 statut:   l.statut,
@@ -98,14 +116,14 @@ const FeuillePresence = () => {
 
                 {/* Filtres */}
                 <form onSubmit={chargerFeuille} className="row g-3 mb-3 align-items-end border-bottom pb-3">
-                    <div className="col-md-3">
+                    <div className="col-md-2">
                         <label className="form-label">Classe</label>
                         <select className="form-select form-select-sm" name="classe_id" value={filtre.classe_id} onChange={handleFiltreChange} required>
                             <option value="">Sélectionner</option>
                             {classes.map((c) => <option key={c.id} value={c.id}>{c.nom_classe}</option>)}
                         </select>
                     </div>
-                    <div className="col-md-3">
+                    <div className="col-md-2">
                         <label className="form-label">Matière</label>
                         <select className="form-select form-select-sm" name="matiere_id" value={filtre.matiere_id} onChange={handleFiltreChange} required>
                             <option value="">Sélectionner</option>
@@ -116,7 +134,21 @@ const FeuillePresence = () => {
                         <label className="form-label">Date</label>
                         <input type="date" className="form-control form-control-sm" name="date" value={filtre.date} onChange={handleFiltreChange} required />
                     </div>
-                    <div className="col-md-3">
+                    <div className="col-md-1">
+                        <label className="form-label">Début</label>
+                        <input type="time" className="form-control form-control-sm" value={heures.heure_debut} onChange={(e) => setHeures({ ...heures, heure_debut: e.target.value })} />
+                    </div>
+                    <div className="col-md-1">
+                        <label className="form-label">Fin</label>
+                        <input type="time" className="form-control form-control-sm" value={heures.heure_fin} onChange={(e) => setHeures({ ...heures, heure_fin: e.target.value })} />
+                    </div>
+                    <div className="col-md-1">
+                        <label className="form-label">Durée</label>
+                        <div className="form-control form-control-sm bg-light text-center fw-bold" style={{ minHeight: 31 }}>
+                            {calculerDuree(heures.heure_debut, heures.heure_fin) ?? '—'}
+                        </div>
+                    </div>
+                    <div className="col-md-2">
                         <label className="form-label">Période</label>
                         <div className="form-control form-control-sm bg-white d-flex align-items-center" style={{ minHeight: 31 }}>
                             {periodeInfo ? (

@@ -88,7 +88,6 @@ import SanctionsEleve from '../components/sanctions/SanctionsEleve';
 
 import ListeInscriptions from '../components/inscriptions/ListeInscriptions';
 import DetailsInscription from '../components/inscriptions/DetailsInscription';
-import NouvelleInscription from '../components/inscriptions/NouvelleInscription';
 
 import GestionChapitres from '../components/programme/GestionChapitres';
 import SuiviProgressions from '../components/programme/SuiviProgressions';
@@ -103,6 +102,8 @@ import ListeRoles from '../components/roles/ListeRoles';
 import NouveauRole from '../components/roles/NouveauRole';
 import Notifications from '../components/notifications/Notifications';
 import ArchivageWizard from '../components/archivage/ArchivageWizard';
+
+import SeederInterface from '../components/developpement/SeederInterface';
 
 import EnseignantDashboard    from '../components/enseignant/EnseignantDashboard';
 import EnseignantDevoirs      from '../components/enseignant/EnseignantDevoirs';
@@ -165,6 +166,9 @@ const RoutesMenu = () => (
             {/* Archivage */}
             <Route path="/Archivage" element={<PrivateRoute permissions={R_PARAM}><ArchivageWizard /></PrivateRoute>} />
 
+            {/* Seed (dev) */}
+            <Route path="/Seeder" element={<PrivateRoute superOnly><SeederInterface /></PrivateRoute>} />
+
             {/* Statistiques */}
             <Route path="/Statistiques" element={<PrivateRoute permissions={R_STATS}><Statistiques /></PrivateRoute>} />
 
@@ -196,7 +200,6 @@ const RoutesMenu = () => (
             {/* Inscriptions */}
             <Route path="/Inscriptions"          element={<PrivateRoute permissions={R_INSCRIP}><ListeInscriptions /></PrivateRoute>} />
             <Route path="/Inscriptions/:id"      element={<PrivateRoute permissions={R_INSCRIP}><DetailsInscription /></PrivateRoute>} />
-            <Route path="/NouvelleInscription"   element={<PrivateRoute permissions={R_INSCRIP}><NouvelleInscription /></PrivateRoute>} />
 
             {/* Personnes */}
             <Route path="/Eleves"              element={<PrivateRoute permissions={R_ELEVES}><ListeEleves /></PrivateRoute>} />

@@ -104,12 +104,10 @@ class _NotesScreenState extends State<NotesScreen> {
     try {
       final data = await _api.getBulletin(
           widget.eleve.id, _periodeSelectionnee!.id);
-      final list = data['matieres'] as List<dynamic>? ?? data['parMatiere']?.entries?.map((e) {
-        return {'matiere': e.key, ...e.value as Map};
-      })?.toList() ?? [];
+      final raw = data['matieres'] as List<dynamic>? ?? [];
       setState(() {
-        _matieres = list
-            .map((m) => NoteMatiere.fromJson(m as Map<String, dynamic>))
+        _matieres = raw
+            .map<NoteMatiere>((m) => NoteMatiere.fromJson(m as Map<String, dynamic>))
             .toList();
         _loadingNotes = false;
       });

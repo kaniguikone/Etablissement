@@ -16,6 +16,10 @@ use App\Http\Controllers\API\Group\TemplateController;
 | Elles permettent de gérer les établissements (tenants).
 */
 
+// ─── Recherche publique d'établissements (onboarding mobile) ─────────────────
+Route::get('/etablissements/recherche',   [TenantController::class, 'recherche']);
+Route::get('/etablissements/code/{code}', [TenantController::class, 'lookupParCode']);
+
 // ─── Auth Group Admin ────────────────────────────────────────────────────────
 Route::post('/group/login', [GroupAuthController::class, 'login']);
 

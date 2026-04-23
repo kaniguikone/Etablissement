@@ -15,6 +15,8 @@ const DetailsAssiduite = () => {
     const [periodeErreur, setPeriodeErreur] = useState('');
     const [form, setForm] = useState({
         date_assiduite: '',
+        heure_debut:    '',
+        heure_fin:      '',
         statut:         'present',
         remarque:       '',
         eleve_id:       '',
@@ -29,10 +31,12 @@ const DetailsAssiduite = () => {
                 const a = r.data;
                 setForm({
                     date_assiduite: a.date_assiduite || '',
-                    statut:         a.statut || 'present',
-                    remarque:       a.remarque || '',
-                    eleve_id:       a.eleve_id || '',
-                    matiere_id:     a.matiere_id || '',
+                    heure_debut:    a.heure_debut    || '',
+                    heure_fin:      a.heure_fin      || '',
+                    statut:         a.statut         || 'present',
+                    remarque:       a.remarque       || '',
+                    eleve_id:       a.eleve_id       || '',
+                    matiere_id:     a.matiere_id     || '',
                 });
             })
             .catch(() => toast.error('Impossible de charger les données.'));
@@ -50,6 +54,17 @@ const DetailsAssiduite = () => {
     }, [form.date_assiduite]);
 
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+    const calculerDuree = (debut, fin) => {
+        if (!debut || !fin) return null;
+        const [hD, mD] = debut.split(':').map(Number);
+        const [hF, mF] = fin.split(':').map(Number);
+        const minutes = (hF * 60 + mF) - (hD * 60 + mD);
+        if (minutes <= 0) return null;
+        const h = Math.floor(minutes / 60);
+        const m = minutes % 60;
+        return m === 0 ? `${h}h` : `${h}h${String(m).padStart(2, '0')}`;
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -76,17 +91,31 @@ const DetailsAssiduite = () => {
                 </div>
                 <form onSubmit={handleSubmit}>
                     <fieldset className="row g-3 justify-content-center">
-                        <div className="mb-3 col-md-4">
+                        <div className="mb-3 col-md-3">
                             <label className="form-label">Date</label>
                             <input type="date" className="form-control" name="date_assiduite" value={form.date_assiduite} onChange={handleChange} required />
                         </div>
-                        <div className="mb-3 col-md-4">
+                        <div className="mb-3 col-md-2">
+                            <label className="form-label">Heure début</label>
+                            <input type="time" className="form-control" name="heure_debut" value={form.heure_debut} onChange={handleChange} />
+                        </div>
+                        <div className="mb-3 col-md-2">
+                            <label className="form-label">Heure fin</label>
+                            <input type="time" className="form-control" name="heure_fin" value={form.heure_fin} onChange={handleChange} />
+                        </div>
+                        <div className="mb-3 col-md-2">
+                            <label className="form-label">Durée</label>
+                            <div className="form-control bg-light text-center fw-bold">
+                                {calculerDuree(form.heure_debut, form.heure_fin) ?? '—'}
+                            </div>
+                        </div>
+                        <div className="mb-3 col-md-3">
                             <label className="form-label">Statut</label>
                             <select className="form-select" name="statut" value={form.statut} onChange={handleChange} required>
                                 {STATUTS.map((s) => <option key={s} value={s}>{s}</option>)}
                             </select>
                         </div>
-                        <div className="mb-3 col-md-4">
+                        <div className="mb-3 col-md-12">
                             <label className="form-label">Remarque</label>
                             <input type="text" className="form-control" name="remarque" value={form.remarque} onChange={handleChange} />
                         </div>

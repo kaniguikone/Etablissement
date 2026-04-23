@@ -28,7 +28,7 @@ const DetailsEleve = () => {
                 matricule_eleve:      e.matricule_eleve      || '',
                 nom_eleve:            e.nom_eleve            || '',
                 prenoms_eleve:        e.prenoms_eleve        || '',
-                date_naissance_eleve: e.date_naissance_eleve || '',
+                date_naissance_eleve: e.date_naissance_eleve?.substring(0, 10) || '',
                 genre_eleve:          e.genre_eleve          || '',
                 lieu_naissance_eleve: e.lieu_naissance_eleve || '',
                 nationalite_eleve:    e.nationalite_eleve    || '',

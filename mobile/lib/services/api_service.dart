@@ -30,6 +30,10 @@ class ApiService {
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
           }
+          // Émulateur Android : "sous-domaine.10.0.2.2:8000" → connexion sur l'IP,
+          // mais le header Host doit contenir le vrai sous-domaine pour le routing tenant.
+          final vh = ApiConfig.virtualHost;
+          if (vh != null) options.headers['Host'] = vh;
           handler.next(options);
         },
         onError: (DioException e, handler) async {
@@ -421,5 +425,32 @@ class ApiService {
   Future<Map<String, dynamic>> annulerRdvEnseignant(int id) async {
     final response = await _dio.post(ApiConfig.enseignantRdvAnnuler(id));
     return response.data as Map<String, dynamic>;
+  }
+
+  /// Recherche publique d'établissements (utilisée à l'onboarding).
+  Future<List<Map<String, dynamic>>> rechercherEtablissements(String q) async {
+    final dio = Dio(BaseOptions(
+      baseUrl: ApiConfig.centralBaseUrl,
+      connectTimeout: ApiConfig.connectTimeout,
+      receiveTimeout: ApiConfig.receiveTimeout,
+      headers: {'Accept': 'application/json'},
+    ));
+    final response = await dio.get(
+      '/etablissements/recherche',
+      queryParameters: {'q': q},
+    );
+    return List<Map<String, dynamic>>.from(response.data as List);
+  }
+
+  /// Lookup par code court (ex: ABC123) — retourne {nom, domaine}.
+  Future<Map<String, dynamic>> rechercherParCode(String code) async {
+    final dio = Dio(BaseOptions(
+      baseUrl: ApiConfig.centralBaseUrl,
+      connectTimeout: ApiConfig.connectTimeout,
+      receiveTimeout: ApiConfig.receiveTimeout,
+      headers: {'Accept': 'application/json'},
+    ));
+    final response = await dio.get('/etablissements/code/${code.trim().toUpperCase()}');
+    return Map<String, dynamic>.from(response.data as Map);
   }
 }

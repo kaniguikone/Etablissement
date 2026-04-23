@@ -23,14 +23,9 @@ class EnseignantAuthSeeder extends Seeder
             return;
         }
 
-        foreach ($enseignants as $i => $enseignant) {
-            // Numéro unique basé sur le matricule ou généré
-            $numero = $enseignant->telephone_enseignant
-                ?: '07' . str_pad($i + 1, 8, '0', STR_PAD_LEFT);
-
+        foreach ($enseignants as $enseignant) {
             $enseignant->update([
-                'numero_enseignant' => $numero,
-                'password'          => Hash::make('12345'),
+                'password' => Hash::make('12345'),
             ]);
         }
 

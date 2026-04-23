@@ -161,6 +161,7 @@ const DetailsEnseignant = () => {
         matricule_enseignant: '', nom_enseignant: '', prenoms_enseignant: '',
         genre_enseignant: '', telephone_enseignant: '', email_enseignant: '',
         date_naissance_enseignant: '', date_embauche_enseignant: '', statut_enseignant: '',
+        password: '',
     });
 
     useEffect(() => {
@@ -173,8 +174,8 @@ const DetailsEnseignant = () => {
                 genre_enseignant:          e.genre_enseignant          || '',
                 telephone_enseignant:      e.telephone_enseignant      || '',
                 email_enseignant:          e.email_enseignant          || '',
-                date_naissance_enseignant: e.date_naissance_enseignant || '',
-                date_embauche_enseignant:  e.date_embauche_enseignant  || '',
+                date_naissance_enseignant: e.date_naissance_enseignant?.substring(0, 10) || '',
+                date_embauche_enseignant:  e.date_embauche_enseignant?.substring(0, 10)  || '',
                 statut_enseignant:         e.statut_enseignant         || '',
             });
         }).catch(() => toast.error('Impossible de charger les données de cet enseignant.'));
@@ -247,6 +248,10 @@ const DetailsEnseignant = () => {
                                 <option value="Stagiaire">Stagiaire</option>
                                 <option value="Vacataire">Vacataire</option>
                             </select>
+                        </div>
+                        <div className="col-md-4">
+                            <label className="form-label">Nouveau mot de passe</label>
+                            <input type="password" className="form-control form-control-sm" name="password" value={form.password} onChange={handleChange} placeholder="Laisser vide pour ne pas modifier" autoComplete="new-password" />
                         </div>
 
                     </fieldset>

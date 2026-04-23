@@ -9,9 +9,9 @@ const getBase = () => {
     const hostname = window.location.hostname;
 
     // Sous-domaine .localhost (ex: lycee-test.localhost, ecole-independante.localhost)
-    // → l'API tourne sur le même hostname, port 80 (WAMP)
+    // → l'API tourne sur le même hostname, port 8000 (php artisan serve)
     if (hostname !== 'localhost' && hostname !== '127.0.0.1' && hostname.endsWith('.localhost')) {
-        return `http://${hostname}`;
+        return `http://${hostname}:8000`;
     }
 
     // localhost pur → utilise VITE_API_URL

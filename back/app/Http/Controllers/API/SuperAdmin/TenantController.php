@@ -20,6 +20,50 @@ class TenantController extends Controller
         return response()->json($tenants);
     }
 
+    /** Recherche publique — retourne uniquement nom + domaine des tenants actifs. */
+    public function recherche(Request $request): JsonResponse
+    {
+        $q = trim($request->get('q', ''));
+
+        $tenants = Tenant::with('domains')
+            ->where('actif', true)
+            ->when($q !== '', fn($query) => $query->where('nom', 'like', "%{$q}%"))
+            ->orderBy('nom')
+            ->limit(10)
+            ->get()
+            ->map(fn($t) => [
+                'nom'     => $t->nom,
+                'domaine' => $t->domains->first()?->domain ?? '',
+            ])
+            ->filter(fn($t) => $t['domaine'] !== '')
+            ->values();
+
+        return response()->json($tenants);
+    }
+
+    /** Lookup public par code court — retourne nom + domaine. */
+    public function lookupParCode(string $code): JsonResponse
+    {
+        $tenant = Tenant::with('domains')
+            ->where('code', strtoupper(trim($code)))
+            ->where('actif', true)
+            ->first();
+
+        if (! $tenant) {
+            return response()->json(['message' => 'Code établissement introuvable.'], 404);
+        }
+
+        $domaine = $tenant->domains->first()?->domain ?? '';
+        if ($domaine === '') {
+            return response()->json(['message' => 'Établissement non configuré.'], 404);
+        }
+
+        return response()->json([
+            'nom'     => $tenant->nom,
+            'domaine' => $domaine,
+        ]);
+    }
+
     public function store(Request $request): JsonResponse
     {
         $data = $request->validate([
@@ -36,6 +80,7 @@ class TenantController extends Controller
 
         $tenant = new Tenant();
         $tenant->id             = $data['id'];
+        $tenant->code           = $this->generateUniqueCode();
         $tenant->nom            = $data['nom'];
         $tenant->email_contact  = $data['email_contact'] ?? null;
         $tenant->telephone      = $data['telephone'] ?? null;
@@ -125,5 +170,14 @@ class TenantController extends Controller
         }
 
         return response()->json(['message' => 'APK supprimé.']);
+    }
+
+    private function generateUniqueCode(): string
+    {
+        do {
+            $code = strtoupper(Str::random(6));
+        } while (Tenant::where('code', $code)->exists());
+
+        return $code;
     }
 }

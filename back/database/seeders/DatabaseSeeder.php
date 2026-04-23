@@ -38,23 +38,23 @@ class DatabaseSeeder extends Seeder
 
         // ── Matières ─────────────────────────────────────────────────────────
         $matieres = [
-            ['MATH', 'Mathématiques'],
+            ['MATHS', 'Mathématiques'],
             ['CFR',   'Composition Française'],
             ['OTG',   'Orthographe'],
             ['OFR',   'Oral Français'],
-            ['ANG',  'Anglais'],
-            ['SVT',  'Sciences de Vie et de la Terre'],
-            ['HG',   'Histoire-Géographie'],
-            ['SPC',  'Sciences Physiques et Chimie'],
-            ['EPS',  'Éducation Physique et Sportive'],
-            ['MUSQ', 'Musique'],
-            ['AP',   'Arts Plastiques'],
-            ['PHI',  'Philosophie'],      // 1ère et Tle uniquement
-            ['ALL',  'Allemand'],         // à partir de 4ième, pas avec ESP
-            ['ESP',  'Espagnol'],         // à partir de 4ième, pas avec ALL
-            ['TIC', 'Techniques de l\'Information et de la Comunication'],
-            ['EDHC', 'EDHC'],
-            ['CDT', 'Conduite']
+            ['ANG',   'Anglais'],
+            ['SVT',   'Science de la Vie et de la Terre'],
+            ['HG',    'Histoire-Géographie'],
+            ['SPC',   'Sciences Physiques et Chimie'],
+            ['EPS',   'Education Physique et Sportive'],
+            ['MUS',   'Musique'],
+            ['ARTS',  'Arts Plastiques'],
+            ['PHILO', 'Philosophie'],      // 1ère et Tle uniquement
+            ['ALL',   'Allemand'],         // à partir de 4ième, pas avec ESP
+            ['ESP',   'Espagnol'],         // à partir de 4ième, pas avec ALL
+            ['TIC',   'Techniques de l\'Information et de la Communication'],
+            ['EDHC',  'Education aux Droits de l\'Homme et à la Citoyenneté'],
+            ['CDT',   'Conduite'],
         ];
         foreach ($matieres as [$abbr, $libelle]) {
             Matiere::create([

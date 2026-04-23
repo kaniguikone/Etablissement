@@ -11,7 +11,6 @@ return new class extends Migration
         Schema::create('enseignants', function (Blueprint $table) {
             $table->id();
             $table->string('matricule_enseignant');
-            $table->string('numero_enseignant')->nullable()->unique();
             $table->string('nom_enseignant');
             $table->string('prenoms_enseignant');
             $table->enum('genre_enseignant', ['M', 'F'])->nullable();

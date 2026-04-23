@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/etablissement_provider.dart';
 import '../../theme/app_theme.dart';
-import 'inscription_screen.dart';
-import 'suivi_inscription_screen.dart';
+// import 'inscription_screen.dart';
+// import 'suivi_inscription_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -29,36 +29,6 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _afficherSuivi(BuildContext context) {
-    final ctrl = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Suivre ma demande'),
-        content: TextField(
-          controller: ctrl,
-          decoration: const InputDecoration(
-            labelText: 'Token reçu lors de l\'inscription',
-            hintText: 'Ex: aB3xK9...',
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuler')),
-          ElevatedButton(
-            onPressed: () {
-              final token = ctrl.text.trim();
-              if (token.isEmpty) return;
-              Navigator.pop(ctx);
-              Navigator.push(context, MaterialPageRoute(
-                builder: (_) => SuiviInscriptionScreen(token: token),
-              ));
-            },
-            child: const Text('Suivre'),
-          ),
-        ],
-      ),
-    );
-  }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -256,27 +226,27 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         const SizedBox(height: 24),
 
-                        // ── Liens inscription (visible uniquement pour les parents) ──
-                        if (_role == UserRole.parent) ...[
-                          const SizedBox(height: 8),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              TextButton(
-                                onPressed: () => Navigator.push(context,
-                                    MaterialPageRoute(builder: (_) => const InscriptionScreen())),
-                                child: const Text('Inscrire mon enfant',
-                                    style: TextStyle(fontSize: 13)),
-                              ),
-                              const Text('·', style: TextStyle(color: Colors.grey)),
-                              TextButton(
-                                onPressed: () => _afficherSuivi(context),
-                                child: const Text('Suivre ma demande',
-                                    style: TextStyle(fontSize: 13)),
-                              ),
-                            ],
-                          ),
-                        ],
+                        // ── Liens inscription masqués (module en attente d'utilisation réelle) ──
+                        // if (_role == UserRole.parent) ...[
+                        //   const SizedBox(height: 8),
+                        //   Row(
+                        //     mainAxisAlignment: MainAxisAlignment.center,
+                        //     children: [
+                        //       TextButton(
+                        //         onPressed: () => Navigator.push(context,
+                        //             MaterialPageRoute(builder: (_) => const InscriptionScreen())),
+                        //         child: const Text('Inscrire mon enfant',
+                        //             style: TextStyle(fontSize: 13)),
+                        //       ),
+                        //       const Text('·', style: TextStyle(color: Colors.grey)),
+                        //       TextButton(
+                        //         onPressed: () => _afficherSuivi(context),
+                        //         child: const Text('Suivre ma demande',
+                        //             style: TextStyle(fontSize: 13)),
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ],
 
                         const SizedBox(height: 8),
 

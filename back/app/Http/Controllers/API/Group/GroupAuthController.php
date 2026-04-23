@@ -29,7 +29,7 @@ class GroupAuthController extends Controller
             return response()->json(['message' => 'Ce groupe est désactivé.'], 403);
         }
 
-        $token = $admin->createToken('group-admin')->plainTextToken;
+        $token = $admin->createToken('group-admin', ['*'], now()->addHours(8))->plainTextToken;
 
         return response()->json([
             'token' => $token,

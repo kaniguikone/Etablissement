@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../services/storage_service.dart';
 
 class ApiConfig {
@@ -13,25 +14,80 @@ class ApiConfig {
       StorageService.getCachedServerUrl() ??
       const String.fromEnvironment('API_HOST', defaultValue: 'localhost:8000');
 
-  // En dev (port explicite ou localhost) → http. En production → https.
+  // En dev (port explicite, localhost, ou sous-domaine localhost/IP) → http.
   static String get _scheme =>
-      _host.contains(':') || _host == 'localhost' ? 'http' : 'https';
+      _host.contains(':') || _host == 'localhost' ||
+      _localhostMatch != null || _ipMatch != null
+          ? 'http'
+          : 'https';
 
-  static String get baseUrl        => '$_scheme://$_host/api';
-  static String get storageBaseUrl => '$_scheme://$_host';
+  // sub.N.N.N.N[:port]  → connecter sur l'IP directement
+  static final _ipHostRegex        = RegExp(r'^([^.]+)\.(\d+\.\d+\.\d+\.\d+(?::\d+)?)$');
+  // sub.localhost[:port] → remplacer localhost par 10.0.2.2 (émulateur Android)
+  static final _localhostHostRegex = RegExp(r'^([^.]+)\.(localhost(?::\d+)?)$');
 
-  /// Corrige les URLs de stockage qui contiennent localhost/127.0.0.1
+  static Match? get _ipMatch        => _ipHostRegex.firstMatch(_host);
+  static Match? get _localhostMatch => _localhostHostRegex.firstMatch(_host);
+
+  // Port du serveur central (ex : "8000" depuis "localhost:8000")
+  static String get _centralPort {
+    final parts = _centralHost.split(':');
+    return parts.length > 1 ? parts.last : '';
+  }
+
+  // Adresse TCP réelle (IP ou 10.0.2.2 à la place de localhost sur Android)
+  static String get _connectionHost {
+    if (_ipMatch != null) return _ipMatch!.group(2)!;
+    if (_localhostMatch != null) {
+      var serverPart = _localhostMatch!.group(2)!; // ex: "localhost" ou "localhost:8000"
+      // Si pas de port dans le domaine stocké, hériter du port du serveur central
+      if (!serverPart.contains(':') && _centralPort.isNotEmpty) {
+        serverPart = '$serverPart:$_centralPort';
+      }
+      // Sur le web, subdomain.localhost:PORT est directement accessible (Chrome)
+      if (kIsWeb) return '${_localhostMatch!.group(1)!}.$serverPart';
+      // Sur Android émulateur, remplacer localhost par 10.0.2.2
+      return serverPart.replaceFirst('localhost', '10.0.2.2');
+    }
+    return _host;
+  }
+
+  // En-tête Host original à injecter pour l'identification du tenant
+  // Sur le web, le navigateur gère lui-même le header Host — pas besoin de l'injecter
+  static String? get virtualHost {
+    if (kIsWeb) return null;
+    return (_ipMatch != null || _localhostMatch != null) ? _host : null;
+  }
+
+  static String get baseUrl        => '$_scheme://$_connectionHost/api';
+  static String get storageBaseUrl => '$_scheme://$_connectionHost';
+
+  // URL du serveur central (pour la recherche publique d'établissements).
+  // En production passer --dart-define=CENTRAL_HOST=monapp.ci
+  static String get _centralHost =>
+      const String.fromEnvironment('CENTRAL_HOST',
+          defaultValue: String.fromEnvironment('API_HOST', defaultValue: 'localhost:8000'));
+  static String get _centralScheme =>
+      _centralHost.contains(':') || _centralHost == 'localhost' ? 'http' : 'https';
+  static String get centralBaseUrl => '$_centralScheme://$_centralHost/api';
+
+  /// Corrige les URLs de stockage (localhost, 127.0.0.1, ou IP virtuelle tenant)
   static String fixStorageUrl(String? url) {
     if (url == null) return '';
-    return url
+    var fixed = url
         .replaceAll('http://localhost:8000', storageBaseUrl)
         .replaceAll('http://127.0.0.1:8000', storageBaseUrl)
         .replaceAll('https://localhost:8000', storageBaseUrl)
-        .replaceAll('https://127.0.0.1:8000', storageBaseUrl);
+        .replaceAll('https://192.168.0.102:8000', storageBaseUrl);
+    // Si on est en mode virtual-host, remplace aussi l'hôte d'origine par l'IP réelle
+    if (_ipMatch != null) {
+      fixed = fixed.replaceAll('://$_host', '://$_connectionHost');
+    }
+    return fixed;
   }
 
-  static const Duration connectTimeout = Duration(seconds: 10);
-  static const Duration receiveTimeout = Duration(seconds: 15);
+  static const Duration connectTimeout = Duration(seconds: 20);
+  static const Duration receiveTimeout = Duration(seconds: 30);
 
   // Endpoints Parent
   static const String parentLogin    = '/parent/login';

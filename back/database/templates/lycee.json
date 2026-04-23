@@ -1,242 +1,1313 @@
 {
-  "meta": {
-    "nom": "Lycée — Système ivoirien",
-    "description": "Seconde / Première / Terminale — Séries A1, A2, B, C, D",
-    "type": "lycee"
-  },
-
-  "niveaux": [
-    { "nom_niveau": "Seconde",   "abbr_niveau": "2nde", "ordre": 1 },
-    { "nom_niveau": "Première",  "abbr_niveau": "1ère", "ordre": 2 },
-    { "nom_niveau": "Terminale", "abbr_niveau": "Tle",  "ordre": 3 }
-  ],
-
-  "series": [
-    { "nom": "A",  "description": "Lettres (Seconde)" },
-    { "nom": "A1", "description": "Lettres et Philosophie" },
-    { "nom": "A2", "description": "Lettres et Langues Vivantes" },
-    { "nom": "B",  "description": "Sciences Économiques et Sociales" },
-    { "nom": "C",  "description": "Mathématiques et Sciences Physiques" },
-    { "nom": "D",  "description": "Sciences de la Vie et de la Terre" }
-  ],
-
-  "matieres": [
-    { "libelle_matiere": "Composition",          "abbr_matiere": "COMP"  },
-    { "libelle_matiere": "Orthographe",          "abbr_matiere": "ORTH"  },
-    { "libelle_matiere": "Oral Français",        "abbr_matiere": "ORAL"  },
-    { "libelle_matiere": "Anglais",              "abbr_matiere": "ANG"   },
-    { "libelle_matiere": "Philosophie",          "abbr_matiere": "PHILO" },
-    { "libelle_matiere": "Allemand",             "abbr_matiere": "ALL"   },
-    { "libelle_matiere": "Espagnol",             "abbr_matiere": "ESP"   },
-    { "libelle_matiere": "Histoire-Géographie",  "abbr_matiere": "HG"    },
-    { "libelle_matiere": "Mathématiques",        "abbr_matiere": "MATHS" },
-    { "libelle_matiere": "Sciences Physiques",   "abbr_matiere": "SP"    },
-    { "libelle_matiere": "SVT",                  "abbr_matiere": "SVT"   },
-    { "libelle_matiere": "E.P.S",                "abbr_matiere": "EPS"   },
-    { "libelle_matiere": "EDHC",                 "abbr_matiere": "EDHC"  },
-    { "libelle_matiere": "Arts Plastiques",      "abbr_matiere": "ARTS"  },
-    { "libelle_matiere": "Musique",              "abbr_matiere": "MUS"   },
-    { "libelle_matiere": "TIC",                  "abbr_matiere": "TIC"   },
-    { "libelle_matiere": "Conduite",             "abbr_matiere": "COND"  }
-  ],
-
-  "type_devoirs": [
-    { "code_type_devoir": "DC",   "description_type_devoir": "Devoir de Classe" },
-    { "code_type_devoir": "DM",   "description_type_devoir": "Devoir Maison" },
-    { "code_type_devoir": "IC",   "description_type_devoir": "Interrogation de Cours" },
-    { "code_type_devoir": "COMP", "description_type_devoir": "Composition" }
-  ],
-
-  "periodes_trimestre": [
-    { "libelle_periode": "1er Trimestre",  "abbr_libelle_periode": "T1", "code_periode": "T1" },
-    { "libelle_periode": "2ème Trimestre", "abbr_libelle_periode": "T2", "code_periode": "T2" },
-    { "libelle_periode": "3ème Trimestre", "abbr_libelle_periode": "T3", "code_periode": "T3" }
-  ],
-
-  "periodes_semestre": [
-    { "libelle_periode": "1er Semestre",  "abbr_libelle_periode": "S1", "code_periode": "S1" },
-    { "libelle_periode": "2ème Semestre", "abbr_libelle_periode": "S2", "code_periode": "S2" }
-  ],
-
-  "niveau_series": [
-    { "niveau": "Seconde",   "series": ["A", "B", "C"] },
-    { "niveau": "Première",  "series": ["A1", "A2", "B", "C", "D"] },
-    { "niveau": "Terminale", "series": ["A1", "A2", "B", "C", "D"] }
-  ],
-
-  "chapitres": [],
-
-  "niveau_matieres": [
-    { "niveau": "Seconde", "serie": "A", "matiere": "Composition",         "coefficient": 4, "heures_semaine": 5 },
-    { "niveau": "Seconde", "serie": "A", "matiere": "Orthographe",         "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Seconde", "serie": "A", "matiere": "Oral Français",       "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Seconde", "serie": "A", "matiere": "Anglais",             "coefficient": 4, "heures_semaine": 3 },
-    { "niveau": "Seconde", "serie": "A", "matiere": "Espagnol",            "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Seconde", "serie": "A", "matiere": "Histoire-Géographie", "coefficient": 3, "heures_semaine": 3 },
-    { "niveau": "Seconde", "serie": "A", "matiere": "Mathématiques",       "coefficient": 3, "heures_semaine": 3 },
-    { "niveau": "Seconde", "serie": "A", "matiere": "Sciences Physiques",  "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Seconde", "serie": "A", "matiere": "SVT",                 "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Seconde", "serie": "A", "matiere": "E.P.S",               "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Seconde", "serie": "A", "matiere": "EDHC",                "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Seconde", "serie": "A", "matiere": "Conduite",            "coefficient": 1, "heures_semaine": 0 },
-
-    { "niveau": "Seconde", "serie": "B", "matiere": "Composition",         "coefficient": 3, "heures_semaine": 4 },
-    { "niveau": "Seconde", "serie": "B", "matiere": "Orthographe",         "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Seconde", "serie": "B", "matiere": "Oral Français",       "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Seconde", "serie": "B", "matiere": "Anglais",             "coefficient": 3, "heures_semaine": 3 },
-    { "niveau": "Seconde", "serie": "B", "matiere": "Histoire-Géographie", "coefficient": 4, "heures_semaine": 3 },
-    { "niveau": "Seconde", "serie": "B", "matiere": "Mathématiques",       "coefficient": 4, "heures_semaine": 4 },
-    { "niveau": "Seconde", "serie": "B", "matiere": "Sciences Physiques",  "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Seconde", "serie": "B", "matiere": "SVT",                 "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Seconde", "serie": "B", "matiere": "E.P.S",               "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Seconde", "serie": "B", "matiere": "EDHC",                "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Seconde", "serie": "B", "matiere": "Conduite",            "coefficient": 1, "heures_semaine": 0 },
-
-    { "niveau": "Seconde", "serie": "C", "matiere": "Composition",         "coefficient": 2, "heures_semaine": 3 },
-    { "niveau": "Seconde", "serie": "C", "matiere": "Orthographe",         "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Seconde", "serie": "C", "matiere": "Oral Français",       "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Seconde", "serie": "C", "matiere": "Anglais",             "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Seconde", "serie": "C", "matiere": "Histoire-Géographie", "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Seconde", "serie": "C", "matiere": "Mathématiques",       "coefficient": 6, "heures_semaine": 5 },
-    { "niveau": "Seconde", "serie": "C", "matiere": "Sciences Physiques",  "coefficient": 5, "heures_semaine": 5 },
-    { "niveau": "Seconde", "serie": "C", "matiere": "SVT",                 "coefficient": 3, "heures_semaine": 3 },
-    { "niveau": "Seconde", "serie": "C", "matiere": "E.P.S",               "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Seconde", "serie": "C", "matiere": "EDHC",                "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Seconde", "serie": "C", "matiere": "TIC",                 "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Seconde", "serie": "C", "matiere": "Conduite",            "coefficient": 1, "heures_semaine": 0 },
-
-    { "niveau": "Première", "serie": "A1", "matiere": "Composition",         "coefficient": 4, "heures_semaine": 5 },
-    { "niveau": "Première", "serie": "A1", "matiere": "Orthographe",         "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Première", "serie": "A1", "matiere": "Oral Français",       "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Première", "serie": "A1", "matiere": "Philosophie",         "coefficient": 5, "heures_semaine": 4 },
-    { "niveau": "Première", "serie": "A1", "matiere": "Histoire-Géographie", "coefficient": 4, "heures_semaine": 3 },
-    { "niveau": "Première", "serie": "A1", "matiere": "Anglais",             "coefficient": 4, "heures_semaine": 3 },
-    { "niveau": "Première", "serie": "A1", "matiere": "Espagnol",            "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Première", "serie": "A1", "matiere": "Mathématiques",       "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Première", "serie": "A1", "matiere": "SVT",                 "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Première", "serie": "A1", "matiere": "Sciences Physiques",  "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Première", "serie": "A1", "matiere": "E.P.S",               "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Première", "serie": "A1", "matiere": "EDHC",                "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Première", "serie": "A1", "matiere": "Conduite",            "coefficient": 1, "heures_semaine": 0 },
-
-    { "niveau": "Première", "serie": "A2", "matiere": "Composition",         "coefficient": 3, "heures_semaine": 4 },
-    { "niveau": "Première", "serie": "A2", "matiere": "Orthographe",         "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Première", "serie": "A2", "matiere": "Oral Français",       "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Première", "serie": "A2", "matiere": "Anglais",             "coefficient": 5, "heures_semaine": 4 },
-    { "niveau": "Première", "serie": "A2", "matiere": "Espagnol",            "coefficient": 4, "heures_semaine": 4 },
-    { "niveau": "Première", "serie": "A2", "matiere": "Allemand",            "coefficient": 3, "heures_semaine": 3 },
-    { "niveau": "Première", "serie": "A2", "matiere": "Histoire-Géographie", "coefficient": 4, "heures_semaine": 3 },
-    { "niveau": "Première", "serie": "A2", "matiere": "Philosophie",         "coefficient": 3, "heures_semaine": 3 },
-    { "niveau": "Première", "serie": "A2", "matiere": "Mathématiques",       "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Première", "serie": "A2", "matiere": "E.P.S",               "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Première", "serie": "A2", "matiere": "EDHC",                "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Première", "serie": "A2", "matiere": "Conduite",            "coefficient": 1, "heures_semaine": 0 },
-
-    { "niveau": "Première", "serie": "B", "matiere": "Composition",         "coefficient": 3, "heures_semaine": 4 },
-    { "niveau": "Première", "serie": "B", "matiere": "Orthographe",         "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Première", "serie": "B", "matiere": "Oral Français",       "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Première", "serie": "B", "matiere": "Anglais",             "coefficient": 3, "heures_semaine": 3 },
-    { "niveau": "Première", "serie": "B", "matiere": "Philosophie",         "coefficient": 3, "heures_semaine": 3 },
-    { "niveau": "Première", "serie": "B", "matiere": "Histoire-Géographie", "coefficient": 4, "heures_semaine": 3 },
-    { "niveau": "Première", "serie": "B", "matiere": "Mathématiques",       "coefficient": 4, "heures_semaine": 4 },
-    { "niveau": "Première", "serie": "B", "matiere": "Sciences Physiques",  "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Première", "serie": "B", "matiere": "SVT",                 "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Première", "serie": "B", "matiere": "E.P.S",               "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Première", "serie": "B", "matiere": "EDHC",                "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Première", "serie": "B", "matiere": "Conduite",            "coefficient": 1, "heures_semaine": 0 },
-
-    { "niveau": "Première", "serie": "C", "matiere": "Composition",         "coefficient": 2, "heures_semaine": 3 },
-    { "niveau": "Première", "serie": "C", "matiere": "Orthographe",         "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Première", "serie": "C", "matiere": "Oral Français",       "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Première", "serie": "C", "matiere": "Anglais",             "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Première", "serie": "C", "matiere": "Philosophie",         "coefficient": 3, "heures_semaine": 3 },
-    { "niveau": "Première", "serie": "C", "matiere": "Histoire-Géographie", "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Première", "serie": "C", "matiere": "Mathématiques",       "coefficient": 7, "heures_semaine": 6 },
-    { "niveau": "Première", "serie": "C", "matiere": "Sciences Physiques",  "coefficient": 6, "heures_semaine": 5 },
-    { "niveau": "Première", "serie": "C", "matiere": "SVT",                 "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Première", "serie": "C", "matiere": "E.P.S",               "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Première", "serie": "C", "matiere": "EDHC",                "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Première", "serie": "C", "matiere": "TIC",                 "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Première", "serie": "C", "matiere": "Conduite",            "coefficient": 1, "heures_semaine": 0 },
-
-    { "niveau": "Première", "serie": "D", "matiere": "Composition",         "coefficient": 2, "heures_semaine": 3 },
-    { "niveau": "Première", "serie": "D", "matiere": "Orthographe",         "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Première", "serie": "D", "matiere": "Oral Français",       "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Première", "serie": "D", "matiere": "Anglais",             "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Première", "serie": "D", "matiere": "Philosophie",         "coefficient": 3, "heures_semaine": 3 },
-    { "niveau": "Première", "serie": "D", "matiere": "Histoire-Géographie", "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Première", "serie": "D", "matiere": "Mathématiques",       "coefficient": 5, "heures_semaine": 5 },
-    { "niveau": "Première", "serie": "D", "matiere": "Sciences Physiques",  "coefficient": 4, "heures_semaine": 4 },
-    { "niveau": "Première", "serie": "D", "matiere": "SVT",                 "coefficient": 6, "heures_semaine": 5 },
-    { "niveau": "Première", "serie": "D", "matiere": "E.P.S",               "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Première", "serie": "D", "matiere": "EDHC",                "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Première", "serie": "D", "matiere": "Conduite",            "coefficient": 1, "heures_semaine": 0 },
-
-    { "niveau": "Terminale", "serie": "A1", "matiere": "Composition",         "coefficient": 4, "heures_semaine": 5 },
-    { "niveau": "Terminale", "serie": "A1", "matiere": "Orthographe",         "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Terminale", "serie": "A1", "matiere": "Oral Français",       "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Terminale", "serie": "A1", "matiere": "Philosophie",         "coefficient": 5, "heures_semaine": 4 },
-    { "niveau": "Terminale", "serie": "A1", "matiere": "Histoire-Géographie", "coefficient": 4, "heures_semaine": 3 },
-    { "niveau": "Terminale", "serie": "A1", "matiere": "Anglais",             "coefficient": 4, "heures_semaine": 3 },
-    { "niveau": "Terminale", "serie": "A1", "matiere": "Espagnol",            "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Terminale", "serie": "A1", "matiere": "Mathématiques",       "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Terminale", "serie": "A1", "matiere": "SVT",                 "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Terminale", "serie": "A1", "matiere": "Sciences Physiques",  "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Terminale", "serie": "A1", "matiere": "E.P.S",               "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Terminale", "serie": "A1", "matiere": "EDHC",                "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Terminale", "serie": "A1", "matiere": "Conduite",            "coefficient": 1, "heures_semaine": 0 },
-
-    { "niveau": "Terminale", "serie": "A2", "matiere": "Composition",         "coefficient": 3, "heures_semaine": 4 },
-    { "niveau": "Terminale", "serie": "A2", "matiere": "Orthographe",         "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Terminale", "serie": "A2", "matiere": "Oral Français",       "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Terminale", "serie": "A2", "matiere": "Anglais",             "coefficient": 5, "heures_semaine": 4 },
-    { "niveau": "Terminale", "serie": "A2", "matiere": "Espagnol",            "coefficient": 4, "heures_semaine": 4 },
-    { "niveau": "Terminale", "serie": "A2", "matiere": "Allemand",            "coefficient": 3, "heures_semaine": 3 },
-    { "niveau": "Terminale", "serie": "A2", "matiere": "Histoire-Géographie", "coefficient": 4, "heures_semaine": 3 },
-    { "niveau": "Terminale", "serie": "A2", "matiere": "Philosophie",         "coefficient": 3, "heures_semaine": 3 },
-    { "niveau": "Terminale", "serie": "A2", "matiere": "Mathématiques",       "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Terminale", "serie": "A2", "matiere": "E.P.S",               "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Terminale", "serie": "A2", "matiere": "EDHC",                "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Terminale", "serie": "A2", "matiere": "Conduite",            "coefficient": 1, "heures_semaine": 0 },
-
-    { "niveau": "Terminale", "serie": "B", "matiere": "Composition",         "coefficient": 3, "heures_semaine": 4 },
-    { "niveau": "Terminale", "serie": "B", "matiere": "Orthographe",         "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Terminale", "serie": "B", "matiere": "Oral Français",       "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Terminale", "serie": "B", "matiere": "Anglais",             "coefficient": 3, "heures_semaine": 3 },
-    { "niveau": "Terminale", "serie": "B", "matiere": "Philosophie",         "coefficient": 3, "heures_semaine": 3 },
-    { "niveau": "Terminale", "serie": "B", "matiere": "Histoire-Géographie", "coefficient": 4, "heures_semaine": 3 },
-    { "niveau": "Terminale", "serie": "B", "matiere": "Mathématiques",       "coefficient": 4, "heures_semaine": 4 },
-    { "niveau": "Terminale", "serie": "B", "matiere": "Sciences Physiques",  "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Terminale", "serie": "B", "matiere": "SVT",                 "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Terminale", "serie": "B", "matiere": "E.P.S",               "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Terminale", "serie": "B", "matiere": "EDHC",                "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Terminale", "serie": "B", "matiere": "Conduite",            "coefficient": 1, "heures_semaine": 0 },
-
-    { "niveau": "Terminale", "serie": "C", "matiere": "Composition",         "coefficient": 2, "heures_semaine": 3 },
-    { "niveau": "Terminale", "serie": "C", "matiere": "Orthographe",         "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Terminale", "serie": "C", "matiere": "Oral Français",       "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Terminale", "serie": "C", "matiere": "Anglais",             "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Terminale", "serie": "C", "matiere": "Philosophie",         "coefficient": 3, "heures_semaine": 3 },
-    { "niveau": "Terminale", "serie": "C", "matiere": "Histoire-Géographie", "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Terminale", "serie": "C", "matiere": "Mathématiques",       "coefficient": 7, "heures_semaine": 6 },
-    { "niveau": "Terminale", "serie": "C", "matiere": "Sciences Physiques",  "coefficient": 6, "heures_semaine": 5 },
-    { "niveau": "Terminale", "serie": "C", "matiere": "SVT",                 "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Terminale", "serie": "C", "matiere": "E.P.S",               "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Terminale", "serie": "C", "matiere": "EDHC",                "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Terminale", "serie": "C", "matiere": "TIC",                 "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Terminale", "serie": "C", "matiere": "Conduite",            "coefficient": 1, "heures_semaine": 0 },
-
-    { "niveau": "Terminale", "serie": "D", "matiere": "Composition",         "coefficient": 2, "heures_semaine": 3 },
-    { "niveau": "Terminale", "serie": "D", "matiere": "Orthographe",         "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Terminale", "serie": "D", "matiere": "Oral Français",       "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Terminale", "serie": "D", "matiere": "Anglais",             "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Terminale", "serie": "D", "matiere": "Philosophie",         "coefficient": 3, "heures_semaine": 3 },
-    { "niveau": "Terminale", "serie": "D", "matiere": "Histoire-Géographie", "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Terminale", "serie": "D", "matiere": "Mathématiques",       "coefficient": 5, "heures_semaine": 5 },
-    { "niveau": "Terminale", "serie": "D", "matiere": "Sciences Physiques",  "coefficient": 4, "heures_semaine": 4 },
-    { "niveau": "Terminale", "serie": "D", "matiere": "SVT",                 "coefficient": 6, "heures_semaine": 5 },
-    { "niveau": "Terminale", "serie": "D", "matiere": "E.P.S",               "coefficient": 2, "heures_semaine": 2 },
-    { "niveau": "Terminale", "serie": "D", "matiere": "EDHC",                "coefficient": 1, "heures_semaine": 1 },
-    { "niveau": "Terminale", "serie": "D", "matiere": "Conduite",            "coefficient": 1, "heures_semaine": 0 }
-  ]
+    "meta": {
+        "nom": "Lycée — Système ivoirien",
+        "description": "Seconde \/ Première \/ Terminale — Séries A1, A2, B, C, D",
+        "type": "lycee"
+    },
+    "niveaux": [
+        {
+            "nom_niveau": "Seconde",
+            "abbr_niveau": "2nde",
+            "ordre": 1
+        },
+        {
+            "nom_niveau": "Première",
+            "abbr_niveau": "1ère",
+            "ordre": 2
+        },
+        {
+            "nom_niveau": "Terminale",
+            "abbr_niveau": "Tle",
+            "ordre": 3
+        }
+    ],
+    "series": [
+        {
+            "nom": "A",
+            "description": "Lettres (Seconde)"
+        },
+        {
+            "nom": "A1",
+            "description": "Lettres et Philosophie"
+        },
+        {
+            "nom": "A2",
+            "description": "Lettres et Langues Vivantes"
+        },
+        {
+            "nom": "B",
+            "description": "Sciences Économiques et Sociales"
+        },
+        {
+            "nom": "C",
+            "description": "Mathématiques et Sciences Physiques"
+        },
+        {
+            "nom": "D",
+            "description": "Sciences de la Vie et de la Terre"
+        }
+    ],
+    "matieres": [
+        {
+            "libelle_matiere": "Composition Française",
+            "abbr_matiere": "CFR"
+        },
+        {
+            "libelle_matiere": "Orthographe",
+            "abbr_matiere": "OTG"
+        },
+        {
+            "libelle_matiere": "Oral Français",
+            "abbr_matiere": "OFR"
+        },
+        {
+            "libelle_matiere": "Anglais",
+            "abbr_matiere": "ANG"
+        },
+        {
+            "libelle_matiere": "Philosophie",
+            "abbr_matiere": "PHILO"
+        },
+        {
+            "libelle_matiere": "Allemand",
+            "abbr_matiere": "ALL"
+        },
+        {
+            "libelle_matiere": "Espagnol",
+            "abbr_matiere": "ESP"
+        },
+        {
+            "libelle_matiere": "Histoire-Géographie",
+            "abbr_matiere": "HG"
+        },
+        {
+            "libelle_matiere": "Mathématiques",
+            "abbr_matiere": "MATHS"
+        },
+        {
+            "libelle_matiere": "Sciences Physiques et Chimie",
+            "abbr_matiere": "SPC"
+        },
+        {
+            "libelle_matiere": "Science de la Vie et de la Terre",
+            "abbr_matiere": "SVT"
+        },
+        {
+            "libelle_matiere": "Education Physique et Sportive",
+            "abbr_matiere": "EPS"
+        },
+        {
+            "libelle_matiere": "Education aux Droits de l'Homme et à la Citoyenneté",
+            "abbr_matiere": "EDHC"
+        },
+        {
+            "libelle_matiere": "Arts Plastiques",
+            "abbr_matiere": "ARTS"
+        },
+        {
+            "libelle_matiere": "Musique",
+            "abbr_matiere": "MUS"
+        },
+        {
+            "libelle_matiere": "Techniques de l'Information et de la Communication",
+            "abbr_matiere": "TIC"
+        },
+        {
+            "libelle_matiere": "Conduite",
+            "abbr_matiere": "CDT"
+        }
+    ],
+    "type_devoirs": [
+        {
+            "code_type_devoir": "DC",
+            "description_type_devoir": "Devoir de Classe"
+        },
+        {
+            "code_type_devoir": "DM",
+            "description_type_devoir": "Devoir Maison"
+        },
+        {
+            "code_type_devoir": "IC",
+            "description_type_devoir": "Interrogation de Cours"
+        },
+        {
+            "code_type_devoir": "COMP",
+            "description_type_devoir": "Composition"
+        }
+    ],
+    "periodes_trimestre": [
+        {
+            "libelle_periode": "1er Trimestre",
+            "abbr_libelle_periode": "T1",
+            "code_periode": "T1"
+        },
+        {
+            "libelle_periode": "2ème Trimestre",
+            "abbr_libelle_periode": "T2",
+            "code_periode": "T2"
+        },
+        {
+            "libelle_periode": "3ème Trimestre",
+            "abbr_libelle_periode": "T3",
+            "code_periode": "T3"
+        }
+    ],
+    "periodes_semestre": [
+        {
+            "libelle_periode": "1er Semestre",
+            "abbr_libelle_periode": "S1",
+            "code_periode": "S1"
+        },
+        {
+            "libelle_periode": "2ème Semestre",
+            "abbr_libelle_periode": "S2",
+            "code_periode": "S2"
+        }
+    ],
+    "niveau_series": [
+        {
+            "niveau": "Seconde",
+            "series": [
+                "A",
+                "B",
+                "C"
+            ]
+        },
+        {
+            "niveau": "Première",
+            "series": [
+                "A1",
+                "A2",
+                "B",
+                "C",
+                "D"
+            ]
+        },
+        {
+            "niveau": "Terminale",
+            "series": [
+                "A1",
+                "A2",
+                "B",
+                "C",
+                "D"
+            ]
+        }
+    ],
+    "chapitres": [],
+    "niveau_matieres": [
+        {
+            "niveau": "Seconde",
+            "serie": "A",
+            "matiere": "Composition Française",
+            "coefficient": 4,
+            "heures_semaine": 5
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "A",
+            "matiere": "Orthographe",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "A",
+            "matiere": "Oral Français",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "A",
+            "matiere": "Anglais",
+            "coefficient": 4,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "A",
+            "matiere": "Espagnol",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "A",
+            "matiere": "Histoire-Géographie",
+            "coefficient": 3,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "A",
+            "matiere": "Mathématiques",
+            "coefficient": 3,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "A",
+            "matiere": "Sciences Physiques et Chimie",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "A",
+            "matiere": "Science de la Vie et de la Terre",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "A",
+            "matiere": "Education Physique et Sportive",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "A",
+            "matiere": "Education aux Droits de l'Homme et à la Citoyenneté",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "A",
+            "matiere": "Conduite",
+            "coefficient": 1,
+            "heures_semaine": 0
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "B",
+            "matiere": "Composition Française",
+            "coefficient": 3,
+            "heures_semaine": 4
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "B",
+            "matiere": "Orthographe",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "B",
+            "matiere": "Oral Français",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "B",
+            "matiere": "Anglais",
+            "coefficient": 3,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "B",
+            "matiere": "Histoire-Géographie",
+            "coefficient": 4,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "B",
+            "matiere": "Mathématiques",
+            "coefficient": 4,
+            "heures_semaine": 4
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "B",
+            "matiere": "Sciences Physiques et Chimie",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "B",
+            "matiere": "Science de la Vie et de la Terre",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "B",
+            "matiere": "Education Physique et Sportive",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "B",
+            "matiere": "Education aux Droits de l'Homme et à la Citoyenneté",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "B",
+            "matiere": "Conduite",
+            "coefficient": 1,
+            "heures_semaine": 0
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "C",
+            "matiere": "Composition Française",
+            "coefficient": 2,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "C",
+            "matiere": "Orthographe",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "C",
+            "matiere": "Oral Français",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "C",
+            "matiere": "Anglais",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "C",
+            "matiere": "Histoire-Géographie",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "C",
+            "matiere": "Mathématiques",
+            "coefficient": 6,
+            "heures_semaine": 5
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "C",
+            "matiere": "Sciences Physiques et Chimie",
+            "coefficient": 5,
+            "heures_semaine": 5
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "C",
+            "matiere": "Science de la Vie et de la Terre",
+            "coefficient": 3,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "C",
+            "matiere": "Education Physique et Sportive",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "C",
+            "matiere": "Education aux Droits de l'Homme et à la Citoyenneté",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "C",
+            "matiere": "Techniques de l'Information et de la Communication",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "C",
+            "matiere": "Conduite",
+            "coefficient": 1,
+            "heures_semaine": 0
+        },
+        {
+            "niveau": "Première",
+            "serie": "A1",
+            "matiere": "Composition Française",
+            "coefficient": 4,
+            "heures_semaine": 5
+        },
+        {
+            "niveau": "Première",
+            "serie": "A1",
+            "matiere": "Orthographe",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "A1",
+            "matiere": "Oral Français",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Première",
+            "serie": "A1",
+            "matiere": "Philosophie",
+            "coefficient": 5,
+            "heures_semaine": 4
+        },
+        {
+            "niveau": "Première",
+            "serie": "A1",
+            "matiere": "Histoire-Géographie",
+            "coefficient": 4,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Première",
+            "serie": "A1",
+            "matiere": "Anglais",
+            "coefficient": 4,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Première",
+            "serie": "A1",
+            "matiere": "Espagnol",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "A1",
+            "matiere": "Mathématiques",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "A1",
+            "matiere": "Science de la Vie et de la Terre",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Première",
+            "serie": "A1",
+            "matiere": "Sciences Physiques et Chimie",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Première",
+            "serie": "A1",
+            "matiere": "Education Physique et Sportive",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "A1",
+            "matiere": "Education aux Droits de l'Homme et à la Citoyenneté",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Première",
+            "serie": "A1",
+            "matiere": "Conduite",
+            "coefficient": 1,
+            "heures_semaine": 0
+        },
+        {
+            "niveau": "Première",
+            "serie": "A2",
+            "matiere": "Composition Française",
+            "coefficient": 3,
+            "heures_semaine": 4
+        },
+        {
+            "niveau": "Première",
+            "serie": "A2",
+            "matiere": "Orthographe",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "A2",
+            "matiere": "Oral Français",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Première",
+            "serie": "A2",
+            "matiere": "Anglais",
+            "coefficient": 5,
+            "heures_semaine": 4
+        },
+        {
+            "niveau": "Première",
+            "serie": "A2",
+            "matiere": "Espagnol",
+            "coefficient": 4,
+            "heures_semaine": 4
+        },
+        {
+            "niveau": "Première",
+            "serie": "A2",
+            "matiere": "Allemand",
+            "coefficient": 3,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Première",
+            "serie": "A2",
+            "matiere": "Histoire-Géographie",
+            "coefficient": 4,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Première",
+            "serie": "A2",
+            "matiere": "Philosophie",
+            "coefficient": 3,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Première",
+            "serie": "A2",
+            "matiere": "Mathématiques",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "A2",
+            "matiere": "Education Physique et Sportive",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "A2",
+            "matiere": "Education aux Droits de l'Homme et à la Citoyenneté",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Première",
+            "serie": "A2",
+            "matiere": "Conduite",
+            "coefficient": 1,
+            "heures_semaine": 0
+        },
+        {
+            "niveau": "Première",
+            "serie": "B",
+            "matiere": "Composition Française",
+            "coefficient": 3,
+            "heures_semaine": 4
+        },
+        {
+            "niveau": "Première",
+            "serie": "B",
+            "matiere": "Orthographe",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "B",
+            "matiere": "Oral Français",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Première",
+            "serie": "B",
+            "matiere": "Anglais",
+            "coefficient": 3,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Première",
+            "serie": "B",
+            "matiere": "Philosophie",
+            "coefficient": 3,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Première",
+            "serie": "B",
+            "matiere": "Histoire-Géographie",
+            "coefficient": 4,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Première",
+            "serie": "B",
+            "matiere": "Mathématiques",
+            "coefficient": 4,
+            "heures_semaine": 4
+        },
+        {
+            "niveau": "Première",
+            "serie": "B",
+            "matiere": "Sciences Physiques et Chimie",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "B",
+            "matiere": "Science de la Vie et de la Terre",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "B",
+            "matiere": "Education Physique et Sportive",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "B",
+            "matiere": "Education aux Droits de l'Homme et à la Citoyenneté",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Première",
+            "serie": "B",
+            "matiere": "Conduite",
+            "coefficient": 1,
+            "heures_semaine": 0
+        },
+        {
+            "niveau": "Première",
+            "serie": "C",
+            "matiere": "Composition Française",
+            "coefficient": 2,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Première",
+            "serie": "C",
+            "matiere": "Orthographe",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Première",
+            "serie": "C",
+            "matiere": "Oral Français",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Première",
+            "serie": "C",
+            "matiere": "Anglais",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "C",
+            "matiere": "Philosophie",
+            "coefficient": 3,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Première",
+            "serie": "C",
+            "matiere": "Histoire-Géographie",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "C",
+            "matiere": "Mathématiques",
+            "coefficient": 7,
+            "heures_semaine": 6
+        },
+        {
+            "niveau": "Première",
+            "serie": "C",
+            "matiere": "Sciences Physiques et Chimie",
+            "coefficient": 6,
+            "heures_semaine": 5
+        },
+        {
+            "niveau": "Première",
+            "serie": "C",
+            "matiere": "Science de la Vie et de la Terre",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "C",
+            "matiere": "Education Physique et Sportive",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "C",
+            "matiere": "Education aux Droits de l'Homme et à la Citoyenneté",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Première",
+            "serie": "C",
+            "matiere": "Techniques de l'Information et de la Communication",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Première",
+            "serie": "C",
+            "matiere": "Conduite",
+            "coefficient": 1,
+            "heures_semaine": 0
+        },
+        {
+            "niveau": "Première",
+            "serie": "D",
+            "matiere": "Composition Française",
+            "coefficient": 2,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Première",
+            "serie": "D",
+            "matiere": "Orthographe",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Première",
+            "serie": "D",
+            "matiere": "Oral Français",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Première",
+            "serie": "D",
+            "matiere": "Anglais",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "D",
+            "matiere": "Philosophie",
+            "coefficient": 3,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Première",
+            "serie": "D",
+            "matiere": "Histoire-Géographie",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "D",
+            "matiere": "Mathématiques",
+            "coefficient": 5,
+            "heures_semaine": 5
+        },
+        {
+            "niveau": "Première",
+            "serie": "D",
+            "matiere": "Sciences Physiques et Chimie",
+            "coefficient": 4,
+            "heures_semaine": 4
+        },
+        {
+            "niveau": "Première",
+            "serie": "D",
+            "matiere": "Science de la Vie et de la Terre",
+            "coefficient": 6,
+            "heures_semaine": 5
+        },
+        {
+            "niveau": "Première",
+            "serie": "D",
+            "matiere": "Education Physique et Sportive",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "D",
+            "matiere": "Education aux Droits de l'Homme et à la Citoyenneté",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Première",
+            "serie": "D",
+            "matiere": "Conduite",
+            "coefficient": 1,
+            "heures_semaine": 0
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A1",
+            "matiere": "Composition Française",
+            "coefficient": 4,
+            "heures_semaine": 5
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A1",
+            "matiere": "Orthographe",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A1",
+            "matiere": "Oral Français",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A1",
+            "matiere": "Philosophie",
+            "coefficient": 5,
+            "heures_semaine": 4
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A1",
+            "matiere": "Histoire-Géographie",
+            "coefficient": 4,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A1",
+            "matiere": "Anglais",
+            "coefficient": 4,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A1",
+            "matiere": "Espagnol",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A1",
+            "matiere": "Mathématiques",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A1",
+            "matiere": "Science de la Vie et de la Terre",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A1",
+            "matiere": "Sciences Physiques et Chimie",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A1",
+            "matiere": "Education Physique et Sportive",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A1",
+            "matiere": "Education aux Droits de l'Homme et à la Citoyenneté",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A1",
+            "matiere": "Conduite",
+            "coefficient": 1,
+            "heures_semaine": 0
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A2",
+            "matiere": "Composition Française",
+            "coefficient": 3,
+            "heures_semaine": 4
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A2",
+            "matiere": "Orthographe",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A2",
+            "matiere": "Oral Français",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A2",
+            "matiere": "Anglais",
+            "coefficient": 5,
+            "heures_semaine": 4
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A2",
+            "matiere": "Espagnol",
+            "coefficient": 4,
+            "heures_semaine": 4
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A2",
+            "matiere": "Allemand",
+            "coefficient": 3,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A2",
+            "matiere": "Histoire-Géographie",
+            "coefficient": 4,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A2",
+            "matiere": "Philosophie",
+            "coefficient": 3,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A2",
+            "matiere": "Mathématiques",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A2",
+            "matiere": "Education Physique et Sportive",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A2",
+            "matiere": "Education aux Droits de l'Homme et à la Citoyenneté",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A2",
+            "matiere": "Conduite",
+            "coefficient": 1,
+            "heures_semaine": 0
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "B",
+            "matiere": "Composition Française",
+            "coefficient": 3,
+            "heures_semaine": 4
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "B",
+            "matiere": "Orthographe",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "B",
+            "matiere": "Oral Français",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "B",
+            "matiere": "Anglais",
+            "coefficient": 3,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "B",
+            "matiere": "Philosophie",
+            "coefficient": 3,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "B",
+            "matiere": "Histoire-Géographie",
+            "coefficient": 4,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "B",
+            "matiere": "Mathématiques",
+            "coefficient": 4,
+            "heures_semaine": 4
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "B",
+            "matiere": "Sciences Physiques et Chimie",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "B",
+            "matiere": "Science de la Vie et de la Terre",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "B",
+            "matiere": "Education Physique et Sportive",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "B",
+            "matiere": "Education aux Droits de l'Homme et à la Citoyenneté",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "B",
+            "matiere": "Conduite",
+            "coefficient": 1,
+            "heures_semaine": 0
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "C",
+            "matiere": "Composition Française",
+            "coefficient": 2,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "C",
+            "matiere": "Orthographe",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "C",
+            "matiere": "Oral Français",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "C",
+            "matiere": "Anglais",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "C",
+            "matiere": "Philosophie",
+            "coefficient": 3,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "C",
+            "matiere": "Histoire-Géographie",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "C",
+            "matiere": "Mathématiques",
+            "coefficient": 7,
+            "heures_semaine": 6
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "C",
+            "matiere": "Sciences Physiques et Chimie",
+            "coefficient": 6,
+            "heures_semaine": 5
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "C",
+            "matiere": "Science de la Vie et de la Terre",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "C",
+            "matiere": "Education Physique et Sportive",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "C",
+            "matiere": "Education aux Droits de l'Homme et à la Citoyenneté",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "C",
+            "matiere": "Techniques de l'Information et de la Communication",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "C",
+            "matiere": "Conduite",
+            "coefficient": 1,
+            "heures_semaine": 0
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "D",
+            "matiere": "Composition Française",
+            "coefficient": 2,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "D",
+            "matiere": "Orthographe",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "D",
+            "matiere": "Oral Français",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "D",
+            "matiere": "Anglais",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "D",
+            "matiere": "Philosophie",
+            "coefficient": 3,
+            "heures_semaine": 3
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "D",
+            "matiere": "Histoire-Géographie",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "D",
+            "matiere": "Mathématiques",
+            "coefficient": 5,
+            "heures_semaine": 5
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "D",
+            "matiere": "Sciences Physiques et Chimie",
+            "coefficient": 4,
+            "heures_semaine": 4
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "D",
+            "matiere": "Science de la Vie et de la Terre",
+            "coefficient": 6,
+            "heures_semaine": 5
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "D",
+            "matiere": "Education Physique et Sportive",
+            "coefficient": 2,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "D",
+            "matiere": "Education aux Droits de l'Homme et à la Citoyenneté",
+            "coefficient": 1,
+            "heures_semaine": 1
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "D",
+            "matiere": "Conduite",
+            "coefficient": 1,
+            "heures_semaine": 0
+        }
+    ]
 }

@@ -33,7 +33,7 @@ class ChildDashboardScreen extends StatelessWidget {
       ),
       _DashItem(
         icon: Icons.event_busy_outlined,
-        label: 'Absences & Retards',
+        label: 'Assiduité',
         color: AppTheme.absent,
         screen: AssiduitesScreen(eleve: eleve),
       ),

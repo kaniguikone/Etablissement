@@ -34,6 +34,98 @@ const mention = (moy) => {
     return 'Insuffisant';
 };
 
+/* ── Section téléchargement bulletins d'une classe ─────────────────────────── */
+const ExportBulletinsClasse = ({ niveaux, periodes }) => {
+    const { toast } = useToast();
+    const [niveauId,  setNiveauId]  = useState('');
+    const [classeId,  setClasseId]  = useState('');
+    const [periodeId, setPeriodeId] = useState('');
+    const [classes,   setClasses]   = useState([]);
+    const [enCours,   setEnCours]   = useState(false);
+
+    const handleNiveau = (e) => {
+        const val = e.target.value;
+        setNiveauId(val);
+        setClasseId('');
+        setClasses([]);
+        if (val) {
+            api.get(`/classesNiveaux/${val}`)
+                .then(r => setClasses(r.data))
+                .catch(() => toast.error('Impossible de charger les classes.'));
+        }
+    };
+
+    const telecharger = async () => {
+        if (!classeId || !periodeId) return;
+        setEnCours(true);
+        try {
+            const r = await api.get(`/bulletins/classe/${classeId}/${periodeId}/pdf`, { responseType: 'blob' });
+            const classe  = classes.find(c => String(c.id) === String(classeId));
+            const periode = periodes.find(p => String(p.id) === String(periodeId));
+            const label   = periode?.code_periode ?? periode?.abbr_libelle_periode ?? periodeId;
+            const nom     = `bulletins_${(classe?.nom_classe ?? classeId).replace(/\s+/g, '_')}_${label}_${periode?.annee ?? ''}.pdf`;
+            const url  = URL.createObjectURL(new Blob([r.data], { type: 'application/pdf' }));
+            const lien = document.createElement('a');
+            lien.href = url; lien.download = nom; lien.click();
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            toast.error(await lireErreurBlob(err));
+        } finally {
+            setEnCours(false);
+        }
+    };
+
+    return (
+        <div className="card border-0 shadow-sm mt-4" style={{ borderRadius: 12 }}>
+            <div className="card-header bg-white border-0 px-4 pt-3 pb-2">
+                <span className="fw-bold">
+                    <i className="fas fa-file-pdf me-2 text-danger" />
+                    Bulletins d'une classe — PDF groupé
+                </span>
+                <div className="text-muted small mt-1">
+                    Génère un seul fichier PDF contenant tous les bulletins des élèves d'une classe, par ordre alphabétique.
+                </div>
+            </div>
+            <div className="card-body">
+                <div className="row g-3 align-items-end">
+                    <div className="col-md-3">
+                        <label className="form-label small fw-semibold">Niveau</label>
+                        <select className="form-select form-select-sm" value={niveauId} onChange={handleNiveau}>
+                            <option value="">— Sélectionner —</option>
+                            {niveaux.map(n => <option key={n.id} value={n.id}>{n.nom_niveau}</option>)}
+                        </select>
+                    </div>
+                    <div className="col-md-3">
+                        <label className="form-label small fw-semibold">Classe</label>
+                        <select className="form-select form-select-sm" value={classeId} onChange={e => setClasseId(e.target.value)} disabled={!niveauId}>
+                            <option value="">— Sélectionner —</option>
+                            {classes.map(c => <option key={c.id} value={c.id}>{c.nom_classe}</option>)}
+                        </select>
+                    </div>
+                    <div className="col-md-3">
+                        <label className="form-label small fw-semibold">Période</label>
+                        <select className="form-select form-select-sm" value={periodeId} onChange={e => setPeriodeId(e.target.value)}>
+                            <option value="">— Sélectionner —</option>
+                            {periodes.map(p => <option key={p.id} value={p.id}>{p.libelle_periode} — {p.annee}</option>)}
+                        </select>
+                    </div>
+                    <div className="col-md-3">
+                        <button
+                            className="btn btn-danger btn-sm d-flex align-items-center gap-2"
+                            onClick={telecharger}
+                            disabled={!classeId || !periodeId || enCours}>
+                            {enCours
+                                ? <span className="spinner-border spinner-border-sm" />
+                                : <i className="fas fa-file-pdf" />}
+                            Télécharger les bulletins
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 /* ── Section export Excel par niveau ───────────────────────────────────────── */
 const ExportMoyennes = ({ niveaux, periodes }) => {
     const { toast } = useToast();
@@ -343,6 +435,7 @@ const Bulletin = () => {
                 )}
 
                 <hr className="my-4" />
+                <ExportBulletinsClasse niveaux={niveaux} periodes={periodes} />
                 <ExportMoyennes niveaux={niveaux} periodes={periodes} />
             </div>
         </section>

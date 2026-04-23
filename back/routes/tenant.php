@@ -48,6 +48,7 @@ use App\Http\Controllers\API\RdvController;
 use App\Http\Controllers\API\ConfigurationMatieresController;
 use App\Http\Controllers\API\ExportMoyennesController;
 use App\Http\Controllers\API\SelfTemplateController;
+use App\Http\Controllers\API\SeederController;
 
 /*
 |--------------------------------------------------------------------------
@@ -332,9 +333,10 @@ Route::middleware([
 
             Route::get('/notesDevoir/{id}',                   [NoteController::class,        'notesDevoir']);
             Route::post('/notesSauvegarder/{id}',             [NoteController::class,        'sauvegarder']);
-            Route::get('/bulletin/{eleveId}/{periodeId}',     [NoteController::class,        'bulletin']);
-            Route::get('/bulletin/{eleveId}/{periodeId}/pdf', [BulletinPdfController::class, 'telecharger']);
-            Route::post('/bulletin/{eleveId}/{periodeId}/notifier', [NoteController::class,  'notifierBulletin']);
+            Route::get('/bulletin/{eleveId}/{periodeId}',                [NoteController::class,        'bulletin']);
+            Route::get('/bulletin/{eleveId}/{periodeId}/pdf',           [BulletinPdfController::class, 'telecharger']);
+            Route::post('/bulletin/{eleveId}/{periodeId}/notifier',     [NoteController::class,        'notifierBulletin']);
+            Route::get('/bulletins/classe/{classeId}/{periodeId}/pdf',  [BulletinPdfController::class, 'telechargerClasse']);
             Route::get('/notes/{periodeId}/export',                    [NoteController::class,        'exportCsv']);
             Route::get('/export/moyennes/{niveauId}/{periodeId}',      [ExportMoyennesController::class, 'export']);
         });
@@ -392,6 +394,10 @@ Route::middleware([
             Route::post('/annees-scolaires/{id}/confirmer',       [ArchivageController::class, 'confirmer']);
             Route::get('/annees-scolaires/{id}/bilan',            [ArchivageController::class, 'bilan']);
         });
+
+        // ─── Seeder (dev uniquement — super admin uniquement, bloqué en production) ──
+        Route::post('/seeder/lancer',          [SeederController::class, 'lancer']);
+        Route::get('/seeder/status/{jobId}',   [SeederController::class, 'statut']);
 
         Route::middleware('permission:utilisateurs')->group(function () {
             Route::get('/utilisateurs',                    [UserController::class, 'index']);

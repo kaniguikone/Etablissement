@@ -25,7 +25,7 @@ class ParentAuthController extends Controller
         // Révoquer les anciens tokens pour ce parent
         $parent->tokens()->delete();
 
-        $token = $parent->createToken('parent-mobile')->plainTextToken;
+        $token = $parent->createToken('parent-mobile', ['*'], now()->addDays(30))->plainTextToken;
 
         return response()->json([
             'token'  => $token,

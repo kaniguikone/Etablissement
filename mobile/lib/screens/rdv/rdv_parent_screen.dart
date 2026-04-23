@@ -106,19 +106,20 @@ class _PrendreRdvTabState extends State<_PrendreRdvTab> {
       separatorBuilder: (_, __) => const SizedBox(height: 8),
       itemBuilder: (_, i) {
         final e = _enseignants[i];
-        final nom = '${e['prenom'] ?? ''} ${e['nom'] ?? ''}'.trim();
+        final nom = '${e['prenoms_enseignant'] ?? ''} ${e['nom_enseignant'] ?? ''}'.trim();
+        final initiale = nom.isNotEmpty ? nom[0].toUpperCase() : null;
         return Card(
           child: ListTile(
             leading: CircleAvatar(
               backgroundColor: AppTheme.primary.withValues(alpha: 0.12),
-              child: Text(
-                nom.isNotEmpty ? nom[0].toUpperCase() : '?',
-                style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold),
-              ),
+              child: initiale != null
+                  ? Text(initiale,
+                      style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold))
+                  : const Icon(Icons.person, color: AppTheme.primary),
             ),
-            title: Text(nom, style: const TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: e['matiere'] != null
-                ? Text(e['matiere']['libelle_matiere'] as String? ?? '')
+            title: Text(nom.isNotEmpty ? nom : '—', style: const TextStyle(fontWeight: FontWeight.w600)),
+            subtitle: e['libelle_matiere'] != null
+                ? Text(e['libelle_matiere'] as String)
                 : null,
             trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
             onTap: () => Navigator.push(
@@ -126,7 +127,7 @@ class _PrendreRdvTabState extends State<_PrendreRdvTab> {
               MaterialPageRoute(
                 builder: (_) => _CreneauxEnseignantScreen(
                   enseignantId:   e['id'] as int,
-                  enseignantNom:  nom,
+                  enseignantNom:  nom.isNotEmpty ? nom : (e['nom_enseignant'] as String? ?? '—'),
                   eleve:          widget.eleve,
                 ),
               ),
@@ -397,7 +398,7 @@ class _MesReservationsTabState extends State<_MesReservationsTab> {
                     children: [
                       Expanded(
                         child: Text(
-                          '${ens?['prenom'] ?? ''} ${ens?['nom'] ?? ''}'.trim(),
+                          '${ens?['prenoms'] ?? ens?['prenom'] ?? ''} ${ens?['nom'] ?? ''}'.trim(),
                           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                         ),
                       ),

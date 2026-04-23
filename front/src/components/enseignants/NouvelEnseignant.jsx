@@ -10,6 +10,7 @@ const NouvelEnseignant = () => {
         matricule_enseignant: '', nom_enseignant: '', prenoms_enseignant: '',
         genre_enseignant: '', telephone_enseignant: '', email_enseignant: '',
         date_naissance_enseignant: '', date_embauche_enseignant: '', statut_enseignant: '',
+        password: '',
     });
 
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -79,6 +80,10 @@ const NouvelEnseignant = () => {
                                 <option value="Stagiaire">Stagiaire</option>
                                 <option value="Vacataire">Vacataire</option>
                             </select>
+                        </div>
+                        <div className="col-md-4">
+                            <label className="form-label">Mot de passe (portail)</label>
+                            <input type="password" className="form-control form-control-sm" name="password" value={form.password} onChange={handleChange} placeholder="Laisser vide si non concerné" />
                         </div>
 
                     </fieldset>

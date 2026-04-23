@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('niveau_id')
                   ->constrained('niveaux')->onDelete('cascade');
+            $table->foreignId('serie_id')
+                  ->nullable()
+                  ->constrained('series')->nullOnDelete();
             $table->foreignId('matiere_id')
                   ->constrained('matieres')->onDelete('cascade');
             // null = matière obligatoire, sinon rattachée à un groupe alternatif (LV2…)
@@ -22,9 +25,10 @@ return new class extends Migration
                   ->nullable()
                   ->constrained('groupes_alternatifs')->nullOnDelete();
             $table->boolean('obligatoire')->default(true);
+            $table->decimal('coefficient', 4, 2)->default(1.00);
             $table->timestamps();
 
-            $table->unique(['niveau_id', 'matiere_id']);
+            $table->unique(['niveau_id', 'serie_id', 'matiere_id']);
         });
     }
 

@@ -14,16 +14,15 @@ const GROUPES = [
         ],
     },
 
-    // ── Inscriptions ─────────────────────────────────────────────────────────
-    {
-        label: 'Inscriptions',
-        icon: 'fas fa-user-plus',
-        permissions: ['inscriptions'],
-        items: [
-            { to: '/Inscriptions',        icon: 'fas fa-list-check',    label: 'Demandes' },
-            { to: '/NouvelleInscription', icon: 'fas fa-pen-to-square', label: 'Nouvelle inscription' },
-        ],
-    },
+    // ── Inscriptions (masqué — module en attente d'utilisation réelle) ────────
+    // {
+    //     label: 'Inscriptions',
+    //     icon: 'fas fa-user-plus',
+    //     permissions: ['inscriptions'],
+    //     items: [
+    //         { to: '/Inscriptions', icon: 'fas fa-list-check', label: 'Demandes' },
+    //     ],
+    // },
 
     // ── Élèves ───────────────────────────────────────────────────────────────
     {
@@ -136,6 +135,16 @@ const GROUPES = [
         ],
     },
 
+    // ── Développement (super admin uniquement) ───────────────────────────────
+    {
+        label: 'Développement',
+        icon: 'fas fa-flask',
+        superOnly: true,
+        items: [
+            { to: '/Seeder', icon: 'fas fa-database', label: 'Interface de seed' },
+        ],
+    },
+
     // ── Statistiques (pilotage — en bas) ─────────────────────────────────────
     {
         label: 'Statistiques',
@@ -192,13 +201,14 @@ const MenuGroup = ({ group, open, onToggle }) => {
 };
 
 const Menu = () => {
-    const { peutAcceder } = useAuth();
+    const { user, peutAcceder } = useAuth();
     const { etablissement } = useEtablissement();
     const location = useLocation();
 
-    const groupesFiltres = GROUPES.filter(g =>
-        !g.permissions || peutAcceder(g.permissions)
-    );
+    const groupesFiltres = GROUPES.filter(g => {
+        if (g.superOnly) return user?.super === true || user?.super === 1;
+        return !g.permissions || peutAcceder(g.permissions);
+    });
 
     const initialOpen = groupesFiltres.findIndex(g =>
         g.label && g.items.some(item => location.pathname.startsWith(item.to))

@@ -58,9 +58,10 @@ class EnseignantController extends Controller
             'genre_enseignant'         => $request->genre_enseignant,
             'telephone_enseignant'     => $request->telephone_enseignant,
             'email_enseignant'         => $request->email_enseignant,
-            'date_naissance_enseignant'=> $request->date_naissance_enseignant,
-            'date_embauche_enseignant' => $request->date_embauche_enseignant,
+            'date_naissance_enseignant'=> $request->date_naissance_enseignant ?: null,
+            'date_embauche_enseignant' => $request->date_embauche_enseignant ?: null,
             'statut_enseignant'        => $request->statut_enseignant,
+            'password'                 => $request->filled('password') ? $request->password : null,
         ]);
 
         return response()->json(['status' => 'success', 'enseignant' => $enseignant], 201);
@@ -81,17 +82,23 @@ class EnseignantController extends Controller
             'prenoms_enseignant'   => 'required',
         ]);
 
-        $enseignant->update([
+        $data = [
             'matricule_enseignant'     => $request->matricule_enseignant,
             'nom_enseignant'           => $request->nom_enseignant,
             'prenoms_enseignant'       => $request->prenoms_enseignant,
             'genre_enseignant'         => $request->genre_enseignant,
             'telephone_enseignant'     => $request->telephone_enseignant,
             'email_enseignant'         => $request->email_enseignant,
-            'date_naissance_enseignant'=> $request->date_naissance_enseignant,
-            'date_embauche_enseignant' => $request->date_embauche_enseignant,
+            'date_naissance_enseignant'=> $request->date_naissance_enseignant ?: null,
+            'date_embauche_enseignant' => $request->date_embauche_enseignant ?: null,
             'statut_enseignant'        => $request->statut_enseignant,
-        ]);
+        ];
+
+        if ($request->filled('password')) {
+            $data['password'] = $request->password;
+        }
+
+        $enseignant->update($data);
 
         return response()->json(['status' => 'success', 'enseignant' => $enseignant]);
     }

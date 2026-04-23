@@ -1,0 +1,27 @@
+Lance ClasseEnseignantMatiereSeeder d'abord.
+  Période T1 : OK
+  Période T2 : OK
+  Période T3 : OK
+✓ 0 devoirs créés.
+✓ 0 notes créées.
+✓ 0 assiduités créées.
+✓ 258 paiements créés.
+✓ 80 parent(s) mis à jour avec le mot de passe « 12345 » et les informations complémentaires.
+✓ 35 enseignant(s) mis à jour avec le mot de passe « 12345 ».
+199 photos PNG générées.
+✓ 728 chapitres créés (7 niveaux × 12 matières).
+Aucune affectation trouvée — lance ClasseEnseignantMatiereSeeder d'abord.
+Niveau 6ième introuvable.
+Niveau 5ième introuvable.
+Niveau 4ième introuvable.
+Niveau 3ième introuvable.
+✓ 28 volumes horaires créés.
+✓ 18 paiements partiels/impayés créés pour le tableau des impayés.
+  Reçu [especes] — Quigley Lora — 55000 FCFA
+  Reçu [cheque] — Bernhard Zaria — 55000 FCFA
+  Reçu [virement] — Pollich Willy — 55000 FCFA
+  Reçu [autre] — Pfeffer Zaria — 65000 FCFA
+✓ 4 paiements représentatifs créés pour tester les reçus PDF.
+✓ 42 notifications créées.
+✓ 21 événements du calendrier créés.
+✓ 42 sanctions créées sur 20 élèves.

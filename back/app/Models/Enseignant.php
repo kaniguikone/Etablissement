@@ -14,7 +14,7 @@ class Enseignant extends Authenticatable
     public $timestamps = false;
 
     protected $fillable = [
-        "matricule_enseignant", "numero_enseignant", "nom_enseignant", "prenoms_enseignant",
+        "matricule_enseignant", "nom_enseignant", "prenoms_enseignant",
         "genre_enseignant", "telephone_enseignant", "email_enseignant",
         "date_naissance_enseignant", "date_embauche_enseignant", "statut_enseignant",
         "password",
@@ -24,8 +24,8 @@ class Enseignant extends Authenticatable
 
     protected $casts = [
         'password'                   => 'hashed',
-        'date_naissance_enseignant'  => 'date',
-        'date_embauche_enseignant'   => 'date',
+        'date_naissance_enseignant'  => 'date:Y-m-d',
+        'date_embauche_enseignant'   => 'date:Y-m-d',
     ];
 
     public function matieres()

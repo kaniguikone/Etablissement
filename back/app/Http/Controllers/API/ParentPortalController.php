@@ -11,7 +11,7 @@ use App\Models\Periodes;
 use App\Models\Scolarites;
 use App\Models\Informations;
 use App\Models\EmploiDuTemps;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Http\Controllers\API\BulletinPdfController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -97,34 +97,12 @@ class ParentPortalController extends Controller
      */
     public function bulletinPdf(Request $request, int $eleveId, int $periodeId)
     {
-        $parent  = $request->user();
-        $eleve   = Eleve::with('classe.niveau')->where('id', $eleveId)
-            ->where('parent_id', $parent->id)->firstOrFail();
-        $periode = Periodes::findOrFail($periodeId);
+        // Vérifier que l'enfant appartient bien à ce parent
+        $parent = $request->user();
+        Eleve::where('id', $eleveId)->where('parent_id', $parent->id)->firstOrFail();
 
-        $notes = Note::with(['devoir.matiere', 'devoir.typeDevoir'])
-            ->where('eleve_id', $eleveId)
-            ->whereHas('devoir', fn ($q) => $q->where('periode_id', $periodeId))
-            ->get();
-
-        $parMatiere = $notes->groupBy(fn ($n) => $n->devoir->matiere->libelle_matiere)
-            ->map(function ($notesMatiere) {
-                $totalCoeff = $notesMatiere->sum(fn ($n) => (float) $n->devoir->coeff_devoir);
-                $somme      = $notesMatiere->sum(fn ($n) => (float) $n->note * (float) $n->devoir->coeff_devoir);
-                return ['moyenne' => $totalCoeff > 0 ? round($somme / $totalCoeff, 2) : null];
-            });
-
-        $etablissement = Etablissement::first();
-        $pdf = Pdf::loadView('bulletins.bulletin', compact('eleve', 'periode', 'parMatiere', 'etablissement'))
-            ->setPaper('A4', 'portrait');
-
-        $nomFichier = sprintf('bulletin_%s_%s_%s.pdf',
-            strtolower($eleve->nom_eleve),
-            strtolower($eleve->prenoms_eleve),
-            $periode->abbr_libelle_periode ?? $periodeId
-        );
-
-        return $pdf->download($nomFichier);
+        // Déléguer la génération PDF au contrôleur dédié (vue unifiée)
+        return app(BulletinPdfController::class)->telecharger((string) $eleveId, (string) $periodeId);
     }
 
     /**

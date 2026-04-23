@@ -62,6 +62,14 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     }, [user]);
 
+    const mettreAJourSession = useCallback((tok, u) => {
+        const userAvecType = { ...u, _type: 'school', group_id: u.group_id ?? null, group_nom: u.group_nom ?? null };
+        localStorage.setItem('token', tok);
+        localStorage.setItem('user', JSON.stringify(userAvecType));
+        setToken(tok);
+        setUser(userAvecType);
+    }, []);
+
     const estGroupe      = user?._type === 'group';
     const estEnseignant  = user?._type === 'enseignant';
     const estDansGroupe  = user?._type === 'school' && !!user?.group_id;
@@ -80,7 +88,7 @@ export const AuthProvider = ({ children }) => {
     }, [user, estGroupe]);
 
     return (
-        <AuthContext.Provider value={{ user, token, connexion, connexionEnseignant, connexionGroupe, deconnexion, peutAcceder, estGroupe, estEnseignant, estDansGroupe, groupeNom }}>
+        <AuthContext.Provider value={{ user, token, connexion, connexionEnseignant, connexionGroupe, deconnexion, peutAcceder, mettreAJourSession, estGroupe, estEnseignant, estDansGroupe, groupeNom }}>
             {children}
         </AuthContext.Provider>
     );

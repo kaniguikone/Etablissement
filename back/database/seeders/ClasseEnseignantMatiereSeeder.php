@@ -12,11 +12,11 @@ use Illuminate\Support\Facades\DB;
 /**
  * Règles d'affectation :
  *
- * Matières de base (TOUS les niveaux) : MATH, FR, ANG, SVT, HG, SPC, EPS, MUSQ, AP
- * Philosophie (PHI)  : uniquement 1ère et Terminale
- * Allemand  (ALL)    : à partir de 4ième, jamais dans une classe qui a Espagnol
- * Espagnol  (ESP)    : à partir de 4ième, jamais dans une classe qui a Allemand
- *                      → alternance par position : position paire = ALL, impaire = ESP
+ * Matières de base (TOUS les niveaux) : MATHS, CFR, OTG, OFR, ANG, SVT, HG, SPC, EPS, MUS, ARTS, TIC, EDHC, CDT
+ * Philosophie (PHILO) : uniquement 1ère et Terminale
+ * Allemand  (ALL)     : à partir de 4ième, jamais dans une classe qui a Espagnol
+ * Espagnol  (ESP)     : à partir de 4ième, jamais dans une classe qui a Allemand
+ *                       → alternance par position : position paire = ALL, impaire = ESP
  *
  * Chaque enseignant  : max 3 matières différentes, max 7 classes distinctes
  */
@@ -52,19 +52,24 @@ class ClasseEnseignantMatiereSeeder extends Seeder
 
         // IDs des matières
         $idsBase = array_values(array_filter([
-            $matieres['MATH']?->id,
-            $matieres['FR']?->id,
+            $matieres['MATHS']?->id,
+            $matieres['CFR']?->id,
+            $matieres['OTG']?->id,
+            $matieres['OFR']?->id,
             $matieres['ANG']?->id,
             $matieres['SVT']?->id,
             $matieres['HG']?->id,
             $matieres['SPC']?->id,
             $matieres['EPS']?->id,
-            $matieres['MUSQ']?->id,
-            $matieres['AP']?->id,
+            $matieres['MUS']?->id,
+            $matieres['ARTS']?->id,
+            $matieres['TIC']?->id,
+            $matieres['EDHC']?->id,
+            $matieres['CDT']?->id,
         ]));
-        $idALL = $matieres['ALL']?->id;
-        $idESP = $matieres['ESP']?->id;
-        $idPHI = $matieres['PHI']?->id;
+        $idALL  = $matieres['ALL']?->id;
+        $idESP  = $matieres['ESP']?->id;
+        $idPHI  = $matieres['PHILO']?->id;
 
         // ── Étape 1 : matières par classe (règles strictes) ──────────────────
 

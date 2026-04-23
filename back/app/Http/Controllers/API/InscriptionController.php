@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\Classe;
 use App\Models\DemandeInscription;
 use App\Models\Eleve;
 use App\Models\Niveau;
@@ -265,20 +264,6 @@ class InscriptionController extends Controller
             'adresse_eleve'        => $request->adresse_eleve,
             'classe_id'            => $request->classe_id,
             'parent_id'            => $parent->id,
-        ]);
-
-        // Enregistrer la demande comme trace
-        DemandeInscription::create([
-            ...$request->only([
-                'nom_eleve', 'prenoms_eleve', 'date_naissance_eleve', 'genre_eleve',
-                'lieu_naissance_eleve', 'nationalite_eleve', 'adresse_eleve',
-                'nom_parent', 'prenom_parent', 'numero_parent',
-                'email_parent', 'relation_parent', 'profession_parent', 'adresse_parent',
-            ]),
-            'niveau_id' => Classe::find($request->classe_id)?->niveau_id,
-            'origine'   => 'etablissement',
-            'statut'    => 'validee',
-            'eleve_id'  => $eleve->id,
         ]);
 
         return response()->json([

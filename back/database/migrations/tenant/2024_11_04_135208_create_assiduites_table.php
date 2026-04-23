@@ -11,6 +11,9 @@ return new class extends Migration
         Schema::create('assiduites', function (Blueprint $table) {
             $table->id();
             $table->date('date_assiduite');
+            $table->time('heure_debut')->nullable();
+            $table->time('heure_fin')->nullable();
+            $table->decimal('duree', 4, 2)->nullable();
             $table->enum('statut', ['present', 'absent', 'retard']);
             $table->string('remarque')->nullable();
 

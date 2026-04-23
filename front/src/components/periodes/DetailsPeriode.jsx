@@ -25,8 +25,8 @@ const DetailsPeriode = () => {
                     abbr_libelle_periode: p.abbr_libelle_periode || '',
                     code_periode: p.code_periode || '',
                     annee: p.annee || '',
-                    date_debut: p.date_debut || '',
-                    date_fin: p.date_fin || '',
+                    date_debut: p.date_debut?.substring(0, 10) || '',
+                    date_fin:   p.date_fin?.substring(0, 10)   || '',
                 });
             })
             .catch(() => toast.error('Impossible de charger les données de cette période.'));

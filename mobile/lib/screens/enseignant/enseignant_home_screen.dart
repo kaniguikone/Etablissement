@@ -26,6 +26,8 @@ class _EnseignantHomeScreenState extends State<EnseignantHomeScreen> {
   final _devoirsKey  = GlobalKey<DevoirsScreenState>();
   final _presenceKey = GlobalKey<PresenceScreenState>();
 
+  // Onglets principaux (bottom bar) : 0-Accueil 1-Devoirs 2-Présence 3-Messages
+  // Onglets secondaires (tiroir)    : 4-Programme 5-Emploi 6-Remplacements 7-RDV 8-Infos
   late final List<Widget> _screens;
 
   @override
@@ -35,19 +37,63 @@ class _EnseignantHomeScreenState extends State<EnseignantHomeScreen> {
       const EnseignantDashboardScreen(),
       DevoirsScreen(key: _devoirsKey),
       PresenceScreen(key: _presenceKey),
+      const ConversationsScreen(prefix: 'enseignant'),
       const ProgrammeScreen(),
       const EnseignantEmploiScreen(),
       const RemplacementsScreen(),
-      const ConversationsScreen(prefix: 'enseignant'),
       const RdvEnseignantScreen(),
       const EnseignantInformationsScreen(),
     ];
+  }
+
+  void _openMore(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) {
+        final items = [
+          (4, Icons.menu_book_outlined,       'Programme'),
+          (5, Icons.calendar_today_outlined,   'Emploi du temps'),
+          (6, Icons.swap_horiz_outlined,       'Remplacements'),
+          (7, Icons.event_available_outlined,  'RDV'),
+          (8, Icons.notifications_outlined,    'Informations'),
+        ];
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(width: 40, height: 4,
+                  decoration: BoxDecoration(color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2))),
+              const SizedBox(height: 8),
+              ...items.map((item) => ListTile(
+                leading: Icon(item.$2, color: AppTheme.primary),
+                title: Text(item.$3),
+                selected: _index == item.$1,
+                selectedTileColor: AppTheme.primary.withValues(alpha: 0.08),
+                onTap: () {
+                  Navigator.pop(context);
+                  setState(() => _index = item.$1);
+                },
+              )),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final auth          = context.watch<AuthProvider>();
     final etablissement = context.watch<EtablissementProvider>().info;
+
+    // Indice dans la NavigationBar (0-3 = onglets principaux, 4 = "Plus")
+    final barIndex = _index < 4 ? _index : 4;
 
     return Scaffold(
       appBar: AppBar(
@@ -112,55 +158,42 @@ class _EnseignantHomeScreenState extends State<EnseignantHomeScreen> {
                 )
               : null,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
+        selectedIndex: barIndex,
+        onDestinationSelected: (i) {
+          if (i == 4) {
+            _openMore(context);
+          } else {
+            setState(() => _index = i);
+          }
+        },
         backgroundColor: Colors.white,
         indicatorColor: AppTheme.primary.withValues(alpha: 0.15),
-        destinations: const [
-          NavigationDestination(
+        destinations: [
+          const NavigationDestination(
             icon: Icon(Icons.dashboard_outlined),
             selectedIcon: Icon(Icons.dashboard, color: AppTheme.primary),
             label: 'Accueil',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.assignment_outlined),
             selectedIcon: Icon(Icons.assignment, color: AppTheme.primary),
             label: 'Devoirs',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.fact_check_outlined),
             selectedIcon: Icon(Icons.fact_check, color: AppTheme.primary),
             label: 'Présence',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.menu_book_outlined),
-            selectedIcon: Icon(Icons.menu_book, color: AppTheme.primary),
-            label: 'Programme',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.calendar_today_outlined),
-            selectedIcon: Icon(Icons.calendar_today, color: AppTheme.primary),
-            label: 'Emploi',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.swap_horiz_outlined),
-            selectedIcon: Icon(Icons.swap_horiz, color: AppTheme.primary),
-            label: 'Remplaç.',
-          ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.chat_outlined),
             selectedIcon: Icon(Icons.chat, color: AppTheme.primary),
             label: 'Messages',
           ),
           NavigationDestination(
-            icon: Icon(Icons.event_available_outlined),
-            selectedIcon: Icon(Icons.event_available, color: AppTheme.primary),
-            label: 'RDV',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.notifications_outlined),
-            selectedIcon: Icon(Icons.notifications, color: AppTheme.primary),
-            label: 'Infos',
+            icon: Icon(_index >= 4 ? Icons.more_horiz : Icons.more_horiz_outlined,
+                color: _index >= 4 ? AppTheme.primary : null),
+            selectedIcon: const Icon(Icons.more_horiz, color: AppTheme.primary),
+            label: 'Plus',
           ),
         ],
       ),

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 import { useConfirm } from '../../context/ConfirmContext';
@@ -49,9 +49,6 @@ const ListeInscriptions = () => {
                             <span className="badge bg-warning text-dark ms-2">{nbAttente} en attente</span>
                         )}
                     </h4>
-                    <NavLink to="/NouvelleInscription" className="btn btn-primary btn-sm">
-                        + Inscrire un élève
-                    </NavLink>
                 </div>
 
                 {/* Filtres */}

@@ -14,7 +14,7 @@ class NoteDetail {
   factory NoteDetail.fromJson(Map<String, dynamic> json) => NoteDetail(
         type:  json['type'] as String?,
         date:  json['date'] as String? ?? '',
-        note:  (json['note'] as num).toDouble(),
+        note:  double.parse(json['note'].toString()),
         coeff: json['coeff'] != null ? int.parse(json['coeff'].toString()) : 1,
       );
 }
@@ -38,7 +38,7 @@ class NoteMatiere {
         matiereId: json['matiere_id'] != null ? int.parse(json['matiere_id'].toString()) : null,
         matiere:   json['matiere'] as String?,
         abbr:      json['abbr'] as String?,
-        moyenne:   json['moyenne'] != null ? (json['moyenne'] as num).toDouble() : null,
+        moyenne:   json['moyenne'] != null ? double.parse(json['moyenne'].toString()) : null,
         notes:     (json['notes'] as List<dynamic>)
             .map((n) => NoteDetail.fromJson(n as Map<String, dynamic>))
             .toList(),

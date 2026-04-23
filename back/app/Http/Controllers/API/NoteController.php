@@ -74,7 +74,7 @@ class NoteController extends Controller
      */
     public function sauvegarder(Request $request, string $devoirId)
     {
-        Devoir::findOrFail($devoirId);
+        $devoir = Devoir::with(['matiere', 'typeDevoir'])->findOrFail($devoirId);
 
         $request->validate([
             'notes'             => 'required|array',
@@ -82,16 +82,42 @@ class NoteController extends Controller
             'notes.*.note'      => 'nullable|numeric|min:0|max:20',
         ]);
 
+        $notifService = app(NotificationService::class);
+
         foreach ($request->notes as $item) {
             if ($item['note'] === null || $item['note'] === '') {
                 Note::where('devoir_id', $devoirId)
                     ->where('eleve_id', $item['eleve_id'])
                     ->delete();
             } else {
+                $existante = Note::where('devoir_id', $devoirId)
+                    ->where('eleve_id', $item['eleve_id'])
+                    ->first();
+
+                $ancienneNote = $existante?->note;
+
                 Note::updateOrCreate(
                     ['devoir_id' => $devoirId, 'eleve_id' => $item['eleve_id']],
                     ['note' => $item['note']]
                 );
+
+                // Notifier uniquement si la note est nouvelle ou modifiée
+                if ((string) $ancienneNote !== (string) $item['note']) {
+                    $eleve = Eleve::with('parents')->find($item['eleve_id']);
+                    if ($eleve?->parents) {
+                        $matiereNom = $devoir->matiere->libelle_matiere;
+                        $typeNom    = $devoir->typeDevoir->libelle_type_devoir ?? $devoir->typeDevoir->code_type_devoir;
+                        $noteVal    = number_format((float) $item['note'], 2, ',', '');
+                        $action     = $ancienneNote === null ? 'a reçu' : 'a une note modifiée :';
+                        $notifService->notifierParent(
+                            $eleve->parents->id,
+                            'note',
+                            'Nouvelle note',
+                            "{$eleve->prenoms_eleve} {$eleve->nom_eleve} {$action} {$noteVal}/20 en {$matiereNom} ({$typeNom}).",
+                            ['eleve_id' => $eleve->id, 'devoir_id' => $devoirId]
+                        );
+                    }
+                }
             }
         }
 

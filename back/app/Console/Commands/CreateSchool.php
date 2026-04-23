@@ -7,6 +7,7 @@ namespace App\Console\Commands;
 use App\Models\Tenant;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class CreateSchool extends Command
 {
@@ -17,6 +18,7 @@ class CreateSchool extends Command
         {--plan=demo : Plan tarifaire (demo|basic|pro)}
         {--email= : Email de contact}
         {--ville= : Ville}
+        {--group-id= : ID du groupe auquel rattacher l\'établissement (optionnel)}
         {--admin-email= : Email du premier administrateur}
         {--admin-password= : Mot de passe du premier administrateur}';
 
@@ -41,12 +43,23 @@ class CreateSchool extends Command
 
         $this->info("Création de l'établissement '$nom'...");
 
+        $groupId = $this->option('group-id') ? (int) $this->option('group-id') : null;
+
+        if ($groupId && !\App\Models\Group::find($groupId)) {
+            $this->error("Aucun groupe trouvé avec l'ID $groupId.");
+            return 1;
+        }
+
+        $code = $this->generateUniqueCode();
+
         $tenant = new Tenant();
         $tenant->id            = $id;
+        $tenant->code          = $code;
         $tenant->nom           = $nom;
         $tenant->email_contact = $this->option('email');
         $tenant->ville         = $this->option('ville');
         $tenant->plan          = $this->option('plan') ?? 'demo';
+        $tenant->group_id      = $groupId;
         $tenant->actif         = true;
         $tenant->save();
 
@@ -60,33 +73,62 @@ class CreateSchool extends Command
         $adminEmail    = $this->option('admin-email');
         $adminPassword = $this->option('admin-password');
 
+        // Initialiser la tenancy pour peupler la base tenant
+        tenancy()->initialize($tenant);
+
+        \App\Models\Etablissement::create([
+            'nom'   => $nom,
+            'ville' => $this->option('ville'),
+            'email' => $this->option('email'),
+            'pays'  => "Côte d'Ivoire",
+        ]);
+
+        $this->info("✓ Établissement initialisé : $nom");
+
         if ($adminEmail && $adminPassword) {
-            // Initialiser la tenancy pour créer l'utilisateur dans la bonne DB
-            tenancy()->initialize($tenant);
+            $role = \App\Models\Role::create([
+                'nom'         => 'Administrateur',
+                'label'       => 'Administrateur',
+                'super'       => true,
+                'permissions' => json_encode([]),
+            ]);
 
             \App\Models\User::create([
                 'name'     => 'Administrateur',
                 'email'    => $adminEmail,
                 'password' => Hash::make($adminPassword),
+                'role_id'  => $role->id,
             ]);
 
-            tenancy()->end();
-
+            $this->info("✓ Rôle super-admin créé");
             $this->info("✓ Administrateur créé : $adminEmail");
         }
+
+        tenancy()->end();
 
         $this->newLine();
         $this->table(
             ['Propriété', 'Valeur'],
             [
                 ['ID', $id],
+                ['Code établissement', $code],
                 ['Nom', $nom],
                 ['Domaine', $domaine],
                 ['Plan', $this->option('plan')],
+                ['Groupe', $groupId ? "#$groupId" : '(indépendant)'],
                 ['URL API', "https://$domaine/api"],
             ]
         );
 
         return 0;
+    }
+
+    private function generateUniqueCode(): string
+    {
+        do {
+            $code = strtoupper(Str::random(6));
+        } while (Tenant::where('code', $code)->exists());
+
+        return $code;
     }
 }

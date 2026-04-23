@@ -1,0 +1,29 @@
+✓ 268 affectations insérées.
+  → max classes distinctes/enseignant : 7, moyenne : 4.5
+✓ 392 créneaux insérés pour 27 classes.
+  Période T1 : OK
+  Période T2 : OK
+  Période T3 : OK
+✓ 2633 devoirs créés.
+✓ 85784 notes créées.
+✓ 84312 assiduités créées.
+✓ 926 paiements créés.
+✓ 283 parent(s) mis à jour avec le mot de passe « 12345 » et les informations complémentaires.
+✓ 60 enseignant(s) mis à jour avec le mot de passe « 12345 ».
+708 photos PNG générées.
+✓ 798 chapitres créés (7 niveaux × 12 matières).
+✓ 3086 progressions insérées.
+Niveau 6ième introuvable.
+Niveau 5ième introuvable.
+Niveau 4ième introuvable.
+Niveau 3ième introuvable.
+✓ 31 volumes horaires créés.
+✓ 19 paiements partiels/impayés créés pour le tableau des impayés.
+  Reçu [especes] — Predovic Rene — 70000 FCFA
+  Reçu [cheque] — McKenzie Celestino — 50000 FCFA
+  Reçu [virement] — Willms Kellie — 55000 FCFA
+  Reçu [autre] — Willms Enrique — 60000 FCFA
+✓ 4 paiements représentatifs créés pour tester les reçus PDF.
+✓ 47 notifications créées.
+✓ 21 événements du calendrier créés.
+✓ 47 sanctions créées sur 20 élèves.

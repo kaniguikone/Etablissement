@@ -21,6 +21,10 @@ return new class extends Migration
                   ->onDelete('restrict')
                   ->onUpdate('restrict');
 
+            $table->foreignId('serie_id')
+                  ->nullable()
+                  ->constrained('series')->nullOnDelete();
+
             $table->foreignId('professeur_principal_id')
                   ->nullable()
                   ->constrained('enseignants')

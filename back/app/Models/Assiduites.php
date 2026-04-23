@@ -13,6 +13,9 @@ class Assiduites extends Model
 
     protected $fillable = [
         'date_assiduite',
+        'heure_debut',
+        'heure_fin',
+        'duree',
         'statut',
         'remarque',
         'eleve_id',

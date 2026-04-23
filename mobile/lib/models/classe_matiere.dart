@@ -32,5 +32,5 @@ class ClasseMatiere {
         niveau:         json['libelle_niveau'] as String?,
       );
 
-  String get label => '$nomClasse · $libelleMatiere';
+  String get label => '$abbrClasse · $libelleMatiere';
 }

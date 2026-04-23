@@ -21,7 +21,7 @@ class Periode {
         annee:   json['annee'] as String?,
       );
 
-  String get label => annee != null ? '$libelle — $annee' : libelle;
+  String get label => libelle;
 
   @override
   String toString() => abbr ?? libelle;

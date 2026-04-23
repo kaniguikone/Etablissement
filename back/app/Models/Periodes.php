@@ -12,8 +12,8 @@ class Periodes extends Model
     public $timestamps = false;
 
     protected $casts = [
-        'date_debut' => 'date',
-        'date_fin'   => 'date',
+        'date_debut' => 'date:Y-m-d',
+        'date_fin'   => 'date:Y-m-d',
     ];
 
     protected $fillable = [

@@ -12,6 +12,7 @@ class CreateTenantsTable extends Migration
     {
         Schema::create('tenants', function (Blueprint $table) {
             $table->string('id')->primary();             // slug unique ex: lycee-moderne
+            $table->string('code', 8)->unique()->nullable(); // code court partageable ex: LYC001
 
             // Informations de l'établissement
             $table->string('nom');                       // Nom complet

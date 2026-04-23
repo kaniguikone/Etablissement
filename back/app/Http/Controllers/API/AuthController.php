@@ -26,7 +26,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Ce compte est désactivé. Contactez l\'administrateur.'], 403);
         }
 
-        $token = $user->createToken('backoffice')->plainTextToken;
+        $token = $user->createToken('backoffice', ['*'], now()->addHours(8))->plainTextToken;
 
         $tenant = tenant();
 

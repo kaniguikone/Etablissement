@@ -25,7 +25,7 @@ class SuperAdminAuthController extends Controller
             return response()->json(['message' => 'Identifiants invalides.'], 401);
         }
 
-        $token = $admin->createToken('superadmin')->plainTextToken;
+        $token = $admin->createToken('superadmin', ['*'], now()->addHours(8))->plainTextToken;
 
         return response()->json([
             'token' => $token,

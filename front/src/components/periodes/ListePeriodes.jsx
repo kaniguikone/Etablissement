@@ -88,8 +88,8 @@ const ListePeriodes = () => {
                                     <td>{p.libelle_periode}</td>
                                     <td><span className="badge bg-light text-dark border">{p.abbr_libelle_periode}</span></td>
                                     <td>{p.annee}</td>
-                                    <td>{p.date_debut}</td>
-                                    <td>{p.date_fin}</td>
+                                    <td>{p.date_debut ? new Date(p.date_debut).toLocaleDateString('fr-FR') : '—'}</td>
+                                    <td>{p.date_fin   ? new Date(p.date_fin).toLocaleDateString('fr-FR')   : '—'}</td>
                                     <td>
                                         <NavLink to={`/DetailsPeriode/${p.id}`} className="btn btn-primary btn-sm me-1">Voir</NavLink>
                                         <button type="button" className="btn btn-danger btn-sm" onClick={() => supprimerPeriode(p.id)}>Supprimer</button>

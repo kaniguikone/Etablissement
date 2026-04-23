@@ -18,7 +18,7 @@ class Eleve extends Model
     ];
 
     protected $casts = [
-        'date_naissance_eleve' => 'date',
+        'date_naissance_eleve' => 'date:Y-m-d',
     ];
 
     protected $appends = ['photo_url'];

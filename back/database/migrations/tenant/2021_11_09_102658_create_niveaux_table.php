@@ -17,7 +17,7 @@ class CreateNiveauxTable extends Migration
             $table->id();
             $table->string('nom_niveau');
             $table->string('abbr_niveau');
-            //$table->timestamps();
+            $table->unsignedTinyInteger('ordre')->nullable();
         });
     }
 
