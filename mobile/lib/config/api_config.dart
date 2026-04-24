@@ -35,7 +35,7 @@ class ApiConfig {
     return parts.length > 1 ? parts.last : '';
   }
 
-  // Adresse TCP réelle (IP ou 10.0.2.2 à la place de localhost sur Android)
+  // Adresse TCP réelle (IP ou IP-centrale à la place de localhost sur mobile)
   static String get _connectionHost {
     if (_ipMatch != null) return _ipMatch!.group(2)!;
     if (_localhostMatch != null) {
@@ -46,10 +46,18 @@ class ApiConfig {
       }
       // Sur le web, subdomain.localhost:PORT est directement accessible (Chrome)
       if (kIsWeb) return '${_localhostMatch!.group(1)!}.$serverPart';
-      // Sur Android émulateur, remplacer localhost par 10.0.2.2
-      return serverPart.replaceFirst('localhost', '10.0.2.2');
+      // Remplacer localhost par l'IP du serveur central si c'est une IP
+      // (appareil physique), sinon fallback sur 10.0.2.2 (émulateur Android).
+      return serverPart.replaceFirst('localhost', _localIp);
     }
     return _host;
+  }
+
+  // IP à substituer à "localhost" : celle du central si configurée, sinon émulateur.
+  static final _ipOnlyRegex = RegExp(r'^(\d+\.\d+\.\d+\.\d+)(?::\d+)?$');
+  static String get _localIp {
+    final m = _ipOnlyRegex.firstMatch(_centralHost);
+    return m != null ? m.group(1)! : '10.0.2.2';
   }
 
   // En-tête Host original à injecter pour l'identification du tenant
@@ -63,8 +71,10 @@ class ApiConfig {
   static String get storageBaseUrl => '$_scheme://$_connectionHost';
 
   // URL du serveur central (pour la recherche publique d'établissements).
-  // En production passer --dart-define=CENTRAL_HOST=monapp.ci
+  // Priorité : valeur sauvegardée par l'utilisateur (onboarding), sinon
+  // --dart-define=CENTRAL_HOST=monapp.ci, sinon API_HOST, sinon localhost:8000.
   static String get _centralHost =>
+      StorageService.getCachedCentralUrl() ??
       const String.fromEnvironment('CENTRAL_HOST',
           defaultValue: String.fromEnvironment('API_HOST', defaultValue: 'localhost:8000'));
   static String get _centralScheme =>

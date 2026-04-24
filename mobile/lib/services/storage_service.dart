@@ -7,10 +7,12 @@ class StorageService {
 
   static const _keyToken        = 'auth_token';
   static const _keyRole         = 'auth_role'; // 'parent' | 'enseignant'
-  static const _keyServerUrl    = 'server_url'; // ex: https://lycee-moderne.monapp.ci
+  static const _keyServerUrl    = 'server_url';  // ex: lycee-moderne.monapp.ci
+  static const _keyCentralUrl   = 'central_url'; // ex: monapp.ci ou 192.168.1.45:8000
 
   // Cache synchrone chargé au démarrage de l'app
   static String? _cachedServerUrl;
+  static String? _cachedCentralUrl;
 
   // Parent
   static const _keyParentId     = 'parent_id';
@@ -44,6 +46,24 @@ class StorageService {
 
   /// Retour synchrone depuis le cache (disponible après loadServerUrl()).
   static String? getCachedServerUrl() => _cachedServerUrl;
+
+  // ── URL serveur central ──────────────────────────────────────────────────
+
+  static Future<void> loadCentralUrl() async {
+    _cachedCentralUrl = await _storage.read(key: _keyCentralUrl);
+  }
+
+  static Future<void> saveCentralUrl(String url) async {
+    _cachedCentralUrl = url;
+    await _storage.write(key: _keyCentralUrl, value: url);
+  }
+
+  static Future<void> clearCentralUrl() async {
+    _cachedCentralUrl = null;
+    await _storage.delete(key: _keyCentralUrl);
+  }
+
+  static String? getCachedCentralUrl() => _cachedCentralUrl;
 
   // ── Token & rôle ─────────────────────────────────────────────────────────
 

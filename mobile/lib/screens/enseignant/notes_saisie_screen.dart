@@ -194,7 +194,7 @@ class _NotesSaisieScreenState extends State<NotesSaisieScreen> {
                     else
                       Expanded(
                         child: ListView.builder(
-                          padding: const EdgeInsets.only(bottom: 80),
+                          padding: const EdgeInsets.only(bottom: 16),
                           itemCount: _eleves.length,
                           itemBuilder: (_, i) {
                             final e = _eleves[i];
@@ -210,14 +210,6 @@ class _NotesSaisieScreenState extends State<NotesSaisieScreen> {
                       ),
                   ],
                 ),
-      floatingActionButton: _eleves.isNotEmpty
-          ? FloatingActionButton.extended(
-              onPressed: _saving ? null : _sauvegarder,
-              icon: const Icon(Icons.save),
-              label: const Text('Enregistrer'),
-              backgroundColor: AppTheme.primary,
-            )
-          : null,
     );
   }
 }

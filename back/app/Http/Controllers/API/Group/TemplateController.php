@@ -47,7 +47,7 @@ class TemplateController extends Controller
             'matieres.*.abbr_matiere'            => 'required|string',
             'niveau_series'                      => 'nullable|array',
             'niveau_series.*.niveau'             => 'required|string',
-            'niveau_series.*.series'             => 'required|array',
+            'niveau_series.*.series'             => 'present|array',
             'niveau_matieres'                    => 'required|array',
             'niveau_matieres.*.niveau'           => 'required|string',
             'niveau_matieres.*.matiere'          => 'required|string',

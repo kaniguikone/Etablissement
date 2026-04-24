@@ -8,22 +8,30 @@ const ANNEE_COURANTE = (() => {
     return m >= 8 ? `${y}-${y + 1}` : `${y - 1}-${y}`;
 })();
 
-const DEFAUTS = {
-    classes_min:    3,
-    classes_max:    5,
-    eleves_min:     20,
-    eleves_max:     35,
-    nb_enseignants: 60,
-    annee:          ANNEE_COURANTE,
-    periodes_type:  'trimestre',
-    avec_eleves:    true,
-    avec_emploi:    true,
-    avec_devoirs:   true,
-    avec_paiements: true,
+const TEMPLATES = {
+    lycee_complet: { label: 'Lycée Complet (6ème → Terminale)', nb_niveaux: 7, nb_matieres: 17 },
+    college:       { label: 'Collège (6ème → 3ème)',            nb_niveaux: 4, nb_matieres: 16 },
+    lycee:         { label: 'Lycée (Seconde → Terminale)',       nb_niveaux: 3, nb_matieres: 17 },
+    primaire:      { label: 'École Primaire (CP1 → CM2)',        nb_niveaux: 6, nb_matieres: 11 },
 };
 
-const NB_NIVEAUX  = 7;
-const NB_MATIERES = 15;
+const DEFAUTS = {
+    template:              'lycee_complet',
+    classes_min:           1,
+    classes_max:           3,
+    eleves_min:            10,
+    eleves_max:            20,
+    nb_enseignants:        35,
+    annee:                 ANNEE_COURANTE,
+    periodes_type:         'trimestre',
+    avec_eleves:           true,
+    avec_emploi:           true,
+    avec_devoirs:          true,
+    avec_paiements:        true,
+    devoirs_min:           1,
+    devoirs_max:           2,
+    assiduites_par_periode: 3,
+};
 const POLL_MS     = 2000;
 
 const MODULES = [
@@ -130,6 +138,9 @@ const SeederInterface = () => {
     };
 
     // ── Estimations ──────────────────────────────────────────────────────────
+    const tplInfo    = TEMPLATES[params.template] ?? TEMPLATES.lycee_complet;
+    const NB_NIVEAUX  = tplInfo.nb_niveaux;
+    const NB_MATIERES = tplInfo.nb_matieres;
     const classesMoy = Math.round((params.classes_min + params.classes_max) / 2);
     const elevesMoy  = Math.round((params.eleves_min  + params.eleves_max)  / 2);
     const estClasses = NB_NIVEAUX * classesMoy;
@@ -203,6 +214,15 @@ const SeederInterface = () => {
                             <i className="fas fa-school me-2 text-primary" />Structure scolaire
                         </div>
                         <div className="card-body">
+                            <div className="mb-3">
+                                <label className="form-label fw-semibold">Cycle scolaire</label>
+                                <select name="template" value={params.template}
+                                    onChange={handleChange} className="form-select" disabled={enCours}>
+                                    {Object.entries(TEMPLATES).map(([key, t]) => (
+                                        <option key={key} value={key}>{t.label}</option>
+                                    ))}
+                                </select>
+                            </div>
                             <div className="row g-3 mb-3">
                                 <div className="col-md-6">
                                     <label className="form-label fw-semibold">Année scolaire</label>
@@ -277,6 +297,25 @@ const SeederInterface = () => {
                                     </div>
                                 );
                             })}
+
+                            {params.avec_devoirs && params.avec_eleves && (
+                                <div className="border-top pt-3 mt-1">
+                                    <RangeRow label="Devoirs par matière × période"
+                                        nameMin="devoirs_min" nameMax="devoirs_max"
+                                        min={1} max={5} params={params} onChange={handleChange} />
+                                    <div className="mb-0">
+                                        <label className="form-label fw-semibold">Séances d'assiduité par période</label>
+                                        <div className="d-flex align-items-center gap-2">
+                                            <input type="number" name="assiduites_par_periode"
+                                                value={params.assiduites_par_periode}
+                                                min={1} max={8} onChange={handleChange}
+                                                className="form-control form-control-sm" style={{ maxWidth: 80 }}
+                                                disabled={enCours} />
+                                            <span className="text-muted small">séances / période / matière</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

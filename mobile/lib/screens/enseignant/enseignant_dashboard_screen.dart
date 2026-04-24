@@ -5,6 +5,7 @@ import '../../models/devoir.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/loading_error_widget.dart';
 import 'notes_saisie_screen.dart';
+import 'devoirs_screen.dart';
 
 class EnseignantDashboardScreen extends StatefulWidget {
   const EnseignantDashboardScreen({super.key});
@@ -149,7 +150,8 @@ class _EnseignantDashboardScreenState extends State<EnseignantDashboardScreen> {
             children: [
               const _SectionHeader(title: 'Devoirs récents', icon: Icons.assignment_outlined),
               TextButton(
-                onPressed: () {},
+                onPressed: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const DevoirsScreen(standalone: true))),
                 child: const Text('Voir tout'),
               ),
             ],

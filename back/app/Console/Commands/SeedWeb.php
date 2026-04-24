@@ -13,6 +13,7 @@ use App\Models\Periodes;
 use App\Models\Scolarites;
 use App\Models\Tenant;
 use App\Models\TypeDevoir;
+use App\Services\TemplateService;
 use Database\Seeders\AdminSeeder;
 use Database\Seeders\CalendrierSeeder;
 use Database\Seeders\ChapitresMatiereSeeder;
@@ -20,7 +21,6 @@ use Database\Seeders\ClasseEnseignantMatiereSeeder;
 use Database\Seeders\DevoirNoteAssiduitesSeeder;
 use Database\Seeders\EmploiDuTempsSeeder;
 use Database\Seeders\EnseignantAuthSeeder;
-use Database\Seeders\EtablissementSeeder;
 use Database\Seeders\ImpaiesSeeder;
 use Database\Seeders\NotificationSeeder;
 use Database\Seeders\PaiementSeeder;
@@ -46,45 +46,12 @@ class SeedWeb extends Command
         'emploi_du_temps', 'paiements', 'notes', 'devoirs', 'assiduites',
         'scolarites', 'informations', 'type_devoirs',
         'eleves', 'parents', 'enseignants', 'classe_enseignant_matiere',
-        'classes', 'niveaux', 'matieres', 'periodes', 'etablissements',
-        'salles',
+        'classe_enseignant_matiere', 'niveau_matieres',
+        'classes', 'niveaux', 'series', 'matieres', 'periodes',
+        'annees_scolaires', 'salles',
     ];
 
-    private const MATIERES = [
-        ['MATHS', 'Mathématiques'],
-        ['CFR',   'Composition Française'],
-        ['OTG',   'Orthographe'],
-        ['OFR',   'Oral Français'],
-        ['ANG',   'Anglais'],
-        ['SVT',   'Science de la Vie et de la Terre'],
-        ['HG',    'Histoire-Géographie'],
-        ['SPC',   'Sciences Physiques et Chimie'],
-        ['EPS',   'Education Physique et Sportive'],
-        ['MUS',   'Musique'],
-        ['ARTS',  'Arts Plastiques'],
-        ['PHILO', 'Philosophie'],
-        ['ALL',   'Allemand'],
-        ['ESP',   'Espagnol'],
-        ['TIC',   'Techniques de l\'Information et de la Communication'],
-        ['EDHC',  'Education aux Droits de l\'Homme et à la Citoyenneté'],
-        ['CDT',   'Conduite'],
-    ];
-
-    private const NIVEAUX = [
-        ['Sixième',   '6ème',  1],
-        ['Cinquième', '5ème',  2],
-        ['Quatrième', '4ème',  3],
-        ['Troisième', '3ème',  4],
-        ['Seconde',   '2nde',  5],
-        ['Première',  '1ère',  6],
-        ['Terminale', 'Tle',   7],
-    ];
-
-    private const TYPE_DEVOIRS = [
-        ['DN', 'Devoir de Niveau'],
-        ['DC', 'Devoir de Classe'],
-        ['EI', 'Interrogation Écrite'],
-    ];
+    public array $seedContext = [];
 
     private string $jobId;
     private string $jobDir;
@@ -130,6 +97,7 @@ class SeedWeb extends Command
 
     private function lancerSeed(array $p): array
     {
+        $template      = $p['template']       ?? 'lycee_complet';
         $classesMin    = $p['classes_min']    ?? 3;
         $classesMax    = max($classesMin, $p['classes_max'] ?? 5);
         $elevesMin     = $p['eleves_min']     ?? 20;
@@ -142,13 +110,15 @@ class SeedWeb extends Command
         $avecDevoirs   = $p['avec_devoirs']   ?? true;
         $avecPaiements = $p['avec_paiements'] ?? true;
 
+        $templateData = TemplateService::charger($template);
+
         $stats  = [];
         $errors = [];
 
         $this->ecrireStatut('running', [], [], 'Nettoyage des tables…');
 
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        foreach (self::TABLES as $table) {
+        foreach (array_unique(self::TABLES) as $table) {
             if (Schema::hasTable($table)) {
                 DB::table($table)->truncate();
             }
@@ -157,23 +127,56 @@ class SeedWeb extends Command
 
         $this->ecrireStatut('running', [], [], 'Création des matières et niveaux…');
 
-        foreach (self::MATIERES as [$abbr, $libelle]) {
-            Matiere::create(['abbr_matiere' => $abbr, 'libelle_matiere' => $libelle, 'description_matiere' => Str::slug($libelle)]);
+        foreach ($templateData['matieres'] as $m) {
+            Matiere::create([
+                'abbr_matiere'        => $m['abbr_matiere'],
+                'libelle_matiere'     => $m['libelle_matiere'],
+                'description_matiere' => Str::slug($m['libelle_matiere']),
+            ]);
         }
-        $stats['matieres'] = count(self::MATIERES);
+        $stats['matieres'] = count($templateData['matieres']);
 
-        foreach (self::NIVEAUX as [$nom, $abbr, $ordre]) {
-            Niveau::create(['nom_niveau' => $nom, 'abbr_niveau' => $abbr, 'ordre' => $ordre]);
+        foreach ($templateData['niveaux'] as $n) {
+            Niveau::create([
+                'nom_niveau'  => $n['nom_niveau'],
+                'abbr_niveau' => $n['abbr_niveau'],
+                'ordre'       => $n['ordre'],
+            ]);
         }
-        $stats['niveaux'] = count(self::NIVEAUX);
+        $stats['niveaux'] = count($templateData['niveaux']);
 
-        $stats['periodes']   = $this->creerPeriodes($annee, $periodesType);
+        $stats['periodes']   = $this->creerPeriodes($annee, $periodesType, $templateData);
         $stats['scolarites'] = $this->creerScolarites();
 
-        foreach (self::TYPE_DEVOIRS as [$code, $desc]) {
-            TypeDevoir::create(['code_type_devoir' => $code, 'description_type_devoir' => $desc]);
+        foreach ($templateData['type_devoirs'] as $td) {
+            TypeDevoir::create([
+                'code_type_devoir'        => $td['code_type_devoir'],
+                'description_type_devoir' => $td['description_type_devoir'],
+            ]);
         }
-        $stats['type_devoirs'] = count(self::TYPE_DEVOIRS);
+        $stats['type_devoirs'] = count($templateData['type_devoirs']);
+
+        // Niveau-matières (utile pour ChapitresMatiereSeeder, VolumeHoraireSeeder)
+        $niveauxMap  = Niveau::pluck('id', 'nom_niveau')->toArray();
+        $matieresMap = Matiere::pluck('id', 'libelle_matiere')->toArray();
+        $nmCount = 0;
+        foreach ($templateData['niveau_matieres'] as $nm) {
+            $niveauId  = $niveauxMap[$nm['niveau']] ?? null;
+            $matiereId = $matieresMap[$nm['matiere']] ?? null;
+            if (!$niveauId || !$matiereId) continue;
+            DB::table('niveau_matieres')->insertOrIgnore([
+                'niveau_id'            => $niveauId,
+                'matiere_id'           => $matiereId,
+                'serie_id'             => null,
+                'groupe_alternatif_id' => null,
+                'obligatoire'          => 1,
+                'coefficient'          => $nm['coefficient'],
+                'created_at'           => now(),
+                'updated_at'           => now(),
+            ]);
+            $nmCount++;
+        }
+        $stats['niveau_matieres'] = $nmCount;
 
         $stats['informations'] = $this->creerInformations($annee);
 
@@ -209,9 +212,14 @@ class SeedWeb extends Command
         }
         $stats['enseignants'] = $nbEnseignants;
 
-        $this->ecrireStatut('running', $stats, [], 'Établissement et comptes…');
-        $this->runSeeder(EtablissementSeeder::class, $errors);
+        $this->ecrireStatut('running', $stats, [], 'Comptes utilisateurs…');
         $this->runSeeder(AdminSeeder::class, $errors);
+
+        $this->seedContext = [
+            'devoirs_min'            => $p['devoirs_min']            ?? 1,
+            'devoirs_max'            => max($p['devoirs_min'] ?? 1, $p['devoirs_max'] ?? 2),
+            'assiduites_par_periode' => $p['assiduites_par_periode'] ?? 3,
+        ];
 
         $this->ecrireStatut('running', $stats, $errors, 'Affectations matières…');
         $this->runSeeder(ClasseEnseignantMatiereSeeder::class, $errors);
@@ -275,37 +283,57 @@ class SeedWeb extends Command
         }
     }
 
-    private function creerPeriodes(string $annee, string $type): int
+    private function creerPeriodes(string $annee, string $type, array $templateData): int
     {
         [$debut, $fin] = explode('-', $annee);
-        $periodes = $type === 'semestre' ? [
-            [$annee, 'Premier Semestre',   '1er Sem',  'S1', "{$debut}-09-02", "{$fin}-01-31"],
-            [$annee, 'Deuxième Semestre',  '2ème Sem', 'S2', "{$fin}-02-01",  "{$fin}-06-30"],
+
+        $defaultDates = $type === 'semestre' ? [
+            ["{$debut}-09-02", "{$fin}-01-31"],
+            ["{$fin}-02-01",   "{$fin}-06-30"],
         ] : [
-            [$annee, 'Premier Trimestre',   '1er Trim', 'T1', "{$debut}-09-02", "{$debut}-12-20"],
-            [$annee, 'Deuxième Trimestre',  '2ème Trim','T2', "{$fin}-01-02",   "{$fin}-03-10"],
-            [$annee, 'Troisième Trimestre', '3ème Trim','T3', "{$fin}-03-15",   "{$fin}-05-20"],
+            ["{$debut}-09-02", "{$debut}-12-20"],
+            ["{$fin}-01-02",   "{$fin}-03-10"],
+            ["{$fin}-03-15",   "{$fin}-05-20"],
         ];
-        foreach ($periodes as [$an, $lib, $abbr, $code, $d, $f]) {
-            Periodes::create(['libelle_periode' => $lib, 'abbr_libelle_periode' => $abbr, 'code_periode' => $code, 'annee' => $an, 'date_debut' => $d, 'date_fin' => $f]);
+
+        $anneeScolaireId = DB::table('annees_scolaires')->insertGetId([
+            'libelle'    => $annee,
+            'date_debut' => "{$debut}-09-01",
+            'date_fin'   => "{$fin}-06-30",
+            'statut'     => 'en_cours',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $templatePeriodes = $templateData['periodes_' . $type] ?? $templateData['periodes_trimestre'];
+        foreach ($templatePeriodes as $i => $p) {
+            [$d, $f] = $defaultDates[$i] ?? ["{$debut}-09-02", "{$fin}-06-30"];
+            Periodes::create([
+                'annee_scolaire_id'    => $anneeScolaireId,
+                'libelle_periode'      => $p['libelle_periode'],
+                'abbr_libelle_periode' => $p['abbr_libelle_periode'],
+                'code_periode'         => $p['code_periode'],
+                'annee'                => $annee,
+                'date_debut'           => $d,
+                'date_fin'             => $f,
+            ]);
         }
-        return count($periodes);
+        return count($templatePeriodes);
     }
 
     private function creerScolarites(): int
     {
-        $montants = [
-            1 => [50000,50000,40000,40000,30000], 2 => [55000,50000,45000,40000,30000],
-            3 => [55000,50000,45000,45000,35000], 4 => [60000,55000,50000,45000,35000],
-            5 => [60000,55000,50000,45000,40000], 6 => [65000,60000,55000,50000,40000],
-            7 => [70000,65000,60000,55000,45000],
-        ];
-        $dates = ['2024-10-05','2024-11-05','2024-12-05','2025-01-05','2025-02-05'];
+        $dates = ['2024-10-05', '2024-11-05', '2024-12-05', '2025-01-05', '2025-02-05'];
         $count = 0;
-        foreach (Niveau::all() as $rank => $niveau) {
-            $m = $montants[min($rank + 1, 7)];
+        foreach (Niveau::orderBy('ordre')->get() as $niveau) {
+            $base = 40000 + ($niveau->ordre * 5000);
             foreach ($dates as $i => $date) {
-                Scolarites::create(['libelle_echeance' => ($i+1).'ème versement', 'date_echeance' => $date, 'montant_echeance' => $m[$i], 'niveau_id' => $niveau->id]);
+                Scolarites::create([
+                    'libelle_echeance'  => ($i + 1) . 'ème versement',
+                    'date_echeance'     => $date,
+                    'montant_echeance'  => max(10000, $base - ($i * 2000)),
+                    'niveau_id'         => $niveau->id,
+                ]);
                 $count++;
             }
         }

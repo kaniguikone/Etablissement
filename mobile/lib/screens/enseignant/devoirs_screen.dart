@@ -8,7 +8,8 @@ import 'devoir_form_screen.dart';
 import 'notes_saisie_screen.dart';
 
 class DevoirsScreen extends StatefulWidget {
-  const DevoirsScreen({super.key});
+  final bool standalone;
+  const DevoirsScreen({super.key, this.standalone = false});
 
   @override
   State<DevoirsScreen> createState() => DevoirsScreenState();
@@ -55,9 +56,7 @@ class DevoirsScreenState extends State<DevoirsScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
+  Widget _body() => Column(
       children: [
         // ── Filtre période ──
         if (_periodes.isNotEmpty)
@@ -121,6 +120,14 @@ class DevoirsScreenState extends State<DevoirsScreen> {
                         ),
         ),
       ],
+    );
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.standalone) return _body();
+    return Scaffold(
+      appBar: AppBar(title: const Text('Devoirs')),
+      body: _body(),
     );
   }
 }

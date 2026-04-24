@@ -1308,6 +1308,314 @@
             "matiere": "Conduite",
             "coefficient": 1,
             "heures_semaine": 0
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "A",
+            "matiere": "Techniques de l'Information et de la Communication",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "A",
+            "matiere": "Musique",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "A",
+            "matiere": "Allemand",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "A",
+            "matiere": "Arts Plastiques",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "C",
+            "matiere": "Musique",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "C",
+            "matiere": "Arts Plastiques",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "C",
+            "matiere": "Espagnol",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Seconde",
+            "serie": "C",
+            "matiere": "Allemand",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "A1",
+            "matiere": "Techniques de l'Information et de la Communication",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "A1",
+            "matiere": "Allemand",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "A1",
+            "matiere": "Musique",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "A1",
+            "matiere": "Arts Plastiques",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "A2",
+            "matiere": "Techniques de l'Information et de la Communication",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "A2",
+            "matiere": "Musique",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "A2",
+            "matiere": "Arts Plastiques",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "A2",
+            "matiere": "Science de la Vie et de la Terre",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "A2",
+            "matiere": "Sciences Physiques et Chimie",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "C",
+            "matiere": "Musique",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "C",
+            "matiere": "Arts Plastiques",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "C",
+            "matiere": "Espagnol",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "C",
+            "matiere": "Allemand",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "D",
+            "matiere": "Techniques de l'Information et de la Communication",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "D",
+            "matiere": "Musique",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "D",
+            "matiere": "Arts Plastiques",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "D",
+            "matiere": "Espagnol",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Première",
+            "serie": "D",
+            "matiere": "Allemand",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "D",
+            "matiere": "Techniques de l'Information et de la Communication",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "D",
+            "matiere": "Musique",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "D",
+            "matiere": "Arts Plastiques",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "D",
+            "matiere": "Espagnol",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "D",
+            "matiere": "Allemand",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "C",
+            "matiere": "Musique",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "C",
+            "matiere": "Allemand",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "C",
+            "matiere": "Espagnol",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "C",
+            "matiere": "Arts Plastiques",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A2",
+            "matiere": "Techniques de l'Information et de la Communication",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A2",
+            "matiere": "Musique",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A2",
+            "matiere": "Arts Plastiques",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A2",
+            "matiere": "Sciences Physiques et Chimie",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A2",
+            "matiere": "Science de la Vie et de la Terre",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A1",
+            "matiere": "Techniques de l'Information et de la Communication",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A1",
+            "matiere": "Musique",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A1",
+            "matiere": "Allemand",
+            "coefficient": 1,
+            "heures_semaine": 2
+        },
+        {
+            "niveau": "Terminale",
+            "serie": "A1",
+            "matiere": "Arts Plastiques",
+            "coefficient": 1,
+            "heures_semaine": 2
         }
     ]
 }

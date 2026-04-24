@@ -48,6 +48,10 @@ use App\Http\Controllers\API\RdvController;
 use App\Http\Controllers\API\ConfigurationMatieresController;
 use App\Http\Controllers\API\ExportMoyennesController;
 use App\Http\Controllers\API\SelfTemplateController;
+use App\Http\Controllers\API\ImportEnseignantController;
+use App\Http\Controllers\API\ImportScolariteController;
+use App\Http\Controllers\API\ImportAffectationController;
+use App\Http\Controllers\API\ImportNoteController;
 use App\Http\Controllers\API\SeederController;
 
 /*
@@ -292,6 +296,10 @@ Route::middleware([
             Route::get('/enseignantClasse/{id}',                  [EnseignantController::class, 'enseignantClasse']);
             Route::get('/enseignants/{id}/affectations',          [EnseignantController::class, 'affectations']);
             Route::post('/enseignants/{id}/affectations',         [EnseignantController::class, 'sauvegarderAffectations']);
+            Route::get('/enseignants/import/template',            [ImportEnseignantController::class, 'template']);
+            Route::post('/enseignants/import',                    [ImportEnseignantController::class, 'import']);
+            Route::get('/affectations/import/template',           [ImportAffectationController::class, 'template']);
+            Route::post('/affectations/import',                   [ImportAffectationController::class, 'import']);
         });
 
         Route::middleware('permission:parents')->group(function () {
@@ -326,8 +334,10 @@ Route::middleware([
             Route::post('/assiduitesSauvegarder',                [AssiduitesController::class, 'sauvegarder']);
             Route::get('/assiduitesRecap/{eleveId}/{periodeId}', [AssiduitesController::class, 'recapEleve']);
 
-            Route::get('/devoirs/prochainCode',  [DevoirController::class, 'prochainCode']);
-            Route::apiResource('devoirs',        DevoirController::class);
+            Route::get('/devoirs/prochainCode',          [DevoirController::class,    'prochainCode']);
+            Route::get('/devoirs/{id}/import/template',  [ImportNoteController::class, 'template']);
+            Route::post('/devoirs/{id}/import',          [ImportNoteController::class, 'import']);
+            Route::apiResource('devoirs',                DevoirController::class);
             Route::get('/devoirsClasse/{id}',    [DevoirController::class, 'devoirsClasse']);
             Route::get('/devoirsPeriode/{id}',   [DevoirController::class, 'devoirsPeriode']);
 
@@ -344,6 +354,8 @@ Route::middleware([
         Route::middleware('permission:finances')->group(function () {
             Route::apiResource('scolarites',         ScolariteController::class);
             Route::get('/scolaritesNiveau/{id}',     [ScolariteController::class, 'ScolaritesNiveau']);
+            Route::get('/scolarites/import/template',[ImportScolariteController::class, 'template']);
+            Route::post('/scolarites/import',        [ImportScolariteController::class, 'import']);
             Route::get('/paiements/export',          [PaiementController::class,  'exportCsv']);
             Route::get('/impayes',                   [PaiementController::class,  'impayes']);
             Route::post('/paiements/initier',        [CinetPayController::class,  'initier']);

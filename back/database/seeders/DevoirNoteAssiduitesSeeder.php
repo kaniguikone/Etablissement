@@ -23,17 +23,6 @@ use Illuminate\Support\Facades\DB;
  */
 class DevoirNoteAssiduitesSeeder extends Seeder
 {
-    private const DATES_DEVOIRS = [
-        'T1' => ['2024-10-11', '2024-10-25', '2024-11-08', '2024-11-29', '2024-12-13'],
-        'T2' => ['2025-01-17', '2025-01-31', '2025-02-14', '2025-02-28', '2025-03-07'],
-        'T3' => ['2025-04-11', '2025-04-25', '2025-05-02', '2025-05-16', '2025-05-23'],
-    ];
-
-    private const DATES_ASSIDUITES = [
-        'T1' => ['2024-09-27', '2024-10-18', '2024-11-15', '2024-12-06'],
-        'T2' => ['2025-01-10', '2025-01-31', '2025-02-21', '2025-03-07'],
-        'T3' => ['2025-04-04', '2025-04-25', '2025-05-09', '2025-05-23'],
-    ];
 
     private const REMARQUES_ABSENT = ['Absent non justifié', 'Maladie', 'Absence justifiée', 'Raison familiale', ''];
     private const REMARQUES_RETARD = ['Retard transport', 'Retard non justifié', 'Problème de transport', ''];
@@ -53,6 +42,11 @@ class DevoirNoteAssiduitesSeeder extends Seeder
             $this->command->warn('Données de base manquantes. Lance DatabaseSeeder d\'abord.');
             return;
         }
+
+        $ctx             = $this->command->seedContext ?? [];
+        $devoirsMin      = max(1, (int) ($ctx['devoirs_min'] ?? 1));
+        $devoirsMax      = max($devoirsMin, (int) ($ctx['devoirs_max'] ?? 2));
+        $nbAssiduites    = max(1, (int) ($ctx['assiduites_par_periode'] ?? 3));
 
         $typeDC = $typeDevoirs->firstWhere('code_type_devoir', 'DC') ?? $typeDevoirs->first();
         $typeDN = $typeDevoirs->firstWhere('code_type_devoir', 'DN') ?? $typeDevoirs->get(1) ?? $typeDevoirs->first();
@@ -97,8 +91,8 @@ class DevoirNoteAssiduitesSeeder extends Seeder
 
         foreach ($periodes as $periode) {
             $code   = $periode->code_periode ?? 'T1';
-            $datesD = self::DATES_DEVOIRS[$code]    ?? self::DATES_DEVOIRS['T1'];
-            $datesA = self::DATES_ASSIDUITES[$code] ?? self::DATES_ASSIDUITES['T1'];
+            $datesD = $this->genererDates($periode->date_debut, $periode->date_fin, max(5, $devoirsMax * 2));
+            $datesA = $this->genererDates($periode->date_debut, $periode->date_fin, $nbAssiduites);
 
             $notesBatch     = [];
             $assiduitesData = [];
@@ -115,8 +109,8 @@ class DevoirNoteAssiduitesSeeder extends Seeder
                     $mat = $matieres[$matiereId] ?? null;
                     if (!$mat) continue;
 
-                    // DC : 1 à 2 devoirs par matière
-                    $nbDC = rand(1, 2);
+                    // DC : devoirs_min à devoirs_max par matière
+                    $nbDC = rand($devoirsMin, $devoirsMax);
                     for ($n = 0; $n < $nbDC; $n++) {
                         $devoir = Devoir::create([
                             'code_devoir'    => sprintf('%s-%s-%s-%s-%02d',
@@ -144,8 +138,8 @@ class DevoirNoteAssiduitesSeeder extends Seeder
                         }
                     }
 
-                    // EI : 1 à 2 interrogations par matière
-                    $nbEI = rand(1, 2);
+                    // EI : devoirs_min à devoirs_max interrogations par matière
+                    $nbEI = rand($devoirsMin, $devoirsMax);
                     for ($n = 0; $n < $nbEI; $n++) {
                         $devoir = Devoir::create([
                             'code_devoir'    => sprintf('%s-%s-%s-%s-%02d',
@@ -264,6 +258,20 @@ class DevoirNoteAssiduitesSeeder extends Seeder
         $this->command->info("✓ {$totalDevoirs} devoirs créés.");
         $this->command->info("✓ {$totalNotes} notes créées.");
         $this->command->info("✓ {$totalAssid} assiduités créées.");
+    }
+
+    /** Génère $count dates réparties uniformément entre $debut et $fin */
+    private function genererDates(string $debut, string $fin, int $count): array
+    {
+        $start = \Carbon\Carbon::parse($debut);
+        $end   = \Carbon\Carbon::parse($fin);
+        $days  = max(1, $start->diffInDays($end));
+        $step  = max(1, (int) floor($days / ($count + 1)));
+        $dates = [];
+        for ($i = 1; $i <= $count; $i++) {
+            $dates[] = $start->copy()->addDays($step * $i)->format('Y-m-d');
+        }
+        return $dates;
     }
 
     /** Note réaliste entre 4 et 20, distribution centrée sur 12-13 */

@@ -4,7 +4,9 @@ namespace Database\Seeders;
 
 use App\Models\Eleve;
 use App\Models\Paiement;
+use App\Models\Periodes;
 use App\Models\Scolarites;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
 /**
@@ -24,19 +26,24 @@ class PaiementSeeder extends Seeder
         'autre'    => 5,
     ];
 
-    private const DATES_PAIEMENT = [
-        '2024-10-03', '2024-10-10', '2024-10-20',
-        '2024-11-04', '2024-11-12', '2024-11-25',
-        '2024-12-02', '2024-12-10',
-        '2025-01-08', '2025-01-20',
-        '2025-02-03', '2025-02-18',
-        '2025-03-05',
-    ];
-
     public function run(): void
     {
-        $eleves    = Eleve::with('classe.niveau')->get();
+        $eleves     = Eleve::with('classe.niveau')->get();
         $scolarites = Scolarites::all()->groupBy('niveau_id');
+
+        // Pool de dates de paiement : une date tous les 7 jours sur toute l'année scolaire
+        $datesPaiement = [];
+        foreach (Periodes::orderBy('date_debut')->get() as $periode) {
+            $current = Carbon::parse($periode->date_debut);
+            $fin     = Carbon::parse($periode->date_fin);
+            while ($current->lte($fin)) {
+                $datesPaiement[] = $current->format('Y-m-d');
+                $current->addDays(7);
+            }
+        }
+        if (empty($datesPaiement)) {
+            $datesPaiement = [now()->format('Y-m-d')];
+        }
 
         if ($eleves->isEmpty() || $scolarites->isEmpty()) {
             $this->command->warn('Élèves ou scolarités manquants.');
@@ -73,7 +80,7 @@ class PaiementSeeder extends Seeder
                     'eleve_id'           => $eleve->id,
                     'scolarite_id'       => $echeance->id,
                     'montant_paye'       => $montantPaye,
-                    'date_paiement'      => self::DATES_PAIEMENT[array_rand(self::DATES_PAIEMENT)],
+                    'date_paiement'      => $datesPaiement[array_rand($datesPaiement)],
                     'mode_paiement'      => $this->modePaiement(),
                     'reference_paiement' => 'PAI-' . strtoupper(substr(uniqid(), -6)),
                     'remarque'           => null,

@@ -31,10 +31,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Timer?  _debounce;
 
   // ── Onglet Code ───────────────────────────────────────────────────────────
-  final _codeFormKey = GlobalKey<FormState>();
-  final _codeCtrl    = TextEditingController();
-  bool    _codeLoading = false;
+  final _codeFormKey  = GlobalKey<FormState>();
+  final _codeCtrl     = TextEditingController();
+  final _serveurCtrl  = TextEditingController();
+  bool    _codeLoading      = false;
   String? _codeError;
+  bool    _showServeurField = false;
 
   @override
   void initState() {
@@ -45,6 +47,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         setState(() => _showSuggestions = false);
       }
     });
+    // Pré-remplir avec la valeur sauvegardée ou la valeur dart-define
+    final saved = StorageService.getCachedCentralUrl();
+    if (saved != null) _serveurCtrl.text = saved;
   }
 
   @override
@@ -53,6 +58,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     _debounce?.cancel();
     _urlCtrl.dispose();
     _codeCtrl.dispose();
+    _serveurCtrl.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -106,6 +112,15 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Future<void> _validerCode() async {
     if (!_codeFormKey.currentState!.validate()) return;
     setState(() { _codeLoading = true; _codeError = null; });
+
+    // Sauvegarder l'URL du serveur central si l'utilisateur l'a renseignée
+    final serveurSaisi = _serveurCtrl.text.trim();
+    if (serveurSaisi.isNotEmpty) {
+      final host = serveurSaisi
+          .replaceAll(RegExp(r'^https?://'), '')
+          .replaceAll(RegExp(r'/.*$'), '');
+      await StorageService.saveCentralUrl(host);
+    }
 
     try {
       final result = await ApiService().rechercherParCode(_codeCtrl.text.trim());
@@ -387,8 +402,56 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
             const SizedBox(height: 12),
             if (_codeError != null) _buildErreur(_codeError!),
-            const SizedBox(height: 28),
 
+            // ── Paramètres réseau (collapsible) ──
+            const SizedBox(height: 8),
+            InkWell(
+              onTap: () => setState(() => _showServeurField = !_showServeurField),
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.settings_ethernet,
+                      size: 16,
+                      color: Colors.grey[600],
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Paramètres réseau',
+                      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      _showServeurField
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                      size: 16,
+                      color: Colors.grey[600],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (_showServeurField) ...[
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _serveurCtrl,
+                keyboardType: TextInputType.url,
+                autocorrect: false,
+                decoration: const InputDecoration(
+                  labelText: 'Adresse du serveur',
+                  hintText: 'ex: 192.168.1.45:8000 ou monapp.ci',
+                  prefixIcon: Icon(Icons.dns_outlined),
+                  helperText: 'À renseigner uniquement si demandé par votre école.',
+                  helperMaxLines: 2,
+                ),
+              ),
+            ],
+
+            const SizedBox(height: 28),
             _buildBouton(
               loading: _codeLoading,
               onPressed: _validerCode,

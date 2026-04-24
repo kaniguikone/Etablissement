@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
@@ -12,6 +12,9 @@ const SaisieNotes = () => {
     const [classeSelectId, setClasseSelectId] = useState('');
     const [chargement, setChargement]         = useState(true);
     const [sauvegarde, setSauvegarde]         = useState(false);
+    const [importEnCours, setImportEnCours]   = useState(false);
+    const [rapportImport, setRapportImport]   = useState(null);
+    const inputFichier = useRef(null);
 
     const chargerNotes = (classeId = '') => {
         setChargement(true);
@@ -80,6 +83,56 @@ const SaisieNotes = () => {
 
     const estNiveau = devoir?.niveau_id && !devoir?.classe_id;
 
+    const classeIdEffectif = devoir?.classe_id || classeSelectId || null;
+
+    const telechargerModele = () => {
+        if (estNiveau && !classeSelectId) {
+            toast.error('Sélectionnez une classe avant de télécharger le modèle.');
+            return;
+        }
+        const url = `/devoirs/${id}/import/template` + (classeIdEffectif ? `?classe_id=${classeIdEffectif}` : '');
+        api.get(url, { responseType: 'blob' })
+            .then((res) => {
+                const disposition = res.headers['content-disposition'] ?? '';
+                const match = disposition.match(/filename="?([^"]+)"?/);
+                const filename = match ? match[1] : `notes_devoir_${id}.xlsx`;
+                const blobUrl = URL.createObjectURL(res.data);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename;
+                a.click();
+                URL.revokeObjectURL(blobUrl);
+            })
+            .catch(() => toast.error('Impossible de télécharger le modèle.'));
+    };
+
+    const handleFichierChange = (e) => {
+        const fichier = e.target.files[0];
+        if (!fichier) return;
+        if (estNiveau && !classeSelectId) {
+            toast.error('Sélectionnez une classe avant d\'importer.');
+            e.target.value = '';
+            return;
+        }
+        setImportEnCours(true);
+        setRapportImport(null);
+        const formData = new FormData();
+        formData.append('fichier', fichier);
+        const url = `/devoirs/${id}/import` + (classeIdEffectif ? `?classe_id=${classeIdEffectif}` : '');
+        api.post(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+            .then((res) => {
+                setRapportImport(res.data);
+                if (res.data.inseres > 0) chargerNotes(classeSelectId);
+                if (res.data.erreurs?.length === 0) toast.success(res.data.message);
+                else toast.warning(res.data.message);
+            })
+            .catch((err) => toast.error(err.response?.data?.message || 'Erreur lors de l\'import.'))
+            .finally(() => {
+                setImportEnCours(false);
+                e.target.value = '';
+            });
+    };
+
     if (chargement) {
         return (
             <section className="page-wrapper">
@@ -108,8 +161,33 @@ const SaisieNotes = () => {
                             </p>
                         )}
                     </div>
-                    <NavLink to="/Devoirs" className="btn btn-secondary btn-sm">Retour</NavLink>
+                    <div className="d-flex gap-2">
+                        <button className="btn btn-outline-success btn-sm" onClick={telechargerModele} title="Télécharger le modèle Excel pré-rempli">
+                            <i className="fas fa-file-excel me-1" />Modèle Excel
+                        </button>
+                        <button className="btn btn-outline-primary btn-sm" onClick={() => inputFichier.current?.click()} disabled={importEnCours}>
+                            {importEnCours
+                                ? <><span className="spinner-border spinner-border-sm me-1" />Import…</>
+                                : <><i className="fas fa-file-upload me-1" />Importer Excel</>}
+                        </button>
+                        <input ref={inputFichier} type="file" accept=".xlsx,.xls" className="d-none" onChange={handleFichierChange} />
+                        <NavLink to="/Devoirs" className="btn btn-secondary btn-sm">Retour</NavLink>
+                    </div>
                 </div>
+
+                {rapportImport && (
+                    <div className={`alert ${rapportImport.erreurs?.length > 0 ? 'alert-warning' : 'alert-success'} alert-dismissible py-2`}>
+                        <strong>{rapportImport.message}</strong>
+                        {rapportImport.erreurs?.length > 0 && (
+                            <ul className="mb-0 mt-1 small">
+                                {rapportImport.erreurs.map((e, i) => (
+                                    <li key={i}>Ligne {e.ligne} : {e.erreurs.join(', ')}</li>
+                                ))}
+                            </ul>
+                        )}
+                        <button type="button" className="btn-close" onClick={() => setRapportImport(null)} />
+                    </div>
+                )}
 
                 {/* Sélecteur de classe pour les devoirs de niveau */}
                 {estNiveau && (

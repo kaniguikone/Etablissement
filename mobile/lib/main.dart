@@ -22,9 +22,10 @@ Future<void> main() async {
     debugPrint(details.stack.toString());
   };
 
-  // Charge l'URL serveur depuis le stockage sécurisé avant de démarrer l'app
+  // Charge les URLs depuis le stockage sécurisé avant de démarrer l'app
   try {
     await StorageService.loadServerUrl();
+    await StorageService.loadCentralUrl();
   } catch (e) {
     // Stockage corrompu → réinitialisation
     debugPrint('=== STORAGE ERROR: $e ===');

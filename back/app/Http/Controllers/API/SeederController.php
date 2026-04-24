@@ -31,6 +31,7 @@ class SeederController extends Controller
         }
 
         $params = $request->validate([
+            'template'       => 'string|in:lycee,lycee_complet,college,primaire',
             'classes_min'    => 'integer|min:1|max:10',
             'classes_max'    => 'integer|min:1|max:15',
             'eleves_min'     => 'integer|min:1|max:60',
@@ -38,10 +39,13 @@ class SeederController extends Controller
             'nb_enseignants' => 'integer|min:1|max:200',
             'annee'          => ['string', 'regex:/^\d{4}-\d{4}$/'],
             'periodes_type'  => 'string|in:trimestre,semestre',
-            'avec_eleves'    => 'boolean',
-            'avec_emploi'    => 'boolean',
-            'avec_devoirs'   => 'boolean',
-            'avec_paiements' => 'boolean',
+            'avec_eleves'            => 'boolean',
+            'avec_emploi'            => 'boolean',
+            'avec_devoirs'           => 'boolean',
+            'avec_paiements'         => 'boolean',
+            'devoirs_min'            => 'integer|min:1|max:5',
+            'devoirs_max'            => 'integer|min:1|max:5',
+            'assiduites_par_periode' => 'integer|min:1|max:8',
         ]);
 
         $params['tenant_id'] = tenant()->getTenantKey();
