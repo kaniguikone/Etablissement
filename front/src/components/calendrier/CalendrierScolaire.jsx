@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+﻿import React, { useEffect, useState, useCallback } from 'react';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 import { useConfirm } from '../../context/ConfirmContext';
@@ -293,7 +293,7 @@ const CalendrierScolaire = () => {
     useEffect(() => { charger(); }, [charger]);
 
     useEffect(() => {
-        api.get('/classesTout').then(r => setClasses(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/classesTout').then(r => setClasses(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
     }, []);
 
     const naviguer = (delta) => {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 import { useConfirm } from '../../context/ConfirmContext';
@@ -18,8 +18,8 @@ const VolumeHoraire = () => {
     const [saving, setSaving]     = useState(false);
 
     useEffect(() => {
-        api.get('/niveaux').then((r) => setNiveaux(r.data)).catch((err) => console.error('Erreur chargement:', err));
-        api.get('/matieres').then((r) => setMatieres(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/niveaux').then((r) => setNiveaux(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
+        api.get('/matieres').then((r) => setMatieres(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
     }, []);
 
     useEffect(() => {

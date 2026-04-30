@@ -16,6 +16,7 @@ import Statistiques from '../components/stats/Statistiques';
 
 import ListeEleves from '../components/eleves/ListeEleves';
 import ListeEnseignants from '../components/enseignants/ListeEnseignants';
+import ListeProfsParMatiere from '../components/enseignants/ListeProfsParMatiere';
 import ListeClasses from '../components/classes/ListeClasses';
 import ListeNiveaux from '../components/niveaux/ListeNiveaux';
 import ListeMatieres from '../components/matieres/ListeMatieres';
@@ -214,6 +215,7 @@ const RoutesMenu = () => (
             <Route path="/Enseignants"            element={<PrivateRoute permissions={R_ENSEIGNANTS}><ListeEnseignants /></PrivateRoute>} />
             <Route path="/NouvelEnseignant"       element={<PrivateRoute permissions={R_ENSEIGNANTS}><NouvelEnseignant /></PrivateRoute>} />
             <Route path="/DetailsEnseignant/:id"  element={<PrivateRoute permissions={R_ENSEIGNANTS}><DetailsEnseignant /></PrivateRoute>} />
+            <Route path="/ProfsParMatiere"        element={<PrivateRoute permissions={R_ENSEIGNANTS}><ListeProfsParMatiere /></PrivateRoute>} />
 
             <Route path="/Parents"           element={<PrivateRoute permissions={R_PARENTS}><ListeParents /></PrivateRoute>} />
             <Route path="/NouveauParent"     element={<PrivateRoute permissions={R_PARENTS}><NouveauParent /></PrivateRoute>} />

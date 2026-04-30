@@ -77,16 +77,20 @@ class ConfigurationMatieresController extends Controller
             'matiere_ids.*' => 'integer|exists:matieres,id',
         ]);
 
-        DB::transaction(function () use ($request) {
-            DB::table('etablissement_matieres')->delete();
-            foreach ($request->matiere_ids as $matiereId) {
-                DB::table('etablissement_matieres')->insert([
-                    'matiere_id' => $matiereId,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
-        });
+        try {
+            DB::transaction(function () use ($request) {
+                DB::table('etablissement_matieres')->delete();
+                foreach ($request->matiere_ids as $matiereId) {
+                    DB::table('etablissement_matieres')->insert([
+                        'matiere_id' => $matiereId,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            });
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'Échec de la sauvegarde. Aucune modification enregistrée.'], 500);
+        }
 
         return response()->json(['message' => 'Matières de l\'établissement sauvegardées.']);
     }
@@ -184,25 +188,29 @@ class ConfigurationMatieresController extends Controller
 
         $serieId = $request->serie_id ?? null;
 
-        DB::transaction(function () use ($request, $niveauId, $serieId) {
-            DB::table('niveau_matieres')
-                ->where('niveau_id', $niveauId)
-                ->where('serie_id', $serieId)
-                ->delete();
+        try {
+            DB::transaction(function () use ($request, $niveauId, $serieId) {
+                DB::table('niveau_matieres')
+                    ->where('niveau_id', $niveauId)
+                    ->where('serie_id', $serieId)
+                    ->delete();
 
-            foreach ($request->matieres as $m) {
-                DB::table('niveau_matieres')->insert([
-                    'niveau_id'            => $niveauId,
-                    'serie_id'             => $serieId,
-                    'matiere_id'           => $m['matiere_id'],
-                    'obligatoire'          => $m['obligatoire'] ? 1 : 0,
-                    'coefficient'          => $m['coefficient'] ?? 1,
-                    'groupe_alternatif_id' => $m['groupe_alternatif_id'] ?? null,
-                    'created_at'           => now(),
-                    'updated_at'           => now(),
-                ]);
-            }
-        });
+                foreach ($request->matieres as $m) {
+                    DB::table('niveau_matieres')->insert([
+                        'niveau_id'            => $niveauId,
+                        'serie_id'             => $serieId,
+                        'matiere_id'           => $m['matiere_id'],
+                        'obligatoire'          => $m['obligatoire'] ? 1 : 0,
+                        'coefficient'          => $m['coefficient'] ?? 1,
+                        'groupe_alternatif_id' => $m['groupe_alternatif_id'] ?? null,
+                        'created_at'           => now(),
+                        'updated_at'           => now(),
+                    ]);
+                }
+            });
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'Échec de la sauvegarde du niveau. Aucune modification enregistrée.'], 500);
+        }
 
         return response()->json(['message' => 'Configuration sauvegardée.']);
     }
@@ -218,19 +226,23 @@ class ConfigurationMatieresController extends Controller
             'resolutions.*.matiere_id'           => 'required|integer|exists:matieres,id',
         ]);
 
-        DB::transaction(function () use ($request, $classeId) {
-            DB::table('classe_matieres')->where('classe_id', $classeId)->delete();
+        try {
+            DB::transaction(function () use ($request, $classeId) {
+                DB::table('classe_matieres')->where('classe_id', $classeId)->delete();
 
-            foreach ($request->resolutions as $r) {
-                DB::table('classe_matieres')->insert([
-                    'classe_id'            => $classeId,
-                    'matiere_id'           => $r['matiere_id'],
-                    'groupe_alternatif_id' => $r['groupe_alternatif_id'],
-                    'created_at'           => now(),
-                    'updated_at'           => now(),
-                ]);
-            }
-        });
+                foreach ($request->resolutions as $r) {
+                    DB::table('classe_matieres')->insert([
+                        'classe_id'            => $classeId,
+                        'matiere_id'           => $r['matiere_id'],
+                        'groupe_alternatif_id' => $r['groupe_alternatif_id'],
+                        'created_at'           => now(),
+                        'updated_at'           => now(),
+                    ]);
+                }
+            });
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'Échec de la sauvegarde de la classe. Aucune modification enregistrée.'], 500);
+        }
 
         return response()->json(['message' => 'Choix de la classe sauvegardé.']);
     }

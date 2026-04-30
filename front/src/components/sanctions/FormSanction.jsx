@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
@@ -22,7 +22,7 @@ const FormSanction = () => {
     const [envoi, setEnvoi]     = useState(false);
 
     useEffect(() => {
-        api.get('/elevesTout').then(r => setEleves(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/elevesTout').then(r => setEleves(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
 
         if (id) {
             api.get(`/sanctions/${id}`).then(r => {

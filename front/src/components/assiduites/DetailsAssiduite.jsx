@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { NavLink, useParams, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
@@ -24,8 +24,8 @@ const DetailsAssiduite = () => {
     });
 
     useEffect(() => {
-        api.get('/elevesTout').then((r) => setEleves(r.data)).catch((err) => console.error('Erreur chargement:', err));
-        api.get('/matieres').then((r) => setMatieres(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/elevesTout').then((r) => setEleves(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
+        api.get('/matieres').then((r) => setMatieres(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
         api.get(`/assiduites/${id}`)
             .then((r) => {
                 const a = r.data;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 
@@ -12,7 +12,7 @@ const ChargeEnseignants = () => {
     const [detailId,   setDetailId]   = useState(null);
 
     useEffect(() => {
-        api.get('/niveaux').then((r) => setNiveaux(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/niveaux').then((r) => setNiveaux(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
         charger('');
     }, []);
 

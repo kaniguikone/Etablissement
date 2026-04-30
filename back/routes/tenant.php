@@ -72,12 +72,12 @@ Route::middleware([
     // ─── Auth back-office ────────────────────────────────────────────────────
     Route::post('/login',  [AuthController::class, 'login']);
 
-    // ─── Images (protégées) ──────────────────────────────────────────────────
-    Route::middleware('auth:sanctum')->get('/image/{path}', function (string $path) {
+    // ─── Images ──────────────────────────────────────────────────────────────
+    Route::get('/image/{path}', function (string $path) {
         $normalized = preg_replace('/\.\.\/|\.\.\\\\/', '', $path);
         $fullPath   = storage_path('app/public/' . $normalized);
         if (!file_exists($fullPath)) abort(404);
-        return response()->file($fullPath, ['Cache-Control' => 'private, max-age=86400']);
+        return response()->file($fullPath, ['Cache-Control' => 'public, max-age=86400']);
     })->where('path', '.*');
 
     // ─── Fichiers publics du stockage tenant (logos, etc.) ──────────────────
@@ -90,6 +90,17 @@ Route::middleware([
 
     // ─── Établissement (public — apps mobiles avant login) ──────────────────
     Route::get('/etablissement', [EtablissementController::class, 'show']);
+
+    // ─── Version mobile (public — vérification de mise à jour) ──────────────
+    Route::get('/mobile/version', function () {
+        $etab = \App\Models\Etablissement::first();
+        return response()->json([
+            'version_code' => $etab?->mobile_version_code ?? 1,
+            'version_name' => $etab?->mobile_version_name ?? '1.0.0',
+            'download_url' => $etab?->mobile_download_url ?? '',
+            'force_update' => $etab?->mobile_force_update ?? false,
+        ]);
+    });
 
     // ─── Inscription parent (public) ─────────────────────────────────────────
     Route::post('/inscription',               [InscriptionController::class, 'soumettre']);
@@ -115,8 +126,10 @@ Route::middleware([
         Route::get('/devoirs',                [EnseignantPortalController::class, 'devoirs']);
         Route::post('/devoirs',               [EnseignantPortalController::class, 'creerDevoir']);
         Route::put('/devoirs/{id}',           [EnseignantPortalController::class, 'modifierDevoir']);
-        Route::get('/devoir/{id}/notes',      [EnseignantPortalController::class, 'notes']);
-        Route::post('/devoir/{id}/notes',     [EnseignantPortalController::class, 'sauvegarderNotes']);
+        Route::get('/devoir/{id}/notes',                [EnseignantPortalController::class, 'notes']);
+        Route::post('/devoir/{id}/notes',               [EnseignantPortalController::class, 'sauvegarderNotes']);
+        Route::get('/devoir/{id}/import/template',      [ImportNoteController::class, 'template']);
+        Route::post('/devoir/{id}/import',              [ImportNoteController::class, 'import']);
         Route::get('/assiduites',             [EnseignantPortalController::class, 'feuillePresence']);
         Route::post('/assiduites',            [EnseignantPortalController::class, 'sauvegarderPresences']);
         Route::get('/emploi',                 [EnseignantPortalController::class, 'emploiDuTemps']);
@@ -160,6 +173,8 @@ Route::middleware([
         Route::get('/enfant/{id}/enseignants',               [ParentPortalController::class, 'enseignants']);
         Route::get('/informations',                          [ParentPortalController::class, 'informations']);
         Route::get('/enfant/{id}/emploi',                    [ParentPortalController::class, 'emploiDuTemps']);
+        Route::get('/enfant/{id}/paiements',                 [ParentPortalController::class, 'paiements']);
+        Route::get('/paiements/{id}/recu',                   [ParentPortalController::class, 'recuPdf']);
         Route::get('/messages/conversations',                [MessageController::class, 'conversations']);
         Route::get('/messages/eleve/{eleveId}',              [MessageController::class, 'fil']);
         Route::post('/messages',                             [MessageController::class, 'store']);
@@ -221,6 +236,7 @@ Route::middleware([
         Route::get('/classeEnseignants/{id}',[ClasseController::class,    'ClasseEnseignant']);
         Route::get('/classeMatieresEnseignants/{id}',            [ClasseController::class, 'classeMatieresEnseignants']);
         Route::get('/matiereEnseignants/{id}',                   [ClasseController::class, 'enseignantsParMatiere']);
+        Route::get('/profsParMatieres',                          [ClasseController::class, 'profsParMatieres']);
         Route::post('/classes/{id}/affectations',                [ClasseController::class, 'ajouterAffectation']);
         Route::delete('/classes/{classeId}/affectations/{affId}',[ClasseController::class, 'supprimerAffectation']);
         Route::get('/classes',               [ClasseController::class,    'index']);

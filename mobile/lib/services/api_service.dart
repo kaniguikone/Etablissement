@@ -284,6 +284,21 @@ class ApiService {
     return response.data as Map<String, dynamic>;
   }
 
+  Future<List<dynamic>> getPaiements(int eleveId) async {
+    final response = await _dio.get(ApiConfig.parentPaiements(eleveId));
+    return response.data as List<dynamic>;
+  }
+
+  Future<List<int>> getPaiementRecuPdf(int paiementId) async {
+    final response = await _dio.get(
+      ApiConfig.parentPaiementRecu(paiementId),
+      options: Options(responseType: ResponseType.bytes),
+    );
+    final data = response.data;
+    if (data is List<int>) return data;
+    return (data as List).cast<int>();
+  }
+
   Future<List<dynamic>> getEnseignants(int eleveId) async {
     final response = await _dio.get(ApiConfig.parentEnseignants(eleveId));
     return response.data as List<dynamic>;
@@ -427,15 +442,17 @@ class ApiService {
     return response.data as Map<String, dynamic>;
   }
 
+  // Instance Dio dédiée à l'API centrale publique (onboarding, pas de token)
+  static final Dio _centralDio = Dio(BaseOptions(
+    baseUrl: ApiConfig.centralBaseUrl,
+    connectTimeout: ApiConfig.connectTimeout,
+    receiveTimeout: ApiConfig.receiveTimeout,
+    headers: {'Accept': 'application/json'},
+  ));
+
   /// Recherche publique d'établissements (utilisée à l'onboarding).
   Future<List<Map<String, dynamic>>> rechercherEtablissements(String q) async {
-    final dio = Dio(BaseOptions(
-      baseUrl: ApiConfig.centralBaseUrl,
-      connectTimeout: ApiConfig.connectTimeout,
-      receiveTimeout: ApiConfig.receiveTimeout,
-      headers: {'Accept': 'application/json'},
-    ));
-    final response = await dio.get(
+    final response = await _centralDio.get(
       '/etablissements/recherche',
       queryParameters: {'q': q},
     );
@@ -444,13 +461,7 @@ class ApiService {
 
   /// Lookup par code court (ex: ABC123) — retourne {nom, domaine}.
   Future<Map<String, dynamic>> rechercherParCode(String code) async {
-    final dio = Dio(BaseOptions(
-      baseUrl: ApiConfig.centralBaseUrl,
-      connectTimeout: ApiConfig.connectTimeout,
-      receiveTimeout: ApiConfig.receiveTimeout,
-      headers: {'Accept': 'application/json'},
-    ));
-    final response = await dio.get('/etablissements/code/${code.trim().toUpperCase()}');
+    final response = await _centralDio.get('/etablissements/code/${code.trim().toUpperCase()}');
     return Map<String, dynamic>.from(response.data as Map);
   }
 }

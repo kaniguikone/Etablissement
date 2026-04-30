@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
@@ -27,10 +27,10 @@ const NouveauDevoir = () => {
     });
 
     useEffect(() => {
-        api.get('/classesTout').then((res) => setClasses(res.data)).catch((err) => console.error('Erreur chargement:', err));
-        api.get('/niveaux').then((res) => setNiveaux(res.data)).catch((err) => console.error('Erreur chargement:', err));
-        api.get('/matieres').then((res) => setMatieres(res.data)).catch((err) => console.error('Erreur chargement:', err));
-        api.get('/typeDevoirs').then((res) => setTypeDevoirs(res.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/classesTout').then((res) => setClasses(res.data)).catch(() => toast.error('Erreur de chargement des données.'));
+        api.get('/niveaux').then((res) => setNiveaux(res.data)).catch(() => toast.error('Erreur de chargement des données.'));
+        api.get('/matieres').then((res) => setMatieres(res.data)).catch(() => toast.error('Erreur de chargement des données.'));
+        api.get('/typeDevoirs').then((res) => setTypeDevoirs(res.data)).catch(() => toast.error('Erreur de chargement des données.'));
     }, []);
 
     // Auto-résolution de la période depuis la date
@@ -67,7 +67,7 @@ const NouveauDevoir = () => {
 
         api.get(`/devoirs/prochainCode?base=${encodeURIComponent(base)}`)
             .then((res) => setForm((prev) => ({ ...prev, code_devoir: res.data.code })))
-            .catch((err) => console.error('Erreur chargement:', err));
+            .catch(() => toast.error('Erreur de chargement des données.'));
     }, [form.type_devoir_id, form.matiere_id, form.classe_id, form.niveau_id, form.date_devoir, portee]);
 
     const handleChange = (e) => {

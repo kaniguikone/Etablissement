@@ -3,6 +3,7 @@ import '../main.dart' show navigatorKey;
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../services/storage_service.dart';
+import '../utils/error_helper.dart';
 
 enum AuthStatus { unknown, authenticated, unauthenticated }
 enum UserRole   { parent, enseignant }
@@ -41,26 +42,30 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> checkAuth() async {
-    final loggedIn = await _authService.isLoggedIn();
-    if (loggedIn) {
-      final roleStr = await StorageService.getRole();
-      if (roleStr == 'enseignant') {
-        _role = UserRole.enseignant;
-        final info = await StorageService.getEnseignantInfo();
-        _nom    = info['nom'];
-        _prenom = info['prenom'];
-        _numero = info['numero'];
-        _id     = int.tryParse(info['id'] ?? '');
+    try {
+      final loggedIn = await _authService.isLoggedIn();
+      if (loggedIn) {
+        final roleStr = await StorageService.getRole();
+        if (roleStr == 'enseignant') {
+          _role = UserRole.enseignant;
+          final info = await StorageService.getEnseignantInfo();
+          _nom    = info['nom'];
+          _prenom = info['prenom'];
+          _numero = info['numero'];
+          _id     = int.tryParse(info['id'] ?? '');
+        } else {
+          _role = UserRole.parent;
+          final info = await StorageService.getParentInfo();
+          _nom    = info['nom'];
+          _prenom = info['prenom'];
+          _numero = info['numero'];
+          _id     = int.tryParse(info['id'] ?? '');
+        }
+        _status = AuthStatus.authenticated;
       } else {
-        _role = UserRole.parent;
-        final info = await StorageService.getParentInfo();
-        _nom    = info['nom'];
-        _prenom = info['prenom'];
-        _numero = info['numero'];
-        _id     = int.tryParse(info['id'] ?? '');
+        _status = AuthStatus.unauthenticated;
       }
-      _status = AuthStatus.authenticated;
-    } else {
+    } catch (_) {
       _status = AuthStatus.unauthenticated;
     }
     notifyListeners();
@@ -82,7 +87,7 @@ class AuthProvider extends ChangeNotifier {
       }
       return 'Identifiants incorrects.';
     } catch (e) {
-      return e.toString();
+      return mapErrorToMessage(e);
     }
   }
 
@@ -102,7 +107,7 @@ class AuthProvider extends ChangeNotifier {
       }
       return 'Identifiants incorrects.';
     } catch (e) {
-      return e.toString();
+      return mapErrorToMessage(e);
     }
   }
 
@@ -115,5 +120,6 @@ class AuthProvider extends ChangeNotifier {
     _numero = null;
     _id     = null;
     notifyListeners();
+    navigatorKey.currentState?.popUntil((route) => route.isFirst);
   }
 }

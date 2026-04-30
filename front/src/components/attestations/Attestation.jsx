@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 
@@ -30,7 +30,7 @@ const Attestation = () => {
     const [telechargement, setTelechargement] = useState(false);
 
     useEffect(() => {
-        api.get('/niveaux').then((r) => setNiveaux(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/niveaux').then((r) => setNiveaux(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
     }, []);
 
     const handleNiveauChange = (e) => {
@@ -42,7 +42,7 @@ const Attestation = () => {
         setEleves([]);
         setEleve(null);
         if (val) {
-            api.get(`/classesNiveaux/${val}`).then((r) => setClasses(r.data)).catch((err) => console.error('Erreur chargement:', err));
+            api.get(`/classesNiveaux/${val}`).then((r) => setClasses(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
         }
     };
 
@@ -53,7 +53,7 @@ const Attestation = () => {
         setEleves([]);
         setEleve(null);
         if (val) {
-            api.get(`/elevesClasse/${val}`).then((r) => setEleves(r.data.data ?? r.data)).catch((err) => console.error('Erreur chargement:', err));
+            api.get(`/elevesClasse/${val}`).then((r) => setEleves(r.data.data ?? r.data)).catch(() => toast.error('Erreur de chargement des données.'));
         }
     };
 

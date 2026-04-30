@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
@@ -24,12 +24,12 @@ const NouvelleInscription = () => {
     const [niveauId, setNiveauId] = useState('');
 
     useEffect(() => {
-        api.get('/niveaux').then(r => setNiveaux(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/niveaux').then(r => setNiveaux(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
     }, []);
 
     useEffect(() => {
         if (!niveauId) { setClasses([]); return; }
-        api.get(`/classesNiveaux/${niveauId}`).then(r => setClasses(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get(`/classesNiveaux/${niveauId}`).then(r => setClasses(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
     }, [niveauId]);
 
     const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });

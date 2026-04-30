@@ -64,16 +64,20 @@ class _NotesScreenState extends State<NotesScreen> {
     setState(() { _loadingPeriodes = true; _periodes = []; _periodeSelectionnee = null; _matieres = []; });
     try {
       final data = await _api.getPeriodesParAnnee(_anneeSelectionnee!.id);
+      final periodes = data
+          .map((p) => Periode.fromJson(p as Map<String, dynamic>))
+          .toList();
+      // Fallback : périodes non liées à une année (données antérieures à l'archivage)
+      if (periodes.isEmpty) {
+        await _loadPeriodesSansAnnee();
+        return;
+      }
       setState(() {
-        _periodes = data
-            .map((p) => Periode.fromJson(p as Map<String, dynamic>))
-            .toList();
-        _loadingPeriodes = false;
-        if (_periodes.isNotEmpty) {
-          _periodeSelectionnee = _periodes.first;
-          _loadNotes();
-        }
+        _periodes             = periodes;
+        _loadingPeriodes      = false;
+        _periodeSelectionnee  = periodes.first;
       });
+      _loadNotes();
     } catch (e) {
       setState(() { _error = e.toString(); _loadingPeriodes = false; });
     }
@@ -265,12 +269,22 @@ class _NotesScreenState extends State<NotesScreen> {
                       ? const LoadingWidget(message: 'Chargement du bulletin...')
                       : _error != null
                           ? ErrorRetryWidget(message: _error!, onRetry: _loadNotes)
-                          : _matieres.isEmpty
+                          : _periodes.isEmpty && !_loadingPeriodes
                               ? const EmptyWidget(
-                                  message: 'Aucune note pour cette période.',
-                                  icon: Icons.grade_outlined,
+                                  message: 'Aucune période configurée pour cette année scolaire.',
+                                  icon: Icons.calendar_today_outlined,
                                 )
-                              : ListView.separated(
+                              : _periodeSelectionnee == null
+                                  ? const EmptyWidget(
+                                      message: 'Sélectionnez une période pour voir les notes.',
+                                      icon: Icons.touch_app_outlined,
+                                    )
+                                  : _matieres.isEmpty
+                                      ? const EmptyWidget(
+                                          message: 'Aucune note pour cette période.',
+                                          icon: Icons.grade_outlined,
+                                        )
+                                      : ListView.separated(
                                   padding: const EdgeInsets.all(16),
                                   itemCount: _matieres.length,
                                   separatorBuilder: (_, __) => const SizedBox(height: 8),

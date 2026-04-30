@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+﻿import React, { useEffect, useState, useCallback } from 'react';
 import api from '../../api/axios';
 import { NavLink } from 'react-router-dom';
 
@@ -28,7 +28,7 @@ const Echeancier = () => {
     const [chargement, setChargement] = useState(false);
 
     useEffect(() => {
-        api.get('/niveaux').then(r => setNiveaux(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/niveaux').then(r => setNiveaux(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
     }, []);
 
     useEffect(() => {
@@ -47,7 +47,7 @@ const Echeancier = () => {
 
         api.get(`/echeancier?${p}`)
             .then(r => { setData(r.data.data); setMeta(r.data); })
-            .catch((err) => console.error('Erreur chargement:', err))
+            .catch(() => toast.error('Erreur de chargement des données.'))
             .finally(() => setChargement(false));
     }, [niveauId, classeId, horizon]);
 

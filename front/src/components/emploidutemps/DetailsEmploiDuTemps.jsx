@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
@@ -25,9 +25,9 @@ const DetailsEmploiDuTemps = () => {
     });
 
     useEffect(() => {
-        api.get('/classesTout').then((r) => setClasses(r.data)).catch((err) => console.error('Erreur chargement:', err));
-        api.get('/matieres').then((r) => setMatieres(r.data)).catch((err) => console.error('Erreur chargement:', err));
-        api.get('/enseignantsTout').then((r) => setEnseignants(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/classesTout').then((r) => setClasses(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
+        api.get('/matieres').then((r) => setMatieres(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
+        api.get('/enseignantsTout').then((r) => setEnseignants(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
         api.get(`/emploiDuTemps/${id}`).then((r) => {
             const c = r.data;
             setForm({

@@ -73,7 +73,12 @@ class EleveController extends Controller
 
         $photoPath = null;
         if ($request->hasFile('photo_eleve')) {
-            $photoPath = $request->file('photo_eleve')->store('photos/eleves', 'public');
+            try {
+                $photoPath = $request->file('photo_eleve')->store('photos/eleves', 'public');
+                if (!$photoPath) throw new \RuntimeException('Stockage échoué.');
+            } catch (\Throwable $e) {
+                return response()->json(['message' => 'Impossible de sauvegarder la photo. Vérifiez l\'espace disque.'], 500);
+            }
         }
 
         $eleve = Eleve::create([
@@ -126,10 +131,16 @@ class EleveController extends Controller
         ];
 
         if ($request->hasFile('photo_eleve')) {
-            if ($eleve->photo_eleve) {
-                Storage::disk('public')->delete($eleve->photo_eleve);
+            try {
+                $newPath = $request->file('photo_eleve')->store('photos/eleves', 'public');
+                if (!$newPath) throw new \RuntimeException('Stockage échoué.');
+                if ($eleve->photo_eleve) {
+                    Storage::disk('public')->delete($eleve->photo_eleve);
+                }
+                $data['photo_eleve'] = $newPath;
+            } catch (\Throwable $e) {
+                return response()->json(['message' => 'Impossible de sauvegarder la photo. Vérifiez l\'espace disque.'], 500);
             }
-            $data['photo_eleve'] = $request->file('photo_eleve')->store('photos/eleves', 'public');
         }
 
         $eleve->update($data);
@@ -145,13 +156,16 @@ class EleveController extends Controller
 
         $eleve = Eleve::findOrFail($id);
 
-        // Supprimer l'ancienne photo
-        if ($eleve->photo_eleve) {
-            Storage::disk('public')->delete($eleve->photo_eleve);
+        try {
+            $path = $request->file('photo_eleve')->store('photos/eleves', 'public');
+            if (!$path) throw new \RuntimeException('Stockage échoué.');
+            if ($eleve->photo_eleve) {
+                Storage::disk('public')->delete($eleve->photo_eleve);
+            }
+            $eleve->update(['photo_eleve' => $path]);
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'Impossible de sauvegarder la photo. Vérifiez l\'espace disque.'], 500);
         }
-
-        $path = $request->file('photo_eleve')->store('photos/eleves', 'public');
-        $eleve->update(['photo_eleve' => $path]);
 
         return response()->json([
             'status'    => 'success',

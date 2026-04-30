@@ -39,6 +39,9 @@ dependencies:
   # Web interop (remplacement dart:html)
   web: ^1.1.0
 
+  # Infos de l'application (version, build number)
+  package_info_plus: ^8.1.0
+
 
 dev_dependencies:
   flutter_test:

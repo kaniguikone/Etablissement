@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import api from '../../api/axios';
 import Pagination from '../shared/Pagination';
@@ -30,7 +30,7 @@ const ListeSanctions = () => {
     const [chargement, setChargement]     = useState(true);
 
     useEffect(() => {
-        api.get('/classesTout').then(r => setClasses(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/classesTout').then(r => setClasses(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
         charger(1, '', '', '');
     }, [location.key]);
 

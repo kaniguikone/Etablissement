@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
@@ -32,11 +32,11 @@ const NouvelEmploiDuTemps = () => {
 
     // Au montage : charger les niveaux + détecter le niveau si classe pré-remplie
     useEffect(() => {
-        api.get('/niveaux').then((r) => setNiveaux(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/niveaux').then((r) => setNiveaux(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
         if (classeIdInit.current) {
             api.get(`/niveauClasse/${classeIdInit.current}`)
                 .then((r) => { if (r.data?.niveau_id) setNiveauId(String(r.data.niveau_id)); })
-                .catch((err) => console.error('Erreur chargement:', err));
+                .catch(() => toast.error('Erreur de chargement des données.'));
         }
     }, []);
 
@@ -56,7 +56,7 @@ const NouvelEmploiDuTemps = () => {
             } else {
                 setForm((prev) => ({ ...prev, classe_id: '', matiere_id: '', enseignant_id: '' }));
             }
-        }).catch((err) => console.error('Erreur chargement:', err));
+        }).catch(() => toast.error('Erreur de chargement des données.'));
     }, [niveauId]);
 
     // Quand la classe change, charger les paires matière+enseignant + heures restantes

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, NavLink } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
@@ -19,7 +19,7 @@ const DetailsPaiement = () => {
     });
 
     useEffect(() => {
-        api.get('/elevesTout').then((r) => setEleves(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/elevesTout').then((r) => setEleves(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
         api.get(`/paiements/${id}`).then((res) => {
             const p = res.data;
             setForm({
@@ -34,7 +34,7 @@ const DetailsPaiement = () => {
             // Charger les échéances du niveau de l'élève
             if (p.eleve?.classe?.niveau_id) {
                 api.get(`/scolaritesNiveau/${p.eleve.classe.niveau_id}`)
-                    .then((r) => setEcheances(r.data)).catch((err) => console.error('Erreur chargement:', err));
+                    .then((r) => setEcheances(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
             }
         }).catch(() => toast.error('Impossible de charger ce paiement.'));
     }, [id]);

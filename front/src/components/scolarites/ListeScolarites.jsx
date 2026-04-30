@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+﻿import React, { useRef, useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import api from '../../api/axios';
 import Pagination from '../shared/Pagination';
@@ -21,7 +21,7 @@ const ListeScolarites = () => {
 
     useEffect(() => {
         listerScolarites(1);
-        api.get('/niveaux').then((res) => setNiveaux(res.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/niveaux').then((res) => setNiveaux(res.data)).catch(() => toast.error('Erreur de chargement des données.'));
     }, [location.key]);
 
     const listerScolarites = (page = 1) => {

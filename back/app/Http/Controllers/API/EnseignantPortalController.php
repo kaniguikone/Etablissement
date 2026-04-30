@@ -86,11 +86,13 @@ class EnseignantPortalController extends Controller
         $classeIds  = $cem->pluck('classe_id')->unique()->values();
         $matiereIds = $cem->pluck('matiere_id')->unique()->values();
 
+        $niveauIds = Classe::whereIn('id', $classeIds)->pluck('niveau_id')->unique()->values();
+
         $query = Devoir::with(['typeDevoir', 'matiere', 'classe', 'niveau', 'periode'])
             ->whereIn('matiere_id', $matiereIds)
-            ->where(function ($q) use ($classeIds) {
+            ->where(function ($q) use ($classeIds, $niveauIds) {
                 $q->whereIn('classe_id', $classeIds)
-                  ->orWhereNotNull('niveau_id');
+                  ->orWhereIn('niveau_id', $niveauIds);
             });
 
         if ($request->has('periode_id')) {

@@ -12,25 +12,27 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 class ExportMoyennesController extends Controller
 {
-    // Colonnes matières dans l'ordre imposé (doivent correspondre aux libelle_matiere en DB)
+    // Colonnes matières dans l'ordre imposé.
+    // Clé = libellé affiché en en-tête Excel, valeur = abbr_matiere de secours (null si aucune).
+    // Le lookup tente d'abord libelle_matiere (insensible à la casse), puis abbr_matiere.
     const COLONNES_MATIERES = [
-        'Composition Française',
-        'Orthographe',
-        'Oral Français',
-        'Anglais',
-        'Philosophie',
-        'Allemand',
-        'Espagnol',
-        'Histoire-Géographie',
-        'Mathématiques',
-        'Sciences Physiques',
-        'SVT',
-        'E.P.S',
-        'EDHC',
-        'Arts Plastiques',
-        'Musique',
-        'TIC',
-        'Conduite',
+        'Composition Française' => 'CFR',
+        'Orthographe'           => null,
+        'Oral Français'         => null,
+        'Anglais'               => 'ANG',
+        'Philosophie'           => 'PHILO',
+        'Allemand'              => 'ALL',
+        'Espagnol'              => 'ESP',
+        'Histoire-Géographie'   => 'HG',
+        'Mathématiques'         => 'MATHS',
+        'Sciences Physiques'    => 'SPC',
+        'SVT'                   => 'SVT',
+        'E.P.S'                 => 'EPS',
+        'EDHC'                  => 'EDHC',
+        'Arts Plastiques'       => 'ARTS',
+        'Musique'               => 'MUS',
+        'TIC'                   => 'TIC',
+        'Conduite'              => 'CDT',
     ];
 
     public function export(string $niveauId, string $periodeId)
@@ -63,11 +65,12 @@ class ExportMoyennesController extends Controller
         // ── 5. Toutes les matières en DB ──────────────────────────────────────
         $toutesLesMatieres = DB::table('matieres')->get();
 
-        // Trouver chaque colonne fixe dans la DB (par libelle insensible à la casse)
+        // Trouver chaque colonne fixe dans la DB : d'abord par libelle_matiere, puis par abbr_matiere
         $colonnesMatiereIds = []; // libelle_colonne => matiere_id|null
-        foreach (self::COLONNES_MATIERES as $colonne) {
+        foreach (self::COLONNES_MATIERES as $colonne => $abbr) {
             $found = $toutesLesMatieres->first(fn($m) =>
                 mb_strtolower(trim($m->libelle_matiere)) === mb_strtolower(trim($colonne))
+                || ($abbr !== null && mb_strtolower(trim($m->abbr_matiere)) === mb_strtolower(trim($abbr)))
             );
             $colonnesMatiereIds[$colonne] = $found ? (int)$found->id : null;
         }
@@ -135,7 +138,7 @@ class ExportMoyennesController extends Controller
 
         $colonnesEntete = array_merge(
             ['Matricule', 'Nom', 'Série', 'Niveau'],
-            self::COLONNES_MATIERES
+            array_keys(self::COLONNES_MATIERES)
         );
         $nbColonnes = count($colonnesEntete);
 
@@ -176,7 +179,7 @@ class ExportMoyennesController extends Controller
             $sheet->setCellValue("D{$rowNum}", $abbrNiveau);
 
             $colIdx = 5; // 1-based, colonne E
-            foreach (self::COLONNES_MATIERES as $colonne) {
+            foreach (array_keys(self::COLONNES_MATIERES) as $colonne) {
                 $matiereId = $colonnesMatiereIds[$colonne];
                 $valeur    = $this->calculerCellule(
                     $matiereId,

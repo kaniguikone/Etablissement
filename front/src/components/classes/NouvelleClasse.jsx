@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
@@ -45,8 +45,8 @@ const NouvelleClasse = () => {
     });
 
     useEffect(() => {
-        api.get('/niveaux').then(r => setNiveaux(r.data)).catch(console.error);
-        api.get('/enseignantsTout').then(r => setEnseignants(r.data)).catch(console.error);
+        api.get('/niveaux').then(r => setNiveaux(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
+        api.get('/enseignantsTout').then(r => setEnseignants(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
         api.get('/config-matieres').then(r => setSeries(r.data.series ?? [])).catch(() => {});
     }, []);
 
@@ -81,7 +81,7 @@ const NouvelleClasse = () => {
                         const gen = genererNoms(niveaux, series, updated);
                         return { ...updated, ...gen };
                     });
-                }).catch(console.error);
+                }).catch(() => toast.error('Erreur de chargement des données.'));
             }
         } else if (name === 'serie_id') {
             // Recalculer le numéro selon la nouvelle série

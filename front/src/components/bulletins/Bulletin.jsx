@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 
 const lireErreurBlob = async (err) => {
+    if (err.code === 'ECONNABORTED' || !err.response) {
+        return 'La génération a pris trop de temps. Réessayez, ou contactez l\'administrateur si le problème persiste.';
+    }
     if (err.response?.data instanceof Blob) {
         try {
             const texte = await err.response.data.text();
@@ -12,7 +15,7 @@ const lireErreurBlob = async (err) => {
             return 'Erreur lors de la génération du PDF.';
         }
     }
-    return err.response?.data?.message || 'Erreur inconnue.';
+    return err.response?.data?.message || 'Erreur lors de la génération du PDF.';
 };
 
 const BADGE_MOY = (moy) => {
@@ -59,7 +62,7 @@ const ExportBulletinsClasse = ({ niveaux, periodes }) => {
         if (!classeId || !periodeId) return;
         setEnCours(true);
         try {
-            const r = await api.get(`/bulletins/classe/${classeId}/${periodeId}/pdf`, { responseType: 'blob' });
+            const r = await api.get(`/bulletins/classe/${classeId}/${periodeId}/pdf`, { responseType: 'blob', timeout: 120000 });
             const classe  = classes.find(c => String(c.id) === String(classeId));
             const periode = periodes.find(p => String(p.id) === String(periodeId));
             const label   = periode?.code_periode ?? periode?.abbr_libelle_periode ?? periodeId;
@@ -248,8 +251,8 @@ const Bulletin = () => {
     const [chargement, setChargement] = useState(false);
 
     useEffect(() => {
-        api.get('/niveaux').then((r) => setNiveaux(r.data)).catch((err) => console.error('Erreur chargement:', err));
-        api.get('/periodes').then((r) => setPeriodes(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/niveaux').then((r) => setNiveaux(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
+        api.get('/periodes').then((r) => setPeriodes(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
     }, []);
 
     const handleNiveauChange = (e) => {
@@ -261,7 +264,7 @@ const Bulletin = () => {
         setEleves([]);
         setBulletin(null);
         if (val) {
-            api.get(`/classesNiveaux/${val}`).then((r) => setClasses(r.data)).catch((err) => console.error('Erreur chargement:', err));
+            api.get(`/classesNiveaux/${val}`).then((r) => setClasses(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
         }
     };
 
@@ -272,7 +275,7 @@ const Bulletin = () => {
         setEleves([]);
         setBulletin(null);
         if (val) {
-            api.get(`/elevesClasse/${val}`).then((r) => setEleves(r.data.data ?? r.data)).catch((err) => console.error('Erreur chargement:', err));
+            api.get(`/elevesClasse/${val}`).then((r) => setEleves(r.data.data ?? r.data)).catch(() => toast.error('Erreur de chargement des données.'));
         }
     };
 
@@ -292,7 +295,7 @@ const Bulletin = () => {
 
     const telechargerPdf = async () => {
         try {
-            const r = await api.get(`/bulletin/${eleveId}/${periodeId}/pdf`, { responseType: 'blob' });
+            const r = await api.get(`/bulletin/${eleveId}/${periodeId}/pdf`, { responseType: 'blob', timeout: 60000 });
             const periode = periodes.find((p) => String(p.id) === String(periodeId));
             const labelPeriode = periode?.code_periode ?? periode?.abbr_libelle_periode ?? periodeId;
             const nomFichier = `bulletin_${bulletin.eleve.nom_eleve.toLowerCase()}_${bulletin.eleve.prenoms_eleve.toLowerCase()}_${labelPeriode}_${periode?.annee ?? ''}.pdf`

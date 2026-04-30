@@ -220,8 +220,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 labelColor: AppTheme.primary,
                 unselectedLabelColor: Colors.white,
                 tabs: const [
-                  Tab(text: 'Rechercher'),
                   Tab(text: 'Code école'),
+                  Tab(text: 'Rechercher'),
                 ],
               ),
             ),
@@ -239,8 +239,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 child: TabBarView(
                   controller: _tabCtrl,
                   children: [
-                    _buildRechercheTab(),
                     _buildCodeTab(),
+                    _buildRechercheTab(),
                   ],
                 ),
               ),

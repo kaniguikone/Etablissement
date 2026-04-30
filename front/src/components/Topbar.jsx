@@ -1,6 +1,7 @@
 import { useNavigate, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
+import { backendUrl } from '../api/axios';
 
 const TOPBAR_HEIGHT = 52;
 
@@ -74,7 +75,7 @@ const Topbar = ({ sidebarWidth = 260 }) => {
                     overflow: 'hidden', flexShrink: 0,
                 }}>
                     {user?.photo_url
-                        ? <img src={user.photo_url} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ? <img src={backendUrl(user.photo_url)} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         : <i className="fas fa-user text-white" style={{ fontSize: 14 }} />
                     }
                 </div>

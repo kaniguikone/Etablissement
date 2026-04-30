@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+﻿import React, { useState, useEffect, useCallback } from "react";
 import { NavLink, useLocation } from 'react-router-dom';
 import api, { backendUrl } from "../../api/axios";
 import Pagination from "../shared/Pagination";
@@ -22,8 +22,8 @@ const ListeEleves = () => {
 
     useEffect(() => {
         charger(1, '', '', '');
-        api.get('/niveaux').then((res) => setNiveaux(res.data)).catch((err) => console.error('Erreur chargement:', err));
-        api.get('/classesTout').then((res) => setClasses(res.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/niveaux').then((res) => setNiveaux(res.data)).catch(() => toast.error('Erreur de chargement des données.'));
+        api.get('/classesTout').then((res) => setClasses(res.data)).catch(() => toast.error('Erreur de chargement des données.'));
     }, [location.key]);
 
     const charger = (page, niveau, classe, search) => {
@@ -53,7 +53,7 @@ const ListeEleves = () => {
         setFiltreClasse('');
         setRecherche('');
         api.get(val ? `/classesNiveaux/${val}` : '/classesTout')
-            .then((res) => setClasses(res.data)).catch((err) => console.error('Erreur chargement:', err));
+            .then((res) => setClasses(res.data)).catch(() => toast.error('Erreur de chargement des données.'));
         charger(1, val, '', '');
     };
 

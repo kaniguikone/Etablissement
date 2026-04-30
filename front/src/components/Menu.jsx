@@ -43,8 +43,9 @@ const GROUPES = [
         icon: 'fas fa-chalkboard-teacher',
         permissions: ['enseignants'],
         items: [
-            { to: '/Enseignants',      icon: 'fas fa-list',      label: 'Liste des enseignants' },
-            { to: '/NouvelEnseignant', icon: 'fas fa-user-plus', label: 'Ajouter un enseignant' },
+            { to: '/Enseignants',      icon: 'fas fa-list',           label: 'Liste des enseignants' },
+            { to: '/NouvelEnseignant', icon: 'fas fa-user-plus',      label: 'Ajouter un enseignant' },
+            { to: '/ProfsParMatiere',  icon: 'fas fa-book-open',      label: 'Profs par matière' },
         ],
     },
 

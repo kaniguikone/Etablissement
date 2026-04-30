@@ -36,6 +36,11 @@ const EnseignantDevoirs = () => {
     const [classesNiveau, setClassesNiveau] = useState([]);
     const [sauvegardeNotes, setSauvegardeNotes] = useState(false);
 
+    // Import notes
+    const [importFichier, setImportFichier]     = useState(null);
+    const [importEnCours, setImportEnCours]     = useState(false);
+    const [importResultat, setImportResultat]   = useState(null);
+
     const matieresUniques = [...new Map(classes.map(c => [c.matiere_id, { id: c.matiere_id, label: c.libelle_matiere }])).values()];
     const classesUniques  = [...new Map(classes.map(c => [c.classe_id, { id: c.classe_id, label: c.nom_classe }])).values()];
 
@@ -177,6 +182,48 @@ const EnseignantDevoirs = () => {
         setNotes(prev => prev.map(n => n.eleve_id === eleveId ? { ...n, _note: val } : n));
     };
 
+    const telechargerModele = async () => {
+        try {
+            const params = classeNotesId ? `?classe_id=${classeNotesId}` : '';
+            const r = await api.get(`/enseignant/devoir/${devoirNotes.id}/import/template${params}`, { responseType: 'blob' });
+            const url  = URL.createObjectURL(new Blob([r.data], { type: r.headers['content-type'] }));
+            const lien = document.createElement('a');
+            lien.href = url;
+            lien.download = `notes_${devoirNotes.code_devoir}.xlsx`;
+            lien.click();
+            URL.revokeObjectURL(url);
+        } catch {
+            toast.error('Impossible de télécharger le modèle.');
+        }
+    };
+
+    const importerNotes = async () => {
+        if (!importFichier) return;
+        setImportEnCours(true);
+        setImportResultat(null);
+        try {
+            const formData = new FormData();
+            formData.append('fichier', importFichier);
+            const params = classeNotesId ? `?classe_id=${classeNotesId}` : '';
+            const { data } = await api.post(`/enseignant/devoir/${devoirNotes.id}/import${params}`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            setImportResultat(data);
+            if (data.inseres > 0) {
+                toast.success(data.message);
+                await chargerNotes(devoirNotes, classeNotesId);
+            } else {
+                toast.error(data.message);
+            }
+        } catch (err) {
+            const msg = err.response?.data?.message ?? 'Erreur lors de l\'import.';
+            toast.error(msg);
+        } finally {
+            setImportEnCours(false);
+            setImportFichier(null);
+        }
+    };
+
     const couleur = (matiereId) => PALETTE[(matiereId ?? 0) % PALETTE.length];
 
     // ── Vue saisie notes ──
@@ -197,6 +244,36 @@ const EnseignantDevoirs = () => {
                         <option value="">Sélectionner une classe</option>
                         {classesNiveau.map(c => <option key={c.id} value={c.id}>{c.nom_classe}</option>)}
                     </select>
+                </div>
+            )}
+
+            {/* Import Excel */}
+            {(notes.length > 0 || classeNotesId || !classesNiveau.length) && (
+                <div className="card border-0 shadow-sm mb-3 p-3">
+                    <div className="d-flex flex-wrap align-items-center gap-2">
+                        <button className="btn btn-sm btn-outline-success" onClick={telechargerModele}
+                            disabled={classesNiveau.length > 0 && !classeNotesId}>
+                            <i className="fas fa-file-excel me-1" />Modèle Excel
+                        </button>
+                        <input type="file" accept=".xlsx,.xls,.csv" className="form-control form-control-sm"
+                            style={{ maxWidth: 220 }}
+                            onChange={e => { setImportFichier(e.target.files[0] || null); setImportResultat(null); }}
+                            key={importFichier === null ? 'reset' : 'file'} />
+                        <button className="btn btn-sm btn-primary" onClick={importerNotes}
+                            disabled={!importFichier || importEnCours || (classesNiveau.length > 0 && !classeNotesId)}>
+                            {importEnCours
+                                ? <span className="spinner-border spinner-border-sm me-1" />
+                                : <i className="fas fa-upload me-1" />}
+                            Importer
+                        </button>
+                    </div>
+                    {importResultat && importResultat.erreurs?.length > 0 && (
+                        <div className="mt-2 small text-danger">
+                            {importResultat.erreurs.map((e, i) => (
+                                <div key={i}>Ligne {e.ligne} : {e.erreurs.join(', ')}</div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             )}
 

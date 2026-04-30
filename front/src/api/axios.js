@@ -29,6 +29,7 @@ const BASE = getBase();
 
 const api = axios.create({
     baseURL: BASE + '/api',
+    timeout: 10000,
 });
 
 // Injecte automatiquement le token Bearer sur chaque requête
@@ -40,7 +41,7 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// Redirige vers /login si le serveur répond 401
+// Gestion globale des erreurs réseau et serveur
 api.interceptors.response.use(
     (response) => response,
     (error) => {
@@ -51,6 +52,12 @@ api.interceptors.response.use(
                 localStorage.removeItem('user');
                 window.location.href = '/login';
             }
+        } else if (error.code === 'ECONNABORTED') {
+            // Timeout — signalé via le rejet, les composants affichent leur propre message
+            error._userMessage = 'La requête a pris trop de temps. Vérifiez votre connexion.';
+        } else if (!error.response) {
+            // Pas de réponse du serveur (réseau coupé, CORS, serveur éteint)
+            error._userMessage = 'Impossible de contacter le serveur. Vérifiez votre connexion.';
         }
         return Promise.reject(error);
     }
@@ -67,6 +74,7 @@ const CENTRAL_BASE = (import.meta.env.VITE_CENTRAL_API_URL || 'http://localhost:
 
 export const centralApi = axios.create({
     baseURL: CENTRAL_BASE + '/api',
+    timeout: 10000,
 });
 
 centralApi.interceptors.request.use((config) => {

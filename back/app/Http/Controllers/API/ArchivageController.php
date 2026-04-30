@@ -258,33 +258,37 @@ class ArchivageController extends Controller
             ], 422);
         }
 
-        DB::transaction(function () use ($annee) {
-            $passages = PassageClasse::where('annee_scolaire_id', $annee->id)
-                ->where('applique', false)
-                ->with('eleve')
-                ->get();
+        try {
+            DB::transaction(function () use ($annee) {
+                $passages = PassageClasse::where('annee_scolaire_id', $annee->id)
+                    ->where('applique', false)
+                    ->with('eleve')
+                    ->get();
 
-            foreach ($passages as $passage) {
-                $eleve = $passage->eleve;
+                foreach ($passages as $passage) {
+                    $eleve = $passage->eleve;
 
-                // Appliquer la décision
-                $updateEleve = ['statut_eleve' => 'actif'];
+                    $updateEleve = ['statut_eleve' => 'actif'];
 
-                if ($passage->decision === 'diplome') {
-                    $updateEleve['statut_eleve'] = 'diplome';
-                } elseif ($passage->decision === 'sorti') {
-                    $updateEleve['statut_eleve'] = 'sorti';
-                } elseif ($passage->classe_suivante_id) {
-                    $updateEleve['classe_id'] = $passage->classe_suivante_id;
+                    if ($passage->decision === 'diplome') {
+                        $updateEleve['statut_eleve'] = 'diplome';
+                    } elseif ($passage->decision === 'sorti') {
+                        $updateEleve['statut_eleve'] = 'sorti';
+                    } elseif ($passage->classe_suivante_id) {
+                        $updateEleve['classe_id'] = $passage->classe_suivante_id;
+                    }
+
+                    $eleve->update($updateEleve);
+                    $passage->update(['applique' => true]);
                 }
-                // redoublant → reste dans la même classe, statut reste actif
 
-                $eleve->update($updateEleve);
-                $passage->update(['applique' => true]);
-            }
-
-            $annee->update(['statut' => 'cloturee']);
-        });
+                $annee->update(['statut' => 'cloturee']);
+            });
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Échec de la confirmation de clôture. Aucune modification appliquée.',
+            ], 500);
+        }
 
         return response()->json([
             'message' => 'Clôture confirmée. Les passages de classe ont été appliqués. L\'année est maintenant archivée.',
@@ -319,40 +323,44 @@ class ArchivageController extends Controller
             return response()->json(['message' => 'Une année scolaire est déjà en cours.'], 422);
         }
 
-        $nouvelleAnnee = DB::transaction(function () use ($request) {
-            $annee = AnneeScolaire::create([
-                'libelle'    => $request->libelle,
-                'date_debut' => $request->date_debut,
-                'date_fin'   => $request->date_fin,
-                'statut'     => 'en_cours',
-            ]);
+        try {
+            $nouvelleAnnee = DB::transaction(function () use ($request) {
+                $annee = AnneeScolaire::create([
+                    'libelle'    => $request->libelle,
+                    'date_debut' => $request->date_debut,
+                    'date_fin'   => $request->date_fin,
+                    'statut'     => 'en_cours',
+                ]);
 
-            // Vider l'emploi du temps si demandé
-            if ($request->boolean('vider_emploi_du_temps', true)) {
-                EmploiDuTemps::whereNull('annee_scolaire_id')->delete();
-            }
-
-            // Créer 3 périodes par défaut si demandé
-            if ($request->boolean('creer_periodes', false)) {
-                $anneeLabel = $annee->libelle;
-                $periodes = [
-                    ['libelle_periode' => "1er Trimestre $anneeLabel", 'abbr_libelle_periode' => 'T1', 'code_periode' => 'T1'],
-                    ['libelle_periode' => "2ème Trimestre $anneeLabel", 'abbr_libelle_periode' => 'T2', 'code_periode' => 'T2'],
-                    ['libelle_periode' => "3ème Trimestre $anneeLabel", 'abbr_libelle_periode' => 'T3', 'code_periode' => 'T3'],
-                ];
-                foreach ($periodes as $p) {
-                    Periodes::create([
-                        ...$p,
-                        'annee'             => $anneeLabel,
-                        'annee_scolaire_id' => $annee->id,
-                        'date_debut'        => $annee->date_debut,
-                        'date_fin'          => $annee->date_fin,
-                    ]);
+                if ($request->boolean('vider_emploi_du_temps', true)) {
+                    EmploiDuTemps::whereNull('annee_scolaire_id')->delete();
                 }
-            }
 
-            return $annee;
-        });
+                if ($request->boolean('creer_periodes', false)) {
+                    $anneeLabel = $annee->libelle;
+                    $periodes = [
+                        ['libelle_periode' => "1er Trimestre $anneeLabel", 'abbr_libelle_periode' => 'T1', 'code_periode' => 'T1'],
+                        ['libelle_periode' => "2ème Trimestre $anneeLabel", 'abbr_libelle_periode' => 'T2', 'code_periode' => 'T2'],
+                        ['libelle_periode' => "3ème Trimestre $anneeLabel", 'abbr_libelle_periode' => 'T3', 'code_periode' => 'T3'],
+                    ];
+                    foreach ($periodes as $p) {
+                        Periodes::create([
+                            ...$p,
+                            'annee'             => $anneeLabel,
+                            'annee_scolaire_id' => $annee->id,
+                            'date_debut'        => $annee->date_debut,
+                            'date_fin'          => $annee->date_fin,
+                        ]);
+                    }
+                }
+
+                return $annee;
+            });
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Échec de l\'initialisation de la nouvelle année. Aucune modification enregistrée.',
+            ], 500);
+        }
 
         return response()->json([
             'message' => 'Nouvelle année scolaire initialisée avec succès.',

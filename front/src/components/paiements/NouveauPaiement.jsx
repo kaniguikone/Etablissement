@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useNavigate, NavLink } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
@@ -19,8 +19,8 @@ const NouveauPaiement = () => {
     });
 
     useEffect(() => {
-        api.get('/elevesTout').then((r) => setEleves(r.data)).catch((err) => console.error('Erreur chargement:', err));
-        api.get('/niveaux').then((r) => setNiveaux(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/elevesTout').then((r) => setEleves(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
+        api.get('/niveaux').then((r) => setNiveaux(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
     }, []);
 
     const handleChange = (e) => {
@@ -32,9 +32,9 @@ const NouveauPaiement = () => {
             api.get(`/eleves/${value}`).then((res) => {
                 const niveauId = res.data.classe?.niveau_id;
                 if (niveauId) {
-                    api.get(`/scolaritesNiveau/${niveauId}`).then((r) => setEcheances(r.data)).catch((err) => console.error('Erreur chargement:', err));
+                    api.get(`/scolaritesNiveau/${niveauId}`).then((r) => setEcheances(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
                 }
-            }).catch((err) => console.error('Erreur chargement:', err));
+            }).catch(() => toast.error('Erreur de chargement des données.'));
         }
     };
 

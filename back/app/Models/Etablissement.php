@@ -12,6 +12,13 @@ class Etablissement extends Model
     protected $fillable = [
         'nom', 'slogan', 'logo', 'adresse', 'ville', 'bp',
         'telephone', 'telephone2', 'email', 'site_web', 'pays',
+        'mobile_version_code', 'mobile_version_name',
+        'mobile_download_url', 'mobile_force_update',
+    ];
+
+    protected $casts = [
+        'mobile_version_code' => 'integer',
+        'mobile_force_update' => 'boolean',
     ];
 
     protected $appends = ['logo_url'];

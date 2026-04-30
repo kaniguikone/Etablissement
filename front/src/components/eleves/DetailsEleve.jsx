@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+﻿import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, useParams, useNavigate } from 'react-router-dom';
-import api from '../../api/axios';
+import api, { backendUrl } from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 
 const DetailsEleve = () => {
@@ -35,10 +35,10 @@ const DetailsEleve = () => {
                 adresse_eleve:        e.adresse_eleve        || '',
                 classe_id:            e.classe_id            || '',
             });
-            if (e.photo_url) setPhotoPreview(e.photo_url);
+            if (e.photo_url) setPhotoPreview(backendUrl(e.photo_url));
         }).catch(() => toast.error('Impossible de charger les données de cet élève.'));
 
-        api.get('/classesTout').then((r) => setClasses(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/classesTout').then((r) => setClasses(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
     }, [id]);
 
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -59,7 +59,7 @@ const DetailsEleve = () => {
         api.post(`/eleves/${id}/photo`, data, { headers: { 'Content-Type': 'multipart/form-data' } })
             .then((res) => {
                 toast.success('Photo mise à jour.');
-                setPhotoPreview(res.data.photo_url);
+                setPhotoPreview(backendUrl(res.data.photo_url));
                 setPhotoFile(null);
             })
             .catch(() => toast.error('Erreur lors de l\'upload de la photo.'))

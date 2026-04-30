@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import api from '../../api/axios';
+import api, { backendUrl } from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 import { useConfirm } from '../../context/ConfirmContext';
 
@@ -85,7 +85,7 @@ const ListeUtilisateurs = () => {
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                             }}>
                                                 {u.photo_url
-                                                    ? <img src={u.photo_url} alt={u.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    ? <img src={backendUrl(u.photo_url)} alt={u.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                     : <i className="fas fa-user text-white" style={{ fontSize: 14 }} />
                                                 }
                                             </div>

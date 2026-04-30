@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
@@ -24,14 +24,14 @@ const ListeEmploiDuTemps = () => {
     const [selection, setSelection]     = useState(null);
 
     useEffect(() => {
-        api.get('/niveaux').then((r) => setNiveaux(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/niveaux').then((r) => setNiveaux(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
     }, []);
 
     useEffect(() => {
         setClasses([]);
         setClasseId('');
         if (!niveauId) return;
-        api.get(`/classesNiveaux/${niveauId}`).then((r) => setClasses(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get(`/classesNiveaux/${niveauId}`).then((r) => setClasses(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
     }, [niveauId]);
 
     useEffect(() => {

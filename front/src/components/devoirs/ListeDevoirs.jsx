@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import api from '../../api/axios';
 import Pagination from '../shared/Pagination';
@@ -20,8 +20,8 @@ const ListeDevoirs = () => {
 
     useEffect(() => {
         listerDevoirs(1);
-        api.get('/classesTout').then((res) => setClasses(res.data)).catch((err) => console.error('Erreur chargement:', err));
-        api.get('/periodes').then((res) => setPeriodes(res.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/classesTout').then((res) => setClasses(res.data)).catch(() => toast.error('Erreur de chargement des données.'));
+        api.get('/periodes').then((res) => setPeriodes(res.data)).catch(() => toast.error('Erreur de chargement des données.'));
     }, [location.key]);
 
     const listerDevoirs = (page = 1) => {

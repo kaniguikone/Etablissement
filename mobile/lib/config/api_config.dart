@@ -124,6 +124,12 @@ class ApiConfig {
   static String parentEmploi(int eleveId) =>
       '/parent/enfant/$eleveId/emploi';
 
+  static String parentPaiements(int eleveId) =>
+      '/parent/enfant/$eleveId/paiements';
+
+  static String parentPaiementRecu(int paiementId) =>
+      '/parent/paiements/$paiementId/recu';
+
   // Endpoint public périodes
   static const String periodes = '/periodes';
 
@@ -190,6 +196,9 @@ class ApiConfig {
   // Endpoints Inscription (public)
   static const String soumettreinscription = '/inscription';
   static String statutInscription(String token) => '/inscription/$token/statut';
+
+  // Version mobile (vérification de mise à jour)
+  static const String mobileVersion = '/mobile/version';
 
   // Endpoints CinetPay
   static const String initierPaiement = '/paiements/initier';

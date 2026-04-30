@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -880,6 +881,7 @@ const TabEnseignants = ({ periodes }) => {
 
 const Statistiques = () => {
     const { peutAcceder } = useAuth();
+    const { toast } = useToast();
 
     const voitPedagogie = peutAcceder('pedagogie');
     const voitFinances  = peutAcceder('finances');
@@ -909,7 +911,7 @@ const Statistiques = () => {
             setPeriodes(sorted);
             if (sorted.length > 0) setPeriodeId(sorted[0].id);
         });
-        api.get('/classesTout').then(r => setClasses(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/classesTout').then(r => setClasses(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
     }, []);
 
     // Charger les données quand la période change

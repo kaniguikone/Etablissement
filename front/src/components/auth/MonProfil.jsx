@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import api from '../../api/axios';
+import api, { backendUrl } from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 
 const MonProfil = () => {
@@ -14,7 +14,7 @@ const MonProfil = () => {
         password_confirm: '',
     });
     const { toast } = useToast();
-    const [photoPreview, setPhotoPreview] = useState(user?.photo_url || null);
+    const [photoPreview, setPhotoPreview] = useState(backendUrl(user?.photo_url) || null);
     const [uploadEnCours, setUploadEnCours] = useState(false);
     const [sauvegarde, setSauvegarde]      = useState(false);
 
@@ -42,11 +42,11 @@ const MonProfil = () => {
             const userActuel = JSON.parse(localStorage.getItem('user') || '{}');
             const userMaj = { ...userActuel, photo_url: res.data.photo_url };
             localStorage.setItem('user', JSON.stringify(userMaj));
-            setPhotoPreview(res.data.photo_url);
+            setPhotoPreview(backendUrl(res.data.photo_url));
             toast.success('Photo mise à jour.');
         } catch {
             toast.error('Erreur lors de l\'upload de la photo.');
-            setPhotoPreview(user?.photo_url || null);
+            setPhotoPreview(backendUrl(user?.photo_url) || null);
         } finally {
             setUploadEnCours(false);
             // Réinitialiser l'input pour permettre de re-sélectionner le même fichier

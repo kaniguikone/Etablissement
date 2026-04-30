@@ -109,6 +109,9 @@ class BulletinPdfController extends Controller
 
     public function telechargerClasse(string $classeId, string $periodeId)
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+
         $classe  = Classe::with('niveau')->findOrFail($classeId);
         $periode = Periodes::findOrFail($periodeId);
 
@@ -126,9 +129,33 @@ class BulletinPdfController extends Controller
             ->orderBy('prenoms_eleve')
             ->get();
 
-        $donnees = $eleves->map(function ($eleve) use ($periodeId, $niveauId, $coefficients, $estDerniereperiode, $periodesAnnee) {
-            $eleveId    = (string) $eleve->id;
-            $parMatiere = $this->calculerParMatiere($eleveId, $periodeId, $eleve, $niveauId, $coefficients);
+        // Chargement en une seule requête de toutes les notes de la classe
+        $periodeIds = $estDerniereperiode
+            ? $periodesAnnee->pluck('id')->toArray()
+            : [(int) $periodeId];
+
+        $toutesNotes = Note::with(['devoir.matiere', 'devoir.typeDevoir'])
+            ->whereHas('devoir', function ($q) use ($periodeIds, $classeId, $niveauId) {
+                $q->whereIn('periode_id', $periodeIds)
+                  ->where(function ($q2) use ($classeId, $niveauId) {
+                      $q2->where('classe_id', $classeId)
+                         ->orWhere('niveau_id', $niveauId);
+                  });
+            })
+            ->whereIn('eleve_id', $eleves->pluck('id')->toArray())
+            ->get()
+            ->groupBy(fn($n) => (string) $n->eleve_id)
+            ->map(fn($g) => $g->groupBy(fn($n) => (string) $n->devoir->periode_id));
+        // $toutesNotes[(string)eleve_id][(string)periode_id] = Collection de Notes
+
+        $donnees = $eleves->map(function ($eleve) use ($periodeId, $niveauId, $coefficients, $estDerniereperiode, $periodesAnnee, $toutesNotes) {
+            $key        = (string) $eleve->id;
+            $notesEleve = $toutesNotes->get($key, collect());
+
+            $parMatiere = $this->calculerDepuisNotes(
+                $notesEleve->get((string) $periodeId, collect()),
+                $coefficients
+            );
 
             $avecMoyenne     = $parMatiere->filter(fn($m) => $m['moyenne'] !== null);
             $moyenneGenerale = $avecMoyenne->sum(fn($m) => $m['coeff_matiere']) > 0
@@ -141,11 +168,14 @@ class BulletinPdfController extends Controller
             if ($estDerniereperiode) {
                 $moyennesParPeriode = [];
                 foreach ($periodesAnnee as $p) {
-                    $moyennesParPeriode[$p->id] = $this->calculerParMatiere($eleveId, (string) $p->id, $eleve, $niveauId, $coefficients);
+                    $moyennesParPeriode[$p->id] = $this->calculerDepuisNotes(
+                        $notesEleve->get((string) $p->id, collect()),
+                        $coefficients
+                    );
                 }
 
                 $toutesLesMatieres  = collect($moyennesParPeriode)->flatMap(fn($m) => $m->keys())->unique();
-                $parMatiereAnnuelle = $toutesLesMatieres->mapWithKeys(function ($matiere) use ($moyennesParPeriode, $coefficients) {
+                $parMatiereAnnuelle = $toutesLesMatieres->mapWithKeys(function ($matiere) use ($moyennesParPeriode) {
                     $moyennesTrim = collect($moyennesParPeriode)->map(fn($pm) => $pm->get($matiere)['moyenne'] ?? null)->filter(fn($m) => $m !== null);
                     $moyenneAnn   = $moyennesTrim->count() > 0 ? round($moyennesTrim->average(), 2) : null;
                     $coeffFirst   = collect($moyennesParPeriode)->map(fn($pm) => $pm->get($matiere))->filter()->first();
@@ -162,12 +192,12 @@ class BulletinPdfController extends Controller
         });
 
         // Rangs globaux
-        $moyennesMap = $donnees->mapWithKeys(fn($d) => [$d['eleve']->id => $d['moyenneGenerale']])->all();
+        $moyennesMap  = $donnees->mapWithKeys(fn($d) => [$d['eleve']->id => $d['moyenneGenerale']])->all();
         $rangsGlobaux = $this->attribuerRangs($moyennesMap);
         $effectif     = $eleves->count();
 
         // Rangs par matière (trimestriels)
-        $toutesLesMatieres = $donnees->flatMap(fn($d) => $d['parMatiere']->keys())->unique();
+        $toutesLesMatieres     = $donnees->flatMap(fn($d) => $d['parMatiere']->keys())->unique();
         $rangsParMatiereGlobal = [];
         foreach ($toutesLesMatieres as $matiere) {
             $moys = $donnees->mapWithKeys(fn($d) => [$d['eleve']->id => $d['parMatiere']->get($matiere)['moyenne'] ?? null])->all();
@@ -301,6 +331,24 @@ class BulletinPdfController extends Controller
         }
 
         return $rangs;
+    }
+
+    // Calcule parMatiere à partir d'une collection de Notes déjà chargées (évite les requêtes N+1)
+    private function calculerDepuisNotes(\Illuminate\Support\Collection $notes, array $coefficients): \Illuminate\Support\Collection
+    {
+        if ($notes->isEmpty()) return collect();
+
+        return $notes->groupBy(fn($n) => $n->devoir->matiere->libelle_matiere)
+            ->map(function ($notesMatiere) use ($coefficients) {
+                $matiereId    = $notesMatiere->first()->devoir->matiere_id;
+                $coeffMatiere = $coefficients[$matiereId] ?? 1.0;
+                $totalCoeff   = $notesMatiere->sum(fn($n) => (float) $n->devoir->coeff_devoir);
+                $sommeCoeff   = $notesMatiere->sum(fn($n) => (float) $n->note * (float) $n->devoir->coeff_devoir);
+                return [
+                    'moyenne'       => $totalCoeff > 0 ? round($sommeCoeff / $totalCoeff, 2) : null,
+                    'coeff_matiere' => $coeffMatiere,
+                ];
+            });
     }
 
     private function calculerParMatiere(string $eleveId, string $periodeId, $eleve, ?int $niveauId, array $coefficients): \Illuminate\Support\Collection

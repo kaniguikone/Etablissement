@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { NavLink, useParams, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
@@ -53,7 +53,7 @@ const DetailsClasse = () => {
     });
 
     const chargerAffectations = () =>
-        api.get(`/classeMatieresEnseignants/${id}`).then((r) => setAffectations(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get(`/classeMatieresEnseignants/${id}`).then((r) => setAffectations(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
 
     const appliquerClasse = (c) => {
         setNomModifie(false);
@@ -76,9 +76,9 @@ const DetailsClasse = () => {
 
     useEffect(() => {
         chargerClasse();
-        api.get('/niveaux').then((r) => setNiveaux(r.data)).catch((err) => console.error('Erreur chargement:', err));
-        api.get('/enseignantsTout').then((r) => setEnseignants(r.data)).catch((err) => console.error('Erreur chargement:', err));
-        api.get('/matieres').then((r) => setMatieres(r.data)).catch((err) => console.error('Erreur chargement:', err));
+        api.get('/niveaux').then((r) => setNiveaux(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
+        api.get('/enseignantsTout').then((r) => setEnseignants(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
+        api.get('/matieres').then((r) => setMatieres(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
         api.get('/config-matieres').then((r) => setSeries(r.data.series ?? [])).catch(() => {});
         chargerAffectations();
     }, [id]);

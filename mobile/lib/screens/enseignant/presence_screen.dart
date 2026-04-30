@@ -4,6 +4,7 @@ import '../../models/classe_matiere.dart';
 import '../../models/periode.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/loading_error_widget.dart';
+import '../../config/api_config.dart';
 
 class PresenceScreen extends StatefulWidget {
   const PresenceScreen({super.key});
@@ -277,7 +278,9 @@ class PresenceScreenState extends State<PresenceScreen> {
                         return _ElevePresenceTile(
                           nom: '${e['nom']} ${e['prenoms']}',
                           matricule: e['matricule'] as String? ?? '',
-                          photoUrl: e['photo_url'] as String?,
+                          photoUrl: e['photo_url'] != null
+                              ? ApiConfig.storageBaseUrl + (e['photo_url'] as String)
+                              : null,
                           statut: statut,
                           onStatutChange: (s) => setState(() => _statuts[id] = s),
                         );

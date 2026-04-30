@@ -1,15 +1,17 @@
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'providers/auth_provider.dart';
 import 'providers/etablissement_provider.dart';
 import 'providers/notification_provider.dart';
-import 'screens/auth/login_screen.dart';
+import 'screens/auth/role_selection_screen.dart';
 import 'screens/home/children_list_screen.dart';
 import 'screens/enseignant/enseignant_home_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'services/api_service.dart';
 import 'services/storage_service.dart';
+import 'services/update_service.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
@@ -83,6 +85,7 @@ class _AuthGateState extends State<_AuthGate> {
       if (!mounted) return;
       _initNotifications();
       _listenDeepLinks();
+      _checkForUpdate();
     });
   }
 
@@ -121,6 +124,46 @@ class _AuthGateState extends State<_AuthGate> {
     ApiService().resetBaseUrl();
   }
 
+  Future<void> _checkForUpdate() async {
+    final update = await UpdateService.checkForUpdate();
+    if (update == null || !mounted) return;
+    _showUpdateDialog(update);
+  }
+
+  void _showUpdateDialog(UpdateInfo update) {
+    showDialog(
+      context: context,
+      barrierDismissible: !update.forceUpdate,
+      builder: (_) => PopScope(
+        canPop: !update.forceUpdate,
+        child: AlertDialog(
+          title: const Text('Mise à jour disponible'),
+          content: Text(
+            update.forceUpdate
+                ? 'La version ${update.versionName} est disponible.\nCette mise à jour est obligatoire pour continuer à utiliser l\'application.'
+                : 'La version ${update.versionName} est disponible.\nNous vous recommandons de mettre à jour l\'application.',
+          ),
+          actions: [
+            if (!update.forceUpdate)
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Plus tard'),
+              ),
+            FilledButton(
+              onPressed: () async {
+                final uri = Uri.parse(update.downloadUrl);
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                }
+              },
+              child: const Text('Mettre à jour'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _initNotifications() {
     final auth = context.read<AuthProvider>();
     if (!auth.isAuthenticated) return;
@@ -149,7 +192,7 @@ class _AuthGateState extends State<_AuthGate> {
       AuthStatus.unknown => const Scaffold(
           body: Center(child: CircularProgressIndicator()),
         ),
-      AuthStatus.unauthenticated => const LoginScreen(),
+      AuthStatus.unauthenticated => const RoleSelectionScreen(),
       AuthStatus.authenticated   => auth.isEnseignant
           ? const EnseignantHomeScreen()
           : const ChildrenListScreen(),

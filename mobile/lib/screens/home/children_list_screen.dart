@@ -8,6 +8,7 @@ import '../../services/api_service.dart';
 import '../../widgets/loading_error_widget.dart';
 import '../child/child_dashboard_screen.dart';
 import '../notifications/notifications_screen.dart';
+import '../parent/profil_screen.dart';
 
 class ChildrenListScreen extends StatefulWidget {
   const ChildrenListScreen({super.key});
@@ -88,29 +89,12 @@ class _ChildrenListScreenState extends State<ChildrenListScreen> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Déconnexion',
-            onPressed: () async {
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: const Text('Déconnexion'),
-                  content: const Text('Voulez-vous vous déconnecter ?'),
-                  actions: [
-                    TextButton(
-                        onPressed: () => Navigator.pop(ctx, false),
-                        child: const Text('Annuler')),
-                    TextButton(
-                        onPressed: () => Navigator.pop(ctx, true),
-                        child: const Text('Oui',
-                            style: TextStyle(color: Colors.red))),
-                  ],
-                ),
-              );
-              if (confirm == true && context.mounted) {
-                await context.read<AuthProvider>().logout();
-              }
-            },
+            icon: const Icon(Icons.account_circle_outlined),
+            tooltip: 'Mon profil',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ProfilScreen()),
+            ),
           ),
         ],
       ),

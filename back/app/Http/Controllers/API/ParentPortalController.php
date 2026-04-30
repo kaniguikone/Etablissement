@@ -8,9 +8,11 @@ use App\Models\Assiduites;
 use App\Models\Etablissement;
 use App\Models\Note;
 use App\Models\Periodes;
+use App\Models\Paiement;
 use App\Models\Scolarites;
 use App\Models\Informations;
 use App\Models\EmploiDuTemps;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Http\Controllers\API\BulletinPdfController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -208,5 +210,56 @@ class ParentPortalController extends Controller
             );
 
         return response()->json($creneaux);
+    }
+
+    /**
+     * Paiements effectués pour un enfant du parent connecté.
+     * GET /api/parent/enfant/{id}/paiements
+     */
+    public function paiements(Request $request, int $eleveId)
+    {
+        $parent = $request->user();
+        $eleve  = Eleve::where('id', $eleveId)
+                       ->where('parent_id', $parent->id)
+                       ->firstOrFail();
+
+        $paiements = Paiement::with('scolarite')
+            ->where('eleve_id', $eleve->id)
+            ->where(function ($q) {
+                $q->whereNull('statut_cinetpay')
+                  ->orWhere('statut_cinetpay', 'paid');
+            })
+            ->whereNotNull('date_paiement')
+            ->orderBy('date_paiement', 'desc')
+            ->get();
+
+        return response()->json($paiements);
+    }
+
+    /**
+     * Reçu PDF d'un paiement (vérifie l'appartenance au parent connecté).
+     * GET /api/parent/paiements/{id}/recu
+     */
+    public function recuPdf(Request $request, int $paiementId)
+    {
+        $parent   = $request->user();
+        $paiement = Paiement::with(['eleve.classe.niveau', 'scolarite'])
+            ->where('id', $paiementId)
+            ->whereHas('eleve', fn($q) => $q->where('parent_id', $parent->id))
+            ->firstOrFail();
+
+        $etablissement = Etablissement::first();
+
+        $pdf = Pdf::loadView('paiements.recu', compact('paiement', 'etablissement'))
+                   ->setPaper('A5', 'portrait');
+
+        $nomFichier = sprintf(
+            'recu_%s_%s_%s.pdf',
+            str_pad($paiement->id, 6, '0', STR_PAD_LEFT),
+            strtolower($paiement->eleve->nom_eleve),
+            $paiement->date_paiement->format('Y-m-d')
+        );
+
+        return $pdf->download($nomFichier);
     }
 }
