@@ -73,6 +73,7 @@ const GROUPES = [
             { to: '/Bulletins',         icon: 'fas fa-file-pdf',        label: 'Bulletins' },
             { to: '/GestionChapitres',  icon: 'fas fa-book-open',       label: 'Programme' },
             { to: '/SuiviProgressions', icon: 'fas fa-tasks',           label: 'Suivi des progressions' },
+            { to: '/ConseilClasse',     icon: 'fas fa-gavel',           label: 'Conseil de classe' },
             { to: '/Remplacements',     icon: 'fas fa-exchange-alt',    label: 'Remplacements' },
             { to: '/ConformiteEdt',     icon: 'fas fa-balance-scale',   label: 'Conformité EDT' },
             { to: '/ChargeEnseignants', icon: 'fas fa-user-clock',      label: 'Charge enseignants' },

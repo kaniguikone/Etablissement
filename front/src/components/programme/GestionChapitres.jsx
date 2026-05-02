@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 import { useConfirm } from '../../context/ConfirmContext';
@@ -9,7 +9,9 @@ const GestionChapitres = () => {
 
     const [niveaux, setNiveaux]           = useState([]);
     const [matieres, setMatieres]         = useState([]);
+    const [seriesDuNiveau, setSeriesDuNiveau] = useState([]);
     const [niveauId, setNiveauId]         = useState('');
+    const [serieId, setSerieId]           = useState('');
     const [matiereId, setMatiereId]       = useState('');
     const [chapitres, setChapitres]       = useState([]);
     const [chargement, setChargement]     = useState(false);
@@ -24,13 +26,34 @@ const GestionChapitres = () => {
         api.get('/matieres').then((r) => setMatieres(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
     }, []);
 
+    // Charger les classes du niveau pour extraire les séries disponibles
+    useEffect(() => {
+        if (!niveauId) { setSeriesDuNiveau([]); setSerieId(''); return; }
+        api.get(`/classesNiveaux/${niveauId}`)
+            .then((r) => {
+                const classes = r.data ?? [];
+                const seriesMap = new Map();
+                classes.forEach((c) => {
+                    if (c.serie_id && c.serie) seriesMap.set(c.serie_id, c.serie);
+                });
+                const series = [...seriesMap.values()];
+                setSeriesDuNiveau(series);
+                setSerieId(series.length > 0 ? String(series[0].id) : '');
+            })
+            .catch(() => { setSeriesDuNiveau([]); setSerieId(''); });
+        setMatiereId('');
+        annuler();
+    }, [niveauId]);
+
     useEffect(() => {
         if (!matiereId || !niveauId) { setChapitres([]); return; }
         setChargement(true);
-        api.get(`/chapitresMatiere/${matiereId}`, { params: { niveau_id: niveauId } })
+        const params = { niveau_id: niveauId };
+        if (serieId) params.serie_id = serieId;
+        api.get(`/chapitresMatiere/${matiereId}`, { params })
             .then((r) => { setChapitres(r.data.chapitres); setChargement(false); })
             .catch(() => { toast.error('Impossible de charger les chapitres.'); setChargement(false); });
-    }, [matiereId, niveauId]);
+    }, [matiereId, niveauId, serieId]);
 
     const commencerEdition = (ch) => {
         setEditId(ch.id);
@@ -43,7 +66,12 @@ const GestionChapitres = () => {
         if (!form.titre.trim() || !form.ordre) return;
         setEnregistrement(true);
 
-        const payload = { ...form, matiere_id: matiereId, niveau_id: niveauId };
+        const payload = {
+            ...form,
+            matiere_id: matiereId,
+            niveau_id:  niveauId,
+            serie_id:   serieId || null,
+        };
         const req = editId
             ? api.put(`/chapitresMatiere/${editId}`, payload)
             : api.post('/chapitresMatiere', payload);
@@ -72,8 +100,9 @@ const GestionChapitres = () => {
             .catch(() => toast.error('Erreur lors de la suppression.'));
     };
 
-    const niveauSelectionne  = niveaux.find((n) => String(n.id) === String(niveauId));
+    const niveauSelectionne   = niveaux.find((n) => String(n.id) === String(niveauId));
     const matiereSelectionnee = matieres.find((m) => String(m.id) === String(matiereId));
+    const serieSelectionnee   = seriesDuNiveau.find((s) => String(s.id) === String(serieId));
 
     return (
         <section className="page-wrapper">
@@ -82,7 +111,7 @@ const GestionChapitres = () => {
                     <h4 className="mb-0">Programme par niveau et matière</h4>
                 </div>
 
-                {/* Sélecteurs niveau + matière */}
+                {/* Sélecteurs niveau + série + matière */}
                 <div className="row g-2 mb-3">
                     <div className="col-auto">
                         <label className="form-label">Niveau</label>
@@ -90,7 +119,7 @@ const GestionChapitres = () => {
                             className="form-select form-select-sm"
                             style={{ minWidth: 160 }}
                             value={niveauId}
-                            onChange={(e) => { setNiveauId(e.target.value); setMatiereId(''); annuler(); }}
+                            onChange={(e) => setNiveauId(e.target.value)}
                         >
                             <option value="">Sélectionner un niveau</option>
                             {niveaux.map((n) => (
@@ -98,6 +127,23 @@ const GestionChapitres = () => {
                             ))}
                         </select>
                     </div>
+
+                    {seriesDuNiveau.length > 0 && (
+                        <div className="col-auto">
+                            <label className="form-label">Série</label>
+                            <select
+                                className="form-select form-select-sm"
+                                style={{ minWidth: 120 }}
+                                value={serieId}
+                                onChange={(e) => { setSerieId(e.target.value); setMatiereId(''); annuler(); }}
+                            >
+                                {seriesDuNiveau.map((s) => (
+                                    <option key={s.id} value={s.id}>Série {s.nom}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
                     <div className="col-auto">
                         <label className="form-label">Matière</label>
                         <select
@@ -124,7 +170,10 @@ const GestionChapitres = () => {
                 {!chargement && matiereId && niveauId && (
                     <>
                         <h6 className="text-muted mb-2">
-                            {niveauSelectionne?.nom_niveau} — {matiereSelectionnee?.libelle_matiere} &nbsp;·&nbsp; {chapitres.length} chapitre{chapitres.length !== 1 ? 's' : ''}
+                            {niveauSelectionne?.nom_niveau}
+                            {serieSelectionnee ? ` — Série ${serieSelectionnee.nom}` : ''}
+                            {' — '}{matiereSelectionnee?.libelle_matiere}
+                            &nbsp;·&nbsp; {chapitres.length} chapitre{chapitres.length !== 1 ? 's' : ''}
                         </h6>
 
                         {chapitres.length > 0 && (
@@ -141,7 +190,14 @@ const GestionChapitres = () => {
                                     {chapitres.map((ch) => (
                                         <tr key={ch.id} className={editId === ch.id ? 'table-warning' : ''}>
                                             <td className="text-center fw-bold">{ch.ordre}</td>
-                                            <td>{ch.titre}</td>
+                                            <td>
+                                                {ch.titre}
+                                                {ch.serie_id && seriesDuNiveau.length > 0 && (
+                                                    <span className="badge bg-secondary ms-2 fw-normal" style={{ fontSize: '0.72rem' }}>
+                                                        {seriesDuNiveau.find((s) => s.id === ch.serie_id)?.nom ?? ''}
+                                                    </span>
+                                                )}
+                                            </td>
                                             <td className="text-muted small">{ch.note_direction || '—'}</td>
                                             <td className="text-center">
                                                 <button

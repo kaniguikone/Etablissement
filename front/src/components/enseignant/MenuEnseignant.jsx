@@ -6,6 +6,7 @@ const items = [
     { to: '/enseignant/devoirs',       icon: 'fas fa-tasks',           label: 'Devoirs & Notes' },
     { to: '/enseignant/presence',      icon: 'fas fa-clipboard-check', label: 'Présences' },
     { to: '/enseignant/programme',     icon: 'fas fa-book-open',       label: 'Programme' },
+    { to: '/enseignant/appreciations', icon: 'fas fa-comment-alt',     label: 'Appréciations' },
     { to: '/enseignant/emploi',        icon: 'fas fa-calendar-alt',    label: 'Emploi du temps' },
     { to: '/enseignant/remplacements', icon: 'fas fa-exchange-alt',    label: 'Remplacements' },
     { to: '/enseignant/messagerie',    icon: 'fas fa-comments',        label: 'Messagerie' },

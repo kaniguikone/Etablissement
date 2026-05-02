@@ -207,6 +207,55 @@ class NoteController extends Controller
     }
 
     /**
+     * Moyenne générale de tous les élèves d'une classe pour une période.
+     * Retourne { eleve_id: moyenne|null }
+     */
+    public function moyennesClasse(int $classeId, int $periodeId)
+    {
+        $classe   = Classe::findOrFail($classeId);
+        $niveauId = $classe->niveau_id;
+        $serieId  = $classe->serie_id;
+        $eleveIds = Eleve::where('classe_id', $classeId)->pluck('id');
+
+        $notes = Note::with(['devoir.matiere'])
+            ->whereIn('eleve_id', $eleveIds)
+            ->whereHas('devoir', function ($q) use ($periodeId, $classeId, $niveauId) {
+                $q->where('periode_id', $periodeId)
+                  ->where(function ($q2) use ($classeId, $niveauId) {
+                      $q2->where('classe_id', $classeId)
+                         ->orWhere('niveau_id', $niveauId);
+                  });
+            })
+            ->get();
+
+        $coefficients = $this->coefficientsMatiere($niveauId, $serieId);
+        $notesByEleve = $notes->groupBy('eleve_id');
+        $result       = [];
+
+        foreach ($eleveIds as $eleveId) {
+            $eleveNotes = $notesByEleve->get($eleveId, collect());
+            $parMatiere = $eleveNotes->groupBy(fn($n) => $n->devoir->matiere_id)
+                ->map(function ($notesMatiere) use ($coefficients) {
+                    $matiereId  = $notesMatiere->first()->devoir->matiere_id;
+                    $coeff      = $coefficients[$matiereId] ?? 1.0;
+                    $totalCoeff = $notesMatiere->sum(fn($n) => (float) $n->devoir->coeff_devoir);
+                    $somme      = $notesMatiere->sum(fn($n) => (float) $n->note * (float) $n->devoir->coeff_devoir);
+                    return [
+                        'moyenne' => $totalCoeff > 0 ? round($somme / $totalCoeff, 2) : null,
+                        'coeff'   => $coeff,
+                    ];
+                });
+
+            $avecMoy       = $parMatiere->filter(fn($m) => $m['moyenne'] !== null);
+            $sommePonderee = $avecMoy->sum(fn($m) => $m['moyenne'] * $m['coeff']);
+            $sommeCoeffs   = $avecMoy->sum(fn($m) => $m['coeff']);
+            $result[$eleveId] = $sommeCoeffs > 0 ? round($sommePonderee / $sommeCoeffs, 2) : null;
+        }
+
+        return response()->json($result);
+    }
+
+    /**
      * Notifier le parent qu'un bulletin est disponible.
      * POST /api/bulletin/{eleveId}/{periodeId}/notifier
      */
@@ -219,12 +268,25 @@ class NoteController extends Controller
             return response()->json(['message' => 'Aucun parent associé à cet élève.'], 422);
         }
 
-        app(NotificationService::class)->notifierParent(
+        $service = app(NotificationService::class);
+        $titre   = 'Bulletin disponible';
+        $corps   = "Le bulletin de {$eleve->prenoms_eleve} {$eleve->nom_eleve} pour la période « {$periode->libelle_periode} » est disponible. Connectez-vous pour le consulter.";
+
+        $service->notifierParent(
             $eleve->parents->id,
             'bulletin',
-            'Bulletin disponible',
-            "Le bulletin de {$eleve->prenoms_eleve} {$eleve->nom_eleve} pour la période « {$periode->libelle_periode} » est disponible.",
+            $titre,
+            $corps,
             ['eleve_id' => $eleve->id, 'periode_id' => $periode->id]
+        );
+
+        $service->envoyerEmailParent(
+            $eleve->parents->id,
+            $eleve->id,
+            "Bulletin scolaire disponible — {$periode->libelle_periode}",
+            $titre,
+            $corps,
+            '#1a56a0'
         );
 
         return response()->json(['message' => 'Notification envoyée au parent.']);

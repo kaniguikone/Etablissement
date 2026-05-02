@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/api_service.dart';
+import '../../services/offline_presence_service.dart';
 import '../../models/classe_matiere.dart';
 import '../../models/periode.dart';
 import '../../theme/app_theme.dart';
@@ -14,7 +15,8 @@ class PresenceScreen extends StatefulWidget {
 }
 
 class PresenceScreenState extends State<PresenceScreen> {
-  final _api = ApiService();
+  final _api            = ApiService();
+  final _offlineService = OfflinePresenceService();
 
   List<ClasseMatiere> _classes = [];
   ClasseMatiere? _selection;
@@ -24,9 +26,11 @@ class PresenceScreenState extends State<PresenceScreen> {
   Periode? _periodeInfo;
   String? _periodeErreur;
 
-  bool _loadingData = true;
+  bool _loadingData   = true;
   bool _loadingEleves = false;
-  bool _saving = false;
+  bool _saving        = false;
+  bool _syncing       = false;
+  int  _pendingCount  = 0;
   String? _error;
 
   @override
@@ -34,6 +38,35 @@ class PresenceScreenState extends State<PresenceScreen> {
     super.initState();
     _loadData();
     _fetchPeriodeFromDate(_date.toIso8601String().substring(0, 10));
+    _rafraichirPendingCount();
+  }
+
+  Future<void> _rafraichirPendingCount() async {
+    final n = await _offlineService.nombreEnAttente();
+    if (mounted) setState(() => _pendingCount = n);
+  }
+
+  Future<void> _synchroniser() async {
+    setState(() { _syncing = true; _error = null; });
+    final enAttente = await _offlineService.enAttente();
+    int ok = 0;
+    for (final payload in enAttente) {
+      try {
+        await _api.sauvegarderPresences(payload);
+        await _offlineService.supprimer(payload);
+        ok++;
+      } catch (_) {
+        // garde les autres pour le prochain essai
+      }
+    }
+    await _rafraichirPendingCount();
+    setState(() => _syncing = false);
+    if (mounted && ok > 0) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('$ok feuille(s) synchronisée(s) avec succès'),
+        backgroundColor: Colors.green,
+      ));
+    }
   }
 
   Future<void> _loadData() async {
@@ -75,8 +108,8 @@ class PresenceScreenState extends State<PresenceScreen> {
         statuts[int.parse(e['eleve_id'].toString())] = e['statut'] as String? ?? 'present';
       }
       setState(() {
-        _eleves  = eleves;
-        _statuts = statuts;
+        _eleves        = eleves;
+        _statuts       = statuts;
         _loadingEleves = false;
       });
     } catch (e) {
@@ -87,23 +120,25 @@ class PresenceScreenState extends State<PresenceScreen> {
   Future<void> sauvegarder() async {
     if (_selection == null || _eleves.isEmpty) return;
     setState(() { _saving = true; _error = null; });
+
+    final assiduites = _eleves.map((e) {
+      final id = int.parse(e['eleve_id'].toString());
+      return {
+        'eleve_id': id,
+        'statut':   _statuts[id] ?? 'present',
+        'remarque': '',
+      };
+    }).toList();
+
+    final payload = {
+      'classe_id':  _selection!.classeId,
+      'matiere_id': _selection!.matiereId,
+      'date':       _date.toIso8601String().substring(0, 10),
+      'assiduites': assiduites,
+    };
+
     try {
-      final assiduites = _eleves.map((e) {
-        final id = int.parse(e['eleve_id'].toString());
-        return {
-          'eleve_id': id,
-          'statut':   _statuts[id] ?? 'present',
-          'remarque': '',
-        };
-      }).toList();
-
-      await _api.sauvegarderPresences({
-        'classe_id':  _selection!.classeId,
-        'matiere_id': _selection!.matiereId,
-        'date':       _date.toIso8601String().substring(0, 10),
-        'assiduites': assiduites,
-      });
-
+      await _api.sauvegarderPresences(payload);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -112,8 +147,19 @@ class PresenceScreenState extends State<PresenceScreen> {
           ),
         );
       }
-    } catch (e) {
-      setState(() => _error = e.toString());
+    } catch (_) {
+      // Pas de réseau : stockage local
+      await _offlineService.sauvegarder(payload);
+      await _rafraichirPendingCount();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sauvegardé hors ligne — sera synchronisé dès la reconnexion'),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
     } finally {
       setState(() => _saving = false);
     }
@@ -131,13 +177,43 @@ class PresenceScreenState extends State<PresenceScreen> {
 
     return Column(
       children: [
+        // ── Bannière hors-ligne ──
+        if (_pendingCount > 0)
+          Material(
+            color: Colors.orange[700],
+            child: InkWell(
+              onTap: _syncing ? null : _synchroniser,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Row(
+                  children: [
+                    _syncing
+                        ? const SizedBox(
+                            width: 16, height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white))
+                        : const Icon(Icons.cloud_upload_outlined, color: Colors.white, size: 18),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        _syncing
+                            ? 'Synchronisation en cours…'
+                            : '$_pendingCount feuille(s) en attente — Appuyez pour synchroniser',
+                        style: const TextStyle(color: Colors.white, fontSize: 13),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
         // ── Filtres ──
         Container(
           color: Colors.white,
           padding: const EdgeInsets.all(12),
           child: Column(
             children: [
-              // Classe + Matière
               DropdownButtonFormField<ClasseMatiere>(
                 initialValue: _selection,
                 decoration: const InputDecoration(
@@ -158,7 +234,6 @@ class PresenceScreenState extends State<PresenceScreen> {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  // Période (affichage automatique)
                   Expanded(
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -189,7 +264,6 @@ class PresenceScreenState extends State<PresenceScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // Date
                   OutlinedButton.icon(
                     onPressed: () async {
                       final d = await showDatePicker(
@@ -373,7 +447,6 @@ class _ElevePresenceTile extends StatelessWidget {
               ],
             ),
           ),
-          // Boutons statut
           _StatutBtn(
             label: 'P',
             color: Colors.green,

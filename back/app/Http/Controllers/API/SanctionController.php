@@ -170,12 +170,24 @@ class SanctionController extends Controller
             $corps .= " (jusqu'au {$sanction->date_fin->format('d/m/Y')})";
         }
 
-        app(NotificationService::class)->notifierParent(
+        $service = app(NotificationService::class);
+        $titre   = $label . ' — ' . $eleve->prenoms_eleve . ' ' . $eleve->nom_eleve;
+
+        $service->notifierParent(
             $eleve->parents->id,
             'sanction',
-            $label . ' — ' . $eleve->prenoms_eleve . ' ' . $eleve->nom_eleve,
+            $titre,
             $corps,
             ['eleve_id' => $eleve->id, 'sanction_id' => $sanction->id]
+        );
+
+        $service->envoyerEmailParent(
+            $eleve->parents->id,
+            $eleve->id,
+            "Sanction scolaire — {$eleve->prenoms_eleve} {$eleve->nom_eleve}",
+            $titre,
+            $corps,
+            '#c0392b'
         );
     }
 }

@@ -11,6 +11,7 @@ use App\Models\Niveau;
 use App\Models\Parents;
 use App\Models\Periodes;
 use App\Models\Scolarites;
+use App\Models\Serie;
 use App\Models\TypeDevoir;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -27,7 +28,7 @@ class DatabaseSeeder extends Seeder
             'emploi_du_temps', 'paiements', 'notes', 'devoirs', 'assiduites',
             'scolarites', 'informations', 'type_devoirs', 'personal_access_tokens',
             'eleves', 'parents', 'enseignants', 'classe_enseignant_matiere',
-            'classes', 'niveaux', 'matieres', 'periodes', 'etablissements',
+            'classes', 'series', 'niveaux', 'matieres', 'periodes', 'etablissements',
             'users', 'roles', 'salles',
         ] as $table) {
             if (\Illuminate\Support\Facades\Schema::hasTable($table)) {
@@ -152,16 +153,46 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        // ── Classes : 3 à 5 par niveau ────────────────────────────────────────
+        // ── Séries (Lycée) ────────────────────────────────────────────────────
+        $seriesData = [
+            ['A', 'Série littéraire'],
+            ['C', 'Série scientifique (Mathématiques)'],
+            ['D', 'Série scientifique (Sciences Naturelles)'],
+        ];
+        $seriesMap = [];
+        foreach ($seriesData as [$nom, $description]) {
+            $serie = Serie::create(['nom' => $nom, 'description' => $description]);
+            $seriesMap[$nom] = $serie->id;
+        }
+
+        // ── Classes ───────────────────────────────────────────────────────────
+        // Lycée (2nde → Tle) : une classe par série ; collège/primaire : numérotées
+        $seriesParNiveau = [
+            'Seconde'   => ['A', 'C'],
+            'Première'  => ['A', 'C', 'D'],
+            'Terminale' => ['A', 'C', 'D'],
+        ];
         foreach (Niveau::all() as $niveau) {
-            $nbClasses = rand(3, 5);
-            for ($i = 1; $i <= $nbClasses; $i++) {
-                Classe::factory()->create([
-                    'num_classe'  => $i,
-                    'nom_classe'  => $niveau->nom_niveau . ' ' . $i,
-                    'abbr_classe' => $niveau->abbr_niveau . $i,
-                    'niveau_id'   => $niveau->id,
-                ]);
+            if (isset($seriesParNiveau[$niveau->nom_niveau])) {
+                foreach ($seriesParNiveau[$niveau->nom_niveau] as $serieNom) {
+                    Classe::factory()->create([
+                        'num_classe'  => $serieNom,
+                        'nom_classe'  => $niveau->nom_niveau . ' ' . $serieNom,
+                        'abbr_classe' => $niveau->abbr_niveau . $serieNom,
+                        'niveau_id'   => $niveau->id,
+                        'serie_id'    => $seriesMap[$serieNom],
+                    ]);
+                }
+            } else {
+                $nbClasses = rand(3, 5);
+                for ($i = 1; $i <= $nbClasses; $i++) {
+                    Classe::factory()->create([
+                        'num_classe'  => $i,
+                        'nom_classe'  => $niveau->nom_niveau . ' ' . $i,
+                        'abbr_classe' => $niveau->abbr_niveau . $i,
+                        'niveau_id'   => $niveau->id,
+                    ]);
+                }
             }
         }
 

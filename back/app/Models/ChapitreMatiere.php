@@ -8,7 +8,7 @@ class ChapitreMatiere extends Model
 {
     protected $table = 'chapitres_matiere';
 
-    protected $fillable = ['matiere_id', 'niveau_id', 'titre', 'ordre', 'note_direction'];
+    protected $fillable = ['matiere_id', 'niveau_id', 'serie_id', 'titre', 'ordre', 'note_direction'];
 
     public function matiere()
     {
@@ -18,6 +18,11 @@ class ChapitreMatiere extends Model
     public function niveau()
     {
         return $this->belongsTo(\App\Models\Niveau::class);
+    }
+
+    public function serie()
+    {
+        return $this->belongsTo(\App\Models\Serie::class);
     }
 
     public function progressions()

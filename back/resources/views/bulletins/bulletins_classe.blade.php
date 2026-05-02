@@ -46,11 +46,18 @@
     .mention-p  { background: #e67e22; }
     .mention-i  { background: #e74c3c; }
 
+    .conseil { margin-top: 12px; border: 1px solid #2c3e50; border-radius: 4px; overflow: hidden; }
+    .conseil-header { background: #2c3e50; color: white; font-size: 11px; font-weight: bold; padding: 5px 10px; }
+    .conseil-body { padding: 8px 10px; font-size: 11px; }
+    .conseil-decision { font-weight: bold; color: #2c3e50; margin-bottom: 4px; }
+    .conseil-appr { font-style: italic; color: #444; }
+
     .footer { margin-top: 20px; border-top: 1px solid #bdc3c7; padding-top: 10px; text-align: right; font-size: 10px; color: #7f8c8d; }
     .signature { margin-top: 30px; display: table; width: 100%; font-size: 11px; }
-    .signature .sig-left  { display: table-cell; width: 50%; text-align: center; }
-    .signature .sig-right { display: table-cell; width: 50%; text-align: center; }
-    .sign-line { border-top: 1px solid #333; margin-top: 30px; width: 150px; }
+    .signature .sig-left   { display: table-cell; width: 33%; text-align: center; }
+    .signature .sig-center { display: table-cell; width: 34%; text-align: center; }
+    .signature .sig-right  { display: table-cell; width: 33%; text-align: center; }
+    .sign-line { border-top: 1px solid #333; margin-top: 30px; width: 130px; }
 </style>
 </head>
 <body>
@@ -64,6 +71,8 @@
     $moyenneAnnuelle    = $item['moyenneAnnuelle'];
     $rang               = $item['rang'];
     $effectif           = $item['effectif'];
+    $appreciations      = $item['appreciations'] ?? collect();
+    $decisionConseil    = $item['decisionConseil'] ?? null;
 
     $refMoy = $estDerniereperiode ? $moyenneAnnuelle : $moyenneGenerale;
     $mention = '—';
@@ -130,13 +139,13 @@
                 <th style="width:26%">Matière</th>
                 <th style="width:6%">Coeff</th>
                 @if($estDerniereperiode)
-                <th style="width:13%">Moy. T3</th>
-                <th style="width:7%">Rg T3</th>
-                <th style="width:13%">Moy. Ann.</th>
-                <th style="width:7%">Rg Ann.</th>
+                <th style="width:12%">Moy. T3</th>
+                <th style="width:6%">Rg T3</th>
+                <th style="width:12%">Moy. Ann.</th>
+                <th style="width:6%">Rg Ann.</th>
                 @else
-                <th style="width:16%">Moyenne</th>
-                <th style="width:7%">Rang</th>
+                <th style="width:14%">Moyenne</th>
+                <th style="width:6%">Rang</th>
                 @endif
                 <th>Appréciation</th>
             </tr>
@@ -144,20 +153,24 @@
         <tbody>
             @foreach($parMatiere as $matiere => $info)
                 @php
-                    $moy     = $info['moyenne'];
-                    $coeff   = $info['coeff_matiere'] ?? 1;
-                    $moyAnn  = $estDerniereperiode ? ($parMatiereAnnuelle[$matiere]['moyenne'] ?? null) : null;
-                    $rangAnn = $estDerniereperiode ? ($parMatiereAnnuelle[$matiere]['rang'] ?? null) : null;
+                    $moy       = $info['moyenne'];
+                    $matiereId = $info['matiere_id'] ?? null;
+                    $coeff     = $info['coeff_matiere'] ?? 1;
+                    $moyAnn    = $estDerniereperiode ? ($parMatiereAnnuelle[$matiere]['moyenne'] ?? null) : null;
+                    $rangAnn   = $estDerniereperiode ? ($parMatiereAnnuelle[$matiere]['rang'] ?? null) : null;
+
+                    $appEnseignant = $matiereId ? ($appreciations[$matiereId] ?? null) : null;
 
                     $classeNote = 'moyenne';
-                    $appreciation = '—';
+                    $appAuto    = '—';
                     if ($moy !== null) {
-                        if ($moy >= 16)      { $classeNote = 'moyenne bien';     $appreciation = 'Très bien'; }
-                        elseif ($moy >= 14)  { $classeNote = 'moyenne bien';     $appreciation = 'Bien'; }
-                        elseif ($moy >= 12)  { $classeNote = 'moyenne passable'; $appreciation = 'Assez bien'; }
-                        elseif ($moy >= 10)  { $classeNote = 'moyenne passable'; $appreciation = 'Passable'; }
-                        else                 { $classeNote = 'moyenne faible';   $appreciation = 'Insuffisant'; }
+                        if ($moy >= 16)      { $classeNote = 'moyenne bien';     $appAuto = 'Très bien'; }
+                        elseif ($moy >= 14)  { $classeNote = 'moyenne bien';     $appAuto = 'Bien'; }
+                        elseif ($moy >= 12)  { $classeNote = 'moyenne passable'; $appAuto = 'Assez bien'; }
+                        elseif ($moy >= 10)  { $classeNote = 'moyenne passable'; $appAuto = 'Passable'; }
+                        else                 { $classeNote = 'moyenne faible';   $appAuto = 'Insuffisant'; }
                     }
+                    $appreciationAffichee = $appEnseignant ?: $appAuto;
                 @endphp
                 <tr>
                     <td class="matiere">{{ $matiere }}</td>
@@ -170,7 +183,7 @@
                     @else
                     <td style="text-align:center;color:#64748b">{{ $info['rang'] !== null ? $info['rang'] . 'er' : '—' }}</td>
                     @endif
-                    <td>{{ $appreciation }}</td>
+                    <td>{{ $appreciationAffichee }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -199,9 +212,30 @@
         </table>
     </div>
 
+    {{-- Décision du conseil de classe --}}
+    @if($decisionConseil && ($decisionConseil->decision || $decisionConseil->appreciation_generale))
+    <div class="conseil">
+        <div class="conseil-header">Décision du Conseil de Classe</div>
+        <div class="conseil-body">
+            @if($decisionConseil->decision)
+            <div class="conseil-decision">
+                {{ \App\Models\DecisionConseil::$LABELS[$decisionConseil->decision] ?? $decisionConseil->decision }}
+            </div>
+            @endif
+            @if($decisionConseil->appreciation_generale)
+            <div class="conseil-appr">{{ $decisionConseil->appreciation_generale }}</div>
+            @endif
+        </div>
+    </div>
+    @endif
+
     <div class="signature">
         <div class="sig-left">
             <div>Le Chef d'établissement</div>
+            <div class="sign-line"></div>
+        </div>
+        <div class="sig-center">
+            <div>Le Prof. Principal</div>
             <div class="sign-line"></div>
         </div>
         <div class="sig-right">

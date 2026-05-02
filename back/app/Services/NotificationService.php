@@ -2,11 +2,14 @@
 
 namespace App\Services;
 
+use App\Mail\NotificationParent;
+use App\Models\Eleve;
 use App\Models\FcmToken;
 use App\Models\Notification;
 use App\Models\Parents;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class NotificationService
 {
@@ -97,6 +100,51 @@ class NotificationService
             ]);
         } catch (\Throwable $e) {
             Log::warning('FCM push échoué : ' . $e->getMessage());
+        }
+    }
+
+    // ── Email parent ─────────────────────────────────────────────────────────
+
+    /**
+     * Envoie un email au parent d'un élève pour un événement scolaire.
+     * Silencieux si le parent n'a pas d'email ou si le mailer n'est pas configuré.
+     *
+     * @param int    $parentId
+     * @param int    $eleveId   Pour récupérer le nom de l'élève dans le mail
+     * @param string $sujet     Objet de l'email
+     * @param string $titre     Titre de la notification (header du mail)
+     * @param string $corps     Corps du message
+     * @param string $couleur   Couleur du header (#hex)
+     */
+    public function envoyerEmailParent(
+        int    $parentId,
+        int    $eleveId,
+        string $sujet,
+        string $titre,
+        string $corps,
+        string $couleur = '#1a56a0'
+    ): void {
+        try {
+            $parent = Parents::find($parentId);
+            if (!$parent || empty($parent->email_parent)) {
+                return;
+            }
+
+            $eleve    = Eleve::find($eleveId);
+            $nomEleve = $eleve
+                ? strtoupper($eleve->nom_eleve) . ' ' . $eleve->prenoms_eleve
+                : 'votre enfant';
+
+            Mail::to($parent->email_parent)->send(new NotificationParent(
+                nomParent:   trim($parent->prenom_parent . ' ' . $parent->nom_parent),
+                nomEleve:    $nomEleve,
+                sujet:       $sujet,
+                titreNotif:  $titre,
+                corpsNotif:  $corps,
+                couleur:     $couleur,
+            ));
+        } catch (\Throwable $e) {
+            Log::warning('Email parent échoué : ' . $e->getMessage());
         }
     }
 

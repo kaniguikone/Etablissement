@@ -197,9 +197,6 @@ class ApiConfig {
   static const String soumettreinscription = '/inscription';
   static String statutInscription(String token) => '/inscription/$token/statut';
 
-  // Version mobile (vérification de mise à jour)
-  static const String mobileVersion = '/mobile/version';
-
   // Endpoints CinetPay
   static const String initierPaiement = '/paiements/initier';
   static String statutPaiement(String transactionId) =>

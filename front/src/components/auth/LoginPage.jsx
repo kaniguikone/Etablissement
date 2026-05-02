@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../api/axios';
 
 // Vrai si on est sur le domaine central (localhost pur ou domaine racine en prod)
 // Faux si on est sur un sous-domaine tenant (lycee-test.localhost, ecole.mondomaine.ci…)
@@ -20,6 +21,26 @@ const LoginPage = () => {
     const [afficher, setAfficher] = useState(false);
     const [erreur, setErreur]     = useState('');
     const [chargement, setChargement] = useState(false);
+
+    // Mot de passe oublié
+    const [vueMdp, setVueMdp]         = useState('login'); // 'login' | 'oublie' | 'confirme'
+    const [emailOublie, setEmailOublie] = useState('');
+    const [envoiMdp, setEnvoiMdp]     = useState(false);
+    const [erreurMdp, setErreurMdp]   = useState('');
+
+    const envoyerLienReinit = async (e) => {
+        e.preventDefault();
+        setEnvoiMdp(true);
+        setErreurMdp('');
+        try {
+            await api.post('/mot-de-passe/oublie', { email: emailOublie });
+            setVueMdp('confirme');
+        } catch {
+            setErreurMdp('Une erreur est survenue. Veuillez réessayer.');
+        } finally {
+            setEnvoiMdp(false);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -43,6 +64,51 @@ const LoginPage = () => {
             setChargement(false);
         }
     };
+
+    // ── Vue : mot de passe oublié ──────────────────────────────────────────
+    if (vueMdp === 'oublie' || vueMdp === 'confirme') {
+        return (
+            <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #1a56a0 0%, #0d3b73 100%)' }}>
+                <div className="card shadow-lg" style={{ width: '100%', maxWidth: 420, borderRadius: 16 }}>
+                    <div className="card-body p-5">
+                        <div className="text-center mb-4">
+                            <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#1a56a0', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+                                <i className={`fas ${vueMdp === 'confirme' ? 'fa-envelope-open-text' : 'fa-key'} text-white`} style={{ fontSize: 22 }} />
+                            </div>
+                            <h5 className="fw-bold mb-1">{vueMdp === 'confirme' ? 'Email envoyé !' : 'Mot de passe oublié'}</h5>
+                        </div>
+
+                        {vueMdp === 'confirme' ? (
+                            <>
+                                <p className="text-muted small text-center">
+                                    Si l'adresse <strong>{emailOublie}</strong> est associée à un compte, vous recevrez un email avec un lien de réinitialisation valable 60 minutes.
+                                </p>
+                                <p className="text-muted small text-center mt-2">Vérifiez vos spams si vous ne trouvez pas l'email.</p>
+                                <button className="btn btn-outline-secondary w-100 mt-3" onClick={() => { setVueMdp('login'); setEmailOublie(''); }}>
+                                    <i className="fas fa-arrow-left me-2" />Retour à la connexion
+                                </button>
+                            </>
+                        ) : (
+                            <form onSubmit={envoyerLienReinit}>
+                                {erreurMdp && <div className="alert alert-danger py-2 small">{erreurMdp}</div>}
+                                <div className="mb-3">
+                                    <label className="form-label small fw-semibold">Adresse email du compte</label>
+                                    <input type="email" className="form-control" placeholder="exemple@etablissement.ci"
+                                        value={emailOublie} onChange={e => setEmailOublie(e.target.value)} required autoFocus />
+                                </div>
+                                <button type="submit" className="btn btn-primary w-100 fw-semibold" disabled={envoiMdp} style={{ borderRadius: 8 }}>
+                                    {envoiMdp ? <><span className="spinner-border spinner-border-sm me-2" />Envoi…</> : 'Envoyer le lien'}
+                                </button>
+                                <button type="button" className="btn btn-link w-100 small mt-2" onClick={() => setVueMdp('login')}>
+                                    Retour à la connexion
+                                </button>
+                            </form>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div style={{
@@ -151,6 +217,14 @@ const LoginPage = () => {
                                 : 'Se connecter'
                             }
                         </button>
+                        {!domaineCentral && (
+                            <div className="text-center mt-3">
+                                <button type="button" className="btn btn-link btn-sm p-0 text-muted"
+                                    onClick={() => { setVueMdp('oublie'); setEmailOublie(email); setErreurMdp(''); }}>
+                                    Mot de passe oublié ?
+                                </button>
+                            </div>
+                        )}
                     </form>
                 </div>
             </div>

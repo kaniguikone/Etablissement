@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\AppreciationMatiere;
 use App\Models\Classe;
+use App\Models\DecisionConseil;
 use App\Models\Eleve;
 use App\Models\Etablissement;
 use App\Models\Note;
@@ -86,12 +88,23 @@ class BulletinPdfController extends Controller
             });
         }
 
+        // Appréciations enseignants par matière
+        $appreciations = AppreciationMatiere::where('eleve_id', $eleveId)
+            ->where('periode_id', $periodeId)
+            ->pluck('appreciation', 'matiere_id');
+
+        // Décision du conseil de classe
+        $decisionConseil = DecisionConseil::where('eleve_id', $eleveId)
+            ->where('periode_id', $periodeId)
+            ->first();
+
         $etablissement = Etablissement::first();
         $pdf = Pdf::loadView('bulletins.bulletin', compact(
             'eleve', 'periode', 'parMatiere', 'etablissement',
             'moyenneGenerale', 'estDerniereperiode',
             'parMatiereAnnuelle', 'moyenneAnnuelle',
-            'rang', 'effectif'
+            'rang', 'effectif',
+            'appreciations', 'decisionConseil'
         ))->setPaper('A4', 'portrait');
 
         $labelPeriode = $periode->code_periode ?? $periode->abbr_libelle_periode ?? $periodeId;
@@ -214,10 +227,26 @@ class BulletinPdfController extends Controller
             }
         }
 
-        $donnees = $donnees->map(function ($d) use ($rangsGlobaux, $rangsParMatiereGlobal, $rangsAnnuelsParMatiereGlobal, $effectif) {
+        // Appréciations et décisions pour toute la classe
+        $elevesIds = $eleves->pluck('id')->toArray();
+
+        $appreciationsClasse = AppreciationMatiere::whereIn('eleve_id', $elevesIds)
+            ->where('periode_id', $periodeId)
+            ->get(['eleve_id', 'matiere_id', 'appreciation'])
+            ->groupBy('eleve_id')
+            ->map(fn($g) => $g->pluck('appreciation', 'matiere_id'));
+
+        $decisionsClasse = DecisionConseil::whereIn('eleve_id', $elevesIds)
+            ->where('periode_id', $periodeId)
+            ->get()
+            ->keyBy('eleve_id');
+
+        $donnees = $donnees->map(function ($d) use ($rangsGlobaux, $rangsParMatiereGlobal, $rangsAnnuelsParMatiereGlobal, $effectif, $appreciationsClasse, $decisionsClasse) {
             $eleveId = $d['eleve']->id;
-            $d['rang']     = $rangsGlobaux[$eleveId] ?? null;
-            $d['effectif'] = $effectif;
+            $d['rang']             = $rangsGlobaux[$eleveId] ?? null;
+            $d['effectif']         = $effectif;
+            $d['appreciations']    = $appreciationsClasse->get($eleveId, collect());
+            $d['decisionConseil']  = $decisionsClasse->get($eleveId);
             $d['parMatiere'] = $d['parMatiere']->map(function ($info, $matiere) use ($eleveId, $rangsParMatiereGlobal) {
                 $info['rang'] = $rangsParMatiereGlobal[$matiere][$eleveId] ?? null;
                 return $info;
@@ -234,7 +263,8 @@ class BulletinPdfController extends Controller
         $etablissement = Etablissement::first();
 
         $pdf = Pdf::loadView('bulletins.bulletins_classe', compact(
-            'donnees', 'periode', 'classe', 'etablissement', 'estDerniereperiode'
+            'donnees', 'periode', 'classe', 'etablissement', 'estDerniereperiode',
+            'appreciationsClasse', 'decisionsClasse'
         ))->setPaper('A4', 'portrait');
 
         $labelPeriode = $periode->code_periode ?? $periode->abbr_libelle_periode ?? $periodeId;
@@ -347,6 +377,7 @@ class BulletinPdfController extends Controller
                 return [
                     'moyenne'       => $totalCoeff > 0 ? round($sommeCoeff / $totalCoeff, 2) : null,
                     'coeff_matiere' => $coeffMatiere,
+                    'matiere_id'    => $matiereId,
                 ];
             });
     }
@@ -373,6 +404,7 @@ class BulletinPdfController extends Controller
                 return [
                     'moyenne'       => $totalCoeff > 0 ? round($sommeCoeff / $totalCoeff, 2) : null,
                     'coeff_matiere' => $coeffMatiere,
+                    'matiere_id'    => $matiereId,
                 ];
             });
     }

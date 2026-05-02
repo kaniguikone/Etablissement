@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from "react";
+﻿import React, { useState, useEffect, useRef } from "react";
 import { NavLink, useLocation } from 'react-router-dom';
 import api, { backendUrl } from "../../api/axios";
 import Pagination from "../shared/Pagination";
@@ -19,6 +19,9 @@ const ListeEleves = () => {
     const [filtreClasse, setFiltreClasse] = useState('');
     const [recherche, setRecherche] = useState('');
     const [chargement, setChargement] = useState(true);
+    const [importEnCours, setImportEnCours] = useState(false);
+    const [rapportImport, setRapportImport] = useState(null);
+    const inputFichier = useRef(null);
 
     useEffect(() => {
         charger(1, '', '', '');
@@ -83,6 +86,42 @@ const ListeEleves = () => {
             .catch(() => toast.error('Impossible de supprimer cet élève.'));
     };
 
+    const telechargerModele = () => {
+        api.get('/eleves/import/template', { responseType: 'blob' })
+            .then((res) => {
+                const url = URL.createObjectURL(res.data);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'modele_eleves.xlsx';
+                a.click();
+                URL.revokeObjectURL(url);
+            })
+            .catch(() => toast.error('Impossible de télécharger le modèle.'));
+    };
+
+    const handleFichierChange = (e) => {
+        const fichier = e.target.files[0];
+        if (!fichier) return;
+        setImportEnCours(true);
+        setRapportImport(null);
+        const formData = new FormData();
+        formData.append('fichier', fichier);
+        api.post('/eleves/import', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+            .then((res) => {
+                setRapportImport(res.data);
+                if (res.data.inseres > 0) charger(1, filtreNiveau, filtreClasse, recherche);
+                if (res.data.erreurs?.length === 0) toast.success(res.data.message);
+                else toast.warning(res.data.message);
+            })
+            .catch((err) => {
+                toast.error(err.response?.data?.message || 'Erreur lors de l\'import.');
+            })
+            .finally(() => {
+                setImportEnCours(false);
+                e.target.value = '';
+            });
+    };
+
     const exportCsv = async () => {
         try {
             const params = new URLSearchParams();
@@ -108,8 +147,18 @@ const ListeEleves = () => {
                         Élèves
                         <span className="badge bg-secondary ms-2" style={{ fontSize: 13 }}>{total}</span>
                     </h4>
-                    <div className="d-flex gap-2">
-                        <button className="btn btn-outline-success btn-sm" onClick={exportCsv}>
+                    <div className="d-flex gap-2 flex-wrap">
+                        <button className="btn btn-outline-success btn-sm" onClick={telechargerModele}>
+                            <i className="fas fa-file-excel me-1" />Modèle élèves
+                        </button>
+                        <button className="btn btn-outline-primary btn-sm" onClick={() => inputFichier.current?.click()} disabled={importEnCours}>
+                            {importEnCours
+                                ? <><span className="spinner-border spinner-border-sm me-1" />Import…</>
+                                : <><i className="fas fa-file-upload me-1" />Importer élèves</>}
+                        </button>
+                        <input ref={inputFichier} type="file" accept=".xlsx,.xls,.csv" className="d-none" onChange={handleFichierChange} />
+                        <div className="vr" />
+                        <button className="btn btn-outline-secondary btn-sm" onClick={exportCsv}>
                             <i className="fas fa-file-csv me-1" />Export CSV
                         </button>
                         <NavLink to="/NouvelEleve" className="btn btn-primary btn-sm">
@@ -117,6 +166,20 @@ const ListeEleves = () => {
                         </NavLink>
                     </div>
                 </div>
+
+                {rapportImport && (
+                    <div className={`alert ${rapportImport.erreurs?.length > 0 ? 'alert-warning' : 'alert-success'} alert-dismissible py-2`}>
+                        <strong>{rapportImport.message}</strong>
+                        {rapportImport.erreurs?.length > 0 && (
+                            <ul className="mb-0 mt-1 small">
+                                {rapportImport.erreurs.map((e, i) => (
+                                    <li key={i}>Ligne {e.ligne} : {e.erreurs.join(', ')}</li>
+                                ))}
+                            </ul>
+                        )}
+                        <button type="button" className="btn-close" onClick={() => setRapportImport(null)} />
+                    </div>
+                )}
 
                 <div className="row g-2 mb-3">
                     <div className="col-md-4">

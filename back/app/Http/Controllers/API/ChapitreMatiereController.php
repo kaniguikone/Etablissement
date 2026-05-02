@@ -20,10 +20,17 @@ class ChapitreMatiereController extends Controller
         $matiere  = Matiere::findOrFail($matiereId);
         $niveauId = $request->query('niveau_id');
 
+        $serieId = $request->query('serie_id');
+
         $query = ChapitreMatiere::where('matiere_id', $matiereId)->orderBy('ordre');
 
         if ($niveauId) {
             $query->where('niveau_id', $niveauId);
+        }
+
+        if ($serieId) {
+            // Retourner les chapitres spécifiques à la série OU les chapitres communs (serie_id null)
+            $query->where(fn($q) => $q->where('serie_id', $serieId)->orWhereNull('serie_id'));
         }
 
         return response()->json([
@@ -41,13 +48,14 @@ class ChapitreMatiereController extends Controller
         $request->validate([
             'matiere_id'     => 'required|exists:matieres,id',
             'niveau_id'      => 'required|exists:niveaux,id',
+            'serie_id'       => 'nullable|exists:series,id',
             'titre'          => 'required|string|max:255',
             'ordre'          => 'required|integer|min:1',
             'note_direction' => 'nullable|string|max:1000',
         ]);
 
         $chapitre = ChapitreMatiere::create($request->only(
-            'matiere_id', 'niveau_id', 'titre', 'ordre', 'note_direction'
+            'matiere_id', 'niveau_id', 'serie_id', 'titre', 'ordre', 'note_direction'
         ));
 
         return response()->json($chapitre, 201);

@@ -33,8 +33,6 @@ const ParametresEtablissement = () => {
     const vide = {
         nom: '', slogan: '', adresse: '', ville: '', bp: '',
         telephone: '', telephone2: '', email: '', site_web: '', pays: '',
-        mobile_version_code: 1, mobile_version_name: '1.0.0',
-        mobile_download_url: '', mobile_force_update: false,
     };
 
     const [form, setForm]               = useState(vide);
@@ -62,10 +60,6 @@ const ParametresEtablissement = () => {
                     email:      d.email      || '',
                     site_web:   d.site_web   || '',
                     pays:       d.pays       || '',
-                    mobile_version_code:  d.mobile_version_code  ?? 1,
-                    mobile_version_name:  d.mobile_version_name  || '1.0.0',
-                    mobile_download_url:  d.mobile_download_url  || '',
-                    mobile_force_update:  d.mobile_force_update  ?? false,
                 });
                 setLogoUrl(d.logo_url || null);
                 if (rNiveaux) setNbNiveaux(rNiveaux.data.length);
@@ -357,62 +351,6 @@ const ParametresEtablissement = () => {
                                     placeholder="www.exemple.ci"
                                     value={form.site_web} onChange={handleChange}
                                 />
-                            </div>
-                        </div>
-
-                        {/* ── Application mobile ── */}
-                        <hr className="my-4" />
-                        <div className="fw-semibold mb-3 d-flex align-items-center gap-2">
-                            <i className="fas fa-mobile-alt text-primary" />
-                            Application mobile
-                        </div>
-                        <div className="row g-3">
-                            <div className="col-md-3">
-                                <label className="form-label small fw-bold">Code version</label>
-                                <input
-                                    type="number" name="mobile_version_code"
-                                    className="form-control form-control-sm"
-                                    min="1"
-                                    value={form.mobile_version_code}
-                                    onChange={handleChange}
-                                />
-                                <div className="text-muted" style={{ fontSize: 11 }}>Entier, incrémental (ex : 2)</div>
-                            </div>
-                            <div className="col-md-3">
-                                <label className="form-label small fw-bold">Nom de version</label>
-                                <input
-                                    type="text" name="mobile_version_name"
-                                    className="form-control form-control-sm"
-                                    placeholder="1.1.0"
-                                    value={form.mobile_version_name}
-                                    onChange={handleChange}
-                                />
-                                <div className="text-muted" style={{ fontSize: 11 }}>Affiché dans le dialog</div>
-                            </div>
-                            <div className="col-md-6">
-                                <label className="form-label small fw-bold">URL de téléchargement</label>
-                                <input
-                                    type="text" name="mobile_download_url"
-                                    className="form-control form-control-sm"
-                                    placeholder="https://mondomaine.ci/downloads/app.apk"
-                                    value={form.mobile_download_url}
-                                    onChange={handleChange}
-                                />
-                                <div className="text-muted" style={{ fontSize: 11 }}>Lien vers le fichier APK</div>
-                            </div>
-                            <div className="col-12">
-                                <div className="form-check form-switch">
-                                    <input
-                                        className="form-check-input"
-                                        type="checkbox"
-                                        id="mobile_force_update"
-                                        checked={form.mobile_force_update}
-                                        onChange={(e) => setForm(p => ({ ...p, mobile_force_update: e.target.checked }))}
-                                    />
-                                    <label className="form-check-label small" htmlFor="mobile_force_update">
-                                        Mise à jour <strong>obligatoire</strong> — l'utilisateur ne peut pas ignorer le dialog
-                                    </label>
-                                </div>
                             </div>
                         </div>
 

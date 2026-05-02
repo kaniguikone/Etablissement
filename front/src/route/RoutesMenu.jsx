@@ -115,6 +115,9 @@ import EnseignantRemplacements from '../components/enseignant/EnseignantRemplace
 import EnseignantMessagerie   from '../components/enseignant/EnseignantMessagerie';
 import EnseignantRdv          from '../components/enseignant/EnseignantRdv';
 import EnseignantInformations from '../components/enseignant/EnseignantInformations';
+import EnseignantAppreciations from '../components/enseignant/EnseignantAppreciations';
+import ConseilClasse from '../components/conseil/ConseilClasse';
+import ReinitialisationMotDePasse from '../components/auth/ReinitialisationMotDePasse';
 
 // Rôles constants pour éviter les répétitions
 const R_STATS     = ['pedagogie', 'finances'];
@@ -131,8 +134,9 @@ const R_ADMIN     = ['utilisateurs'];
 const RoutesMenu = () => (
     <div>
         <Routes>
-            {/* Page de connexion — publique */}
+            {/* Pages publiques */}
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/reinitialiser-mot-de-passe" element={<ReinitialisationMotDePasse />} />
 
             {/* ── Espace Enseignant ─────────────────────────────────────── */}
             <Route path="/enseignant"               element={<PrivateRoute><EnseignantDashboard /></PrivateRoute>} />
@@ -143,7 +147,8 @@ const RoutesMenu = () => (
             <Route path="/enseignant/remplacements" element={<PrivateRoute><EnseignantRemplacements /></PrivateRoute>} />
             <Route path="/enseignant/messagerie"    element={<PrivateRoute><EnseignantMessagerie /></PrivateRoute>} />
             <Route path="/enseignant/rdv"           element={<PrivateRoute><EnseignantRdv /></PrivateRoute>} />
-            <Route path="/enseignant/informations"  element={<PrivateRoute><EnseignantInformations /></PrivateRoute>} />
+            <Route path="/enseignant/informations"    element={<PrivateRoute><EnseignantInformations /></PrivateRoute>} />
+            <Route path="/enseignant/appreciations"  element={<PrivateRoute><EnseignantAppreciations /></PrivateRoute>} />
 
             {/* ── Espace Groupe Scolaire ─────────────────────────────────── */}
             <Route path="/groupe"                  element={<PrivateRoute><DashboardGroupe /></PrivateRoute>} />
@@ -211,6 +216,8 @@ const RoutesMenu = () => (
             <Route path="/NouvelleSanction"    element={<PrivateRoute permissions={R_ELEVES}><FormSanction /></PrivateRoute>} />
             <Route path="/DetailsSanction/:id" element={<PrivateRoute permissions={R_ELEVES}><FormSanction /></PrivateRoute>} />
             <Route path="/SanctionsEleve/:id"  element={<PrivateRoute permissions={R_ELEVES}><SanctionsEleve /></PrivateRoute>} />
+
+            <Route path="/ConseilClasse" element={<PrivateRoute permissions={R_PEDAGO}><ConseilClasse /></PrivateRoute>} />
 
             <Route path="/Enseignants"            element={<PrivateRoute permissions={R_ENSEIGNANTS}><ListeEnseignants /></PrivateRoute>} />
             <Route path="/NouvelEnseignant"       element={<PrivateRoute permissions={R_ENSEIGNANTS}><NouvelEnseignant /></PrivateRoute>} />

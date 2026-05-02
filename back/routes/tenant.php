@@ -48,11 +48,15 @@ use App\Http\Controllers\API\RdvController;
 use App\Http\Controllers\API\ConfigurationMatieresController;
 use App\Http\Controllers\API\ExportMoyennesController;
 use App\Http\Controllers\API\SelfTemplateController;
+use App\Http\Controllers\API\ImportEleveController;
 use App\Http\Controllers\API\ImportEnseignantController;
 use App\Http\Controllers\API\ImportScolariteController;
 use App\Http\Controllers\API\ImportAffectationController;
 use App\Http\Controllers\API\ImportNoteController;
 use App\Http\Controllers\API\SeederController;
+use App\Http\Controllers\API\AppreciationController;
+use App\Http\Controllers\API\MotDePasseController;
+use App\Http\Controllers\API\ReleveAnnuelController;
 
 /*
 |--------------------------------------------------------------------------
@@ -72,6 +76,10 @@ Route::middleware([
     // ─── Auth back-office ────────────────────────────────────────────────────
     Route::post('/login',  [AuthController::class, 'login']);
 
+    // ─── Mot de passe oublié (public) ────────────────────────────────────────
+    Route::post('/mot-de-passe/oublie',       [MotDePasseController::class, 'oublie']);
+    Route::post('/mot-de-passe/reinitialiser', [MotDePasseController::class, 'reinitialiser']);
+
     // ─── Images ──────────────────────────────────────────────────────────────
     Route::get('/image/{path}', function (string $path) {
         $normalized = preg_replace('/\.\.\/|\.\.\\\\/', '', $path);
@@ -90,17 +98,6 @@ Route::middleware([
 
     // ─── Établissement (public — apps mobiles avant login) ──────────────────
     Route::get('/etablissement', [EtablissementController::class, 'show']);
-
-    // ─── Version mobile (public — vérification de mise à jour) ──────────────
-    Route::get('/mobile/version', function () {
-        $etab = \App\Models\Etablissement::first();
-        return response()->json([
-            'version_code' => $etab?->mobile_version_code ?? 1,
-            'version_name' => $etab?->mobile_version_name ?? '1.0.0',
-            'download_url' => $etab?->mobile_download_url ?? '',
-            'force_update' => $etab?->mobile_force_update ?? false,
-        ]);
-    });
 
     // ─── Inscription parent (public) ─────────────────────────────────────────
     Route::post('/inscription',               [InscriptionController::class, 'soumettre']);
@@ -152,6 +149,10 @@ Route::middleware([
         Route::get('/rdv/reservations',       [RdvController::class, 'mesReservations']);
         Route::post('/rdv/reservations/{id}/confirmer', [RdvController::class, 'confirmer']);
         Route::post('/rdv/reservations/{id}/annuler',   [RdvController::class, 'annulerEnseignant']);
+
+        // Appréciations (l'enseignant peut saisir et consulter ses propres appréciations)
+        Route::get('/appreciations-matiere/{classeId}/{periodeId}', [AppreciationController::class, 'parClasse']);
+        Route::post('/appreciations-matiere/batch',                  [AppreciationController::class, 'sauvegarderBatch']);
     });
 
     // ─── Portail Parent (mobile) ─────────────────────────────────────────────
@@ -296,13 +297,15 @@ Route::middleware([
         });
 
         Route::middleware('permission:eleves')->group(function () {
-            Route::get('/eleves/export',      [EleveController::class, 'exportCsv']);
-            Route::get('/elevesTout',         [EleveController::class, 'listeEleves']);
+            Route::get('/eleves/export',           [EleveController::class, 'exportCsv']);
+            Route::get('/eleves/import/template',  [ImportEleveController::class, 'template']);
+            Route::post('/eleves/import',          [ImportEleveController::class, 'import']);
+            Route::get('/elevesTout',              [EleveController::class, 'listeEleves']);
             Route::apiResource('eleves', EleveController::class);
-            Route::post('/eleves/{id}/photo', [EleveController::class, 'updatePhoto']);
-            Route::get('/elevesNiveau/{id}',  [EleveController::class, 'ElevesNiveau']);
-            Route::get('/elevesClasse/{id}',  [EleveController::class, 'ElevesClasse']);
-            Route::get('/elevesParent/{id}',  [EleveController::class, 'ElevesParent']);
+            Route::post('/eleves/{id}/photo',      [EleveController::class, 'updatePhoto']);
+            Route::get('/elevesNiveau/{id}',       [EleveController::class, 'ElevesNiveau']);
+            Route::get('/elevesClasse/{id}',       [EleveController::class, 'ElevesClasse']);
+            Route::get('/elevesParent/{id}',       [EleveController::class, 'ElevesParent']);
             Route::get('/attestation/{eleveId}/scolarite/pdf', [AttestationPdfController::class, 'scolarite']);
         });
 
@@ -363,8 +366,16 @@ Route::middleware([
             Route::get('/bulletin/{eleveId}/{periodeId}/pdf',           [BulletinPdfController::class, 'telecharger']);
             Route::post('/bulletin/{eleveId}/{periodeId}/notifier',     [NoteController::class,        'notifierBulletin']);
             Route::get('/bulletins/classe/{classeId}/{periodeId}/pdf',  [BulletinPdfController::class, 'telechargerClasse']);
+            Route::get('/releve-annuel/{eleveId}/{annee}',             [ReleveAnnuelController::class, 'telecharger']);
             Route::get('/notes/{periodeId}/export',                    [NoteController::class,        'exportCsv']);
             Route::get('/export/moyennes/{niveauId}/{periodeId}',      [ExportMoyennesController::class, 'export']);
+
+            // Appréciations enseignants + décisions conseil de classe
+            Route::get('/appreciations-matiere/{classeId}/{periodeId}', [AppreciationController::class, 'parClasse']);
+            Route::post('/appreciations-matiere/batch',                  [AppreciationController::class, 'sauvegarderBatch']);
+            Route::get('/decisions-conseil/{classeId}/{periodeId}',     [AppreciationController::class, 'decisionsClasse']);
+            Route::post('/decisions-conseil/batch',                      [AppreciationController::class, 'sauvegarderDecisions']);
+            Route::get('/moyennes-classe/{classeId}/{periodeId}',       [NoteController::class,         'moyennesClasse']);
         });
 
         Route::middleware('permission:finances')->group(function () {

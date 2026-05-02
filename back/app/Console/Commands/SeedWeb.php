@@ -11,6 +11,7 @@ use App\Models\Niveau;
 use App\Models\Parents;
 use App\Models\Periodes;
 use App\Models\Scolarites;
+use App\Models\Serie;
 use App\Models\Tenant;
 use App\Models\TypeDevoir;
 use App\Services\TemplateService;
@@ -156,7 +157,19 @@ class SeedWeb extends Command
         }
         $stats['type_devoirs'] = count($templateData['type_devoirs']);
 
-        // Niveau-matières (utile pour ChapitresMatiereSeeder, VolumeHoraireSeeder)
+        // ── Séries (Lycée) ────────────────────────────────────────────────────
+        $seriesData = [
+            ['A', 'Série littéraire'],
+            ['C', 'Série scientifique (Mathématiques)'],
+            ['D', 'Série scientifique (Sciences Naturelles)'],
+        ];
+        $seriesMap = [];
+        foreach ($seriesData as [$nom, $description]) {
+            $serie = Serie::create(['nom' => $nom, 'description' => $description]);
+            $seriesMap[$nom] = $serie->id;
+        }
+
+        // Niveau-matières : résoudre la série depuis le template (ignorer A1, A2, B…)
         $niveauxMap  = Niveau::pluck('id', 'nom_niveau')->toArray();
         $matieresMap = Matiere::pluck('id', 'libelle_matiere')->toArray();
         $nmCount = 0;
@@ -164,10 +177,13 @@ class SeedWeb extends Command
             $niveauId  = $niveauxMap[$nm['niveau']] ?? null;
             $matiereId = $matieresMap[$nm['matiere']] ?? null;
             if (!$niveauId || !$matiereId) continue;
-            DB::table('niveau_matieres')->insertOrIgnore([
+            $serieNom = $nm['serie'] ?? null;
+            if ($serieNom !== null && !isset($seriesMap[$serieNom])) continue; // Ignorer A1, A2, B…
+            $serieId = $serieNom ? $seriesMap[$serieNom] : null;
+            DB::table('niveau_matieres')->insert([
                 'niveau_id'            => $niveauId,
                 'matiere_id'           => $matiereId,
-                'serie_id'             => null,
+                'serie_id'             => $serieId,
                 'groupe_alternatif_id' => null,
                 'obligatoire'          => 1,
                 'coefficient'          => $nm['coefficient'],
@@ -182,15 +198,33 @@ class SeedWeb extends Command
 
         $this->ecrireStatut('running', $stats, [], 'Création des classes…');
 
+        // Lycée (2nde → Tle) : une classe par série ; collège/primaire : numérotées
+        $seriesParNiveau = [
+            'Seconde'   => ['A', 'C'],
+            'Première'  => ['A', 'C', 'D'],
+            'Terminale' => ['A', 'C', 'D'],
+        ];
         foreach (Niveau::all() as $niveau) {
-            $nb = rand($classesMin, $classesMax);
-            for ($i = 1; $i <= $nb; $i++) {
-                Classe::factory()->create([
-                    'num_classe'  => $i,
-                    'nom_classe'  => $niveau->nom_niveau . ' ' . $i,
-                    'abbr_classe' => $niveau->abbr_niveau . $i,
-                    'niveau_id'   => $niveau->id,
-                ]);
+            if (isset($seriesParNiveau[$niveau->nom_niveau])) {
+                foreach ($seriesParNiveau[$niveau->nom_niveau] as $serieNom) {
+                    Classe::factory()->create([
+                        'num_classe'  => $serieNom,
+                        'nom_classe'  => $niveau->nom_niveau . ' ' . $serieNom,
+                        'abbr_classe' => $niveau->abbr_niveau . $serieNom,
+                        'niveau_id'   => $niveau->id,
+                        'serie_id'    => $seriesMap[$serieNom],
+                    ]);
+                }
+            } else {
+                $nb = rand($classesMin, $classesMax);
+                for ($i = 1; $i <= $nb; $i++) {
+                    Classe::factory()->create([
+                        'num_classe'  => $i,
+                        'nom_classe'  => $niveau->nom_niveau . ' ' . $i,
+                        'abbr_classe' => $niveau->abbr_niveau . $i,
+                        'niveau_id'   => $niveau->id,
+                    ]);
+                }
             }
         }
         $stats['classes'] = Classe::count();

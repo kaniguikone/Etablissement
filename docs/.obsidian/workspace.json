@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "guide-production.md",
+                "file": "analyse-experte.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "guide-production"
+              "title": "analyse-experte"
             }
           }
         ]
@@ -78,7 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 200
   },
   "right": {
     "id": "3b9e1085b7c5447c",
@@ -185,9 +185,16 @@
   },
   "active": "d574e5a8177cf752",
   "lastOpenFiles": [
+    "guide-production.md",
+    "analyse-experte.md",
+    "analyse-experte.md.tmp.13324.1777580216424",
+    "~$nctionnalités.docx",
+    "~WRL2666.tmp",
+    "~WRD2650.tmp",
+    "Fonctionnalités.docx",
+    "~$nctionnalites.md",
     "fonctionnalites.md",
     "guide-administrateur.md",
-    "guide-deploiement.md",
-    "guide-production.md"
+    "guide-deploiement.md"
   ]
 }

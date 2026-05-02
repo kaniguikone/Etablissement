@@ -144,12 +144,24 @@ class AssiduitesController extends Controller
                     $matiereNom   = $matiere?->libelle_matiere ?? 'un cours';
                     $heureInfo    = $request->heure_debut ? " ({$request->heure_debut}–{$request->heure_fin})" : '';
                     $dureeInfo    = $duree ? ", durée : {$duree}h" : '';
+                    $titreAbsence = 'Absence signalée';
+                    $corpsAbsence = "{$eleve->prenoms_eleve} {$eleve->nom_eleve} a été signalé(e) {$label} en {$matiereNom}{$heureInfo} le {$request->date_assiduite}{$dureeInfo}.";
+
                     $notifService->notifierParent(
                         $eleve->parents->id,
                         'absence',
-                        'Absence signalée',
-                        "{$eleve->prenoms_eleve} {$eleve->nom_eleve} a été signalé(e) {$label} en {$matiereNom}{$heureInfo} le {$request->date_assiduite}{$dureeInfo}.",
+                        $titreAbsence,
+                        $corpsAbsence,
                         ['eleve_id' => $eleve->id, 'date' => $request->date_assiduite]
+                    );
+
+                    $notifService->envoyerEmailParent(
+                        $eleve->parents->id,
+                        $eleve->id,
+                        "Absence signalée — {$eleve->prenoms_eleve} {$eleve->nom_eleve}",
+                        $titreAbsence,
+                        $corpsAbsence,
+                        '#e67e22'
                     );
                 }
             }

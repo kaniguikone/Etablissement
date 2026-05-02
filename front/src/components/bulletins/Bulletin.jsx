@@ -368,9 +368,25 @@ const Bulletin = () => {
                         </button>
                         {bulletin && (
                             <button className="btn btn-danger btn-sm" onClick={telechargerPdf}>
-                                <i className="fas fa-file-pdf me-1"></i> Télécharger PDF
+                                <i className="fas fa-file-pdf me-1"></i> Bulletin PDF
                             </button>
                         )}
+                        {eleveId && periodeId && (() => {
+                            const annee = periodes.find(p => String(p.id) === String(periodeId))?.annee;
+                            return annee ? (
+                                <button className="btn btn-outline-secondary btn-sm" onClick={async () => {
+                                    try {
+                                        const r = await api.get(`/releve-annuel/${eleveId}/${encodeURIComponent(annee)}`, { responseType: 'blob', timeout: 90000 });
+                                        const url = URL.createObjectURL(new Blob([r.data], { type: 'application/pdf' }));
+                                        const a = document.createElement('a');
+                                        a.href = url; a.download = `releve_annuel_${annee.replace('/', '-')}.pdf`; a.click();
+                                        URL.revokeObjectURL(url);
+                                    } catch (err) { toast.error(await lireErreurBlob(err)); }
+                                }}>
+                                    <i className="fas fa-list-alt me-1"></i> Relevé annuel
+                                </button>
+                            ) : null;
+                        })()}
                     </div>
                 </div>
 

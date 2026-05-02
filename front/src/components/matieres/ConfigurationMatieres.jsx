@@ -156,11 +156,12 @@ const EtapeNiveaux = ({ config }) => {
     useEffect(() => {
         if (!cleNiveau) return;
         const configNiveau = niveauMatieresLocal[cleNiveau] ?? [];
+        const noConfig = configNiveau.length === 0;
         const map = {};
         matieres.forEach(m => {
             const existing = configNiveau.find(c => c.matiere_id === m.id);
             map[m.id] = {
-                actif:                !!existing,
+                actif:                noConfig ? true : !!existing,
                 obligatoire:          existing ? existing.obligatoire : true,
                 coefficient:          existing ? (existing.coefficient ?? 1) : 1,
                 groupe_alternatif_id: existing ? existing.groupe_alternatif_id : null,
@@ -188,7 +189,14 @@ const EtapeNiveaux = ({ config }) => {
 
     const selectNiveau = (id) => {
         setNiveauId(id);
-        setSerieId(null); // reset la série à chaque changement de niveau
+        // Niveaux avec séries → sélectionner directement la première série
+        const premiereSerie = [...new Map(
+            config.classes
+                .filter(c => c.niveau_id === id && c.serie_id != null)
+                .map(c => [c.serie_id, seriesLocal.find(s => s.id === c.serie_id)])
+                .filter(([, s]) => s)
+        ).values()][0];
+        setSerieId(premiereSerie ? premiereSerie.id : null);
     };
 
     const setCoefficient = (matiereId, val) => setNiveauEdit(prev => ({
@@ -305,9 +313,7 @@ const EtapeNiveaux = ({ config }) => {
     const titreConfig = niveauSelectionne
         ? serieSelectionnee
             ? `${niveauSelectionne.nom_niveau} — Série ${serieSelectionnee.nom}`
-            : niveauASeries
-                ? `${niveauSelectionne.nom_niveau} — Tronc commun`
-                : niveauSelectionne.nom_niveau
+            : niveauSelectionne.nom_niveau
         : '';
 
     if (matieres.length === 0) return (
@@ -422,19 +428,6 @@ const EtapeNiveaux = ({ config }) => {
                                         {/* Sous-entrées séries si le niveau est sélectionné */}
                                         {actifN && aSeries && (
                                             <>
-                                                {/* Tronc commun (serie_id = null) */}
-                                                <button onClick={() => setSerieId(null)}
-                                                    className="w-100 text-start border-0"
-                                                    style={{
-                                                        paddingLeft: 24, paddingTop: 6, paddingBottom: 6, paddingRight: 12,
-                                                        background: serieId == null ? '#1e3a8a' : '#f8fafc',
-                                                        color: serieId == null ? 'white' : '#4a5568',
-                                                        borderBottom: '1px solid #f1f5f9',
-                                                        fontSize: 12,
-                                                    }}>
-                                                    <i className="fas fa-layer-group me-2" style={{ opacity: .6 }} />
-                                                    Tronc commun
-                                                </button>
                                                 {seriesDuN.map(s => (
                                                     <button key={s.id} onClick={() => setSerieId(s.id)}
                                                         className="w-100 text-start border-0"

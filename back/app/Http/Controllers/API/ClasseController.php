@@ -99,7 +99,7 @@ class ClasseController extends Controller
     /** Classes d'un niveau donné. */
     public function ChoixNiveau($id)
     {
-        return response()->json(Classe::where('niveau_id', $id)->get());
+        return response()->json(Classe::with('serie')->where('niveau_id', $id)->get());
     }
 
     /** Classe avec son niveau. */
