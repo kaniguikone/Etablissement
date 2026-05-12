@@ -139,4 +139,11 @@ class ParentController extends Controller
         $parent->delete();
         return response()->json(null, 204);
     }
+
+    public function revoquerTokens(string $id)
+    {
+        $parent = Parents::findOrFail($id);
+        $parent->tokens()->delete();
+        return response()->json(['message' => 'Sessions révoquées.']);
+    }
 }

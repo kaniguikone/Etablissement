@@ -19,7 +19,6 @@ return new class extends Migration
             $table->text('observations')->nullable();
             $table->timestamps();
 
-            // Un prof ne peut avoir qu'une progression par chapitre/classe/période
             $table->unique(['chapitre_id', 'classe_id', 'enseignant_id', 'periode_id'], 'prog_unique');
         });
     }

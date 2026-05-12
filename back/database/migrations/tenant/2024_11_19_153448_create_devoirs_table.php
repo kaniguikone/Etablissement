@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('code_devoir');
             $table->date('date_devoir');
-            $table->string('coeff_devoir');
+            $table->decimal('coeff_devoir', 5, 2)->default(1);
 
             $table->foreignId('type_devoir_id')
                   ->constrained('type_devoirs')

@@ -273,10 +273,10 @@ const Accueil = () => {
     const tauxNotes    = stats?.taux_saisie_notes ?? 0;
     const couleurNotes = tauxNotes >= 80 ? 'success' : tauxNotes >= 50 ? 'warning' : 'danger';
 
-    const voitEffectifs  = peutAcceder(['eleves', 'enseignants', 'parents', 'inscriptions', 'pedagogie']);
-    const voitFinances   = peutAcceder('finances');
-    const voitPedagogie  = peutAcceder('pedagogie');
-    const voitAssiduites = peutAcceder('pedagogie');
+    const voitEffectifs  = peutAcceder(['eleves', 'enseignants', 'parents', 'inscriptions', 'pedagogie_saisie', 'pedagogie_pilotage']);
+    const voitFinances   = peutAcceder(['finances_caisse', 'finances_gestion']);
+    const voitPedagogie  = peutAcceder(['pedagogie_saisie', 'pedagogie_pilotage']);
+    const voitAssiduites = peutAcceder('pedagogie_saisie');
     const voitInfos      = peutAcceder('communication');
     const voitAdmin      = user?.super === true;
 

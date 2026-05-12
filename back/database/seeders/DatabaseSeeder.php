@@ -81,9 +81,9 @@ class DatabaseSeeder extends Seeder
 
         // ── Périodes ─────────────────────────────────────────────────────────
         $periodes = [
-            ['Premier Trimestre',   '1er Trim', 'T1', '2024-2025', '2024-09-02', '2024-12-20'],
-            ['Deuxième Trimestre',  '2eme Trim', 'T2', '2024-2025', '2025-01-02', '2025-03-10'],
-            ['Troisième Trimestre', '3eme Trim', 'T3', '2024-2025', '2025-03-15', '2025-05-20'],
+            ['Premier Trimestre',   '1er Trim', 'T1', '2025-2026', '2025-09-02', '2025-12-20'],
+            ['Deuxième Trimestre',  '2eme Trim', 'T2', '2025-2026', '2026-01-05', '2026-03-13'],
+            ['Troisième Trimestre', '3eme Trim', 'T3', '2025-2026', '2026-03-16', '2026-06-20'],
         ];
         foreach ($periodes as [$libelle, $abbr, $code, $annee, $debut, $fin]) {
             Periodes::create([
@@ -107,7 +107,7 @@ class DatabaseSeeder extends Seeder
             6 => [65000, 60000, 55000, 50000, 40000],
             7 => [70000, 65000, 60000, 55000, 45000],
         ];
-        $datesEcheances = ['2024-10-05', '2024-11-05', '2024-12-05', '2025-01-05', '2025-02-05'];
+        $datesEcheances = ['2025-10-05', '2025-11-05', '2025-12-05', '2026-01-05', '2026-02-05'];
 
         foreach (Niveau::all() as $rank => $niveau) {
             $montants = $montantsParNiveau[$rank + 1];

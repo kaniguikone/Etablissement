@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('libelle_echeance');
             $table->date('date_echeance');
-            $table->string('montant_echeance');
+            $table->decimal('montant_echeance', 10, 2);
 
             $table->unsignedBigInteger('niveau_id');
             $table->foreign('niveau_id')

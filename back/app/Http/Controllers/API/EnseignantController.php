@@ -173,4 +173,11 @@ class EnseignantController extends Controller
 
         return response()->json(['status' => 'success']);
     }
+
+    public function revoquerTokens(string $id)
+    {
+        $enseignant = Enseignant::findOrFail($id);
+        $enseignant->tokens()->delete();
+        return response()->json(['message' => 'Sessions révoquées.']);
+    }
 }

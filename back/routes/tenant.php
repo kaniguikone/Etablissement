@@ -57,6 +57,7 @@ use App\Http\Controllers\API\SeederController;
 use App\Http\Controllers\API\AppreciationController;
 use App\Http\Controllers\API\MotDePasseController;
 use App\Http\Controllers\API\ReleveAnnuelController;
+use App\Http\Controllers\API\UnifiedAuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -75,6 +76,9 @@ Route::middleware([
 
     // ─── Auth back-office ────────────────────────────────────────────────────
     Route::post('/login',  [AuthController::class, 'login']);
+
+    // ─── Auth mobile unifiée (parent + enseignant en un seul appel) ──────────
+    Route::post('/mobile/login', [UnifiedAuthController::class, 'login']);
 
     // ─── Mot de passe oublié (public) ────────────────────────────────────────
     Route::post('/mot-de-passe/oublie',       [MotDePasseController::class, 'oublie']);
@@ -209,7 +213,7 @@ Route::middleware([
 
         Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
 
-        Route::middleware('permission:pedagogie,finances')->group(function () {
+        Route::middleware('permission:pedagogie_saisie,pedagogie_pilotage,finances_caisse,finances_gestion')->group(function () {
             Route::get('/stats/synthese',     [StatistiquesController::class, 'synthese']);
             Route::get('/stats/presences',    [StatistiquesController::class, 'presences']);
             Route::get('/stats/moyennes',     [StatistiquesController::class, 'moyennes']);
@@ -219,7 +223,7 @@ Route::middleware([
             Route::get('/stats/enseignants',  [StatistiquesController::class, 'enseignants']);
         });
 
-        Route::middleware('permission:finances')->group(function () {
+        Route::middleware('permission:finances_caisse,finances_gestion')->group(function () {
             Route::get('/echeancier', [PaiementController::class, 'echeancier']);
         });
 
@@ -319,13 +323,15 @@ Route::middleware([
             Route::post('/enseignants/import',                    [ImportEnseignantController::class, 'import']);
             Route::get('/affectations/import/template',           [ImportAffectationController::class, 'template']);
             Route::post('/affectations/import',                   [ImportAffectationController::class, 'import']);
+            Route::delete('/enseignants/{id}/tokens',             [EnseignantController::class, 'revoquerTokens']);
         });
 
         Route::middleware('permission:parents')->group(function () {
             Route::apiResource('parents', ParentController::class);
+            Route::delete('/parents/{id}/tokens',                 [ParentController::class, 'revoquerTokens']);
         });
 
-        Route::middleware('permission:pedagogie')->group(function () {
+        Route::middleware('permission:pedagogie_saisie')->group(function () {
             Route::get('/remplacements/dashboard',  [RemplacementController::class, 'dashboard']);
             Route::get('/remplacements',            [RemplacementController::class, 'index']);
             Route::post('/remplacements',           [RemplacementController::class, 'store']);
@@ -334,9 +340,7 @@ Route::middleware([
             Route::delete('/remplacements/{id}',    [RemplacementController::class, 'destroy']);
         });
 
-        Route::middleware('permission:pedagogie')->group(function () {
-            Route::get('/volumesHoraires/conformite',          [VolumeHoraireController::class, 'conformite']);
-            Route::get('/volumesHoraires/chargeEnseignants',   [VolumeHoraireController::class, 'chargeEnseignants']);
+        Route::middleware('permission:pedagogie_saisie')->group(function () {
             Route::get('/volumesHoraires/restant/{classe_id}', [VolumeHoraireController::class, 'restantClasse'])->where('classe_id', '[0-9]+');
 
             Route::apiResource('emploiDuTemps', EmploiDuTempsController::class);
@@ -360,15 +364,21 @@ Route::middleware([
             Route::get('/devoirsClasse/{id}',    [DevoirController::class, 'devoirsClasse']);
             Route::get('/devoirsPeriode/{id}',   [DevoirController::class, 'devoirsPeriode']);
 
-            Route::get('/notesDevoir/{id}',                   [NoteController::class,        'notesDevoir']);
-            Route::post('/notesSauvegarder/{id}',             [NoteController::class,        'sauvegarder']);
-            Route::get('/bulletin/{eleveId}/{periodeId}',                [NoteController::class,        'bulletin']);
+            Route::get('/notesDevoir/{id}',       [NoteController::class, 'notesDevoir']);
+            Route::post('/notesSauvegarder/{id}', [NoteController::class, 'sauvegarder']);
+        });
+
+        Route::middleware('permission:pedagogie_pilotage')->group(function () {
+            Route::get('/volumesHoraires/conformite',        [VolumeHoraireController::class, 'conformite']);
+            Route::get('/volumesHoraires/chargeEnseignants', [VolumeHoraireController::class, 'chargeEnseignants']);
+
+            Route::get('/bulletin/{eleveId}/{periodeId}',               [NoteController::class,        'bulletin']);
             Route::get('/bulletin/{eleveId}/{periodeId}/pdf',           [BulletinPdfController::class, 'telecharger']);
             Route::post('/bulletin/{eleveId}/{periodeId}/notifier',     [NoteController::class,        'notifierBulletin']);
             Route::get('/bulletins/classe/{classeId}/{periodeId}/pdf',  [BulletinPdfController::class, 'telechargerClasse']);
-            Route::get('/releve-annuel/{eleveId}/{annee}',             [ReleveAnnuelController::class, 'telecharger']);
-            Route::get('/notes/{periodeId}/export',                    [NoteController::class,        'exportCsv']);
-            Route::get('/export/moyennes/{niveauId}/{periodeId}',      [ExportMoyennesController::class, 'export']);
+            Route::get('/releve-annuel/{eleveId}/{annee}',              [ReleveAnnuelController::class, 'telecharger']);
+            Route::get('/notes/{periodeId}/export',                     [NoteController::class,        'exportCsv']);
+            Route::get('/export/moyennes/{niveauId}/{periodeId}',       [ExportMoyennesController::class, 'export']);
 
             // Appréciations enseignants + décisions conseil de classe
             Route::get('/appreciations-matiere/{classeId}/{periodeId}', [AppreciationController::class, 'parClasse']);
@@ -378,19 +388,22 @@ Route::middleware([
             Route::get('/moyennes-classe/{classeId}/{periodeId}',       [NoteController::class,         'moyennesClasse']);
         });
 
-        Route::middleware('permission:finances')->group(function () {
+        Route::middleware('permission:finances_gestion')->group(function () {
             Route::apiResource('scolarites',         ScolariteController::class);
             Route::get('/scolaritesNiveau/{id}',     [ScolariteController::class, 'ScolaritesNiveau']);
             Route::get('/scolarites/import/template',[ImportScolariteController::class, 'template']);
             Route::post('/scolarites/import',        [ImportScolariteController::class, 'import']);
-            Route::get('/paiements/export',          [PaiementController::class,  'exportCsv']);
             Route::get('/impayes',                   [PaiementController::class,  'impayes']);
-            Route::post('/paiements/initier',        [CinetPayController::class,  'initier']);
-            Route::get('/paiements/statut/{transactionId}', [CinetPayController::class, 'statut']);
-            Route::apiResource('paiements',          PaiementController::class);
-            Route::get('/paiementsEleve/{id}',       [PaiementController::class,  'parEleve']);
-            Route::get('/paiementsNiveau/{id}',      [PaiementController::class,  'recapNiveau']);
-            Route::get('/paiements/{id}/recu',       [PaiementController::class,  'recu']);
+        });
+
+        Route::middleware('permission:finances_caisse,finances_gestion')->group(function () {
+            Route::get('/paiements/export',                    [PaiementController::class,  'exportCsv']);
+            Route::post('/paiements/initier',                  [CinetPayController::class,  'initier']);
+            Route::get('/paiements/statut/{transactionId}',    [CinetPayController::class,  'statut']);
+            Route::apiResource('paiements',                    PaiementController::class);
+            Route::get('/paiementsEleve/{id}',                 [PaiementController::class,  'parEleve']);
+            Route::get('/paiementsNiveau/{id}',                [PaiementController::class,  'recapNiveau']);
+            Route::get('/paiements/{id}/recu',                 [PaiementController::class,  'recu']);
         });
 
         Route::middleware('permission:communication')->group(function () {
@@ -399,19 +412,19 @@ Route::middleware([
             Route::get('/messages/conversation/{a}/{b}', [MessageController::class, 'filAdmin']);
         });
 
-        Route::middleware('permission:pedagogie,communication')->group(function () {
+        Route::middleware('permission:pedagogie_saisie,pedagogie_pilotage,communication')->group(function () {
             Route::get('/rdv/reservations',           [RdvController::class, 'toutesReservations']);
             Route::get('/rdv/creneaux',               [RdvController::class, 'tousCreneaux']);
         });
 
         Route::get('/calendrier',         [CalendrierController::class, 'index']);
-        Route::middleware('permission:pedagogie,parametrage')->group(function () {
+        Route::middleware('permission:pedagogie_saisie,parametrage')->group(function () {
             Route::post('/calendrier',        [CalendrierController::class, 'store']);
             Route::put('/calendrier/{id}',    [CalendrierController::class, 'update']);
             Route::delete('/calendrier/{id}', [CalendrierController::class, 'destroy']);
         });
 
-        Route::middleware('permission:eleves,pedagogie')->group(function () {
+        Route::middleware('permission:eleves,pedagogie_saisie')->group(function () {
             Route::get('/sanctions',                    [SanctionController::class, 'index']);
             Route::get('/sanctions/eleve/{eleveId}',    [SanctionController::class, 'parEleve']);
             Route::post('/sanctions',                   [SanctionController::class, 'store']);
@@ -422,16 +435,16 @@ Route::middleware([
         });
 
         Route::middleware('permission:parametrage')->group(function () {
-            Route::get('/annees-scolaires',                       [ArchivageController::class, 'index']);
-            Route::post('/annees-scolaires',                      [ArchivageController::class, 'store']);
-            Route::post('/annees-scolaires/init-nouvelle-annee',  [ArchivageController::class, 'initNouvelleAnnee']);
-            Route::get('/annees-scolaires/{id}',                  [ArchivageController::class, 'show']);
-            Route::get('/annees-scolaires/{id}/passage',          [ArchivageController::class, 'passage']);
-            Route::put('/annees-scolaires/{id}/passage',          [ArchivageController::class, 'enregistrerPassage']);
-            Route::post('/annees-scolaires/{id}/initier-cloture', [ArchivageController::class, 'initierCloture']);
-            Route::post('/annees-scolaires/{id}/rollback',        [ArchivageController::class, 'rollback']);
-            Route::post('/annees-scolaires/{id}/confirmer',       [ArchivageController::class, 'confirmer']);
-            Route::get('/annees-scolaires/{id}/bilan',            [ArchivageController::class, 'bilan']);
+            Route::get('/annees-scolaires',                          [ArchivageController::class, 'index']);
+            Route::post('/annees-scolaires',                         [ArchivageController::class, 'store']);
+            Route::post('/annees-scolaires/init-nouvelle-annee',     [ArchivageController::class, 'initNouvelleAnnee']);
+            Route::get('/annees-scolaires/{id}',                     [ArchivageController::class, 'show']);
+            Route::get('/annees-scolaires/{id}/prerequis',           [ArchivageController::class, 'prerequis']);
+            Route::get('/annees-scolaires/{id}/bilan-preview',       [ArchivageController::class, 'bilanPreview']);
+            Route::get('/annees-scolaires/{id}/bilan',               [ArchivageController::class, 'bilan']);
+            Route::post('/annees-scolaires/{id}/initier-cloture',    [ArchivageController::class, 'initierCloture']);
+            Route::post('/annees-scolaires/{id}/rollback',           [ArchivageController::class, 'rollback']);
+            Route::post('/annees-scolaires/{id}/confirmer',          [ArchivageController::class, 'confirmer']);
         });
 
         // ─── Seeder (dev uniquement — super admin uniquement, bloqué en production) ──

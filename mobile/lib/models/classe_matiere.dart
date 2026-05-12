@@ -33,4 +33,13 @@ class ClasseMatiere {
       );
 
   String get label => '$abbrClasse · $libelleMatiere';
+
+  @override
+  bool operator ==(Object other) =>
+      other is ClasseMatiere &&
+      classeId == other.classeId &&
+      matiereId == other.matiereId;
+
+  @override
+  int get hashCode => Object.hash(classeId, matiereId);
 }

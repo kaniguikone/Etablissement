@@ -47,7 +47,10 @@ class PeriodeController extends Controller
             ->whereDate('date_fin', '>=', $request->date)
             ->first();
 
-        return response()->json($periode);
+        // response()->json(null) sérialise en {} à cause de Symfony — on force le JSON null explicite
+        return $periode
+            ? response()->json($periode)
+            : response('null', 200)->header('Content-Type', 'application/json');
     }
 
     public function show(string $id)

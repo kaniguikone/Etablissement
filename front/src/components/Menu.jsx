@@ -60,37 +60,55 @@ const GROUPES = [
         ],
     },
 
-    // ── Pédagogie ────────────────────────────────────────────────────────────
+    // ── Pédagogie — saisie ───────────────────────────────────────────────────
     {
         label: 'Pédagogie',
         icon: 'fas fa-graduation-cap',
-        permissions: ['pedagogie'],
+        permissions: ['pedagogie_saisie'],
         items: [
-            { to: '/Calendrier',        icon: 'fas fa-calendar-alt',    label: 'Calendrier scolaire' },
-            { to: '/EmploiDuTemps',     icon: 'fas fa-calendar-week',   label: 'Emploi du temps' },
-            { to: '/Assiduites',        icon: 'fas fa-clipboard-check', label: 'Assiduités' },
-            { to: '/Devoirs',           icon: 'fas fa-file-alt',        label: 'Devoirs / Notes' },
-            { to: '/Bulletins',         icon: 'fas fa-file-pdf',        label: 'Bulletins' },
-            { to: '/GestionChapitres',  icon: 'fas fa-book-open',       label: 'Programme' },
-            { to: '/SuiviProgressions', icon: 'fas fa-tasks',           label: 'Suivi des progressions' },
-            { to: '/ConseilClasse',     icon: 'fas fa-gavel',           label: 'Conseil de classe' },
-            { to: '/Remplacements',     icon: 'fas fa-exchange-alt',    label: 'Remplacements' },
-            { to: '/ConformiteEdt',     icon: 'fas fa-balance-scale',   label: 'Conformité EDT' },
-            { to: '/ChargeEnseignants', icon: 'fas fa-user-clock',      label: 'Charge enseignants' },
+            { to: '/Calendrier',       icon: 'fas fa-calendar-alt',    label: 'Calendrier scolaire' },
+            { to: '/EmploiDuTemps',    icon: 'fas fa-calendar-week',   label: 'Emploi du temps' },
+            { to: '/Assiduites',       icon: 'fas fa-clipboard-check', label: 'Assiduités' },
+            { to: '/Devoirs',          icon: 'fas fa-file-alt',        label: 'Devoirs / Notes' },
+            { to: '/GestionChapitres', icon: 'fas fa-book-open',       label: 'Programme' },
+            { to: '/Remplacements',    icon: 'fas fa-exchange-alt',    label: 'Remplacements' },
         ],
     },
 
-    // ── Finances ─────────────────────────────────────────────────────────────
+    // ── Pédagogie — pilotage ─────────────────────────────────────────────────
+    {
+        label: 'Pilotage pédagogique',
+        icon: 'fas fa-chart-line',
+        permissions: ['pedagogie_pilotage'],
+        items: [
+            { to: '/Bulletins',         icon: 'fas fa-file-pdf',      label: 'Bulletins' },
+            { to: '/SuiviProgressions', icon: 'fas fa-tasks',         label: 'Suivi des progressions' },
+            { to: '/ConseilClasse',     icon: 'fas fa-gavel',         label: 'Conseil de classe' },
+            { to: '/ConformiteEdt',     icon: 'fas fa-balance-scale', label: 'Conformité EDT' },
+            { to: '/ChargeEnseignants', icon: 'fas fa-user-clock',    label: 'Charge enseignants' },
+        ],
+    },
+
+    // ── Finances — caisse ────────────────────────────────────────────────────
+    {
+        label: 'Caisse',
+        icon: 'fas fa-cash-register',
+        permissions: ['finances_caisse'],
+        items: [
+            { to: '/Paiements',      icon: 'fas fa-hand-holding-usd', label: 'Paiements' },
+            { to: '/RecapPaiements', icon: 'fas fa-table',            label: 'Récap par niveau' },
+            { to: '/Echeancier',     icon: 'fas fa-calendar-alt',     label: 'Échéancier' },
+        ],
+    },
+
+    // ── Finances — gestion ───────────────────────────────────────────────────
     {
         label: 'Finances',
         icon: 'fas fa-wallet',
-        permissions: ['finances'],
+        permissions: ['finances_gestion'],
         items: [
-            { to: '/Scolarites',     icon: 'fas fa-money-bill-wave',  label: 'Scolarités' },
-            { to: '/Paiements',      icon: 'fas fa-hand-holding-usd', label: 'Paiements' },
-            { to: '/RecapPaiements', icon: 'fas fa-table',            label: 'Récap par niveau' },
-            { to: '/Impayes',        icon: 'fas fa-exclamation-circle', label: 'Tableau des impayés' },
-            { to: '/Echeancier',     icon: 'fas fa-calendar-alt',     label: 'Échéancier' },
+            { to: '/Scolarites', icon: 'fas fa-money-bill-wave',    label: 'Scolarités' },
+            { to: '/Impayes',    icon: 'fas fa-exclamation-circle', label: 'Tableau des impayés' },
         ],
     },
 
@@ -151,7 +169,7 @@ const GROUPES = [
     {
         label: 'Statistiques',
         icon: 'fas fa-chart-bar',
-        permissions: ['pedagogie', 'finances'],
+        permissions: ['pedagogie_saisie', 'pedagogie_pilotage', 'finances_caisse', 'finances_gestion'],
         items: [
             { to: '/Statistiques', icon: 'fas fa-chart-bar', label: 'Tableaux de bord' },
         ],

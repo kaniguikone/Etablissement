@@ -30,7 +30,7 @@ class AdminSeeder extends Seeder
             [
                 'nom'         => 'censeur',
                 'label'       => 'Censeur / Adjoint pédagogique',
-                'permissions' => ['eleves', 'enseignants', 'parents', 'pedagogie', 'communication'],
+                'permissions' => ['eleves', 'enseignants', 'parents', 'pedagogie_saisie', 'pedagogie_pilotage', 'communication'],
                 'super'       => false,
             ],
             [
@@ -42,7 +42,7 @@ class AdminSeeder extends Seeder
             [
                 'nom'         => 'comptable',
                 'label'       => 'Comptable',
-                'permissions' => ['finances'],
+                'permissions' => ['finances_caisse', 'finances_gestion'],
                 'super'       => false,
             ],
         ];
@@ -57,12 +57,14 @@ class AdminSeeder extends Seeder
         }
 
         // ── Création des comptes de test ──────────────────────────────────────
+        $domaine = tenancy()->tenant?->domains()->first()?->domain ?? 'etablissement.ci';
+
         $comptes = [
-            ['name' => 'Super Administrateur', 'telephone' => '0700000001', 'email' => 'admin@etablissement.ci',      'role' => 'super_admin', 'password' => 'admin123'],
-            ['name' => 'Directeur Général',    'telephone' => '0700000002', 'email' => 'directeur@etablissement.ci',  'role' => 'directeur',   'password' => 'directeur123'],
-            ['name' => 'Censeur Principal',    'telephone' => '0700000003', 'email' => 'censeur@etablissement.ci',    'role' => 'censeur',     'password' => 'censeur123'],
-            ['name' => 'Secrétaire',           'telephone' => '0700000004', 'email' => 'secretaire@etablissement.ci', 'role' => 'secretaire',  'password' => 'secretaire123'],
-            ['name' => 'Comptable',            'telephone' => '0700000005', 'email' => 'comptable@etablissement.ci',  'role' => 'comptable',   'password' => 'comptable123'],
+            ['name' => 'Super Administrateur', 'telephone' => '0700000001', 'email' => "admin@{$domaine}",       'role' => 'super_admin', 'password' => 'admin123'],
+            ['name' => 'Directeur Général',    'telephone' => '0700000002', 'email' => "directeur@{$domaine}",   'role' => 'directeur',   'password' => 'directeur123'],
+            ['name' => 'Censeur Principal',    'telephone' => '0700000003', 'email' => "censeur@{$domaine}",     'role' => 'censeur',     'password' => 'censeur123'],
+            ['name' => 'Secrétaire',           'telephone' => '0700000004', 'email' => "secretaire@{$domaine}",  'role' => 'secretaire',  'password' => 'secretaire123'],
+            ['name' => 'Comptable',            'telephone' => '0700000005', 'email' => "comptable@{$domaine}",   'role' => 'comptable',   'password' => 'comptable123'],
         ];
 
         foreach ($comptes as $compte) {

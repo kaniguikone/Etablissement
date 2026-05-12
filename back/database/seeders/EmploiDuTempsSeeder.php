@@ -57,6 +57,8 @@ class EmploiDuTempsSeeder extends Seeder
         $totalSlots   = array_sum(array_map('count', $slotsParJour));
 
         $rows = [];
+        // Tracks slots already taken per enseignant: enseignant_id => ['jour_debut_fin', ...]
+        $slotsEnseignant = [];
 
         foreach ($classes as $classe) {
             // Mélanger les matières pour varier la répartition entre classes
@@ -66,24 +68,37 @@ class EmploiDuTempsSeeder extends Seeder
 
             foreach ($slotsParJour as $jour => $slots) {
                 foreach ($slots as [$debut, $fin]) {
-                    $matiereId    = $matieresIds[$cursor % $nbMatieres];
-                    $affectKey    = $classe->id . '_' . $matiereId;
-                    $enseignantId = $affectations->get($affectKey);
+                    $slotKey  = "{$jour}_{$debut}_{$fin}";
+                    $assigned = false;
 
-                    if (!$enseignantId) {
+                    // Parcourir toutes les matières depuis le curseur courant
+                    // pour trouver la première dont l'enseignant est libre sur ce slot
+                    for ($i = 0; $i < $nbMatieres; $i++) {
+                        $matiereId    = $matieresIds[($cursor + $i) % $nbMatieres];
+                        $affectKey    = $classe->id . '_' . $matiereId;
+                        $enseignantId = $affectations->get($affectKey);
+
+                        if (!$enseignantId) continue;
+                        if (in_array($slotKey, $slotsEnseignant[$enseignantId] ?? [])) continue;
+
+                        $slotsEnseignant[$enseignantId][] = $slotKey;
+                        $rows[] = [
+                            'classe_id'     => $classe->id,
+                            'matiere_id'    => $matiereId,
+                            'enseignant_id' => $enseignantId,
+                            'jour'          => $jour,
+                            'heure_debut'   => $debut,
+                            'heure_fin'     => $fin,
+                        ];
                         $cursor++;
-                        continue;
+                        $assigned = true;
+                        break;
                     }
 
-                    $rows[] = [
-                        'classe_id'     => $classe->id,
-                        'matiere_id'    => $matiereId,
-                        'enseignant_id' => $enseignantId,
-                        'jour'          => $jour,
-                        'heure_debut'   => $debut,
-                        'heure_fin'     => $fin,
-                    ];
-                    $cursor++;
+                    if (!$assigned) {
+                        $this->command->warn("Aucune matière disponible pour {$classe->nom_classe} le {$jour} {$debut}-{$fin} (tous les enseignants sont occupés).");
+                        $cursor++;
+                    }
                 }
             }
         }

@@ -120,16 +120,18 @@ import ConseilClasse from '../components/conseil/ConseilClasse';
 import ReinitialisationMotDePasse from '../components/auth/ReinitialisationMotDePasse';
 
 // Rôles constants pour éviter les répétitions
-const R_STATS     = ['pedagogie', 'finances'];
-const R_PARAM     = ['parametrage'];
-const R_INSCRIP   = ['inscriptions'];
-const R_ELEVES    = ['eleves'];
-const R_ENSEIGNANTS = ['enseignants'];
-const R_PARENTS   = ['parents'];
-const R_PEDAGO    = ['pedagogie'];
-const R_FINANCES  = ['finances'];
-const R_COMM      = ['communication'];
-const R_ADMIN     = ['utilisateurs'];
+const R_STATS            = ['pedagogie_saisie', 'pedagogie_pilotage', 'finances_caisse', 'finances_gestion'];
+const R_PARAM            = ['parametrage'];
+const R_INSCRIP          = ['inscriptions'];
+const R_ELEVES           = ['eleves'];
+const R_ENSEIGNANTS      = ['enseignants'];
+const R_PARENTS          = ['parents'];
+const R_PEDAGO_SAISIE    = ['pedagogie_saisie'];
+const R_PEDAGO_PILOTAGE  = ['pedagogie_pilotage'];
+const R_FINANCES_CAISSE  = ['finances_caisse', 'finances_gestion'];
+const R_FINANCES_GESTION = ['finances_gestion'];
+const R_COMM             = ['communication'];
+const R_ADMIN            = ['utilisateurs'];
 
 const RoutesMenu = () => (
     <div>
@@ -217,7 +219,7 @@ const RoutesMenu = () => (
             <Route path="/DetailsSanction/:id" element={<PrivateRoute permissions={R_ELEVES}><FormSanction /></PrivateRoute>} />
             <Route path="/SanctionsEleve/:id"  element={<PrivateRoute permissions={R_ELEVES}><SanctionsEleve /></PrivateRoute>} />
 
-            <Route path="/ConseilClasse" element={<PrivateRoute permissions={R_PEDAGO}><ConseilClasse /></PrivateRoute>} />
+            <Route path="/ConseilClasse" element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE}><ConseilClasse /></PrivateRoute>} />
 
             <Route path="/Enseignants"            element={<PrivateRoute permissions={R_ENSEIGNANTS}><ListeEnseignants /></PrivateRoute>} />
             <Route path="/NouvelEnseignant"       element={<PrivateRoute permissions={R_ENSEIGNANTS}><NouvelEnseignant /></PrivateRoute>} />
@@ -235,53 +237,53 @@ const RoutesMenu = () => (
             <Route path="/PlanningSalle/:id" element={<PrivateRoute permissions={R_PARAM}><PlanningSalle /></PrivateRoute>} />
 
             {/* Remplacements */}
-            <Route path="/Remplacements"           element={<PrivateRoute permissions={R_PEDAGO}><ListeRemplacements /></PrivateRoute>} />
-            <Route path="/NouveauRemplacement"     element={<PrivateRoute permissions={R_PEDAGO}><FormRemplacement /></PrivateRoute>} />
-            <Route path="/DetailsRemplacement/:id" element={<PrivateRoute permissions={R_PEDAGO}><FormRemplacement /></PrivateRoute>} />
+            <Route path="/Remplacements"           element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><ListeRemplacements /></PrivateRoute>} />
+            <Route path="/NouveauRemplacement"     element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><FormRemplacement /></PrivateRoute>} />
+            <Route path="/DetailsRemplacement/:id" element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><FormRemplacement /></PrivateRoute>} />
 
             {/* Messagerie */}
             <Route path="/Messagerie" element={<PrivateRoute permissions={R_COMM}><Messagerie /></PrivateRoute>} />
 
             {/* RDV parents-profs */}
-            <Route path="/RDV" element={<PrivateRoute permissions={R_PEDAGO}><GestionCreneauxRdv /></PrivateRoute>} />
+            <Route path="/RDV" element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><GestionCreneauxRdv /></PrivateRoute>} />
 
-            {/* Pédagogie */}
-            <Route path="/EmploiDuTemps"            element={<PrivateRoute permissions={R_PEDAGO}><ListeEmploiDuTemps /></PrivateRoute>} />
-            <Route path="/NouvelEmploiDuTemps"      element={<PrivateRoute permissions={R_PEDAGO}><NouvelEmploiDuTemps /></PrivateRoute>} />
-            <Route path="/DetailsEmploiDuTemps/:id" element={<PrivateRoute permissions={R_PEDAGO}><DetailsEmploiDuTemps /></PrivateRoute>} />
+            {/* Pédagogie — saisie */}
+            <Route path="/EmploiDuTemps"            element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><ListeEmploiDuTemps /></PrivateRoute>} />
+            <Route path="/NouvelEmploiDuTemps"      element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><NouvelEmploiDuTemps /></PrivateRoute>} />
+            <Route path="/DetailsEmploiDuTemps/:id" element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><DetailsEmploiDuTemps /></PrivateRoute>} />
 
-            <Route path="/Assiduites"          element={<PrivateRoute permissions={R_PEDAGO}><ListeAssiduites /></PrivateRoute>} />
-            <Route path="/FeuillePresence"     element={<PrivateRoute permissions={R_PEDAGO}><FeuillePresence /></PrivateRoute>} />
-            <Route path="/DetailsAssiduite/:id" element={<PrivateRoute permissions={R_PEDAGO}><DetailsAssiduite /></PrivateRoute>} />
+            <Route path="/Assiduites"           element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><ListeAssiduites /></PrivateRoute>} />
+            <Route path="/FeuillePresence"      element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><FeuillePresence /></PrivateRoute>} />
+            <Route path="/DetailsAssiduite/:id" element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><DetailsAssiduite /></PrivateRoute>} />
 
-            <Route path="/Devoirs"           element={<PrivateRoute permissions={R_PEDAGO}><ListeDevoirs /></PrivateRoute>} />
-            <Route path="/NouveauDevoir"     element={<PrivateRoute permissions={R_PEDAGO}><NouveauDevoir /></PrivateRoute>} />
-            <Route path="/DetailsDevoir/:id" element={<PrivateRoute permissions={R_PEDAGO}><DetailsDevoir /></PrivateRoute>} />
-            <Route path="/SaisieNotes/:id"   element={<PrivateRoute permissions={R_PEDAGO}><SaisieNotes /></PrivateRoute>} />
+            <Route path="/Devoirs"           element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><ListeDevoirs /></PrivateRoute>} />
+            <Route path="/NouveauDevoir"     element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><NouveauDevoir /></PrivateRoute>} />
+            <Route path="/DetailsDevoir/:id" element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><DetailsDevoir /></PrivateRoute>} />
+            <Route path="/SaisieNotes/:id"   element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><SaisieNotes /></PrivateRoute>} />
 
-            <Route path="/Bulletins" element={<PrivateRoute permissions={R_PEDAGO}><Bulletin /></PrivateRoute>} />
+            <Route path="/GestionChapitres" element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><GestionChapitres /></PrivateRoute>} />
+            <Route path="/Calendrier"       element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><CalendrierScolaire /></PrivateRoute>} />
 
-            <Route path="/GestionChapitres"  element={<PrivateRoute permissions={R_PEDAGO}><GestionChapitres /></PrivateRoute>} />
-            <Route path="/SuiviProgressions" element={<PrivateRoute permissions={R_PEDAGO}><SuiviProgressions /></PrivateRoute>} />
-            <Route path="/ConformiteEdt"     element={<PrivateRoute permissions={R_PEDAGO}><ConformiteEdt /></PrivateRoute>} />
-            <Route path="/ChargeEnseignants" element={<PrivateRoute permissions={R_PEDAGO}><ChargeEnseignants /></PrivateRoute>} />
+            {/* Pédagogie — pilotage */}
+            <Route path="/Bulletins"        element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE}><Bulletin /></PrivateRoute>} />
+            <Route path="/SuiviProgressions" element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE}><SuiviProgressions /></PrivateRoute>} />
+            <Route path="/ConformiteEdt"     element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE}><ConformiteEdt /></PrivateRoute>} />
+            <Route path="/ChargeEnseignants" element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE}><ChargeEnseignants /></PrivateRoute>} />
 
-            {/* Calendrier scolaire */}
-            <Route path="/Calendrier" element={<PrivateRoute permissions={R_PEDAGO}><CalendrierScolaire /></PrivateRoute>} />
+            {/* Finances — gestion */}
+            <Route path="/Scolarites"           element={<PrivateRoute permissions={R_FINANCES_GESTION}><ListeScolarites /></PrivateRoute>} />
+            <Route path="/NouvelleScolarite"    element={<PrivateRoute permissions={R_FINANCES_GESTION}><NouvelleScolarite /></PrivateRoute>} />
+            <Route path="/DetailsScolarite/:id" element={<PrivateRoute permissions={R_FINANCES_GESTION}><DetailsScolarite /></PrivateRoute>} />
+            <Route path="/Impayes"              element={<PrivateRoute permissions={R_FINANCES_GESTION}><TableauImpayes /></PrivateRoute>} />
 
-            {/* Finances */}
-            <Route path="/Scolarites"            element={<PrivateRoute permissions={R_FINANCES}><ListeScolarites /></PrivateRoute>} />
-            <Route path="/NouvelleScolarite"     element={<PrivateRoute permissions={R_FINANCES}><NouvelleScolarite /></PrivateRoute>} />
-            <Route path="/DetailsScolarite/:id"  element={<PrivateRoute permissions={R_FINANCES}><DetailsScolarite /></PrivateRoute>} />
-
-            <Route path="/Paiements"          element={<PrivateRoute permissions={R_FINANCES}><ListePaiements /></PrivateRoute>} />
-            <Route path="/NouveauPaiement"    element={<PrivateRoute permissions={R_FINANCES}><NouveauPaiement /></PrivateRoute>} />
-            <Route path="/DetailsPaiement/:id"element={<PrivateRoute permissions={R_FINANCES}><DetailsPaiement /></PrivateRoute>} />
-            <Route path="/RecapPaiements"     element={<PrivateRoute permissions={R_FINANCES}><RecapPaiements /></PrivateRoute>} />
-            <Route path="/PaiementsEleve/:id" element={<PrivateRoute permissions={R_FINANCES}><PaiementsEleve /></PrivateRoute>} />
-            <Route path="/PaiementRetour"     element={<PrivateRoute permissions={R_FINANCES}><PaiementRetour /></PrivateRoute>} />
-            <Route path="/Impayes"            element={<PrivateRoute permissions={R_FINANCES}><TableauImpayes /></PrivateRoute>} />
-            <Route path="/Echeancier"         element={<PrivateRoute permissions={R_FINANCES}><Echeancier /></PrivateRoute>} />
+            {/* Finances — caisse */}
+            <Route path="/Paiements"           element={<PrivateRoute permissions={R_FINANCES_CAISSE}><ListePaiements /></PrivateRoute>} />
+            <Route path="/NouveauPaiement"     element={<PrivateRoute permissions={R_FINANCES_CAISSE}><NouveauPaiement /></PrivateRoute>} />
+            <Route path="/DetailsPaiement/:id" element={<PrivateRoute permissions={R_FINANCES_CAISSE}><DetailsPaiement /></PrivateRoute>} />
+            <Route path="/RecapPaiements"      element={<PrivateRoute permissions={R_FINANCES_CAISSE}><RecapPaiements /></PrivateRoute>} />
+            <Route path="/PaiementsEleve/:id"  element={<PrivateRoute permissions={R_FINANCES_CAISSE}><PaiementsEleve /></PrivateRoute>} />
+            <Route path="/PaiementRetour"      element={<PrivateRoute permissions={R_FINANCES_CAISSE}><PaiementRetour /></PrivateRoute>} />
+            <Route path="/Echeancier"          element={<PrivateRoute permissions={R_FINANCES_CAISSE}><Echeancier /></PrivateRoute>} />
 
             {/* Communication */}
             <Route path="/Informations"            element={<PrivateRoute permissions={R_COMM}><ListeInformations /></PrivateRoute>} />

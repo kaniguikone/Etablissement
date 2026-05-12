@@ -176,9 +176,9 @@ class DemoSeeder extends Seeder
         $roleId = DB::table('roles')->insertGetId([
             'nom'         => 'super_admin',
             'label'       => 'Super Administrateur',
-            'permissions' => json_encode(['eleves', 'enseignants', 'parents', 'pedagogie',
-                                         'finances', 'inscriptions', 'communication',
-                                         'parametrage', 'utilisateurs']),
+            'permissions' => json_encode(['eleves', 'enseignants', 'parents', 'pedagogie_saisie',
+                                         'pedagogie_pilotage', 'finances_caisse', 'finances_gestion',
+                                         'inscriptions', 'communication', 'parametrage', 'utilisateurs']),
             'super'       => 1,
             'actif'       => 1,
             'created_at'  => now(),

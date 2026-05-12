@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/etablissement_provider.dart';
 import 'providers/notification_provider.dart';
-import 'screens/auth/role_selection_screen.dart';
+import 'screens/auth/login_screen.dart';
 import 'screens/home/children_list_screen.dart';
 import 'screens/enseignant/enseignant_home_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
@@ -149,7 +149,7 @@ class _AuthGateState extends State<_AuthGate> {
       AuthStatus.unknown => const Scaffold(
           body: Center(child: CircularProgressIndicator()),
         ),
-      AuthStatus.unauthenticated => const RoleSelectionScreen(),
+      AuthStatus.unauthenticated => const LoginScreen(),
       AuthStatus.authenticated   => auth.isEnseignant
           ? const EnseignantHomeScreen()
           : const ChildrenListScreen(),

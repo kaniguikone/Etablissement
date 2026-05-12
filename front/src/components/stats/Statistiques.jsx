@@ -883,8 +883,8 @@ const Statistiques = () => {
     const { peutAcceder } = useAuth();
     const { toast } = useToast();
 
-    const voitPedagogie = peutAcceder('pedagogie');
-    const voitFinances  = peutAcceder('finances');
+    const voitPedagogie = peutAcceder(['pedagogie_saisie', 'pedagogie_pilotage']);
+    const voitFinances  = peutAcceder(['finances_caisse', 'finances_gestion']);
 
     const onglets = [
         voitPedagogie && { id: 'assiduite',   label: 'Assiduité',    icone: 'fas fa-clipboard-check'     },

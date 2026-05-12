@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('matiere_id')->constrained('matieres')->onDelete('cascade');
             $table->foreignId('niveau_id')->nullable()->constrained('niveaux')->onDelete('cascade');
+            $table->foreignId('serie_id')->nullable()->constrained('series')->onDelete('cascade');
             $table->string('titre');
             $table->unsignedSmallInteger('ordre')->default(1);
             $table->text('note_direction')->nullable();

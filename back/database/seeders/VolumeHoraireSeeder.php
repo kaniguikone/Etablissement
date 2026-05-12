@@ -17,23 +17,23 @@ use Illuminate\Support\Facades\DB;
 class VolumeHoraireSeeder extends Seeder
 {
     private const VOLUMES = [
-        '6ième' => [
+        '6e' => [
             'MATH' => 5.0, 'FR'   => 6.0, 'ANG'  => 3.0,
             'SVT'  => 2.0, 'HG'   => 2.0, 'SPC'  => 2.0,
             'EPS'  => 2.0, 'MUSQ' => 1.0, 'AP'   => 1.0,
         ],
-        '5ième' => [
+        '5e' => [
             'MATH' => 5.0, 'FR'   => 5.0, 'ANG'  => 3.0,
             'SVT'  => 2.0, 'HG'   => 2.0, 'SPC'  => 2.0,
             'EPS'  => 2.0, 'MUSQ' => 1.0, 'AP'   => 1.0,
         ],
-        '4ième' => [
+        '4e' => [
             'MATH' => 5.0, 'FR'   => 5.0, 'ANG'  => 3.0,
             'SVT'  => 2.0, 'HG'   => 2.0, 'SPC'  => 3.0,
             'EPS'  => 2.0, 'MUSQ' => 1.0, 'AP'   => 1.0,
             'ALL'  => 2.0, 'ESP'  => 2.0,
         ],
-        '3ième' => [
+        '3e' => [
             'MATH' => 5.0, 'FR'   => 5.0, 'ANG'  => 3.0,
             'SVT'  => 2.0, 'HG'   => 3.0, 'SPC'  => 3.0,
             'EPS'  => 2.0, 'MUSQ' => 1.0, 'AP'   => 1.0,

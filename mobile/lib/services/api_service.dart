@@ -65,6 +65,16 @@ class ApiService {
     _dio.options.baseUrl = ApiConfig.baseUrl;
   }
 
+  // ─── Auth mobile unifiée ─────────────────────────────────────────────────────
+
+  Future<Map<String, dynamic>> loginUnifie(String numero, String password) async {
+    final response = await _dio.post(ApiConfig.mobileLogin, data: {
+      'numero': numero,
+      'password': password,
+    });
+    return response.data as Map<String, dynamic>;
+  }
+
   // ─── Auth Parent ────────────────────────────────────────────────────────────
 
   Future<Map<String, dynamic>> login(String numero, String password) async {
@@ -140,8 +150,9 @@ class ApiService {
       ApiConfig.enseignantPeriodesParDate,
       queryParameters: {'date': date},
     );
-    if (response.data == null) return null;
-    return Periode.fromJson(response.data as Map<String, dynamic>);
+    final data = response.data;
+    if (data == null || data is! Map || data.isEmpty) return null;
+    return Periode.fromJson(Map<String, dynamic>.from(data));
   }
 
   Future<List<dynamic>> getFeuillePresence({

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/etablissement_provider.dart';
 import '../../services/api_service.dart';
 import '../../services/storage_service.dart';
@@ -10,8 +11,31 @@ import 'enseignant_login_screen.dart';
 // Couleur neutre pour l'en-tête (pas liée à un rôle, écran de choix)
 const _headerColor = Color(0xFF1A237E);
 
-class RoleSelectionScreen extends StatelessWidget {
+class RoleSelectionScreen extends StatefulWidget {
   const RoleSelectionScreen({super.key});
+
+  @override
+  State<RoleSelectionScreen> createState() => _RoleSelectionScreenState();
+}
+
+class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final auth = context.read<AuthProvider>();
+      if (auth.sessionExpiree) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Votre session a expiré. Veuillez vous reconnecter.'),
+            backgroundColor: Color(0xFFB71C1C),
+            duration: Duration(seconds: 4),
+          ),
+        );
+        auth.acquitterSessionExpiree();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

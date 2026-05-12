@@ -17,6 +17,7 @@ use Database\Seeders\NotificationSeeder;
 use Database\Seeders\PaiementSeeder;
 use Database\Seeders\ParentAuthSeeder;
 use Database\Seeders\ProgressionSeeder;
+use Database\Seeders\ConseilClasseSeeder;
 use Database\Seeders\SanctionSeeder;
 use Database\Seeders\VolumeHoraireSeeder;
 use App\Models\Role;
@@ -33,11 +34,10 @@ class CreerDemo extends Command
         {--nom=                   : Nom affiché du tenant (défaut: dérivé de l\'id)}
         {--domaine=               : Domaine (défaut: {id}.localhost)}
         {--template=college       : Template (lycee|lycee_complet|college|primaire)}
-        {--annee=2024-2025        : Année scolaire}
+        {--annee=2025-2026        : Année scolaire}
         {--periodes=trimestre     : trimestre ou semestre}
         {--admin-email=           : Email admin (défaut: admin@{id}.localhost)}
-        {--admin-password=demo123 : Mot de passe admin}
-        {--force                  : Supprime et recrée si le tenant existe déjà}';
+        {--admin-password=demo123 : Mot de passe admin}';
 
     protected $description = 'Crée un établissement de démonstration entièrement prépeuplé';
 
@@ -51,9 +51,9 @@ class CreerDemo extends Command
         $adminEmail    = $this->option('admin-email') ?: "admin@{$id}.localhost";
         $adminPassword = $this->option('admin-password');
 
-        // ── Nettoyage si --force ─────────────────────────────────────────────
-        if ($this->option('force') && $tenant = Tenant::find($id)) {
-            $this->warn("Suppression du tenant existant « {$id} »…");
+        // ── Nettoyage si le tenant existe déjà ──────────────────────────────
+        if ($tenant = Tenant::find($id)) {
+            $this->warn("Tenant « {$id} » existant — suppression et recréation…");
             tenancy()->initialize($tenant);
             DB::connection('tenant')->getSchemaBuilder()->dropAllTables();
             tenancy()->end();
@@ -61,16 +61,16 @@ class CreerDemo extends Command
             $tenant->delete();
         }
 
-        if (Tenant::find($id)) {
-            $this->error("Un tenant « {$id} » existe déjà. Utilisez --force pour le recréer.");
-            return 1;
-        }
-
         // ── Création du tenant ───────────────────────────────────────────────
         $this->info("Création du tenant « {$id} »…");
+        do {
+            $code = strtoupper(Str::random(6));
+        } while (Tenant::where('code', $code)->exists());
+
         $tenant = Tenant::create([
-            'id'  => $id,
-            'nom' => $this->option('nom') ?: ucfirst(str_replace('-', ' ', $id)),
+            'id'   => $id,
+            'nom'  => $this->option('nom') ?: ucfirst(str_replace('-', ' ', $id)),
+            'code' => $code,
         ]);
         $tenant->domains()->create(['domain' => $domaine]);
 
@@ -157,6 +157,7 @@ class CreerDemo extends Command
             VolumeHoraireSeeder::class,
             SanctionSeeder::class,
             NotificationSeeder::class,
+            ConseilClasseSeeder::class,
         ] as $seederClass) {
             $this->info("  → {$seederClass}…");
             app($seederClass)->setCommand($this)->run();
@@ -173,6 +174,7 @@ class CreerDemo extends Command
             ['Champ', 'Valeur'],
             [
                 ['URL',            "http://{$domaine}"],
+                ['Code (6 car.)',  $code],
                 ['Email admin',    $adminEmail],
                 ['Mot de passe',   $adminPassword],
                 ['Template',       $template],

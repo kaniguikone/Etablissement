@@ -38,6 +38,7 @@ return new class extends Migration
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
 
+            $table->index('date_assiduite');
             $table->unique(['eleve_id', 'matiere_id', 'periode_id', 'date_assiduite']);
         });
     }
