@@ -129,6 +129,121 @@ const ExportBulletinsClasse = ({ niveaux, periodes }) => {
     );
 };
 
+/* ── Section tableau des moyennes et rangs par classe / niveau ─────────────── */
+const ExportTableauClasse = ({ niveaux, periodes }) => {
+    const { toast } = useToast();
+    const [mode,     setMode]     = useState('classe'); // 'classe' | 'niveau'
+    const [niveauId, setNiveauId] = useState('');
+    const [classeId, setClasseId] = useState('');
+    const [annee,    setAnnee]    = useState('');
+    const [classes,  setClasses]  = useState([]);
+    const [enCours,  setEnCours]  = useState(false);
+
+    const annees = [...new Set(periodes.map(p => p.annee).filter(Boolean))].sort().reverse();
+
+    const handleNiveau = (e) => {
+        const val = e.target.value;
+        setNiveauId(val);
+        setClasseId('');
+        setClasses([]);
+        if (val) {
+            api.get(`/classesNiveaux/${val}`)
+                .then(r => setClasses(r.data))
+                .catch(() => toast.error('Impossible de charger les classes.'));
+        }
+    };
+
+    const handleMode = (e) => {
+        setMode(e.target.value);
+        setClasseId('');
+    };
+
+    const telecharger = async () => {
+        if (!annee || !niveauId) return;
+        if (mode === 'classe' && !classeId) return;
+        setEnCours(true);
+        try {
+            const url = mode === 'classe'
+                ? `/tableau-classe/${classeId}/${encodeURIComponent(annee)}`
+                : `/tableau-niveau/${niveauId}/${encodeURIComponent(annee)}`;
+            const r = await api.get(url, { responseType: 'blob', timeout: 180000 });
+            const label = mode === 'classe'
+                ? (classes.find(c => String(c.id) === String(classeId))?.nom_classe ?? classeId)
+                : (niveaux.find(n => String(n.id) === String(niveauId))?.nom_niveau ?? niveauId);
+            const nom = `tableau_${label.replace(/\s+/g, '_')}_${annee.replace('/', '-')}.pdf`;
+            const blobUrl = URL.createObjectURL(new Blob([r.data], { type: 'application/pdf' }));
+            const lien = document.createElement('a');
+            lien.href = blobUrl; lien.download = nom; lien.click();
+            URL.revokeObjectURL(blobUrl);
+        } catch (err) {
+            toast.error(await lireErreurBlob(err));
+        } finally {
+            setEnCours(false);
+        }
+    };
+
+    const peutTelecharger = !enCours && !!annee && !!niveauId && (mode === 'niveau' || !!classeId);
+
+    return (
+        <div className="card border-0 shadow-sm mt-4" style={{ borderRadius: 12 }}>
+            <div className="card-header bg-white border-0 px-4 pt-3 pb-2">
+                <span className="fw-bold">
+                    <i className="fas fa-table me-2 text-primary" />
+                    Tableau des moyennes et rangs — PDF
+                </span>
+                <div className="text-muted small mt-1">
+                    Génère le tableau Matricule / Nom / Moyenne+Rang par trimestre et annuel, par classe ou pour tout un niveau.
+                </div>
+            </div>
+            <div className="card-body">
+                <div className="row g-3 align-items-end">
+                    <div className="col-md-2">
+                        <label className="form-label small fw-semibold">Génération</label>
+                        <select className="form-select form-select-sm" value={mode} onChange={handleMode}>
+                            <option value="classe">Par classe</option>
+                            <option value="niveau">Par lot (niveau entier)</option>
+                        </select>
+                    </div>
+                    <div className="col-md-3">
+                        <label className="form-label small fw-semibold">Niveau</label>
+                        <select className="form-select form-select-sm" value={niveauId} onChange={handleNiveau}>
+                            <option value="">— Sélectionner —</option>
+                            {niveaux.map(n => <option key={n.id} value={n.id}>{n.nom_niveau}</option>)}
+                        </select>
+                    </div>
+                    {mode === 'classe' && (
+                        <div className="col-md-3">
+                            <label className="form-label small fw-semibold">Classe</label>
+                            <select className="form-select form-select-sm" value={classeId} onChange={e => setClasseId(e.target.value)} disabled={!niveauId}>
+                                <option value="">— Sélectionner —</option>
+                                {classes.map(c => <option key={c.id} value={c.id}>{c.nom_classe}</option>)}
+                            </select>
+                        </div>
+                    )}
+                    <div className="col-md-2">
+                        <label className="form-label small fw-semibold">Année scolaire</label>
+                        <select className="form-select form-select-sm" value={annee} onChange={e => setAnnee(e.target.value)}>
+                            <option value="">— Sélectionner —</option>
+                            {annees.map(a => <option key={a} value={a}>{a}</option>)}
+                        </select>
+                    </div>
+                    <div className="col-md-2">
+                        <button
+                            className="btn btn-primary btn-sm d-flex align-items-center gap-2"
+                            onClick={telecharger}
+                            disabled={!peutTelecharger}>
+                            {enCours
+                                ? <span className="spinner-border spinner-border-sm" />
+                                : <i className="fas fa-download" />}
+                            Télécharger
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 /* ── Section export Excel par niveau ───────────────────────────────────────── */
 const ExportMoyennes = ({ niveaux, periodes }) => {
     const { toast } = useToast();
@@ -454,6 +569,7 @@ const Bulletin = () => {
                 )}
 
                 <hr className="my-4" />
+                <ExportTableauClasse niveaux={niveaux} periodes={periodes} />
                 <ExportBulletinsClasse niveaux={niveaux} periodes={periodes} />
                 <ExportMoyennes niveaux={niveaux} periodes={periodes} />
             </div>

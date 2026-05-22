@@ -57,6 +57,7 @@ use App\Http\Controllers\API\SeederController;
 use App\Http\Controllers\API\AppreciationController;
 use App\Http\Controllers\API\MotDePasseController;
 use App\Http\Controllers\API\ReleveAnnuelController;
+use App\Http\Controllers\API\TableauClasseController;
 use App\Http\Controllers\API\UnifiedAuthController;
 
 /*
@@ -376,8 +377,10 @@ Route::middleware([
             Route::get('/bulletin/{eleveId}/{periodeId}/pdf',           [BulletinPdfController::class, 'telecharger']);
             Route::post('/bulletin/{eleveId}/{periodeId}/notifier',     [NoteController::class,        'notifierBulletin']);
             Route::get('/bulletins/classe/{classeId}/{periodeId}/pdf',  [BulletinPdfController::class, 'telechargerClasse']);
-            Route::get('/releve-annuel/{eleveId}/{annee}',              [ReleveAnnuelController::class, 'telecharger']);
-            Route::get('/notes/{periodeId}/export',                     [NoteController::class,        'exportCsv']);
+            Route::get('/releve-annuel/{eleveId}/{annee}',              [ReleveAnnuelController::class,   'telecharger']);
+            Route::get('/tableau-classe/{classeId}/{annee}',           [TableauClasseController::class, 'telechargerClasse']);
+            Route::get('/tableau-niveau/{niveauId}/{annee}',           [TableauClasseController::class, 'telechargerNiveau']);
+            Route::get('/notes/{periodeId}/export',                     [NoteController::class,          'exportCsv']);
             Route::get('/export/moyennes/{niveauId}/{periodeId}',       [ExportMoyennesController::class, 'export']);
 
             // Appréciations enseignants + décisions conseil de classe
