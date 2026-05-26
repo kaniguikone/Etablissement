@@ -59,6 +59,11 @@ use App\Http\Controllers\API\MotDePasseController;
 use App\Http\Controllers\API\ReleveAnnuelController;
 use App\Http\Controllers\API\TableauClasseController;
 use App\Http\Controllers\API\UnifiedAuthController;
+use App\Http\Controllers\API\AuditController;
+use App\Http\Controllers\API\RapportMinistereController;
+use App\Http\Controllers\API\FraisAnnexeController;
+use App\Http\Controllers\API\ExportComptableController;
+use App\Http\Controllers\API\HelpArticleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -369,14 +374,24 @@ Route::middleware([
             Route::post('/notesSauvegarder/{id}', [NoteController::class, 'sauvegarder']);
         });
 
+        Route::middleware('permission:parametrage')->group(function () {
+            Route::post('/rapport-ministere', [RapportMinistereController::class, 'telecharger']);
+        });
+
+        Route::middleware('permission:finances_gestion')->group(function () {
+            Route::get('/export-comptable/apercu', [ExportComptableController::class, 'apercu']);
+            Route::get('/export-comptable',        [ExportComptableController::class, 'export']);
+        });
+
         Route::middleware('permission:pedagogie_pilotage')->group(function () {
             Route::get('/volumesHoraires/conformite',        [VolumeHoraireController::class, 'conformite']);
             Route::get('/volumesHoraires/chargeEnseignants', [VolumeHoraireController::class, 'chargeEnseignants']);
 
-            Route::get('/bulletin/{eleveId}/{periodeId}',               [NoteController::class,        'bulletin']);
-            Route::get('/bulletin/{eleveId}/{periodeId}/pdf',           [BulletinPdfController::class, 'telecharger']);
-            Route::post('/bulletin/{eleveId}/{periodeId}/notifier',     [NoteController::class,        'notifierBulletin']);
-            Route::get('/bulletins/classe/{classeId}/{periodeId}/pdf',  [BulletinPdfController::class, 'telechargerClasse']);
+            Route::get('/bulletin/{eleveId}/{periodeId}',                          [NoteController::class,        'bulletin']);
+            Route::get('/bulletin/{eleveId}/{periodeId}/pdf',                      [BulletinPdfController::class, 'telecharger']);
+            Route::post('/bulletin/{eleveId}/{periodeId}/notifier',                [NoteController::class,        'notifierBulletin']);
+            Route::get('/bulletins/classe/{classeId}/{periodeId}/pdf',             [BulletinPdfController::class, 'telechargerClasse']);
+            Route::post('/bulletin/classe/{classeId}/{periodeId}/notifier-tous',   [NoteController::class,        'notifierClasseBulletin']);
             Route::get('/releve-annuel/{eleveId}/{annee}',              [ReleveAnnuelController::class,   'telecharger']);
             Route::get('/tableau-classe/{classeId}/{annee}',           [TableauClasseController::class, 'telechargerClasse']);
             Route::get('/tableau-niveau/{niveauId}/{annee}',           [TableauClasseController::class, 'telechargerNiveau']);
@@ -397,6 +412,19 @@ Route::middleware([
             Route::get('/scolarites/import/template',[ImportScolariteController::class, 'template']);
             Route::post('/scolarites/import',        [ImportScolariteController::class, 'import']);
             Route::get('/impayes',                   [PaiementController::class,  'impayes']);
+            Route::post('/relances-paiements',       [PaiementController::class,  'relancerImpayes']);
+
+            // ── Frais annexes ────────────────────────────────────────────────
+            // Routes spécifiques avant apiResource pour éviter que {id} capte "impayes"
+            Route::get('/frais-annexes/impayes',         [FraisAnnexeController::class, 'impayes']);
+            Route::get('/frais-annexes/eleve/{eleveId}', [FraisAnnexeController::class, 'parEleve']);
+            Route::apiResource('frais-annexes',          FraisAnnexeController::class)->except(['show']);
+        });
+
+        Route::middleware('permission:finances_caisse,finances_gestion')->group(function () {
+            Route::post('/paiements-frais-annexes',           [FraisAnnexeController::class, 'enregistrerPaiement']);
+            Route::delete('/paiements-frais-annexes/{id}',    [FraisAnnexeController::class, 'supprimerPaiement']);
+            Route::get('/paiements-frais-annexes/{id}/recu',  [FraisAnnexeController::class, 'recu']);
         });
 
         Route::middleware('permission:finances_caisse,finances_gestion')->group(function () {
@@ -467,6 +495,18 @@ Route::middleware([
             Route::put('/roles/{role}',           [RoleController::class, 'update']);
             Route::delete('/roles/{role}',        [RoleController::class, 'destroy']);
             Route::get('/roles-permissions',      [RoleController::class, 'permissions']);
+
+            // Journal d'audit — lecture seule
+            Route::get('/audit-logs',             [AuditController::class, 'index']);
+
+            // Documentation in-app — gestion admin
+            Route::get('/help/admin',             [HelpArticleController::class, 'adminIndex']);
+            Route::post('/help',                  [HelpArticleController::class, 'store']);
+            Route::put('/help/{id}',              [HelpArticleController::class, 'update']);
+            Route::delete('/help/{id}',           [HelpArticleController::class, 'destroy']);
         });
+
+        // Documentation in-app — lecture (tous les utilisateurs connectés)
+        Route::get('/help',                       [HelpArticleController::class, 'index']);
     });
 });

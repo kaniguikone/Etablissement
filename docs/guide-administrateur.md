@@ -11,7 +11,9 @@
 8. [Communication](#8-communication)
 9. [Application mobile](#9-application-mobile)
 10. [Tableau de bord & Statistiques](#10-tableau-de-bord--statistiques)
-11. [Questions fréquentes](#11-questions-fréquentes)
+11. [Journal d'audit](#11-journal-daudit)
+12. [Documentation in-app](#12-documentation-in-app)
+13. [Questions fréquentes](#13-questions-fréquentes)
 
 ---
 
@@ -40,10 +42,10 @@ Respectez cet ordre lors de la mise en place initiale :
 | Rôle | Accès |
 |---|---|
 | Super administrateur | Tout |
-| Scolarité | Élèves, inscriptions, classes |
-| Pédagogie | Notes, devoirs, emplois du temps, assiduités |
-| Finances | Paiements, scolarités, reçus |
-| Communication | Informations, messagerie |
+| Directeur / Proviseur | Tout sauf gestion des utilisateurs |
+| Censeur | Élèves, enseignants, parents, pédagogie, communication |
+| Secrétaire | Inscriptions, élèves, enseignants, parents, communication |
+| Comptable | Paiements et configuration financière |
 
 
 
@@ -123,7 +125,7 @@ Les parents peuvent soumettre une demande d'inscription depuis l'application mob
 ### Sanctions et comportement
 *Menu : Élèves → Sanctions*
 
-Enregistrez avertissements, exclusions, etc. Le parent est notifié automatiquement sur son mobile.
+Enregistrez avertissements, exclusions, etc. Le parent est notifié automatiquement sur son mobile et par email.
 
 ### Exporter la liste des élèves
 Bouton **Exporter CSV** en haut de la liste. Le fichier s'ouvre dans Excel.
@@ -159,7 +161,7 @@ Créez les créneaux en sélectionnant : classe, matière, enseignant, salle, jo
 ### Assiduité
 *Menu : Pédagogie → Assiduité*
 
-Renseignez les absences par classe et par séance. Les parents reçoivent une notification automatique à chaque absence enregistrée.
+Renseignez les absences par classe et par séance. Les parents reçoivent une notification automatique (push mobile + email) à chaque absence enregistrée.
 
 ### Saisie des notes
 *Menu : Pédagogie → Devoirs*
@@ -174,7 +176,7 @@ Renseignez les absences par classe et par séance. Les parents reçoivent une no
 
 Sélectionnez un élève et une période → **Voir le bulletin**. Le bulletin PDF peut être :
 - Téléchargé directement
-- **Envoyé au parent** via notification push (bouton « Notifier »)
+- **Envoyé au parent** via notification push + email (bouton « Notifier »)
 
 ### Progression du programme
 Suivez l'avancement de chaque chapitre par matière et par classe.
@@ -193,18 +195,52 @@ Planifiez les événements (conseils de classe, vacances, examens, portes ouvert
 
 Définissez les montants de scolarité par niveau. Vous pouvez configurer jusqu'à 3 échéances (mensuel, trimestriel, annuel).
 
-### Enregistrer un paiement
+### Enregistrer un paiement de scolarité
 *Menu : Finances → Paiements → Nouveau paiement*
 
 Sélectionnez l'élève, le montant et le mode de paiement. Un **reçu PDF** est généré automatiquement.
 
+### Frais annexes
+*Menu : Finances → Frais annexes*
+
+Les frais annexes permettent de facturer des charges complémentaires à la scolarité (fournitures, tenue, examens, transport, restauration…).
+
+**Configuration :**
+1. Créez un frais annexe en précisant : nom, montant, catégorie, niveau concerné (ou tous les niveaux)
+2. Cochez **Obligatoire** si le frais doit apparaître automatiquement dans les impayés
+
+**Suivi des paiements :**
+- *Menu : Finances → Frais annexes → Suivi par élève*
+- Vue individuelle : total dû, total payé, solde restant
+- Enregistrement d'un paiement partiel ou total depuis cette vue
+- Reçu PDF généré automatiquement
+
+**Impayés frais annexes :**
+- *Menu : Finances → Frais annexes → Impayés*
+- Liste de tous les élèves ayant un solde non nul sur des frais obligatoires
+
 ### Paiement mobile (CinetPay)
 Les parents peuvent payer depuis l'application mobile via Mobile Money (Orange Money, MTN MoMo, Wave). Le paiement est enregistré automatiquement.
 
-### Tableau des impayés
+### Tableau des impayés scolarité
 *Menu : Finances → Impayés*
 
-Vue synthétique de tous les élèves ayant des montants en retard, avec possibilité d'export CSV.
+Vue synthétique de tous les élèves ayant des montants de scolarité en retard, avec possibilité d'export CSV.
+
+### Export comptable
+*Menu : Finances → Export comptable*
+
+Générez un aperçu ou un export de tous les encaissements pour votre comptable :
+
+| Export | Format | Contenu |
+|---|---|---|
+| **Aperçu** | — | Total scolarité, frais annexes, détail par mode de paiement |
+| **Excel OHADA** | `.xlsx` | 3 feuilles : journal, récapitulatif par mode, écritures comptables |
+| **FEC SAGE** | `.csv` | Format Fichier des Écritures Comptables importable dans SAGE |
+
+Filtres disponibles : période (date début / date fin).
+
+> La relance automatique par email est déclenchée pour les élèves dont les impayés dépassent le seuil configuré.
 
 ---
 
@@ -219,6 +255,15 @@ Publiez une annonce → tous les parents et enseignants reçoivent une **notific
 Communication directe entre :
 - Un enseignant et les parents d'un élève
 - L'administration et les parents
+
+### Notifications email automatiques
+Les parents reçoivent un email automatique dans les situations suivantes :
+- **Publication d'un bulletin** : email avec invitation à consulter le bulletin dans l'app
+- **Absence signalée** : email le jour même avec détails de la séance
+- **Sanction appliquée** : email détaillant le motif et les mesures
+- **Relance impayés** : email de rappel lorsqu'un solde est en retard
+
+La configuration SMTP (serveur, identifiants) est définie dans les paramètres de l'établissement.
 
 ### Rendez-vous (RDV)
 Les enseignants définissent leurs créneaux de disponibilité. Les parents réservent un rendez-vous depuis l'application mobile.
@@ -280,9 +325,49 @@ Disponibles une fois l'année scolaire bien avancée :
 
 Tous les rapports sont **exportables en CSV**.
 
+### Rapport statistique Ministère
+*Menu : Statistiques → Rapport Ministère*
+
+Génère un document PDF au format réglementaire (A4 paysage) incluant :
+- Effectifs par genre et par niveau
+- Taux de passage et de redoublement
+- Résultats aux examens nationaux
+- Statistiques d'assiduité
+- Bilan financier de l'année
+
+Ce document peut être remis directement à l'inspection académique.
+
 ---
 
-## 11. Questions fréquentes
+## 11. Journal d'audit
+
+*Menu : Administration → Journal d'audit*
+
+L'application enregistre automatiquement toutes les opérations sensibles :
+- Modifications de notes
+- Enregistrements et suppressions de paiements
+- Applications de sanctions
+- Modifications de comptes utilisateurs
+
+Chaque entrée indique : **qui** a fait **quoi**, **quand**, et la valeur **avant/après** la modification.
+
+> Ce journal est en **lecture seule** — il ne peut pas être modifié ou supprimé, garantissant son intégrité pour tout audit.
+
+---
+
+## 12. Documentation in-app
+
+Un panneau d'aide est accessible depuis n'importe quelle page en cliquant sur le bouton **?** en bas à droite de l'écran.
+
+- **Aide contextuelle** : les articles affichés sont filtrés automatiquement selon le module en cours
+- **Recherche** : tapez un mot-clé pour trouver un article dans toute la documentation
+- **Gestion admin** (*Menu : Administration → Documentation*) : créez, modifiez ou désactivez des articles
+
+L'application est livrée avec **26 articles pré-rédigés** couvrant tous les modules.
+
+---
+
+## 13. Questions fréquentes
 
 **Q : Un parent a oublié son mot de passe. Que faire ?**  
 R : Dans la fiche du parent (*Menu : Parents → [nom du parent]*), cliquez **Réinitialiser le mot de passe**. Un nouveau mot de passe provisoire est généré.
@@ -301,6 +386,15 @@ R : Vérifiez que l'utilisateur a bien téléchargé **l'application de votre é
 
 **Q : Comment exporter toutes les notes pour les transmettre à l'inspection ?**  
 R : *Menu : Pédagogie → Notes → Exporter CSV* — sélectionnez la période souhaitée.
+
+**Q : Un frais annexe apparaît dans les impayés alors que l'élève est exempté. Comment corriger ?**  
+R : Les frais annexes marqués **Obligatoire** apparaissent automatiquement pour tous les élèves du niveau concerné. Si un élève est exempté, décochez l'option obligatoire pour ce frais ou enregistrez un paiement à 0 pour solder son compte.
+
+**Q : Le comptable demande un fichier pour SAGE. Quoi lui donner ?**  
+R : *Menu : Finances → Export comptable → FEC CSV*. Ce fichier au format FEC (Fichier des Écritures Comptables) s'importe directement dans SAGE et la plupart des logiciels de comptabilité.
+
+**Q : Les parents ne reçoivent pas les emails. Que vérifier ?**  
+R : La configuration SMTP est définie par votre prestataire. Vérifiez avec lui que le service d'envoi est actif et que les adresses email des parents sont bien renseignées dans leurs fiches.
 
 ---
 

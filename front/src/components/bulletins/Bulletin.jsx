@@ -40,11 +40,12 @@ const mention = (moy) => {
 /* ── Section téléchargement bulletins d'une classe ─────────────────────────── */
 const ExportBulletinsClasse = ({ niveaux, periodes }) => {
     const { toast } = useToast();
-    const [niveauId,  setNiveauId]  = useState('');
-    const [classeId,  setClasseId]  = useState('');
-    const [periodeId, setPeriodeId] = useState('');
-    const [classes,   setClasses]   = useState([]);
-    const [enCours,   setEnCours]   = useState(false);
+    const [niveauId,    setNiveauId]    = useState('');
+    const [classeId,    setClasseId]    = useState('');
+    const [periodeId,   setPeriodeId]   = useState('');
+    const [classes,     setClasses]     = useState([]);
+    const [enCours,     setEnCours]     = useState(false);
+    const [notifCours,  setNotifCours]  = useState(false);
 
     const handleNiveau = (e) => {
         const val = e.target.value;
@@ -55,6 +56,20 @@ const ExportBulletinsClasse = ({ niveaux, periodes }) => {
             api.get(`/classesNiveaux/${val}`)
                 .then(r => setClasses(r.data))
                 .catch(() => toast.error('Impossible de charger les classes.'));
+        }
+    };
+
+    const notifierTous = async () => {
+        if (!classeId || !periodeId) return;
+        setNotifCours(true);
+        try {
+            const r = await api.post(`/bulletin/classe/${classeId}/${periodeId}/notifier-tous`);
+            const { envoyes, ignores } = r.data;
+            toast.success(`${envoyes} notification(s) envoyée(s).${ignores > 0 ? ` ${ignores} sans email.` : ''}`);
+        } catch {
+            toast.error('Erreur lors de l\'envoi des notifications.');
+        } finally {
+            setNotifCours(false);
         }
     };
 
@@ -112,7 +127,7 @@ const ExportBulletinsClasse = ({ niveaux, periodes }) => {
                             {periodes.map(p => <option key={p.id} value={p.id}>{p.libelle_periode} — {p.annee}</option>)}
                         </select>
                     </div>
-                    <div className="col-md-3">
+                    <div className="col-md-3 d-flex gap-2">
                         <button
                             className="btn btn-danger btn-sm d-flex align-items-center gap-2"
                             onClick={telecharger}
@@ -120,7 +135,17 @@ const ExportBulletinsClasse = ({ niveaux, periodes }) => {
                             {enCours
                                 ? <span className="spinner-border spinner-border-sm" />
                                 : <i className="fas fa-file-pdf" />}
-                            Télécharger les bulletins
+                            Télécharger
+                        </button>
+                        <button
+                            className="btn btn-outline-primary btn-sm d-flex align-items-center gap-2"
+                            onClick={notifierTous}
+                            disabled={!classeId || !periodeId || notifCours}
+                            title="Envoyer une notification email + push à tous les parents de la classe">
+                            {notifCours
+                                ? <span className="spinner-border spinner-border-sm" />
+                                : <i className="fas fa-bell" />}
+                            Notifier les parents
                         </button>
                     </div>
                 </div>

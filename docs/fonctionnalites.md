@@ -153,13 +153,28 @@ L'application propose quatre portails distincts selon le profil :
 - Paramétrage des montants de scolarité par niveau
 - Import en masse via modèles Excel
 
-### Paiements
+### Paiements de scolarité
 - Enregistrement des paiements par élève
 - **Génération de reçus PDF** pour chaque paiement
 - Tableau de bord des **impayés** (élèves n'ayant pas réglé)
 - Échéancier de paiement
 - Récapitulatif financier par niveau
 - **Export CSV** des listes de paiements
+
+### Frais annexes
+- Configuration de frais complémentaires par niveau et par catégorie (fournitures, transport, tenue, examen, restauration, autre)
+- Frais obligatoires ou optionnels, déclenchés automatiquement pour les élèves concernés
+- Suivi individuel des paiements : total dû, total payé, solde
+- Tableau des **impayés frais annexes** (élèves avec solde non nul)
+- **Génération de reçus PDF** pour chaque paiement de frais annexe
+- Modes de paiement multiples (espèces, chèque, virement, Mobile Money)
+
+### Export comptable OHADA
+- **Aperçu financier JSON** : total scolarités, total frais annexes, détail par mode de paiement
+- Filtres par période (date_debut / date_fin)
+- **Export Excel** (3 feuilles) : journal des encaissements, récapitulatif par mode, écritures comptables format OHADA (plan comptable 706/521/571/512)
+- **Export FEC CSV** compatible SAGE pour import direct en comptabilité
+- Tous les exports respectent la nomenclature comptable UEMOA
 
 ### Paiement en ligne
 - Intégration **CinetPay** pour le paiement depuis le portail parent
@@ -183,7 +198,7 @@ L'application propose quatre portails distincts selon le profil :
 - Publication d'informations par l'administration
 - Visibles dans tous les portails
 
-### Notifications
+### Notifications in-app
 - Système de notifications in-app (toutes les interfaces)
 - **Notifications push mobiles** via Firebase Cloud Messaging (FCM)
 - Déclenchements automatiques :
@@ -193,6 +208,15 @@ L'application propose quatre portails distincts selon le profil :
   - Confirmation d'un rendez-vous
   - Affectation d'un remplacement
   - Réception d'un message
+
+### Notifications email
+- Envoi automatique d'emails via SMTP configurable par établissement
+- File d'attente (Laravel Queue) pour ne pas bloquer les requêtes
+- **4 déclencheurs** :
+  - Publication d'un bulletin scolaire
+  - Signalement d'une absence
+  - Application d'une sanction
+  - Relance pour impayés de scolarité
 
 ### Rendez-vous parents-professeurs
 - Les enseignants définissent leurs créneaux de disponibilité
@@ -211,10 +235,32 @@ L'application propose quatre portails distincts selon le profil :
 - **Classement des élèves** par période et par classe
 - **Activité des enseignants** : heures enseignées, devoirs créés
 - **Export CSV des moyennes** par niveau et par période
+- **Rapport statistique annuel Ministère PDF** : document A4 paysage généré automatiquement, incluant effectifs par genre/niveau, taux de passage, résultats aux examens, statistiques d'assiduité, bilan financier — format conforme aux exigences du Ministère de l'Éducation
 
 ---
 
-## 10. Imports / Exports récapitulatif
+## 10. Journal d'audit et traçabilité
+
+- Toutes les opérations sensibles sont enregistrées automatiquement (notes, paiements, sanctions, modifications de compte)
+- Chaque entrée contient : utilisateur, action, entité modifiée, valeur avant/après, horodatage
+- Interface d'administration en **lecture seule** (non modifiable)
+- Filtres par utilisateur, par type d'action et par date
+- Permet l'investigation en cas de contestation ou d'erreur
+
+---
+
+## 11. Documentation in-app
+
+- Panneau d'aide contextuel accessible depuis chaque module via le bouton **?**
+- Articles classés par **module** (élèves, finances, bulletins, etc.) et **catégorie** (guide, astuce, FAQ, vidéo)
+- **Recherche plein texte** dans les titres et contenus des articles
+- Tri par ordre personnalisable
+- Gestion admin complète (CRUD articles, activation/désactivation)
+- **26 articles pré-rédigés** couvrant tous les modules livrés avec l'application
+
+---
+
+## 12. Imports / Exports récapitulatif
 
 | Données | Import | Export |
 |---|---|---|
@@ -224,14 +270,18 @@ L'application propose quatre portails distincts selon le profil :
 | Scolarités | Excel | — |
 | Notes | Excel | CSV |
 | Moyennes | — | CSV |
-| Paiements | — | CSV |
+| Paiements scolarité | — | CSV |
+| Paiements frais annexes | — | CSV |
 | Bulletins | — | PDF (individuel ou classe) |
 | Attestations | — | PDF |
 | Reçus de paiement | — | PDF |
+| Export comptable OHADA | — | Excel (3 feuilles) |
+| Export FEC SAGE | — | CSV |
+| Rapport Ministère | — | PDF |
 
 ---
 
-## 11. Architecture multi-tenant et administration centrale
+## 13. Architecture multi-tenant et administration centrale
 
 ### Gestion multi-établissements (groupe scolaire)
 - Dashboard consolidé : effectifs, finances et activité de chaque école
@@ -243,9 +293,15 @@ L'application propose quatre portails distincts selon le profil :
 - Activation / désactivation d'un établissement
 - Gestion des versions de l'application mobile (versionning, URL de téléchargement, mise à jour forcée)
 
+### Module SaaS billing
+- Gestion des **abonnements** par établissement (plans demo, basic, pro, premium)
+- **Génération automatique de factures PDF** à chaque renouvellement
+- Dashboard super-admin : revenus par plan, statut des abonnements, historique des paiements
+- Base de données centrale séparée des données pédagogiques des tenants
+
 ---
 
-## 12. Sécurité et contrôle d'accès
+## 14. Sécurité et contrôle d'accès
 
 - Authentification par token via **Laravel Sanctum**
 - Portails distincts avec tokens séparés (admin web, enseignant mobile, parent mobile)
@@ -253,15 +309,18 @@ L'application propose quatre portails distincts selon le profil :
 
 | Permission | Périmètre |
 |---|---|
-| `pedagogie` | Notes, devoirs, assiduités, emploi du temps, programme |
+| `parametrage` | Niveaux, classes, matières, périodes, types de devoirs |
+| `inscriptions` | Demandes et validation des inscriptions |
 | `eleves` | Gestion des élèves et attestations |
 | `enseignants` | Gestion des enseignants et affectations |
 | `parents` | Gestion des parents |
-| `finances` | Paiements, scolarités, statistiques financières |
-| `inscriptions` | Demandes et validation des inscriptions |
-| `communication` | Messages, informations, rendez-vous |
-| `parametrage` | Configuration de l'établissement, niveaux, classes, matières |
+| `pedagogie_saisie` | Saisie des assiduités, devoirs, emploi du temps, remplacements |
+| `pedagogie_pilotage` | Bulletins, conseil de classe, suivi de conformité du programme |
+| `finances_caisse` | Enregistrement des paiements (scolarité et frais annexes) |
+| `finances_gestion` | Configuration des scolarités, impayés, échéancier, export comptable |
+| `communication` | Informations, messagerie, rendez-vous |
 | `utilisateurs` | Gestion des comptes utilisateurs et des rôles |
 
 - Masquage automatique des menus et routes selon les permissions de l'utilisateur connecté
 - Isolation complète des données entre établissements (multi-tenant)
+- **Journal d'audit** : toutes les actions sensibles sont tracées et non modifiables

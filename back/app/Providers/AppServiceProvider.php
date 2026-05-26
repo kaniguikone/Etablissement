@@ -24,5 +24,11 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
+
+        // En tests (SQLite in-memory), on inclut les migrations tenant dans la
+        // même base pour que les modèles tenant soient accessibles.
+        if ($this->app->runningUnitTests()) {
+            $this->loadMigrationsFrom(database_path('migrations/tenant'));
+        }
     }
 }

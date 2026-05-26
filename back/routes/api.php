@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\SuperAdmin\SuperAdminAuthController;
 use App\Http\Controllers\API\SuperAdmin\TenantController;
+use App\Http\Controllers\API\SuperAdmin\AbonnementSaasController;
 use App\Http\Controllers\API\Group\GroupAuthController;
 use App\Http\Controllers\API\Group\GroupDashboardController;
 use App\Http\Controllers\API\Group\GroupTenantController;
@@ -64,4 +65,12 @@ Route::middleware('auth:sanctum')->prefix('superadmin')->group(function () {
     Route::post('/tenants/{id}/toggle-actif',   [TenantController::class, 'toggleActif']);
     Route::post('/tenants/{id}/apk',            [TenantController::class, 'uploadApk']);
     Route::delete('/tenants/{id}/apk',          [TenantController::class, 'deleteApk']);
+
+    // ── Billing / Abonnements SaaS ────────────────────────────────────────
+    Route::get('/billing',                           [AbonnementSaasController::class, 'index']);
+    Route::get('/billing/plans',                     [AbonnementSaasController::class, 'plans']);
+    Route::post('/billing/abonnements',              [AbonnementSaasController::class, 'store']);
+    Route::get('/billing/tenants/{tenantId}/historique', [AbonnementSaasController::class, 'historique']);
+    Route::get('/billing/factures/{id}/telecharger', [AbonnementSaasController::class, 'telechargerFacture']);
+    Route::post('/billing/factures/{id}/payer',      [AbonnementSaasController::class, 'marquerPayee']);
 });

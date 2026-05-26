@@ -9,6 +9,7 @@ import MenuGroupe from './components/groupe/MenuGroupe';
 import MenuEnseignant from './components/enseignant/MenuEnseignant';
 import Topbar, { TOPBAR_HEIGHT } from './components/Topbar';
 import NotificationsPanel from './components/notifications/NotificationsPanel';
+import AideContextuelle from './components/aide/AideContextuelle';
 import RoutesMenu from './route/RoutesMenu';
 
 const SIDEBAR_WIDTH = 310;
@@ -39,6 +40,7 @@ const AppInterne = () => {
             <div style={connecte ? { marginLeft: SIDEBAR_WIDTH, marginTop: TOPBAR_HEIGHT, minHeight: '100vh' } : {}}>
                 <RoutesMenu />
             </div>
+            {connecte && !estGroupe && !estEnseignant && <AideContextuelle />}
         </div>
     );
 };

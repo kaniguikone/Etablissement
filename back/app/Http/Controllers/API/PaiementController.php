@@ -7,6 +7,7 @@ use App\Models\Eleve;
 use App\Models\Etablissement;
 use App\Models\Paiement;
 use App\Models\Scolarites;
+use App\Services\NotificationService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
@@ -162,6 +163,21 @@ class PaiementController extends Controller
     {
         Paiement::findOrFail($id)->delete();
         return response()->json(null, 204);
+    }
+
+    /**
+     * Déclenche manuellement les relances email pour paiements en retard.
+     * POST /api/relances-paiements
+     */
+    public function relancerImpayes(Request $request)
+    {
+        $result = app(NotificationService::class)->relancerPaiementsEnRetard();
+
+        return response()->json([
+            'message' => "Relances envoyées : {$result['envoyes']}. Sans email : {$result['ignores']}.",
+            'envoyes' => $result['envoyes'],
+            'ignores' => $result['ignores'],
+        ]);
     }
 
     /**

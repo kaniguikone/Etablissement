@@ -107,8 +107,11 @@ const GROUPES = [
         icon: 'fas fa-wallet',
         permissions: ['finances_gestion'],
         items: [
-            { to: '/Scolarites', icon: 'fas fa-money-bill-wave',    label: 'Scolarités' },
-            { to: '/Impayes',    icon: 'fas fa-exclamation-circle', label: 'Tableau des impayés' },
+            { to: '/Scolarites',          icon: 'fas fa-money-bill-wave',    label: 'Scolarités' },
+            { to: '/Impayes',             icon: 'fas fa-exclamation-circle', label: 'Tableau des impayés' },
+            { to: '/FraisAnnexes',        icon: 'fas fa-tags',               label: 'Frais annexes' },
+            { to: '/ImpayesFraisAnnexes', icon: 'fas fa-file-invoice',       label: 'Impayés frais annexes' },
+            { to: '/ExportComptable',     icon: 'fas fa-file-export',        label: 'Export comptable' },
         ],
     },
 
@@ -130,8 +133,10 @@ const GROUPES = [
         icon: 'fas fa-shield-alt',
         permissions: ['utilisateurs'],
         items: [
-            { to: '/Utilisateurs', icon: 'fas fa-users-cog',   label: 'Utilisateurs' },
-            { to: '/Roles',        icon: 'fas fa-user-shield', label: 'Rôles et permissions' },
+            { to: '/Utilisateurs',  icon: 'fas fa-users-cog',        label: 'Utilisateurs' },
+            { to: '/Roles',         icon: 'fas fa-user-shield',       label: 'Rôles et permissions' },
+            { to: '/AuditLogs',     icon: 'fas fa-history',           label: 'Journal d\'audit' },
+            { to: '/Documentation', icon: 'fas fa-question-circle',   label: 'Documentation in-app' },
         ],
     },
 

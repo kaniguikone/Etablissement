@@ -150,6 +150,8 @@ MAIL_FROM_NAME="Suivi Scolaire"
 CINETPAY_API_KEY=ta_cle_prod
 CINETPAY_SITE_ID=ton_site_id_prod
 CINETPAY_BASE_URL=https://api-checkout.cinetpay.com/v2
+
+SENTRY_LARAVEL_DSN=https://xxxx@oXXX.ingest.sentry.io/YYYY
 ```
 
 ---
@@ -170,6 +172,7 @@ CINETPAY_BASE_URL=https://api-checkout.cinetpay.com/v2
 cd /var/www/etablissement/back
 
 # Migrations base centrale
+# Crée notamment : tenants, domains, super_admins, abonnements_saas, factures_saas
 php artisan migrate --force
 
 # Optimisations production

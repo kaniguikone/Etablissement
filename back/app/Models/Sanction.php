@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 
 class Sanction extends Model
 {
+    use Auditable;
     protected $fillable = [
         'eleve_id', 'type', 'motif', 'description',
         'date_sanction', 'date_fin', 'prononcee_par', 'parent_notifie',

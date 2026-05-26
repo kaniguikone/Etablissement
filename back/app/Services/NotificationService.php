@@ -6,7 +6,9 @@ use App\Mail\NotificationParent;
 use App\Models\Eleve;
 use App\Models\FcmToken;
 use App\Models\Notification;
+use App\Models\Paiement;
 use App\Models\Parents;
+use App\Models\Scolarites;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -146,6 +148,73 @@ class NotificationService
         } catch (\Throwable $e) {
             Log::warning('Email parent échoué : ' . $e->getMessage());
         }
+    }
+
+    // ── Relances paiements en retard ─────────────────────────────────────────
+
+    /**
+     * Envoie des relances email+notif aux parents des élèves avec paiements en retard.
+     * Utilisé par la commande Artisan et par le déclencheur manuel (API).
+     *
+     * @return array{envoyes: int, ignores: int}
+     */
+    public function relancerPaiementsEnRetard(): array
+    {
+        $today           = now()->toDateString();
+        $echeancesEchues = Scolarites::where('date_echeance', '<', $today)->get();
+        $envoyes         = 0;
+        $ignores         = 0;
+
+        foreach ($echeancesEchues as $echeance) {
+            $eleves = Eleve::with(['parents', 'classe'])
+                ->whereHas('classe', fn($q) => $q->where('niveau_id', $echeance->niveau_id))
+                ->get();
+
+            foreach ($eleves as $eleve) {
+                $totalPaye = Paiement::where('eleve_id', $eleve->id)
+                    ->where('scolarite_id', $echeance->id)
+                    ->sum('montant_paye');
+
+                $solde = (float) $echeance->montant_echeance - (float) $totalPaye;
+
+                if ($solde <= 0) {
+                    continue;
+                }
+
+                if (!$eleve->parents || empty($eleve->parents->email_parent)) {
+                    $ignores++;
+                    continue;
+                }
+
+                $montantFormate = number_format($solde, 0, ',', ' ');
+                $corps = "La scolarité « {$echeance->libelle_echeance} » de {$eleve->prenoms_eleve} {$eleve->nom_eleve} "
+                       . "est en retard. Solde restant : {$montantFormate} FCFA. "
+                       . "Merci de régulariser au plus tôt auprès de l'administration.";
+
+                $this->notifierParent(
+                    $eleve->parents->id,
+                    'paiement',
+                    'Rappel de paiement',
+                    $corps,
+                    ['eleve_id' => $eleve->id, 'scolarite_id' => $echeance->id, 'solde' => $solde]
+                );
+
+                $this->envoyerEmailParent(
+                    $eleve->parents->id,
+                    $eleve->id,
+                    "Rappel : paiement en retard — {$echeance->libelle_echeance}",
+                    'Rappel de paiement',
+                    $corps,
+                    '#e67e22'
+                );
+
+                $envoyes++;
+            }
+        }
+
+        Log::info("RelancesPaiements : {$envoyes} envoyées, {$ignores} ignorées (pas d'email).");
+
+        return ['envoyes' => $envoyes, 'ignores' => $ignores];
     }
 
     // ── Enregistrement token FCM ──────────────────────────────────────────────

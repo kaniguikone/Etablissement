@@ -101,6 +101,14 @@ import ListeUtilisateurs from '../components/utilisateurs/ListeUtilisateurs';
 import NouvelUtilisateur from '../components/utilisateurs/NouvelUtilisateur';
 import ListeRoles from '../components/roles/ListeRoles';
 import NouveauRole from '../components/roles/NouveauRole';
+import AuditLogs from '../components/audit/AuditLogs';
+import RapportMinistere from '../components/rapports/RapportMinistere';
+import FraisAnnexesConfig from '../components/fraisannexes/FraisAnnexesConfig';
+import ImpayesFraisAnnexes from '../components/fraisannexes/ImpayesFraisAnnexes';
+import FraisAnnexeEleve from '../components/fraisannexes/FraisAnnexeEleve';
+import ExportComptable from '../components/comptabilite/ExportComptable';
+import GestionAbonnements from '../components/superadmin/GestionAbonnements';
+import GestionDocumentation from '../components/aide/GestionDocumentation';
 import Notifications from '../components/notifications/Notifications';
 import ArchivageWizard from '../components/archivage/ArchivageWizard';
 
@@ -151,6 +159,9 @@ const RoutesMenu = () => (
             <Route path="/enseignant/rdv"           element={<PrivateRoute><EnseignantRdv /></PrivateRoute>} />
             <Route path="/enseignant/informations"    element={<PrivateRoute><EnseignantInformations /></PrivateRoute>} />
             <Route path="/enseignant/appreciations"  element={<PrivateRoute><EnseignantAppreciations /></PrivateRoute>} />
+
+            {/* ── SuperAdmin ────────────────────────────────────────────── */}
+            <Route path="/superadmin/abonnements"  element={<PrivateRoute><GestionAbonnements /></PrivateRoute>} />
 
             {/* ── Espace Groupe Scolaire ─────────────────────────────────── */}
             <Route path="/groupe"                  element={<PrivateRoute><DashboardGroupe /></PrivateRoute>} />
@@ -266,6 +277,7 @@ const RoutesMenu = () => (
 
             {/* Pédagogie — pilotage */}
             <Route path="/Bulletins"        element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE}><Bulletin /></PrivateRoute>} />
+            <Route path="/RapportMinistere" element={<PrivateRoute permissions={R_PARAM}><RapportMinistere /></PrivateRoute>} />
             <Route path="/SuiviProgressions" element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE}><SuiviProgressions /></PrivateRoute>} />
             <Route path="/ConformiteEdt"     element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE}><ConformiteEdt /></PrivateRoute>} />
             <Route path="/ChargeEnseignants" element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE}><ChargeEnseignants /></PrivateRoute>} />
@@ -275,6 +287,10 @@ const RoutesMenu = () => (
             <Route path="/NouvelleScolarite"    element={<PrivateRoute permissions={R_FINANCES_GESTION}><NouvelleScolarite /></PrivateRoute>} />
             <Route path="/DetailsScolarite/:id" element={<PrivateRoute permissions={R_FINANCES_GESTION}><DetailsScolarite /></PrivateRoute>} />
             <Route path="/Impayes"              element={<PrivateRoute permissions={R_FINANCES_GESTION}><TableauImpayes /></PrivateRoute>} />
+            <Route path="/FraisAnnexes"         element={<PrivateRoute permissions={R_FINANCES_GESTION}><FraisAnnexesConfig /></PrivateRoute>} />
+            <Route path="/ImpayesFraisAnnexes"  element={<PrivateRoute permissions={R_FINANCES_GESTION}><ImpayesFraisAnnexes /></PrivateRoute>} />
+            <Route path="/FraisAnnexeEleve/:eleveId" element={<PrivateRoute permissions={R_FINANCES_CAISSE}><FraisAnnexeEleve /></PrivateRoute>} />
+            <Route path="/ExportComptable"       element={<PrivateRoute permissions={R_FINANCES_GESTION}><ExportComptable /></PrivateRoute>} />
 
             {/* Finances — caisse */}
             <Route path="/Paiements"           element={<PrivateRoute permissions={R_FINANCES_CAISSE}><ListePaiements /></PrivateRoute>} />
@@ -297,6 +313,8 @@ const RoutesMenu = () => (
             <Route path="/Roles"                 element={<PrivateRoute permissions={['utilisateurs']}><ListeRoles /></PrivateRoute>} />
             <Route path="/Roles/nouveau"         element={<PrivateRoute permissions={['utilisateurs']}><NouveauRole /></PrivateRoute>} />
             <Route path="/Roles/:id"             element={<PrivateRoute permissions={['utilisateurs']}><NouveauRole /></PrivateRoute>} />
+            <Route path="/Documentation"  element={<PrivateRoute permissions={R_ADMIN}><GestionDocumentation /></PrivateRoute>} />
+            <Route path="/AuditLogs"             element={<PrivateRoute permissions={['utilisateurs']}><AuditLogs /></PrivateRoute>} />
 
             {/* 404 — page non trouvée */}
             <Route path="*" element={

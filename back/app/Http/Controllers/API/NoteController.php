@@ -256,6 +256,55 @@ class NoteController extends Controller
     }
 
     /**
+     * Notifier tous les parents d'une classe qu'un bulletin est disponible.
+     * POST /api/bulletin/classe/{classeId}/{periodeId}/notifier-tous
+     */
+    public function notifierClasseBulletin(string $classeId, string $periodeId)
+    {
+        $eleves  = Eleve::with('parents')->where('classe_id', $classeId)->get();
+        $periode = Periodes::findOrFail($periodeId);
+        $service = app(NotificationService::class);
+
+        $envoyes = 0;
+        $ignores = 0;
+
+        foreach ($eleves as $eleve) {
+            if (!$eleve->parents) {
+                $ignores++;
+                continue;
+            }
+
+            $titre = 'Bulletin disponible';
+            $corps = "Le bulletin de {$eleve->prenoms_eleve} {$eleve->nom_eleve} pour la période « {$periode->libelle_periode} » est disponible. Connectez-vous pour le consulter.";
+
+            $service->notifierParent(
+                $eleve->parents->id,
+                'bulletin',
+                $titre,
+                $corps,
+                ['eleve_id' => $eleve->id, 'periode_id' => $periode->id]
+            );
+
+            $service->envoyerEmailParent(
+                $eleve->parents->id,
+                $eleve->id,
+                "Bulletin scolaire disponible — {$periode->libelle_periode}",
+                $titre,
+                $corps,
+                '#1a56a0'
+            );
+
+            $envoyes++;
+        }
+
+        return response()->json([
+            'message' => "Notifications envoyées : {$envoyes}. Sans email : {$ignores}.",
+            'envoyes' => $envoyes,
+            'ignores' => $ignores,
+        ]);
+    }
+
+    /**
      * Notifier le parent qu'un bulletin est disponible.
      * POST /api/bulletin/{eleveId}/{periodeId}/notifier
      */

@@ -73,7 +73,7 @@ class TenantController extends Controller
             'telephone'       => 'nullable|string|max:30',
             'ville'           => 'nullable|string|max:100',
             'pays'            => 'nullable|string|max:100',
-            'plan'            => ['nullable', Rule::in(['demo', 'basic', 'pro'])],
+            'plan'            => ['nullable', Rule::in(['demo', 'basic', 'pro', 'premium'])],
             'date_expiration' => 'nullable|date|after:today',
             'domaine'         => 'required|string|max:255', // sous-domaine principal
         ]);
@@ -113,7 +113,7 @@ class TenantController extends Controller
             'telephone'       => 'nullable|string|max:30',
             'ville'           => 'nullable|string|max:100',
             'pays'            => 'nullable|string|max:100',
-            'plan'            => ['nullable', Rule::in(['demo', 'basic', 'pro'])],
+            'plan'            => ['nullable', Rule::in(['demo', 'basic', 'pro', 'premium'])],
             'actif'           => 'sometimes|boolean',
             'date_expiration' => 'nullable|date',
         ]);

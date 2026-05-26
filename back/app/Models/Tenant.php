@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 use Stancl\Tenancy\Contracts\TenantWithDatabase;
 use Stancl\Tenancy\Database\Concerns\HasDatabase;
@@ -38,6 +39,11 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
+    }
+
+    public function abonnements(): HasMany
+    {
+        return $this->hasMany(AbonnementSaas::class, 'tenant_id');
     }
 
     protected $casts = [

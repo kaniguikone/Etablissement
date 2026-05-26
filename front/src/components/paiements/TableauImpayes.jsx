@@ -11,13 +11,14 @@ const BADGE = {
 const TableauImpayes = () => {
     const { toast } = useToast();
 
-    const [niveaux, setNiveaux]       = useState([]);
-    const [classes, setClasses]       = useState([]);
-    const [niveauId, setNiveauId]     = useState('');
-    const [classeId, setClasseId]     = useState('');
-    const [data, setData]             = useState(null);
-    const [chargement, setChargement] = useState(false);
-    const abortRef                    = useRef(null);
+    const [niveaux, setNiveaux]           = useState([]);
+    const [classes, setClasses]           = useState([]);
+    const [niveauId, setNiveauId]         = useState('');
+    const [classeId, setClasseId]         = useState('');
+    const [data, setData]                 = useState(null);
+    const [chargement, setChargement]     = useState(false);
+    const [relanceCours, setRelanceCours] = useState(false);
+    const abortRef                        = useRef(null);
 
     useEffect(() => {
         api.get('/niveaux').then(r => setNiveaux(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
@@ -69,6 +70,20 @@ const TableauImpayes = () => {
         window.open(`${api.defaults.baseURL}/paiements/export?${params}`, '_blank');
     };
 
+    const envoyerRelances = async () => {
+        if (!window.confirm('Envoyer des relances email à tous les parents avec des paiements en retard ?')) return;
+        setRelanceCours(true);
+        try {
+            const r = await api.post('/relances-paiements');
+            const { envoyes, ignores } = r.data;
+            toast.success(`${envoyes} relance(s) envoyée(s).${ignores > 0 ? ` ${ignores} sans email.` : ''}`);
+        } catch {
+            toast.error('Erreur lors de l\'envoi des relances.');
+        } finally {
+            setRelanceCours(false);
+        }
+    };
+
     const listeEleves = data?.data ?? [];
     const totalImpayes = data?.total_impayes ?? 0;
     const count = data?.count ?? 0;
@@ -88,6 +103,16 @@ const TableauImpayes = () => {
                                 <i className="fas fa-file-csv me-1" />Export CSV
                             </button>
                         )}
+                        <button
+                            className="btn btn-outline-warning btn-sm"
+                            onClick={envoyerRelances}
+                            disabled={relanceCours}
+                            title="Envoyer un email de rappel aux parents dont les paiements sont en retard">
+                            {relanceCours
+                                ? <span className="spinner-border spinner-border-sm me-1" />
+                                : <i className="fas fa-paper-plane me-1" />}
+                            Envoyer relances
+                        </button>
                         <NavLink to="/Paiements" className="btn btn-secondary btn-sm">Retour</NavLink>
                     </div>
                 </div>

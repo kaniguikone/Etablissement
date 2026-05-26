@@ -280,13 +280,38 @@ npm run dev
 
 ## 7. Plans tarifaires
 
-| Plan    | Description                                          |
-| ------- | ---------------------------------------------------- |
-| `demo`  | Accès limité dans le temps (date_expiration requise) |
-| `basic` | Fonctionnalités standard                             |
-| `pro`   | Toutes les fonctionnalités                           |
+| Plan      | Description                                          |
+| --------- | ---------------------------------------------------- |
+| `demo`    | Accès limité dans le temps (date_expiration requise) |
+| `basic`   | Fonctionnalités standard                             |
+| `pro`     | Toutes les fonctionnalités                           |
+| `premium` | Pro + SLA prioritaire et support dédié               |
 
 Modifier le plan d'un tenant via le super-admin : `https://monapp.ci/superadmin`
+
+---
+
+## 8. Monitoring et erreurs (Sentry)
+
+L'application intègre **Sentry** pour la capture automatique des erreurs PHP et JavaScript en production.
+
+### Configurer Sentry
+
+1. Créer un projet sur [sentry.io](https://sentry.io) (ou instance auto-hébergée)
+2. Récupérer le **DSN** du projet
+3. Ajouter dans le `.env` du backend :
+
+```env
+SENTRY_LARAVEL_DSN=https://xxxx@oXXX.ingest.sentry.io/YYYY
+```
+
+4. Ajouter dans `front/.env.production` :
+
+```env
+VITE_SENTRY_DSN=https://xxxx@oXXX.ingest.sentry.io/YYYY
+```
+
+Toutes les exceptions PHP non catchées et les erreurs JS critiques remontent automatiquement dans le tableau de bord Sentry.
 
 ---
 
