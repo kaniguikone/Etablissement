@@ -133,6 +133,9 @@ L'application propose quatre portails distincts selon le profil :
 
 - CRUD complet avec association aux élèves
 - **Import en masse** via modèles Excel
+- **Inscription autonome depuis l'app mobile** : le parent saisit le matricule de son enfant, vérifie ses informations, crée son compte — sans intervention préalable de l'établissement
+- Validation des demandes d'accès par l'admin (2 modes : paiement autonome CinetPay ou collecte par l'école)
+- Limite : 2 parents maximum par élève
 
 ### Portail parent (mobile)
 - Vue consolidée de tous ses enfants
@@ -236,6 +239,7 @@ L'application propose quatre portails distincts selon le profil :
 - **Activité des enseignants** : heures enseignées, devoirs créés
 - **Export CSV des moyennes** par niveau et par période
 - **Rapport statistique annuel Ministère PDF** : document A4 paysage généré automatiquement, incluant effectifs par genre/niveau, taux de passage, résultats aux examens, statistiques d'assiduité, bilan financier — format conforme aux exigences du Ministère de l'Éducation
+- **Formulaire statistique MENET (14 sections)** : saisie et export du formulaire officiel annuel — groupes pédagogiques, effectifs, langues, nationalités, âges et redoublants par cycle, résultats aux examens nationaux (BEPC, BAC, CEPE), décisions de fin d'année (admis, redoublants, exclus, abandons), élèves en situation de handicap et orphelins — **export Excel** et **PDF**
 
 ---
 
@@ -278,6 +282,7 @@ L'application propose quatre portails distincts selon le profil :
 | Export comptable OHADA | — | Excel (3 feuilles) |
 | Export FEC SAGE | — | CSV |
 | Rapport Ministère | — | PDF |
+| Formulaire MENET (14 sections) | — | Excel + PDF |
 
 ---
 

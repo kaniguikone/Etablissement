@@ -137,7 +137,7 @@ Sur la fiche d'un élève → bouton **Attestation PDF**. Le document est géné
 
 ## 5. Gestion des parents
 
-### Ajouter un parent
+### Ajouter un parent manuellement
 *Menu : Parents → Nouveau parent*
 
 Un **compte mobile** est créé automatiquement. Communiquez le numéro de téléphone et le mot de passe provisoire au parent.
@@ -146,6 +146,23 @@ Un **compte mobile** est créé automatiquement. Communiquez le numéro de tél�
 Sur la fiche de l'élève → champ **Parent** → sélectionnez dans la liste.
 
 Un parent peut avoir plusieurs enfants dans l'établissement.
+
+### Inscription autonome du parent depuis l'app mobile
+Le parent peut créer son propre compte sans que vous interveniez au préalable :
+
+1. Il ouvre l'application mobile → **« Je suis parent »** → **« Créer un compte »**
+2. Il saisit le **matricule de son enfant** — l'application affiche le nom et la classe pour confirmation
+3. Il renseigne ses informations (nom, prénom, téléphone, mot de passe, lien de parenté)
+4. La demande vous parvient dans : *Menu : Parents → Demandes d'accès*
+
+### Valider une demande d'accès parent
+*Menu : Parents → Demandes d'accès*
+
+Chaque demande indique : nom du parent, matricule de l'élève concerné, date de demande.
+- **Approuver** : le compte est activé, le parent peut se connecter immédiatement
+- **Rejeter** : la demande est supprimée, le parent reçoit une notification de refus
+
+> **Limite :** 2 parents maximum par élève. Au-delà, les nouvelles demandes sont bloquées automatiquement.
 
 ---
 
@@ -336,6 +353,30 @@ Génère un document PDF au format réglementaire (A4 paysage) incluant :
 - Bilan financier de l'année
 
 Ce document peut être remis directement à l'inspection académique.
+
+### Formulaire statistique MENET (14 sections)
+*Menu : Statistiques → Stats générales*
+
+Outil de saisie et d'export du **formulaire statistique annuel officiel** demandé par le Ministère :
+
+| Section | Contenu |
+|---|---|
+| S1 | Groupes pédagogiques et salles (1er cycle) |
+| S2 | Effectifs et boursiers (1er cycle) |
+| S3 | Langues (1er cycle) |
+| S4-S5 | Nationalités (1er et 2nd cycle) |
+| S6-S7 | Affectés État (1er et 2nd cycle) |
+| S8-S9 | Âges et redoublants (1er cycle) |
+| S10-S11 | Âges et redoublants (2nd cycle) |
+| S12 | Résultats examens : BEPC, BAC, CEPE |
+| S13 | Décisions fin d'année (admis, redoublants, exclus, abandons) |
+| S14 | Enfants en situation de handicap et orphelins |
+
+Les données (effectifs, redoublants, passages) sont calculées automatiquement depuis la base. Vous saisissez uniquement les **résultats aux examens nationaux** (BEPC/BAC/CEPE) qui ne sont pas dans le système.
+
+**Exports disponibles :**
+- **Excel** : feuille structurée conforme au formulaire MENET
+- **PDF** : version imprimable prête à remettre à l'inspection
 
 ---
 
