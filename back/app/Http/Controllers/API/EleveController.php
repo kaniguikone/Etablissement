@@ -69,6 +69,13 @@ class EleveController extends Controller
             'classe_id'            => 'required|exists:classes,id',
             'parent_id'            => 'nullable|exists:parents,id',
             'photo_eleve'          => 'nullable|image|max:2048',
+            'langue2'              => 'nullable|in:espagnol,allemand,autre',
+            'est_boursier'         => 'nullable|boolean',
+            'est_demi_boursier'    => 'nullable|boolean',
+            'est_affecte'          => 'nullable|boolean',
+            'types_handicap'       => 'nullable|array',
+            'types_handicap.*'     => 'in:moteur,malvoyant,malentendant,albinisme,nanisme,begayement,autiste',
+            'statut_orphelin'      => 'nullable|in:pere,mere,les_deux',
         ]);
 
         $photoPath = null;
@@ -93,6 +100,12 @@ class EleveController extends Controller
             'photo_eleve'          => $photoPath,
             'classe_id'            => $request->classe_id,
             'parent_id'            => $request->parent_id,
+            'langue2'              => $request->langue2 ?: null,
+            'est_boursier'         => $request->boolean('est_boursier'),
+            'est_demi_boursier'    => $request->boolean('est_demi_boursier'),
+            'est_affecte'          => $request->boolean('est_affecte'),
+            'types_handicap'       => $request->input('types_handicap') ?: null,
+            'statut_orphelin'      => $request->statut_orphelin ?: null,
         ]);
 
         return response()->json(['status' => 'success', 'eleve' => $eleve], 201);
@@ -113,6 +126,14 @@ class EleveController extends Controller
             'classe_id'            => 'required|exists:classes,id',
             'parent_id'            => 'nullable|exists:parents,id',
             'photo_eleve'          => 'nullable|image|max:2048',
+            'statut_eleve'         => 'nullable|in:actif,inactif,abandon,decede',
+            'langue2'              => 'nullable|in:espagnol,allemand,autre',
+            'est_boursier'         => 'nullable|boolean',
+            'est_demi_boursier'    => 'nullable|boolean',
+            'est_affecte'          => 'nullable|boolean',
+            'types_handicap'       => 'nullable|array',
+            'types_handicap.*'     => 'in:moteur,malvoyant,malentendant,albinisme,nanisme,begayement,autiste',
+            'statut_orphelin'      => 'nullable|in:pere,mere,les_deux',
         ]);
 
         $eleve = Eleve::findOrFail($id);
@@ -128,6 +149,13 @@ class EleveController extends Controller
             'adresse_eleve'        => $request->adresse_eleve,
             'classe_id'            => $request->classe_id,
             'parent_id'            => $request->parent_id,
+            'statut_eleve'         => $request->statut_eleve ?? $eleve->statut_eleve,
+            'langue2'              => $request->langue2 ?: null,
+            'est_boursier'         => $request->boolean('est_boursier'),
+            'est_demi_boursier'    => $request->boolean('est_demi_boursier'),
+            'est_affecte'          => $request->boolean('est_affecte'),
+            'types_handicap'       => $request->input('types_handicap') ?: null,
+            'statut_orphelin'      => $request->statut_orphelin ?: null,
         ];
 
         if ($request->hasFile('photo_eleve')) {

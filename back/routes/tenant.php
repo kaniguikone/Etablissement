@@ -64,6 +64,8 @@ use App\Http\Controllers\API\RapportMinistereController;
 use App\Http\Controllers\API\FraisAnnexeController;
 use App\Http\Controllers\API\ExportComptableController;
 use App\Http\Controllers\API\HelpArticleController;
+use App\Http\Controllers\API\ParentRegistrationController;
+use App\Http\Controllers\API\StatsGeneralesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -85,6 +87,10 @@ Route::middleware([
 
     // ─── Auth mobile unifiée (parent + enseignant en un seul appel) ──────────
     Route::post('/mobile/login', [UnifiedAuthController::class, 'login']);
+
+    // ─── Inscription parent (public) ──────────────────────────────────────────
+    Route::get('/mobile/parent/valider-matricule/{matricule}', [ParentRegistrationController::class, 'validerMatricule']);
+    Route::post('/mobile/parent/register',                     [ParentRegistrationController::class, 'register']);
 
     // ─── Mot de passe oublié (public) ────────────────────────────────────────
     Route::post('/mot-de-passe/oublie',       [MotDePasseController::class, 'oublie']);
@@ -219,6 +225,9 @@ Route::middleware([
 
         Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
 
+        // Lecture des années scolaires accessible à tous les utilisateurs authentifiés
+        Route::get('/annees-scolaires', [ArchivageController::class, 'index']);
+
         Route::middleware('permission:pedagogie_saisie,pedagogie_pilotage,finances_caisse,finances_gestion')->group(function () {
             Route::get('/stats/synthese',     [StatistiquesController::class, 'synthese']);
             Route::get('/stats/presences',    [StatistiquesController::class, 'presences']);
@@ -334,7 +343,12 @@ Route::middleware([
 
         Route::middleware('permission:parents')->group(function () {
             Route::apiResource('parents', ParentController::class);
-            Route::delete('/parents/{id}/tokens',                 [ParentController::class, 'revoquerTokens']);
+            Route::delete('/parents/{id}/tokens',                     [ParentController::class,             'revoquerTokens']);
+            Route::get('/parents/demandes',                           [ParentRegistrationController::class, 'demandes']);
+            Route::post('/parents/demandes/{id}/approuver',           [ParentRegistrationController::class, 'approuver']);
+            Route::post('/parents/demandes/{id}/rejeter',             [ParentRegistrationController::class, 'rejeter']);
+            Route::get('/parents/slots',                              [ParentRegistrationController::class, 'slots']);
+            Route::put('/etablissement/parent-payment-mode',          [ParentRegistrationController::class, 'configurerMode']);
         });
 
         Route::middleware('permission:pedagogie_saisie')->group(function () {
@@ -376,6 +390,14 @@ Route::middleware([
 
         Route::middleware('permission:parametrage')->group(function () {
             Route::post('/rapport-ministere', [RapportMinistereController::class, 'telecharger']);
+        });
+
+        // ─── Statistiques générales (formulaire MENET) ───────────────────────
+        Route::middleware('permission:pedagogie_pilotage,parametrage')->group(function () {
+            Route::get('/stats-generales',               [StatsGeneralesController::class, 'donnees']);
+            Route::get('/stats-generales/export-excel',  [StatsGeneralesController::class, 'exportExcel']);
+            Route::get('/stats-generales/export-pdf',    [StatsGeneralesController::class, 'exportPdf']);
+            Route::post('/stats-generales/examens',      [StatsGeneralesController::class, 'upsertExamen']);
         });
 
         Route::middleware('permission:finances_gestion')->group(function () {
@@ -466,7 +488,6 @@ Route::middleware([
         });
 
         Route::middleware('permission:parametrage')->group(function () {
-            Route::get('/annees-scolaires',                          [ArchivageController::class, 'index']);
             Route::post('/annees-scolaires',                         [ArchivageController::class, 'store']);
             Route::post('/annees-scolaires/init-nouvelle-annee',     [ArchivageController::class, 'initNouvelleAnnee']);
             Route::get('/annees-scolaires/{id}',                     [ArchivageController::class, 'show']);

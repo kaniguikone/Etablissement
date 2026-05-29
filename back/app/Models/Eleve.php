@@ -11,14 +11,21 @@ class Eleve extends Model
 
     public $timestamps = false;
 
+    // statut_eleve : actif | inactif | abandon | decede
     protected $fillable = [
         "matricule_eleve", "nom_eleve", "prenoms_eleve", "date_naissance_eleve",
         "genre_eleve", "lieu_naissance_eleve", "nationalite_eleve", "adresse_eleve",
         "photo_eleve", "classe_id", "parent_id", "statut_eleve",
+        "langue2", "est_boursier", "est_demi_boursier", "est_affecte",
+        "types_handicap", "statut_orphelin",
     ];
 
     protected $casts = [
         'date_naissance_eleve' => 'date:Y-m-d',
+        'est_boursier'         => 'boolean',
+        'est_demi_boursier'    => 'boolean',
+        'est_affecte'          => 'boolean',
+        'types_handicap'       => 'array',
     ];
 
     protected $appends = ['photo_url'];
@@ -35,19 +42,27 @@ class Eleve extends Model
         return $this->belongsTo(Classe::class);
     }
 
+    /** Parents liés via le portail (pivot eleve_parent, max 2) */
     public function parents()
     {
+        return $this->belongsToMany(Parents::class, 'eleve_parent', 'eleve_id', 'parent_id')
+                    ->withPivot('relation')
+                    ->withTimestamps();
+    }
+
+    /** Parent unique legacy (rétrocompatibilité champ parent_id) */
+    public function parentLegacy()
+    {
         return $this->belongsTo(Parents::class, 'parent_id');
+    }
+
+    public function subscription()
+    {
+        return $this->hasOne(ParentSubscription::class)->latestOfMany();
     }
 
     public function paiements()
     {
         return $this->hasMany(Paiement::class);
-    }
-
-    /** @deprecated Use parents() */
-    public function parent()
-    {
-        return $this->parents();
     }
 }

@@ -6,6 +6,7 @@ import '../../services/api_service.dart';
 import '../../services/storage_service.dart';
 import '../../theme/app_theme.dart';
 import '../onboarding/onboarding_screen.dart';
+import 'inscription_parent_screen.dart';
 
 const _headerColor = Color(0xFF1A237E);
 
@@ -257,6 +258,33 @@ class _LoginScreenState extends State<LoginScreen> {
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+                        Center(
+                          child: TextButton(
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const InscriptionParentScreen(),
+                              ),
+                            ),
+                            child: RichText(
+                              text: TextSpan(
+                                style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                                children: const [
+                                  TextSpan(text: 'Pas encore de compte ? '),
+                                  TextSpan(
+                                    text: 'S\'inscrire',
+                                    style: TextStyle(
+                                      color: _headerColor,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ],

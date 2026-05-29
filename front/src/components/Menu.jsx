@@ -55,8 +55,9 @@ const GROUPES = [
         icon: 'fas fa-user-friends',
         permissions: ['parents'],
         items: [
-            { to: '/Parents',       icon: 'fas fa-list',      label: 'Liste des parents' },
-            { to: '/NouveauParent', icon: 'fas fa-user-plus', label: 'Ajouter un parent' },
+            { to: '/Parents',         icon: 'fas fa-list',       label: 'Liste des parents' },
+            { to: '/NouveauParent',   icon: 'fas fa-user-plus',  label: 'Ajouter un parent' },
+            { to: '/DemandesParents', icon: 'fas fa-user-clock', label: 'Demandes d\'accès' },
         ],
     },
 
@@ -176,7 +177,9 @@ const GROUPES = [
         icon: 'fas fa-chart-bar',
         permissions: ['pedagogie_saisie', 'pedagogie_pilotage', 'finances_caisse', 'finances_gestion'],
         items: [
-            { to: '/Statistiques', icon: 'fas fa-chart-bar', label: 'Tableaux de bord' },
+            { to: '/Statistiques',      icon: 'fas fa-chart-bar',  label: 'Tableaux de bord' },
+            { to: '/StatsGenerales',    icon: 'fas fa-table',      label: 'Stats générales (MENET)' },
+            { to: '/RapportMinistere',  icon: 'fas fa-file-alt',   label: 'Rapport Ministère' },
         ],
     },
 ];

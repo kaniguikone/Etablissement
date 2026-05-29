@@ -204,6 +204,18 @@ class ApiService {
     return response.data as Map<String, dynamic>;
   }
 
+  // ─── Inscription parent (public) ────────────────────────────────────────────
+
+  Future<Map<String, dynamic>> validerMatricule(String matricule) async {
+    final response = await _dio.get(ApiConfig.validerMatricule(matricule));
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> inscrireParent(Map<String, dynamic> data) async {
+    final response = await _dio.post(ApiConfig.inscriptionParent, data: data);
+    return response.data as Map<String, dynamic>;
+  }
+
   Future<List<dynamic>> getNiveaux() async {
     final response = await _dio.get('/niveaux');
     return response.data as List<dynamic>;

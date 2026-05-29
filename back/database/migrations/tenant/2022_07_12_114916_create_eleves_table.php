@@ -19,7 +19,13 @@ return new class extends Migration
             $table->string('nationalite_eleve')->nullable();
             $table->string('adresse_eleve')->nullable();
             $table->string('photo_eleve')->nullable();
-            $table->string('statut_eleve', 20)->default('actif');
+            $table->string('statut_eleve', 20)->default('actif'); // actif | inactif | abandon | decede
+            $table->enum('langue2', ['espagnol', 'allemand', 'autre'])->nullable();
+            $table->boolean('est_boursier')->default(false);
+            $table->boolean('est_demi_boursier')->default(false);
+            $table->boolean('est_affecte')->default(false);
+            $table->json('types_handicap')->nullable(); // tableau ex: ["moteur","malvoyant"]
+            $table->enum('statut_orphelin', ['pere', 'mere', 'les_deux'])->nullable();
 
             $table->foreignId('classe_id')
                   ->constrained('classes')

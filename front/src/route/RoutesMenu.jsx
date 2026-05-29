@@ -13,6 +13,7 @@ import MonProfil from '../components/auth/MonProfil';
 
 import Accueil from '../components/Accueil';
 import Statistiques from '../components/stats/Statistiques';
+import StatsGenerales from '../components/stats/StatsGenerales';
 
 import ListeEleves from '../components/eleves/ListeEleves';
 import ListeEnseignants from '../components/enseignants/ListeEnseignants';
@@ -22,6 +23,8 @@ import ListeNiveaux from '../components/niveaux/ListeNiveaux';
 import ListeMatieres from '../components/matieres/ListeMatieres';
 import ListePeriodes from '../components/periodes/ListePeriodes';
 import ListeParents from '../components/parents/ListeParents';
+import InscriptionParent from '../components/parents/InscriptionParent';
+import DemandesParents from '../components/parents/DemandesParents';
 import ListeScolarites from '../components/scolarites/ListeScolarites';
 import ListeInformations from '../components/informations/ListeInformations';
 
@@ -147,6 +150,7 @@ const RoutesMenu = () => (
             {/* Pages publiques */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/reinitialiser-mot-de-passe" element={<ReinitialisationMotDePasse />} />
+            <Route path="/inscription-parent" element={<InscriptionParent />} />
 
             {/* ── Espace Enseignant ─────────────────────────────────────── */}
             <Route path="/enseignant"               element={<PrivateRoute><EnseignantDashboard /></PrivateRoute>} />
@@ -189,7 +193,8 @@ const RoutesMenu = () => (
             <Route path="/Seeder" element={<PrivateRoute superOnly><SeederInterface /></PrivateRoute>} />
 
             {/* Statistiques */}
-            <Route path="/Statistiques" element={<PrivateRoute permissions={R_STATS}><Statistiques /></PrivateRoute>} />
+            <Route path="/Statistiques"     element={<PrivateRoute permissions={R_STATS}><Statistiques /></PrivateRoute>} />
+            <Route path="/StatsGenerales"   element={<PrivateRoute permissions={['pedagogie_pilotage','parametrage']}><StatsGenerales /></PrivateRoute>} />
 
             {/* Paramétrage */}
             <Route path="/Etablissement"  element={<PrivateRoute permissions={R_PARAM}><ParametresEtablissement /></PrivateRoute>} />
@@ -237,9 +242,10 @@ const RoutesMenu = () => (
             <Route path="/DetailsEnseignant/:id"  element={<PrivateRoute permissions={R_ENSEIGNANTS}><DetailsEnseignant /></PrivateRoute>} />
             <Route path="/ProfsParMatiere"        element={<PrivateRoute permissions={R_ENSEIGNANTS}><ListeProfsParMatiere /></PrivateRoute>} />
 
-            <Route path="/Parents"           element={<PrivateRoute permissions={R_PARENTS}><ListeParents /></PrivateRoute>} />
-            <Route path="/NouveauParent"     element={<PrivateRoute permissions={R_PARENTS}><NouveauParent /></PrivateRoute>} />
-            <Route path="/DetailsParent/:id" element={<PrivateRoute permissions={R_PARENTS}><DetailsParent /></PrivateRoute>} />
+            <Route path="/Parents"               element={<PrivateRoute permissions={R_PARENTS}><ListeParents /></PrivateRoute>} />
+            <Route path="/NouveauParent"         element={<PrivateRoute permissions={R_PARENTS}><NouveauParent /></PrivateRoute>} />
+            <Route path="/DetailsParent/:id"     element={<PrivateRoute permissions={R_PARENTS}><DetailsParent /></PrivateRoute>} />
+            <Route path="/DemandesParents"       element={<PrivateRoute permissions={R_PARENTS}><DemandesParents /></PrivateRoute>} />
 
             {/* Salles */}
             <Route path="/Salles"            element={<PrivateRoute permissions={R_PARAM}><ListeSalles /></PrivateRoute>} />
@@ -277,7 +283,7 @@ const RoutesMenu = () => (
 
             {/* Pédagogie — pilotage */}
             <Route path="/Bulletins"        element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE}><Bulletin /></PrivateRoute>} />
-            <Route path="/RapportMinistere" element={<PrivateRoute permissions={R_PARAM}><RapportMinistere /></PrivateRoute>} />
+            <Route path="/RapportMinistere" element={<PrivateRoute permissions={R_STATS}><RapportMinistere /></PrivateRoute>} />
             <Route path="/SuiviProgressions" element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE}><SuiviProgressions /></PrivateRoute>} />
             <Route path="/ConformiteEdt"     element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE}><ConformiteEdt /></PrivateRoute>} />
             <Route path="/ChargeEnseignants" element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE}><ChargeEnseignants /></PrivateRoute>} />

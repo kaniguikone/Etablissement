@@ -200,6 +200,11 @@ class ApiConfig {
   static const String soumettreinscription = '/inscription';
   static String statutInscription(String token) => '/inscription/$token/statut';
 
+  // Inscription parent (public)
+  static String validerMatricule(String matricule) =>
+      '/mobile/parent/valider-matricule/$matricule';
+  static const String inscriptionParent = '/mobile/parent/register';
+
   // Endpoints CinetPay
   static const String initierPaiement = '/paiements/initier';
   static String statutPaiement(String transactionId) =>

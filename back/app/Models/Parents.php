@@ -25,8 +25,22 @@ class Parents extends Authenticatable
         'password' => 'hashed',
     ];
 
+    /** Enfants liés via le portail (pivot eleve_parent) */
     public function eleves()
     {
+        return $this->belongsToMany(Eleve::class, 'eleve_parent', 'parent_id', 'eleve_id')
+                    ->withPivot('relation')
+                    ->withTimestamps();
+    }
+
+    /** Enfants liés via l'ancien champ parent_id (rétrocompatibilité) */
+    public function elevesLegacy()
+    {
         return $this->hasMany(Eleve::class, 'parent_id');
+    }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(ParentSubscription::class, 'paid_by');
     }
 }

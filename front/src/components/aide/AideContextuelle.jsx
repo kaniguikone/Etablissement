@@ -140,20 +140,39 @@ export default function AideContextuelle() {
         return (
             <button
                 onClick={() => setOuvert(true)}
+                title="Centre d'aide"
                 style={{
                     position: 'fixed', bottom: 24, right: 24, zIndex: 1040,
-                    width: 48, height: 48, borderRadius: '50%',
+                    height: 48, borderRadius: 24,
                     background: '#1a5276', color: '#fff', border: 'none',
                     boxShadow: '0 4px 12px rgba(0,0,0,.3)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 22, cursor: 'pointer',
-                    transition: 'transform .15s',
+                    display: 'flex', alignItems: 'center',
+                    paddingLeft: 13, paddingRight: 13,
+                    gap: 0, overflow: 'hidden',
+                    width: 48,
+                    transition: 'width .25s ease, box-shadow .15s',
+                    cursor: 'pointer', whiteSpace: 'nowrap',
                 }}
-                title="Aide contextuelle"
-                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                onMouseEnter={e => {
+                    e.currentTarget.style.width = '160px';
+                    e.currentTarget.style.gap = '8px';
+                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,.35)';
+                    e.currentTarget.querySelector('.aide-label').style.opacity = '1';
+                }}
+                onMouseLeave={e => {
+                    e.currentTarget.style.width = '48px';
+                    e.currentTarget.style.gap = '0';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,.3)';
+                    e.currentTarget.querySelector('.aide-label').style.opacity = '0';
+                }}
             >
-                <i className="bi bi-question-lg" />
+                <i className="fas fa-question" style={{ fontSize: 18, flexShrink: 0 }} />
+                <span className="aide-label" style={{
+                    fontSize: 14, fontWeight: 600, opacity: 0,
+                    transition: 'opacity .2s ease .05s',
+                }}>
+                    Centre d'aide
+                </span>
             </button>
         );
     }

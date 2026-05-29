@@ -9,45 +9,45 @@
 
 ### Ce qui est livré et opérationnel ✅
 
-| Fonctionnalité | Note |
-|---|---|
-| Gestion élèves, enseignants, classes, niveaux, matières | Complet |
-| Notes, devoirs, bulletins PDF avec appréciations enseignants | Complet incl. commentaires par matière + appréciation prof principal |
-| Relevé de notes annuel PDF | Complet |
-| Décisions du conseil de classe (Admis, Redoublement, etc.) | Complet |
-| Assiduités, paiements de scolarité, reçus PDF | Complet |
-| Tableau des impayés + export CSV | Complet |
-| Échéancier de paiement (tranches) | Complet |
-| Archivage fin d'année + rollback | Complet |
-| Emploi du temps avec détection des conflits | Complet |
-| Gestion des salles | Complet |
-| Calendrier scolaire (vacances, événements) | Complet |
-| Sanctions / comportement élèves | Complet |
-| Notifications in-app (cloche + badge, 6 déclencheurs) | Complet |
-| Notifications push mobile FCM (Android) | Complet |
-| **Notifications email (bulletin, absence, sanction, relance)** | **Complet** — Mailables + Queue, SMTP configurable |
-| **Journal d'audit** | **Complet** — trait `Auditable`, interface admin lecture seule |
-| **Rapport statistique annuel Ministère PDF** | **Complet** — 6 sections, A4 paysage, DomPDF |
-| **Monitoring infrastructure** | **Complet** — Sentry (PHP + JS), UptimeRobot, Telescope |
-| **Frais annexes** (tenues, manuels, examens, transport…) | **Complet** — config par niveau, suivi paiements, impayés, reçus PDF |
-| **Export comptable structuré** | **Complet** — Excel 3 feuilles (OHADA) + FEC/CSV SAGE |
-| **Module SaaS billing** | **Complet** — dashboard super-admin, abonnements, factures PDF |
-| **Documentation in-app et aide contextuelle** | **Complet** — panneau "?" contextuel, gestion BDD, 26 articles pré-rédigés |
-| Statistiques avancées (KPIs, classements, évolution inter-périodes) | Complet |
-| Gestion des remplacements d'enseignants | Complet |
-| Progression du programme par matière/classe | Complet |
-| Messagerie parents ↔ enseignants | Complet |
-| Réunions parents-profs (prise de RDV) | Complet |
-| Photos élèves | Complet |
-| Export CSV (élèves, notes, paiements) | Complet |
-| Réinitialisation de mot de passe autonome | Complet |
-| Architecture multi-tenant isolée | Complet |
-| Portail enseignant mobile (Flutter/Android) | Complet |
-| Portail parent mobile (Flutter/Android) | Complet |
-| Mode hors-ligne mobile pour les présences | Complet (SharedPreferences + sync auto) |
-| Templates de démarrage rapide (lycée, collège, primaire) | Complet (4 templates JSON) |
-| Instance démo (code + commande `php artisan demo:creer`) | Code complet — déploiement public manquant |
-| **86 tests automatisés** | **Complet** — couverture frais annexes, export, documentation, + tous les anciens |
+| Fonctionnalité                                                      | Note                                                                              |
+| ------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Gestion élèves, enseignants, classes, niveaux, matières             | Complet                                                                           |
+| Notes, devoirs, bulletins PDF avec appréciations enseignants        | Complet incl. commentaires par matière + appréciation prof principal              |
+| Relevé de notes annuel PDF                                          | Complet                                                                           |
+| Décisions du conseil de classe (Admis, Redoublement, etc.)          | Complet                                                                           |
+| Assiduités, paiements de scolarité, reçus PDF                       | Complet                                                                           |
+| Tableau des impayés + export CSV                                    | Complet                                                                           |
+| Échéancier de paiement (tranches)                                   | Complet                                                                           |
+| Archivage fin d'année + rollback                                    | Complet                                                                           |
+| Emploi du temps avec détection des conflits                         | Complet                                                                           |
+| Gestion des salles                                                  | Complet                                                                           |
+| Calendrier scolaire (vacances, événements)                          | Complet                                                                           |
+| Sanctions / comportement élèves                                     | Complet                                                                           |
+| Notifications in-app (cloche + badge, 6 déclencheurs)               | Complet                                                                           |
+| Notifications push mobile FCM (Android)                             | Complet                                                                           |
+| **Notifications email (bulletin, absence, sanction, relance)**      | **Complet** — Mailables + Queue, SMTP configurable                                |
+| **Journal d'audit**                                                 | **Complet** — trait `Auditable`, interface admin lecture seule                    |
+| **Rapport statistique annuel Ministère PDF**                        | **Complet** — 6 sections, A4 paysage, DomPDF                                      |
+| **Monitoring infrastructure**                                       | **Complet** — Sentry (PHP + JS), UptimeRobot, Telescope                           |
+| **Frais annexes** (tenues, manuels, examens, transport…)            | **Complet** — config par niveau, suivi paiements, impayés, reçus PDF              |
+| **Export comptable structuré**                                      | **Complet** — Excel 3 feuilles (OHADA) + FEC/CSV SAGE                             |
+| **Module SaaS billing**                                             | **Complet** — dashboard super-admin, abonnements, factures PDF                    |
+| **Documentation in-app et aide contextuelle**                       | **Complet** — panneau "?" contextuel, gestion BDD, 26 articles pré-rédigés        |
+| Statistiques avancées (KPIs, classements, évolution inter-périodes) | Complet                                                                           |
+| Gestion des remplacements d'enseignants                             | Complet                                                                           |
+| Progression du programme par matière/classe                         | Complet                                                                           |
+| Messagerie parents ↔ enseignants                                    | Complet                                                                           |
+| Réunions parents-profs (prise de RDV)                               | Complet                                                                           |
+| Photos élèves                                                       | Complet                                                                           |
+| Export CSV (élèves, notes, paiements)                               | Complet                                                                           |
+| Réinitialisation de mot de passe autonome                           | Complet                                                                           |
+| Architecture multi-tenant isolée                                    | Complet                                                                           |
+| Portail enseignant mobile (Flutter/Android)                         | Complet                                                                           |
+| Portail parent mobile (Flutter/Android)                             | Complet                                                                           |
+| Mode hors-ligne mobile pour les présences                           | Complet (SharedPreferences + sync auto)                                           |
+| Templates de démarrage rapide (lycée, collège, primaire)            | Complet (4 templates JSON)                                                        |
+| Instance démo (code + commande `php artisan demo:creer`)            | Code complet — déploiement public manquant                                        |
+| **86 tests automatisés**                                            | **Complet** — couverture frais annexes, export, documentation, + tous les anciens |
 
 ---
 
@@ -175,24 +175,24 @@ Les données d'enfants mineurs sont ultra-sensibles. Même si la réglementation
 
 ## Récapitulatif général
 
-| Phase | # | Fonctionnalité | Effort | Priorité | Statut |
-|---|---|---|---|---|---|
-| **0** | 0.1 | Déploiement instance démo publique | ~1 j | ★★★★★ | ⬜ À faire |
-| **0** | 0.2 | Notifications email (bulletin, absence, sanction, relance) | ~2 j | ★★★★★ | ✅ Livré |
-| **0** | 0.3 | Journal d'audit (notes, paiements, sanctions) | ~2 j | ★★★★☆ | ✅ Livré |
-| **1** | 1.1 | Rapport statistique Ministère PDF | ~3-4 j | ★★★★★ | ✅ Livré |
-| **1** | 1.2 | Gestion santé élève | ~1 j | ★★★☆☆ | ⬜ À faire |
-| **1** | 1.3 | Authentification 2FA admin/comptable | ~2 j | ★★★☆☆ | ⬜ À faire |
-| **1** | 1.4 | Monitoring infrastructure (Sentry + UptimeRobot) | ~1 j | ★★★★☆ | ✅ Livré |
-| **2** | 2.1 | Portail élève dans l'app mobile (rôle distinct) | ~3 j | ★★★☆☆ | ⬜ À faire |
-| **2** | 2.2 | Frais annexes (fournitures, tenues, examens) | ~3-4 j | ★★★☆☆ | ✅ Livré |
-| **2** | 2.3 | Export comptable structuré (SAGE/Excel + FEC) | ~2 j | ★★☆☆☆ | ✅ Livré |
-| **2** | 2.4 | Notifications SMS (AfricasTalking) | ~2 j | ★★☆☆☆ | ⬜ À faire |
-| **3** | 3.1 | Bibliothèque de ressources pédagogiques | ~4-5 j | ★★☆☆☆ | ⬜ À faire |
-| **3** | 3.2 | Module SaaS billing (abonnements tenants) | ~5-7 j | ★★★☆☆ | ✅ Livré |
-| **3** | 3.3 | Application iOS (App Store) | ~3-5 j | ★★☆☆☆ | ⬜ À faire |
-| **3** | 3.4 | RGPD / politique de données | ~2 j | ★★☆☆☆ | ⬜ À faire |
-| **3** | 3.5 | Documentation in-app et aide contextuelle | ~3 j | ★★☆☆☆ | ✅ Livré |
+| Phase | #   | Fonctionnalité                                             | Effort | Priorité | Statut    |
+| ----- | --- | ---------------------------------------------------------- | ------ | -------- | --------- |
+| **0** | 0.1 | Déploiement instance démo publique                         | ~1 j   | ★★★★★    | ⬜ À faire |
+| **0** | 0.2 | Notifications email (bulletin, absence, sanction, relance) | ~2 j   | ★★★★★    | ✅ Livré   |
+| **0** | 0.3 | Journal d'audit (notes, paiements, sanctions)              | ~2 j   | ★★★★☆    | ✅ Livré   |
+| **1** | 1.1 | Rapport statistique Ministère PDF                          | ~3-4 j | ★★★★★    | ✅ Livré   |
+| **1** | 1.2 | Gestion santé élève                                        | ~1 j   | ★★★☆☆    | ⬜ À faire |
+| **1** | 1.3 | Authentification 2FA admin/comptable                       | ~2 j   | ★★★☆☆    | ⬜ À faire |
+| **1** | 1.4 | Monitoring infrastructure (Sentry + UptimeRobot)           | ~1 j   | ★★★★☆    | ✅ Livré   |
+| **2** | 2.1 | Portail élève dans l'app mobile (rôle distinct)            | ~3 j   | ★★★☆☆    | ⬜ À faire |
+| **2** | 2.2 | Frais annexes (fournitures, tenues, examens)               | ~3-4 j | ★★★☆☆    | ✅ Livré   |
+| **2** | 2.3 | Export comptable structuré (SAGE/Excel + FEC)              | ~2 j   | ★★☆☆☆    | ✅ Livré   |
+| **2** | 2.4 | Notifications SMS (AfricasTalking)                         | ~2 j   | ★★☆☆☆    | ⬜ À faire |
+| **3** | 3.1 | Bibliothèque de ressources pédagogiques                    | ~4-5 j | ★★☆☆☆    | ⬜ À faire |
+| **3** | 3.2 | Module SaaS billing (abonnements tenants)                  | ~5-7 j | ★★★☆☆    | ✅ Livré   |
+| **3** | 3.3 | Application iOS (App Store)                                | ~3-5 j | ★★☆☆☆    | ⬜ À faire |
+| **3** | 3.4 | RGPD / politique de données                                | ~2 j   | ★★☆☆☆    | ⬜ À faire |
+| **3** | 3.5 | Documentation in-app et aide contextuelle                  | ~3 j   | ★★☆☆☆    | ✅ Livré   |
 
 **Livré :** 8 fonctionnalités sur 15 (hors démo) — **Restant :** ~21-27 jours de développement
 

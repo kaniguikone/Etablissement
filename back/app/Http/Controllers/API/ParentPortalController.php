@@ -19,6 +19,15 @@ use Illuminate\Support\Facades\DB;
 
 class ParentPortalController extends Controller
 {
+    /** IDs des élèves du parent (pivot + legacy parent_id) */
+    private function eleveIds($parent): array
+    {
+        $viaPivot  = $parent->eleves()->pluck('eleves.id')->toArray();
+        $viaLegacy = Eleve::where('parent_id', $parent->id)->pluck('id')->toArray();
+
+        return array_unique(array_merge($viaPivot, $viaLegacy));
+    }
+
     /**
      * Liste des enfants du parent connecté.
      * GET /api/parent/enfants
@@ -28,7 +37,7 @@ class ParentPortalController extends Controller
         $parent = $request->user();
 
         $eleves = Eleve::with(['classe.niveau'])
-            ->where('parent_id', $parent->id)
+            ->whereIn('id', $this->eleveIds($parent))
             ->get()
             ->map(fn ($e) => [
                 'id'             => $e->id,
@@ -52,9 +61,8 @@ class ParentPortalController extends Controller
     public function bulletin(Request $request, int $eleveId, int $periodeId)
     {
         $parent = $request->user();
-        $eleve  = Eleve::where('id', $eleveId)
-            ->where('parent_id', $parent->id)
-            ->firstOrFail();
+        abort_unless(in_array($eleveId, $this->eleveIds($parent)), 403);
+        $eleve  = Eleve::findOrFail($eleveId);
 
         $notes = Note::with(['devoir.matiere', 'devoir.typeDevoir'])
             ->where('eleve_id', $eleveId)
@@ -99,9 +107,8 @@ class ParentPortalController extends Controller
      */
     public function bulletinPdf(Request $request, int $eleveId, int $periodeId)
     {
-        // Vérifier que l'enfant appartient bien à ce parent
         $parent = $request->user();
-        Eleve::where('id', $eleveId)->where('parent_id', $parent->id)->firstOrFail();
+        abort_unless(in_array($eleveId, $this->eleveIds($parent)), 403);
 
         // Déléguer la génération PDF au contrôleur dédié (vue unifiée)
         return app(BulletinPdfController::class)->telecharger((string) $eleveId, (string) $periodeId);
@@ -114,7 +121,7 @@ class ParentPortalController extends Controller
     public function assiduites(Request $request, int $eleveId, int $periodeId)
     {
         $parent = $request->user();
-        Eleve::where('id', $eleveId)->where('parent_id', $parent->id)->firstOrFail();
+        abort_unless(in_array($eleveId, $this->eleveIds($parent)), 403);
 
         $records = Assiduites::with('matiere')
             ->where('eleve_id', $eleveId)
@@ -140,10 +147,8 @@ class ParentPortalController extends Controller
     public function scolarites(Request $request, int $eleveId)
     {
         $parent = $request->user();
-        $eleve  = Eleve::with('classe.niveau')
-            ->where('id', $eleveId)
-            ->where('parent_id', $parent->id)
-            ->firstOrFail();
+        abort_unless(in_array($eleveId, $this->eleveIds($parent)), 403);
+        $eleve  = Eleve::with('classe.niveau')->findOrFail($eleveId);
 
         $niveauId  = $eleve->classe?->niveau_id;
         $echeances = $niveauId
@@ -163,7 +168,8 @@ class ParentPortalController extends Controller
     public function enseignants(Request $request, int $eleveId)
     {
         $parent = $request->user();
-        $eleve  = Eleve::where('id', $eleveId)->where('parent_id', $parent->id)->firstOrFail();
+        abort_unless(in_array($eleveId, $this->eleveIds($parent)), 403);
+        $eleve  = Eleve::findOrFail($eleveId);
 
         $enseignants = DB::table('classe_enseignant_matiere as cem')
             ->join('enseignants as e', 'e.id', '=', 'cem.enseignant_id')
@@ -196,9 +202,8 @@ class ParentPortalController extends Controller
     public function emploiDuTemps(Request $request, int $eleveId)
     {
         $parent = $request->user();
-        $eleve  = Eleve::where('id', $eleveId)
-            ->where('parent_id', $parent->id)
-            ->firstOrFail();
+        abort_unless(in_array($eleveId, $this->eleveIds($parent)), 403);
+        $eleve  = Eleve::findOrFail($eleveId);
 
         $jours    = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
         $creneaux = EmploiDuTemps::with(['matiere', 'enseignant'])
@@ -219,9 +224,8 @@ class ParentPortalController extends Controller
     public function paiements(Request $request, int $eleveId)
     {
         $parent = $request->user();
-        $eleve  = Eleve::where('id', $eleveId)
-                       ->where('parent_id', $parent->id)
-                       ->firstOrFail();
+        abort_unless(in_array($eleveId, $this->eleveIds($parent)), 403);
+        $eleve  = Eleve::findOrFail($eleveId);
 
         $paiements = Paiement::with('scolarite')
             ->where('eleve_id', $eleve->id)
@@ -243,9 +247,10 @@ class ParentPortalController extends Controller
     public function recuPdf(Request $request, int $paiementId)
     {
         $parent   = $request->user();
+        $eleveIds = $this->eleveIds($parent);
         $paiement = Paiement::with(['eleve.classe.niveau', 'scolarite'])
             ->where('id', $paiementId)
-            ->whereHas('eleve', fn($q) => $q->where('parent_id', $parent->id))
+            ->whereHas('eleve', fn($q) => $q->whereIn('id', $eleveIds))
             ->firstOrFail();
 
         $etablissement = Etablissement::first();

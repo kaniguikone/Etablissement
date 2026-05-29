@@ -12,6 +12,7 @@ use App\Models\Parents;
 use App\Models\Periodes;
 use App\Models\Scolarites;
 use App\Models\Serie;
+use App\Models\AnneeScolaire;
 use App\Models\TypeDevoir;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -28,8 +29,8 @@ class DatabaseSeeder extends Seeder
             'emploi_du_temps', 'paiements', 'notes', 'devoirs', 'assiduites',
             'scolarites', 'informations', 'type_devoirs', 'personal_access_tokens',
             'eleves', 'parents', 'enseignants', 'classe_enseignant_matiere',
-            'classes', 'series', 'niveaux', 'matieres', 'periodes', 'etablissements',
-            'users', 'roles', 'salles',
+            'classes', 'series', 'niveaux', 'matieres', 'periodes', 'annees_scolaires',
+            'etablissements', 'users', 'roles', 'salles',
         ] as $table) {
             if (\Illuminate\Support\Facades\Schema::hasTable($table)) {
                 \Illuminate\Support\Facades\DB::table($table)->truncate();
@@ -79,18 +80,27 @@ class DatabaseSeeder extends Seeder
             Niveau::create(['nom_niveau' => $nom, 'abbr_niveau' => $abbr, 'ordre' => $ordre]);
         }
 
+        // ── Année scolaire active ─────────────────────────────────────────────
+        $anneeScolaire = AnneeScolaire::create([
+            'libelle'    => '2025-2026',
+            'date_debut' => '2025-09-02',
+            'date_fin'   => '2026-06-20',
+            'statut'     => 'en_cours',
+        ]);
+
         // ── Périodes ─────────────────────────────────────────────────────────
         $periodes = [
-            ['Premier Trimestre',   '1er Trim', 'T1', '2025-2026', '2025-09-02', '2025-12-20'],
-            ['Deuxième Trimestre',  '2eme Trim', 'T2', '2025-2026', '2026-01-05', '2026-03-13'],
-            ['Troisième Trimestre', '3eme Trim', 'T3', '2025-2026', '2026-03-16', '2026-06-20'],
+            ['Premier Trimestre',   '1er Trim', 'T1', '2025-09-02', '2025-12-20'],
+            ['Deuxième Trimestre',  '2eme Trim', 'T2', '2026-01-05', '2026-03-13'],
+            ['Troisième Trimestre', '3eme Trim', 'T3', '2026-03-16', '2026-06-20'],
         ];
-        foreach ($periodes as [$libelle, $abbr, $code, $annee, $debut, $fin]) {
+        foreach ($periodes as [$libelle, $abbr, $code, $debut, $fin]) {
             Periodes::create([
                 'libelle_periode'      => $libelle,
                 'abbr_libelle_periode' => $abbr,
                 'code_periode'         => $code,
-                'annee'                => $annee,
+                'annee'                => $anneeScolaire->libelle,
+                'annee_scolaire_id'    => $anneeScolaire->id,
                 'date_debut'           => $debut,
                 'date_fin'             => $fin,
             ]);
