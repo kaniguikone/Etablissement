@@ -1,6 +1,6 @@
 # Roadmap commerciale — Application de gestion scolaire
 
-> Document de référence — Mis à jour le 2026-05-26
+> Document de référence — Mis à jour le 2026-05-29
 > Synthèse de l'analyse experte (2026-04-30) et de l'état réel du code
 
 ---
@@ -28,6 +28,8 @@
 | **Notifications email (bulletin, absence, sanction, relance)**      | **Complet** — Mailables + Queue, SMTP configurable                                |
 | **Journal d'audit**                                                 | **Complet** — trait `Auditable`, interface admin lecture seule                    |
 | **Rapport statistique annuel Ministère PDF**                        | **Complet** — 6 sections, A4 paysage, DomPDF                                      |
+| **Statistiques générales MENET (formulaire officiel)**              | **Complet** — 14 sections (effectifs, langues, nationalités, âges, résultats examens BEPC/BAC/CEPE), exports Excel + PDF |
+| **Inscription parent autonome depuis l'app mobile**                 | **Complet** — flow 3 étapes via matricule élève, validation admin, slots/abonnements |
 | **Monitoring infrastructure**                                       | **Complet** — Sentry (PHP + JS), UptimeRobot, Telescope                           |
 | **Frais annexes** (tenues, manuels, examens, transport…)            | **Complet** — config par niveau, suivi paiements, impayés, reçus PDF              |
 | **Export comptable structuré**                                      | **Complet** — Excel 3 feuilles (OHADA) + FEC/CSV SAGE                             |
@@ -47,7 +49,7 @@
 | Mode hors-ligne mobile pour les présences                           | Complet (SharedPreferences + sync auto)                                           |
 | Templates de démarrage rapide (lycée, collège, primaire)            | Complet (4 templates JSON)                                                        |
 | Instance démo (code + commande `php artisan demo:creer`)            | Code complet — déploiement public manquant                                        |
-| **86 tests automatisés**                                            | **Complet** — couverture frais annexes, export, documentation, + tous les anciens |
+| **85 tests automatisés**                                            | **Complet** — couverture frais annexes, export, documentation, stats MENET, portail parent |
 
 ---
 
@@ -181,6 +183,8 @@ Les données d'enfants mineurs sont ultra-sensibles. Même si la réglementation
 | **0** | 0.2 | Notifications email (bulletin, absence, sanction, relance) | ~2 j   | ★★★★★    | ✅ Livré   |
 | **0** | 0.3 | Journal d'audit (notes, paiements, sanctions)              | ~2 j   | ★★★★☆    | ✅ Livré   |
 | **1** | 1.1 | Rapport statistique Ministère PDF                          | ~3-4 j | ★★★★★    | ✅ Livré   |
+| **1** | 1.1b | Statistiques générales MENET (formulaire 14 sections)     | ~2 j   | ★★★★★    | ✅ Livré   |
+| **1** | 1.1c | Inscription parent autonome (flow matricule + validation)  | ~2 j   | ★★★★☆    | ✅ Livré   |
 | **1** | 1.2 | Gestion santé élève                                        | ~1 j   | ★★★☆☆    | ⬜ À faire |
 | **1** | 1.3 | Authentification 2FA admin/comptable                       | ~2 j   | ★★★☆☆    | ⬜ À faire |
 | **1** | 1.4 | Monitoring infrastructure (Sentry + UptimeRobot)           | ~1 j   | ★★★★☆    | ✅ Livré   |
@@ -194,7 +198,7 @@ Les données d'enfants mineurs sont ultra-sensibles. Même si la réglementation
 | **3** | 3.4 | RGPD / politique de données                                | ~2 j   | ★★☆☆☆    | ⬜ À faire |
 | **3** | 3.5 | Documentation in-app et aide contextuelle                  | ~3 j   | ★★☆☆☆    | ✅ Livré   |
 
-**Livré :** 8 fonctionnalités sur 15 (hors démo) — **Restant :** ~21-27 jours de développement
+**Livré :** 10 fonctionnalités sur 17 (hors démo) — **Restant :** ~17-23 jours de développement
 
 ---
 
@@ -211,9 +215,11 @@ Les données d'enfants mineurs sont ultra-sensibles. Même si la réglementation
 - **Notifications email automatiques** (bulletin, absence, sanction, relance)
 - **Journal d'audit complet** (traçabilité de toutes les modifications sensibles)
 - **Rapport statistique Ministère PDF** (auto-génération — argument de vente unique)
+- **Formulaire MENET officiel** (14 sections, BEPC/BAC/CEPE, exports Excel/PDF — zéro ressaisie annuelle)
+- **Inscription parent autonome depuis l'app** (flow matricule élève, validation admin, slots par école)
 - **Frais annexes** (tenues, manuels, examens — facturation complémentaire intégrée)
 - **Export comptable OHADA** (Excel 3 feuilles + FEC SAGE — zéro ressaisie)
 - **Module SaaS billing** (abonnements, factures, dashboard super-admin)
 - **Documentation in-app contextuelle** (aide par module, 26 articles pré-rédigés)
-- 86 tests automatisés
+- 85 tests automatisés
 - Templates de démarrage rapide (mise en service en moins d'une heure)
