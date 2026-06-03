@@ -213,8 +213,9 @@ Route::middleware([
 
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me',      [AuthController::class, 'me']);
-        Route::put('/mon-profil',        [UserController::class, 'monProfil']);
-        Route::post('/mon-profil/photo', [UserController::class, 'updateMaPhoto']);
+        Route::put('/mon-profil',                    [UserController::class, 'monProfil']);
+        Route::post('/mon-profil/photo',             [UserController::class, 'updateMaPhoto']);
+        Route::post('/changer-mot-de-passe-initial', [UserController::class, 'changerMotDePasseInitial']);
 
         Route::get('/notifications',                [NotificationController::class, 'index']);
         Route::get('/notifications/non-lues',       [NotificationController::class, 'nonLues']);

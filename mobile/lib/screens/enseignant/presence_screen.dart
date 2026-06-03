@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../services/api_service.dart';
 import '../../services/offline_presence_service.dart';
 import '../../models/classe_matiere.dart';
@@ -17,6 +19,8 @@ class PresenceScreen extends StatefulWidget {
 class PresenceScreenState extends State<PresenceScreen> {
   final _api            = ApiService();
   final _offlineService = OfflinePresenceService();
+
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySub;
 
   List<ClasseMatiere> _classes = [];
   ClasseMatiere? _selection;
@@ -39,6 +43,18 @@ class PresenceScreenState extends State<PresenceScreen> {
     _loadData();
     _fetchPeriodeFromDate(_date.toIso8601String().substring(0, 10));
     _rafraichirPendingCount();
+    _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
+      final connecte = results.any((r) => r != ConnectivityResult.none);
+      if (connecte && _pendingCount > 0 && !_syncing) {
+        _synchroniser();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _connectivitySub?.cancel();
+    super.dispose();
   }
 
   Future<void> _rafraichirPendingCount() async {

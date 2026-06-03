@@ -7,6 +7,7 @@ import { NotificationProvider } from './context/NotificationContext';
 import Menu from './components/Menu';
 import MenuGroupe from './components/groupe/MenuGroupe';
 import MenuEnseignant from './components/enseignant/MenuEnseignant';
+import MenuSuperAdmin from './components/superadmin/MenuSuperAdmin';
 import Topbar, { TOPBAR_HEIGHT } from './components/Topbar';
 import NotificationsPanel from './components/notifications/NotificationsPanel';
 import AideContextuelle from './components/aide/AideContextuelle';
@@ -15,14 +16,16 @@ import RoutesMenu from './route/RoutesMenu';
 const SIDEBAR_WIDTH = 310;
 
 const AppInterne = () => {
-    const { user, estGroupe, estEnseignant } = useAuth();
+    const { user, estGroupe, estEnseignant, estSuperAdmin } = useAuth();
     const location = useLocation();
     const surLogin = location.pathname === '/login';
 
     const connecte = user && !surLogin;
+    const avecSidebar = connecte && !estSuperAdmin;
 
     const renderMenu = () => {
         if (!connecte) return null;
+        if (estSuperAdmin) return <MenuSuperAdmin />;
         if (estGroupe)     return <MenuGroupe />;
         if (estEnseignant) return <MenuEnseignant />;
         return <Menu />;
@@ -31,16 +34,16 @@ const AppInterne = () => {
     return (
         <div>
             {renderMenu()}
-            {connecte && !estGroupe && (
+            {avecSidebar && !estGroupe && (
                 <>
                     <Topbar sidebarWidth={SIDEBAR_WIDTH} />
                     <NotificationsPanel />
                 </>
             )}
-            <div style={connecte ? { marginLeft: SIDEBAR_WIDTH, marginTop: TOPBAR_HEIGHT, minHeight: '100vh' } : {}}>
+            <div style={connecte ? { marginLeft: SIDEBAR_WIDTH, marginTop: estSuperAdmin ? 0 : TOPBAR_HEIGHT, minHeight: '100vh' } : {}}>
                 <RoutesMenu />
             </div>
-            {connecte && !estGroupe && !estEnseignant && <AideContextuelle />}
+            {avecSidebar && !estGroupe && !estEnseignant && <AideContextuelle />}
         </div>
     );
 };

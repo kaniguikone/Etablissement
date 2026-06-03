@@ -42,6 +42,9 @@ dependencies:
   # Infos de l'application (version, build number)
   package_info_plus: ^8.1.0
 
+  # Détection connectivité réseau (sync automatique hors-ligne)
+  connectivity_plus: ^6.0.0
+
 
 dev_dependencies:
   flutter_test:

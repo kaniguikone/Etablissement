@@ -31,7 +31,7 @@ const ParametresEtablissement = () => {
     const [nbNiveaux, setNbNiveaux] = useState(null); // null = pas encore chargé
 
     const vide = {
-        nom: '', slogan: '', adresse: '', ville: '', bp: '',
+        nom: '', type: '', code_ministere: '', slogan: '', adresse: '', ville: '', bp: '',
         telephone: '', telephone2: '', email: '', site_web: '', pays: '',
     };
 
@@ -50,16 +50,18 @@ const ParametresEtablissement = () => {
             .then(([rEtab, rNiveaux]) => {
                 const d = rEtab.data;
                 setForm({
-                    nom:        d.nom        || '',
-                    slogan:     d.slogan     || '',
-                    adresse:    d.adresse    || '',
-                    ville:      d.ville      || '',
-                    bp:         d.bp         || '',
-                    telephone:  d.telephone  || '',
-                    telephone2: d.telephone2 || '',
-                    email:      d.email      || '',
-                    site_web:   d.site_web   || '',
-                    pays:       d.pays       || '',
+                    nom:             d.nom             || '',
+                    type:            d.type            || '',
+                    code_ministere:  d.code_ministere  || '',
+                    slogan:          d.slogan          || '',
+                    adresse:         d.adresse         || '',
+                    ville:           d.ville           || '',
+                    bp:              d.bp              || '',
+                    telephone:       d.telephone       || '',
+                    telephone2:      d.telephone2      || '',
+                    email:           d.email           || '',
+                    site_web:        d.site_web        || '',
+                    pays:            d.pays            || '',
                 });
                 setLogoUrl(d.logo_url || null);
                 if (rNiveaux) setNbNiveaux(rNiveaux.data.length);
@@ -283,6 +285,25 @@ const ParametresEtablissement = () => {
                                     type="text" name="pays"
                                     className="form-control form-control-sm"
                                     value={form.pays} onChange={handleChange}
+                                />
+                            </div>
+                            <div className="col-md-5">
+                                <label className="form-label small fw-bold">Type d'établissement</label>
+                                <select name="type" className="form-select form-select-sm" value={form.type} onChange={handleChange}>
+                                    <option value="">— Non défini —</option>
+                                    <option value="college">Collège (6ème → 3ème)</option>
+                                    <option value="lycee">Lycée (Seconde → Terminale)</option>
+                                    <option value="lycee_complet">Lycée Complet (6ème → Terminale)</option>
+                                    <option value="primaire">École Primaire (CP1 → CM2)</option>
+                                </select>
+                            </div>
+                            <div className="col-md-4">
+                                <label className="form-label small fw-bold">Code MENET</label>
+                                <input
+                                    type="text" name="code_ministere"
+                                    className="form-control form-control-sm"
+                                    placeholder="Ex : 0100123A"
+                                    value={form.code_ministere} onChange={handleChange}
                                 />
                             </div>
                             <div className="col-12">

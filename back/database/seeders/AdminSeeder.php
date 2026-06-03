@@ -57,7 +57,7 @@ class AdminSeeder extends Seeder
         }
 
         // ── Création des comptes de test ──────────────────────────────────────
-        $domaine = tenancy()->tenant?->domains()->first()?->domain ?? 'etablissement.ci';
+        $domaine = (tenancy()->tenant?->id ?? 'etablissement') . '.ci';
 
         $comptes = [
             ['name' => 'Super Administrateur', 'telephone' => '0700000001', 'email' => "admin@{$domaine}",       'role' => 'super_admin', 'password' => 'admin123'],

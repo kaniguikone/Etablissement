@@ -1,13 +1,17 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\API\DemandeAccesController;
+use App\Http\Controllers\API\ParentCentralController;
 use App\Http\Controllers\API\SuperAdmin\SuperAdminAuthController;
+use App\Http\Controllers\API\SuperAdmin\TarifsLicenceController;
 use App\Http\Controllers\API\SuperAdmin\TenantController;
 use App\Http\Controllers\API\SuperAdmin\AbonnementSaasController;
 use App\Http\Controllers\API\Group\GroupAuthController;
 use App\Http\Controllers\API\Group\GroupDashboardController;
 use App\Http\Controllers\API\Group\GroupTenantController;
 use App\Http\Controllers\API\Group\TemplateController;
+use App\Http\Controllers\API\SuperAdmin\SuperAdminTemplateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +20,16 @@ use App\Http\Controllers\API\Group\TemplateController;
 | Ces routes s'appliquent au domaine central uniquement.
 | Elles permettent de gérer les établissements (tenants).
 */
+
+// ─── Tarifs publics (landing page) ───────────────────────────────────────────
+Route::get('/tarifs', [TarifsLicenceController::class, 'public']);
+
+// ─── Demande d'accès établissement (formulaire public) ───────────────────────
+Route::post('/demande-acces', [DemandeAccesController::class, 'store']);
+
+// ─── Inscription parent depuis landing page (cross-tenant) ───────────────────
+Route::get('/parent/valider-matricule', [ParentCentralController::class, 'validerMatricule']);
+Route::post('/parent/inscription',      [ParentCentralController::class, 'inscrire']);
 
 // ─── Recherche publique d'établissements (onboarding mobile) ─────────────────
 Route::get('/etablissements/recherche',   [TenantController::class, 'recherche']);
@@ -57,6 +71,19 @@ Route::middleware('auth:sanctum')->prefix('superadmin')->group(function () {
     Route::post('/logout',    [SuperAdminAuthController::class, 'logout']);
     Route::get('/me',         [SuperAdminAuthController::class, 'me']);
 
+    // ── Demandes d'accès ─────────────────────────────────────────────────────
+    Route::get('/demandes',                         [DemandeAccesController::class, 'index']);
+    Route::post('/demandes/{id}/accepter',          [DemandeAccesController::class, 'accepter']);
+    Route::post('/demandes/{id}/refuser',           [DemandeAccesController::class, 'refuser']);
+
+    // ── Tarifs & configuration licence ───────────────────────────────────────
+    Route::get('/tarifs',                           [TarifsLicenceController::class, 'index']);
+    Route::post('/tarifs/tranches',                 [TarifsLicenceController::class, 'storeTranche']);
+    Route::put('/tarifs/tranches/{id}',             [TarifsLicenceController::class, 'updateTranche']);
+    Route::delete('/tarifs/tranches/{id}',          [TarifsLicenceController::class, 'destroyTranche']);
+    Route::put('/tarifs/config',                    [TarifsLicenceController::class, 'updateConfig']);
+    Route::post('/tarifs/simuler',                  [TarifsLicenceController::class, 'simuler']);
+
     Route::get('/tenants',                      [TenantController::class, 'index']);
     Route::post('/tenants',                     [TenantController::class, 'store']);
     Route::get('/tenants/{id}',                 [TenantController::class, 'show']);
@@ -73,4 +100,10 @@ Route::middleware('auth:sanctum')->prefix('superadmin')->group(function () {
     Route::get('/billing/tenants/{tenantId}/historique', [AbonnementSaasController::class, 'historique']);
     Route::get('/billing/factures/{id}/telecharger', [AbonnementSaasController::class, 'telechargerFacture']);
     Route::post('/billing/factures/{id}/payer',      [AbonnementSaasController::class, 'marquerPayee']);
+
+    // ── Templates de type d'établissement ────────────────────────────────────
+    Route::get('/templates',                         [TemplateController::class, 'index']);
+    Route::get('/templates/{type}',                  [TemplateController::class, 'show']);
+    Route::put('/templates/{type}',                  [TemplateController::class, 'update']);
+    Route::post('/tenants/{tenantId}/apply-template',[TemplateController::class, 'appliquer']);
 });

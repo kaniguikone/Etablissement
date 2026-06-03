@@ -31,10 +31,11 @@ class AuthController extends Controller
         $tenant = tenant();
 
         return response()->json([
-            'token'      => $token,
-            'user'       => $this->formatUser($user),
-            'group_id'   => $tenant?->group_id,
-            'group_nom'  => $tenant?->group?->nom,
+            'token'                => $token,
+            'user'                 => $this->formatUser($user),
+            'group_id'             => $tenant?->group_id,
+            'group_nom'            => $tenant?->group?->nom,
+            'must_change_password' => (bool) $user->must_change_password,
         ]);
     }
 

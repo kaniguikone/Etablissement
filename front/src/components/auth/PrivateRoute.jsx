@@ -9,6 +9,11 @@ const PrivateRoute = ({ children, permissions, superOnly }) => {
         return <Navigate to="/login" replace />;
     }
 
+    // Forcer le changement de mot de passe avant tout accès
+    if (user.must_change_password && location.pathname !== '/changer-mot-de-passe') {
+        return <Navigate to="/changer-mot-de-passe" replace />;
+    }
+
     // Un admin groupe qui tente d'accéder aux pages école → redirige vers son dashboard
     const surPageEcole = !location.pathname.startsWith('/groupe');
     if (estGroupe && surPageEcole) {

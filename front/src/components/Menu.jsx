@@ -10,7 +10,7 @@ const GROUPES = [
     {
         label: null,
         items: [
-            { to: '/', icon: 'fas fa-home', label: 'Accueil' },
+            { to: '/accueil', icon: 'fas fa-home', label: 'Accueil' },
         ],
     },
 
@@ -161,16 +161,6 @@ const GROUPES = [
         ],
     },
 
-    // ── Développement (super admin uniquement) ───────────────────────────────
-    {
-        label: 'Développement',
-        icon: 'fas fa-flask',
-        superOnly: true,
-        items: [
-            { to: '/Seeder', icon: 'fas fa-database', label: 'Interface de seed' },
-        ],
-    },
-
     // ── Statistiques (pilotage — en bas) ─────────────────────────────────────
     {
         label: 'Statistiques',
@@ -233,10 +223,9 @@ const Menu = () => {
     const { etablissement } = useEtablissement();
     const location = useLocation();
 
-    const groupesFiltres = GROUPES.filter(g => {
-        if (g.superOnly) return user?.super === true || user?.super === 1;
-        return !g.permissions || peutAcceder(g.permissions);
-    });
+    const groupesFiltres = GROUPES.filter(g =>
+        !g.permissions || peutAcceder(g.permissions)
+    );
 
     const initialOpen = groupesFiltres.findIndex(g =>
         g.label && g.items.some(item => location.pathname.startsWith(item.to))

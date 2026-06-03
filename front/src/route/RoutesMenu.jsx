@@ -1,6 +1,10 @@
 import { Routes, Route } from 'react-router-dom';
 import PrivateRoute from '../components/auth/PrivateRoute';
 import LoginPage from '../components/auth/LoginPage';
+import BackofficeLogin from '../components/auth/BackofficeLogin';
+import ChangerMotDePasseInitial from '../components/auth/ChangerMotDePasseInitial';
+import LandingPage from '../components/landing/LandingPage';
+import InscriptionEtablissement from '../components/landing/InscriptionEtablissement';
 import DashboardGroupe from '../components/groupe/DashboardGroupe';
 import ListeEcoles from '../components/groupe/ListeEcoles';
 import DetailsEcole from '../components/groupe/DetailsEcole';
@@ -24,6 +28,7 @@ import ListeMatieres from '../components/matieres/ListeMatieres';
 import ListePeriodes from '../components/periodes/ListePeriodes';
 import ListeParents from '../components/parents/ListeParents';
 import InscriptionParent from '../components/parents/InscriptionParent';
+import InscriptionParentPublique from '../components/parents/InscriptionParentPublique';
 import DemandesParents from '../components/parents/DemandesParents';
 import ListeScolarites from '../components/scolarites/ListeScolarites';
 import ListeInformations from '../components/informations/ListeInformations';
@@ -111,6 +116,9 @@ import ImpayesFraisAnnexes from '../components/fraisannexes/ImpayesFraisAnnexes'
 import FraisAnnexeEleve from '../components/fraisannexes/FraisAnnexeEleve';
 import ExportComptable from '../components/comptabilite/ExportComptable';
 import GestionAbonnements from '../components/superadmin/GestionAbonnements';
+import DemandesAcces from '../components/superadmin/DemandesAcces';
+import ConfigTarifs from '../components/superadmin/ConfigTarifs';
+import GestionTemplatesSuperAdmin from '../components/superadmin/GestionTemplatesSuperAdmin';
 import GestionDocumentation from '../components/aide/GestionDocumentation';
 import Notifications from '../components/notifications/Notifications';
 import ArchivageWizard from '../components/archivage/ArchivageWizard';
@@ -148,7 +156,12 @@ const RoutesMenu = () => (
     <div>
         <Routes>
             {/* Pages publiques */}
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/backoffice" element={<BackofficeLogin />} />
+            <Route path="/changer-mot-de-passe" element={<PrivateRoute><ChangerMotDePasseInitial /></PrivateRoute>} />
+            <Route path="/inscription-etablissement" element={<InscriptionEtablissement />} />
+            <Route path="/inscription-parent" element={<InscriptionParentPublique />} />
             <Route path="/reinitialiser-mot-de-passe" element={<ReinitialisationMotDePasse />} />
             <Route path="/inscription-parent" element={<InscriptionParent />} />
 
@@ -165,7 +178,11 @@ const RoutesMenu = () => (
             <Route path="/enseignant/appreciations"  element={<PrivateRoute><EnseignantAppreciations /></PrivateRoute>} />
 
             {/* ── SuperAdmin ────────────────────────────────────────────── */}
-            <Route path="/superadmin/abonnements"  element={<PrivateRoute><GestionAbonnements /></PrivateRoute>} />
+            <Route path="/superadmin/abonnements"       element={<PrivateRoute><GestionAbonnements /></PrivateRoute>} />
+            <Route path="/superadmin/demandes"          element={<PrivateRoute><DemandesAcces /></PrivateRoute>} />
+            <Route path="/superadmin/tarifs"            element={<PrivateRoute><ConfigTarifs /></PrivateRoute>} />
+            <Route path="/superadmin/templates"         element={<PrivateRoute><GestionTemplatesSuperAdmin /></PrivateRoute>} />
+            <Route path="/superadmin/templates/:type"   element={<PrivateRoute><EditionTemplate basePath="/superadmin" /></PrivateRoute>} />
 
             {/* ── Espace Groupe Scolaire ─────────────────────────────────── */}
             <Route path="/groupe"                  element={<PrivateRoute><DashboardGroupe /></PrivateRoute>} />
@@ -178,7 +195,7 @@ const RoutesMenu = () => (
             <Route path="/groupe/templates/:type"     element={<PrivateRoute><EditionTemplate /></PrivateRoute>} />
 
             {/* Tableau de bord */}
-            <Route path="/" element={<PrivateRoute><Accueil /></PrivateRoute>} />
+            <Route path="/accueil" element={<PrivateRoute><Accueil /></PrivateRoute>} />
 
             {/* Mon profil */}
             <Route path="/MonProfil" element={<PrivateRoute><MonProfil /></PrivateRoute>} />

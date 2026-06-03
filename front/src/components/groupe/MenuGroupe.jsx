@@ -96,6 +96,33 @@ const MenuGroupe = () => {
                     </ul>
                 </nav>
 
+                {/* Super-Admin — visible pour tous les admins groupe (opérateur) */}
+                <div style={{ padding: '8px 16px 4px', borderTop: '1px solid rgba(255,255,255,0.12)', marginTop: 8 }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'rgba(255,255,255,0.45)' }}>
+                        Super-Admin
+                    </span>
+                </div>
+                <ul className="menu-flat">
+                    <li>
+                        <NavLink to="/superadmin/demandes">
+                            <span className="icon"><i className="fas fa-inbox" /></span>
+                            <span className="item">Demandes d'accès</span>
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink to="/superadmin/abonnements">
+                            <span className="icon"><i className="fas fa-credit-card" /></span>
+                            <span className="item">Abonnements</span>
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink to="/superadmin/tarifs">
+                            <span className="icon"><i className="fas fa-tags" /></span>
+                            <span className="item">Tarifs & Licences</span>
+                        </NavLink>
+                    </li>
+                </ul>
+
                 {/* Déconnexion */}
                 <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
                     <button

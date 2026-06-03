@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../services/api_service.dart';
+import '../../services/offline_notes_service.dart';
 import '../../models/devoir.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/loading_error_widget.dart';
@@ -13,36 +16,78 @@ class NotesSaisieScreen extends StatefulWidget {
 }
 
 class _NotesSaisieScreenState extends State<NotesSaisieScreen> {
-  final _api = ApiService();
+  final _api            = ApiService();
+  final _offlineService = OfflineNotesService();
+
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySub;
 
   List<Map<String, dynamic>> _eleves = [];
   List<Map<String, dynamic>> _classesNiveau = [];
   Map<int, TextEditingController> _controllers = {};
   int? _classeSelectionneeId;
   bool _loading = true;
-  bool _saving = false;
+  bool _saving  = false;
+  bool _syncing = false;
+  int  _pendingCount = 0;
   String? _error;
 
   @override
   void initState() {
     super.initState();
     _load();
+    _rafraichirPendingCount();
+    _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
+      final connecte = results.any((r) => r != ConnectivityResult.none);
+      if (connecte && _pendingCount > 0 && !_syncing) {
+        _synchroniser();
+      }
+    });
   }
 
   @override
   void dispose() {
+    _connectivitySub?.cancel();
     for (final c in _controllers.values) { c.dispose(); }
     super.dispose();
+  }
+
+  Future<void> _rafraichirPendingCount() async {
+    final n = await _offlineService.nombreEnAttente();
+    if (mounted) setState(() => _pendingCount = n);
+  }
+
+  Future<void> _synchroniser() async {
+    setState(() { _syncing = true; _error = null; });
+    final enAttente = await _offlineService.enAttente();
+    int ok = 0;
+    for (final payload in enAttente) {
+      try {
+        final devoirId = int.parse(payload['devoir_id'].toString());
+        final notes    = (payload['notes'] as List).cast<Map<String, dynamic>>();
+        await _api.sauvegarderNotes(devoirId, notes);
+        await _offlineService.supprimer(payload);
+        ok++;
+      } catch (_) {
+        // garde les autres pour le prochain essai
+      }
+    }
+    await _rafraichirPendingCount();
+    setState(() => _syncing = false);
+    if (mounted && ok > 0) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('$ok devoir(s) synchronisé(s) avec succès'),
+        backgroundColor: Colors.green,
+      ));
+    }
   }
 
   Future<void> _load({int? classeId}) async {
     setState(() { _loading = true; _error = null; });
     try {
       final data = await _api.getNotesDevoir(widget.devoir.id, classeId: classeId);
-      final notes = (data['notes'] as List? ?? []);
+      final notes   = (data['notes'] as List? ?? []);
       final classes = (data['classes_niveau'] as List? ?? []);
 
-      // Recréer les controllers
       for (final c in _controllers.values) { c.dispose(); }
       _controllers = {};
 
@@ -55,9 +100,9 @@ class _NotesSaisieScreenState extends State<NotesSaisieScreen> {
       }
 
       setState(() {
-        _eleves = notes.cast<Map<String, dynamic>>();
+        _eleves        = notes.cast<Map<String, dynamic>>();
         _classesNiveau = classes.cast<Map<String, dynamic>>();
-        _loading = false;
+        _loading       = false;
       });
     } catch (e) {
       setState(() { _error = e.toString(); _loading = false; });
@@ -66,25 +111,44 @@ class _NotesSaisieScreenState extends State<NotesSaisieScreen> {
 
   Future<void> _sauvegarder() async {
     setState(() { _saving = true; _error = null; });
+
+    final notes = _eleves.map((e) {
+      final eleveId = int.parse(e['eleve_id'].toString());
+      final val     = _controllers[eleveId]?.text.trim();
+      return {
+        'eleve_id': eleveId,
+        'note': val != null && val.isNotEmpty ? double.tryParse(val) : null,
+      };
+    }).toList();
+
     try {
-      final notes = _eleves.map((e) {
-        final eleveId = int.parse(e['eleve_id'].toString());
-        final val = _controllers[eleveId]?.text.trim();
-        return {
-          'eleve_id': eleveId,
-          'note': val != null && val.isNotEmpty ? double.tryParse(val) : null,
-        };
-      }).toList();
-
       await _api.sauvegarderNotes(widget.devoir.id, notes.cast<Map<String, dynamic>>());
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Notes enregistrées avec succès'), backgroundColor: Colors.green),
+          const SnackBar(
+            content: Text('Notes enregistrées avec succès'),
+            backgroundColor: Colors.green,
+          ),
         );
       }
-    } catch (e) {
-      setState(() => _error = e.toString());
+    } catch (_) {
+      // Pas de réseau : stockage local
+      final payload = {
+        'devoir_id': widget.devoir.id,
+        if (_classeSelectionneeId != null) 'classe_id': _classeSelectionneeId,
+        'notes': notes,
+      };
+      await _offlineService.sauvegarder(payload);
+      await _rafraichirPendingCount();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sauvegardé hors ligne — sera synchronisé dès la reconnexion'),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
     } finally {
       setState(() => _saving = false);
     }
@@ -118,10 +182,42 @@ class _NotesSaisieScreenState extends State<NotesSaisieScreen> {
       ),
       body: _loading
           ? const LoadingWidget(message: 'Chargement...')
-          : _error != null
+          : _error != null && _eleves.isEmpty
               ? ErrorRetryWidget(message: _error!, onRetry: _load)
               : Column(
                   children: [
+                    // ── Bannière hors-ligne ──
+                    if (_pendingCount > 0)
+                      Material(
+                        color: Colors.orange[700],
+                        child: InkWell(
+                          onTap: _syncing ? null : _synchroniser,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            child: Row(
+                              children: [
+                                _syncing
+                                    ? const SizedBox(
+                                        width: 16, height: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2, color: Colors.white))
+                                    : const Icon(Icons.cloud_upload_outlined,
+                                        color: Colors.white, size: 18),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    _syncing
+                                        ? 'Synchronisation en cours…'
+                                        : '$_pendingCount devoir(s) en attente — Appuyez pour synchroniser',
+                                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
                     // Sélecteur classe si devoir de niveau
                     if (_classesNiveau.isNotEmpty)
                       Container(
@@ -177,6 +273,8 @@ class _NotesSaisieScreenState extends State<NotesSaisieScreen> {
                       ),
                     ),
 
+                    if (_saving) const LinearProgressIndicator(),
+
                     if (_eleves.isEmpty && _classesNiveau.isEmpty)
                       const Expanded(
                         child: EmptyWidget(
@@ -197,12 +295,12 @@ class _NotesSaisieScreenState extends State<NotesSaisieScreen> {
                           padding: const EdgeInsets.only(bottom: 16),
                           itemCount: _eleves.length,
                           itemBuilder: (_, i) {
-                            final e = _eleves[i];
+                            final e      = _eleves[i];
                             final eleveId = int.parse(e['eleve_id'].toString());
-                            final ctrl = _controllers[eleveId]!;
+                            final ctrl   = _controllers[eleveId]!;
                             return _EleveNoteTile(
-                              nom: '${e['nom_eleve']} ${e['prenoms_eleve']}',
-                              matricule: e['matricule_eleve'] as String? ?? '',
+                              nom:        '${e['nom_eleve']} ${e['prenoms_eleve']}',
+                              matricule:  e['matricule_eleve'] as String? ?? '',
                               controller: ctrl,
                             );
                           },

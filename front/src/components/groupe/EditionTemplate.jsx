@@ -11,10 +11,11 @@ const ONGLETS = [
     { id: 'periodes',      label: 'Périodes',          icon: 'fa-calendar-alt' },
 ];
 
-const EditionTemplate = () => {
+const EditionTemplate = ({ basePath = '/groupe' }) => {
     const { type } = useParams();
     const navigate = useNavigate();
     const { toast } = useToast();
+    const apiPrefix = basePath === '/superadmin' ? '/superadmin' : '/group';
 
     const [chargement, setChargement] = useState(true);
     const [sauvegarde, setSauvegarde] = useState(false);
@@ -43,7 +44,7 @@ const EditionTemplate = () => {
 
     /* ── Chargement ── */
     useEffect(() => {
-        centralApi.get(`/group/templates/${type}`)
+        centralApi.get(`${apiPrefix}/templates/${type}`)
             .then(r => {
                 const d = r.data;
                 const niveauxData = d.niveaux || [];
@@ -236,7 +237,7 @@ const EditionTemplate = () => {
     const handleSauvegarder = async () => {
         setSauvegarde(true);
         try {
-            await centralApi.put(`/group/templates/${type}`, {
+            await centralApi.put(`${apiPrefix}/templates/${type}`, {
                 matieres,
                 niveau_series:      niveauSeries,
                 niveau_matieres:    niveauMatieres,

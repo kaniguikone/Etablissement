@@ -25,21 +25,23 @@ class EtablissementController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'nom'                  => 'required|string|max:255',
-            'slogan'               => 'nullable|string|max:255',
-            'adresse'              => 'nullable|string|max:255',
-            'ville'                => 'nullable|string|max:100',
-            'bp'                   => 'nullable|string|max:100',
-            'telephone'            => 'nullable|string|max:30',
-            'telephone2'           => 'nullable|string|max:30',
-            'email'                => 'nullable|email|max:255',
-            'site_web'             => 'nullable|string|max:255',
-            'pays'                 => 'nullable|string|max:100',
+            'nom'             => 'required|string|max:255',
+            'type'            => 'nullable|in:lycee,lycee_complet,college,primaire',
+            'code_ministere'  => 'nullable|string|max:50',
+            'slogan'          => 'nullable|string|max:255',
+            'adresse'         => 'nullable|string|max:255',
+            'ville'           => 'nullable|string|max:100',
+            'bp'              => 'nullable|string|max:100',
+            'telephone'       => 'nullable|string|max:30',
+            'telephone2'      => 'nullable|string|max:30',
+            'email'           => 'nullable|email|max:255',
+            'site_web'        => 'nullable|string|max:255',
+            'pays'            => 'nullable|string|max:100',
         ]);
 
         $etablissement = Etablissement::firstOrCreate([], ['nom' => 'Mon Établissement']);
         $etablissement->update($request->only([
-            'nom', 'slogan', 'adresse', 'ville', 'bp',
+            'nom', 'type', 'code_ministere', 'slogan', 'adresse', 'ville', 'bp',
             'telephone', 'telephone2', 'email', 'site_web', 'pays',
         ]));
 

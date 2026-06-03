@@ -365,12 +365,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           children: [
             const SizedBox(height: 4),
             const Text(
-              'Code établissement',
+              'Code MENET',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             const Text(
-              'Saisissez le code à 6 caractères fourni par votre établissement.',
+              'Saisissez le code officiel de votre établissement attribué par le Ministère de l\'Éducation Nationale.',
               style: TextStyle(color: Colors.black54, height: 1.4),
             ),
             const SizedBox(height: 28),
@@ -380,7 +380,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               keyboardType: TextInputType.text,
               textCapitalization: TextCapitalization.characters,
               autocorrect: false,
-              maxLength: 6,
+              maxLength: 20,
               style: const TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,

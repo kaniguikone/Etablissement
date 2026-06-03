@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "analyse-experte.md",
+                "file": "guide-production.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "analyse-experte"
+              "title": "guide-production"
             }
           }
         ]
@@ -185,18 +185,24 @@
   },
   "active": "64e474c9d1cd1ed8",
   "lastOpenFiles": [
+    "commandes-creation.md.tmp.25700.8e8d667109ca",
+    "fonctionnalites.md",
+    "roadmap-commerciale.md",
+    "guide-administrateur.md.tmp.40008.cef871bd101b",
+    "guide-administrateur.md.tmp.40008.8deb41b3f19a",
+    "fonctionnalites.md.tmp.40008.8ef5e64430b8",
+    "fonctionnalites.md.tmp.40008.123d9fac83d0",
+    "fonctionnalites.md.tmp.40008.99d016a65084",
+    "roadmap-commerciale.md.tmp.40008.cef98ed2f5fe",
+    "roadmap-commerciale.md.tmp.40008.387838185e27",
+    "roadmap-commerciale.md.tmp.40008.857864e52b04",
+    "roadmap-commerciale.md.tmp.40008.fd43b6e85682",
     "analyse-experte.md",
+    "guide-production.md.tmp.6136.bd4c31e76b0e",
     "Sans titre.md",
     "Sans titre/Sans titre.md",
-    "Sans titre",
     "guide-production.md",
-    "analyse-experte.md.tmp.13324.1777580216424",
-    "~$nctionnalités.docx",
-    "~WRL2666.tmp",
-    "~WRD2650.tmp",
-    "Fonctionnalités.docx",
     "~$nctionnalites.md",
-    "fonctionnalites.md",
     "guide-administrateur.md",
     "guide-deploiement.md"
   ]

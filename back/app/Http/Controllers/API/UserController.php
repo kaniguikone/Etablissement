@@ -119,6 +119,23 @@ class UserController extends Controller
         ]);
     }
 
+    /** POST /changer-mot-de-passe-initial — 1ère connexion, sans vérifier l'ancien mot de passe. */
+    public function changerMotDePasseInitial(Request $request)
+    {
+        $request->validate([
+            'password'              => 'required|string|min:6',
+            'password_confirmation' => 'required|same:password',
+        ]);
+
+        $user = $request->user();
+        $user->update([
+            'password'             => Hash::make($request->password),
+            'must_change_password' => false,
+        ]);
+
+        return response()->json(['message' => 'Mot de passe mis à jour.']);
+    }
+
     // L'utilisateur connecté change sa propre photo (MonProfil)
     public function updateMaPhoto(Request $request)
     {

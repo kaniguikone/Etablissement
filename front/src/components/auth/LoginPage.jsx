@@ -11,7 +11,7 @@ const estDomaineCentral = () => {
 };
 
 const LoginPage = () => {
-    const { connexion, connexionEnseignant, connexionGroupe } = useAuth();
+    const { connexion, connexionEnseignant, connexionGroupe, connexionSuperAdmin } = useAuth();
     const navigate = useNavigate();
 
     const domaineCentral = estDomaineCentral();
@@ -51,12 +51,11 @@ const LoginPage = () => {
                 await connexionGroupe(email, password);
                 navigate('/groupe');
             } else if (!email.includes('@')) {
-                // Numéro enseignant → portail enseignant
                 await connexionEnseignant(email, password);
                 navigate('/enseignant');
             } else {
                 await connexion(email, password);
-                navigate('/');
+                navigate('/accueil');
             }
         } catch (err) {
             setErreur(err.response?.data?.message || 'Identifiants incorrects.');
@@ -136,22 +135,30 @@ const LoginPage = () => {
                         </p>
                     </div>
 
-                    {/* Sélecteur de mode — uniquement sur les sous-domaines tenant */}
+                    {/* Sur le domaine central : onglet Groupe scolaire uniquement */}
+                    {domaineCentral && (
+                        <div className="d-flex mb-4" style={{ background: '#f1f5f9', borderRadius: 10, padding: 4 }}>
+                            <button type="button" style={{
+                                flex: 1, border: 'none', borderRadius: 8, padding: '8px 0',
+                                fontWeight: 600, fontSize: 13, cursor: 'default',
+                                background: '#fff', color: '#1a56a0',
+                                boxShadow: '0 1px 4px rgba(0,0,0,.1)',
+                            }}>
+                                <i className="fas fa-layer-group me-2" />Groupe scolaire
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Sélecteur de mode — sous-domaine tenant : Établissement uniquement */}
                     {!domaineCentral && (
-                        <div className="d-flex mb-4" style={{
-                            background: '#f1f5f9', borderRadius: 10, padding: 4,
-                        }}>
-                            <button
-                                type="button"
-                                onClick={() => { setMode('school'); setErreur(''); }}
+                        <div className="d-flex mb-4" style={{ background: '#f1f5f9', borderRadius: 10, padding: 4 }}>
+                            <button type="button" onClick={() => { setMode('school'); setErreur(''); }}
                                 style={{
                                     flex: 1, border: 'none', borderRadius: 8, padding: '8px 0',
-                                    fontWeight: 600, fontSize: 13, cursor: 'pointer', transition: 'all .2s',
-                                    background: mode === 'school' ? '#fff' : 'transparent',
-                                    color: mode === 'school' ? '#1a56a0' : '#6c757d',
-                                    boxShadow: mode === 'school' ? '0 1px 4px rgba(0,0,0,.1)' : 'none',
-                                }}
-                            >
+                                    fontWeight: 600, fontSize: 13, cursor: 'pointer',
+                                    background: '#fff', color: '#1a56a0',
+                                    boxShadow: '0 1px 4px rgba(0,0,0,.1)',
+                                }}>
                                 <i className="fas fa-school me-2" />Établissement
                             </button>
                         </div>

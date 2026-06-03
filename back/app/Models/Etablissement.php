@@ -10,7 +10,7 @@ class Etablissement extends Model
     protected $table = 'etablissement';
 
     protected $fillable = [
-        'nom', 'slogan', 'logo', 'adresse', 'ville', 'bp',
+        'nom', 'type', 'code_ministere', 'slogan', 'logo', 'adresse', 'ville', 'bp',
         'telephone', 'telephone2', 'email', 'site_web', 'pays',
     ];
 
