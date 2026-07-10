@@ -10,6 +10,9 @@ return new class extends Migration
 
     public function up(): void
     {
+        // La base centrale MySQL n'est pas disponible en tests (SQLite in-memory)
+        if (app()->environment('testing')) return;
+
         // Tranches de prix par élève
         Schema::connection('mysql')->create('tarifs_licence', function (Blueprint $table) {
             $table->id();
@@ -33,6 +36,8 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (app()->environment('testing')) return;
+
         Schema::connection('mysql')->dropIfExists('tarifs_licence');
         Schema::connection('mysql')->dropIfExists('config_saas');
     }

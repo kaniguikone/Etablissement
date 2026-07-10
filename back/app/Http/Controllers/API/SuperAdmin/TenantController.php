@@ -10,7 +10,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 
 class TenantController extends Controller
 {
@@ -73,7 +72,6 @@ class TenantController extends Controller
             'telephone'       => 'nullable|string|max:30',
             'ville'           => 'nullable|string|max:100',
             'pays'            => 'nullable|string|max:100',
-            'plan'            => ['nullable', Rule::in(['demo', 'basic', 'pro', 'premium'])],
             'date_expiration' => 'nullable|date|after:today',
             'domaine'         => 'required|string|max:255', // sous-domaine principal
         ]);
@@ -86,7 +84,6 @@ class TenantController extends Controller
         $tenant->telephone      = $data['telephone'] ?? null;
         $tenant->ville          = $data['ville'] ?? null;
         $tenant->pays           = $data['pays'] ?? "Côte d'Ivoire";
-        $tenant->plan           = $data['plan'] ?? 'demo';
         $tenant->actif          = true;
         $tenant->date_expiration = $data['date_expiration'] ?? null;
         $tenant->save();
@@ -113,7 +110,6 @@ class TenantController extends Controller
             'telephone'       => 'nullable|string|max:30',
             'ville'           => 'nullable|string|max:100',
             'pays'            => 'nullable|string|max:100',
-            'plan'            => ['nullable', Rule::in(['demo', 'basic', 'pro', 'premium'])],
             'actif'           => 'sometimes|boolean',
             'date_expiration' => 'nullable|date',
         ]);

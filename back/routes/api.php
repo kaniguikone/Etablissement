@@ -97,7 +97,6 @@ Route::middleware('auth:sanctum')->prefix('superadmin')->group(function () {
 
     // ── Billing / Abonnements SaaS ────────────────────────────────────────
     Route::get('/billing',                           [AbonnementSaasController::class, 'index']);
-    Route::get('/billing/plans',                     [AbonnementSaasController::class, 'plans']);
     Route::post('/billing/abonnements',              [AbonnementSaasController::class, 'store']);
     Route::get('/billing/tenants/{tenantId}/historique', [AbonnementSaasController::class, 'historique']);
     Route::get('/billing/factures/{id}/telecharger', [AbonnementSaasController::class, 'telechargerFacture']);

@@ -18,7 +18,6 @@ return new class extends Migration
         Schema::connection('mysql')->create('abonnements_saas', function (Blueprint $table) {
             $table->id();
             $table->string('tenant_id');           // FK → tenants.id
-            $table->string('plan', 20);            // demo | basic | pro | premium
             $table->string('periode', 20);         // mensuel | annuel | offert | personnalise
             $table->date('date_debut');
             $table->date('date_fin');

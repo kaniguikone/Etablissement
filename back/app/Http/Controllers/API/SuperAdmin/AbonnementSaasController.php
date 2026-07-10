@@ -46,8 +46,6 @@ class AbonnementSaasController extends Controller
                 'nom'               => $t->nom,
                 'code'              => $t->code,
                 'domaine'           => $t->domains->first()?->domain,
-                'plan'              => $t->plan,
-                'plan_label'        => AbonnementSaas::PLANS[$t->plan]['label'] ?? $t->plan,
                 'actif'             => $t->actif,
                 'date_expiration'   => $t->date_expiration?->format('Y-m-d'),
                 'jours_restants'    => $expiration ? max(0, $maintenant->diffInDays($expiration, false)) : null,
@@ -63,7 +61,6 @@ class AbonnementSaasController extends Controller
             'expires'        => $data->where('statut', 'expire')->count(),
             'expire_bientot' => $data->where('statut', 'expire_bientot')->count(),
             'desactives'     => $data->where('statut', 'desactive')->count(),
-            'par_plan'       => $data->groupBy('plan')->map->count(),
         ];
 
         return response()->json(['tenants' => $data, 'stats' => $stats]);
@@ -91,11 +88,10 @@ class AbonnementSaasController extends Controller
     {
         $request->validate([
             'tenant_id'          => 'required|exists:tenants,id',
-            'plan'               => 'required|in:demo,basic,pro,premium',
             'periode'            => 'required|in:mensuel,annuel,offert,personnalise',
             'date_debut'         => 'required|date',
             'duree_mois'         => 'nullable|integer|min:1|max:120',
-            'montant_ht'         => 'nullable|numeric|min:0',
+            'montant_ht'         => 'required|numeric|min:0',
             'taux_tva'           => 'nullable|numeric|min:0|max:100',
             'mode_paiement'      => 'nullable|in:especes,cheque,virement,mobile_money,offert',
             'reference_paiement' => 'nullable|string|max:100',
@@ -103,7 +99,6 @@ class AbonnementSaasController extends Controller
             'avec_facture'       => 'boolean',
         ]);
 
-        $planConfig   = AbonnementSaas::PLANS[$request->plan] ?? [];
         $periodeLabel = $request->periode;
         $dateDebut    = Carbon::parse($request->date_debut);
 
@@ -115,20 +110,16 @@ class AbonnementSaasController extends Controller
             'personnalise' => $dateDebut->copy()->addMonths((int) $request->input('duree_mois', 1)),
         };
 
-        // Calculer les montants si non fournis
-        $montantHt = (float) $request->input('montant_ht',
-            $periodeLabel === 'annuel'
-                ? ($planConfig['prix_annuel'] ?? 0)
-                : ($planConfig['prix_mensuel'] ?? 0)
-        );
-        $tauxTva   = (float) $request->input('taux_tva', 18.0);
+        // Montant négocié avec l'établissement, saisi manuellement par le super-admin
+        // (le tarif licence/élève affiché publiquement n'est qu'indicatif)
+        $montantHt  = (float) $request->montant_ht;
+        $tauxTva    = (float) $request->input('taux_tva', 18.0);
         $montantTtc = $montantHt * (1 + $tauxTva / 100);
 
         DB::transaction(function () use ($request, $dateDebut, $dateFin, $montantHt, $tauxTva, $montantTtc, &$abonnement) {
             // Créer l'abonnement
             $abonnement = AbonnementSaas::create([
                 'tenant_id'          => $request->tenant_id,
-                'plan'               => $request->plan,
                 'periode'            => $request->periode,
                 'date_debut'         => $dateDebut,
                 'date_fin'           => $dateFin,
@@ -142,9 +133,8 @@ class AbonnementSaasController extends Controller
                 'created_by'         => auth()->id(),
             ]);
 
-            // Mettre à jour le plan et la date d'expiration du tenant
+            // Mettre à jour la date d'expiration du tenant
             Tenant::where('id', $request->tenant_id)->update([
-                'plan'            => $request->plan,
                 'date_expiration' => $dateFin,
             ]);
 
@@ -166,13 +156,6 @@ class AbonnementSaasController extends Controller
         });
 
         return response()->json($abonnement->load(['facture', 'tenant']), 201);
-    }
-
-    // ── Plans disponibles ─────────────────────────────────────────────────
-
-    public function plans()
-    {
-        return response()->json(AbonnementSaas::PLANS);
     }
 
     // ── PDF Facture ───────────────────────────────────────────────────────

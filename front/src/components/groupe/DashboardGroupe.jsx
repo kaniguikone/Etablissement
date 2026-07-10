@@ -194,13 +194,12 @@ const DashboardGroupe = () => {
                         const s = ecole.stats;
                         const taux = s.totalDu > 0 ? Math.round((s.totalEncaisse / s.totalDu) * 100) : 0;
                         const couleur = taux >= 80 ? '#198754' : taux >= 50 ? '#f59e0b' : '#dc3545';
-                        const planCouleur = ecole.plan === 'pro' ? '#0d6efd' : ecole.plan === 'basic' ? '#198754' : '#6c757d';
 
                         return (
                             <div key={ecole.id} className="col-12 col-md-6 col-lg-4">
                                 <div
                                     className="card shadow-sm h-100"
-                                    style={{ borderRadius: 12, borderTop: `4px solid ${planCouleur}`, cursor: 'pointer', transition: 'transform .15s' }}
+                                    style={{ borderRadius: 12, borderTop: '4px solid #6c757d', cursor: 'pointer', transition: 'transform .15s' }}
                                     onClick={() => navigate(`/groupe/ecoles/${ecole.id}`)}
                                     onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
                                     onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
@@ -211,7 +210,6 @@ const DashboardGroupe = () => {
                                                 <h6 className="fw-bold mb-0">{ecole.nom}</h6>
                                                 <span className="text-muted small"><i className="fas fa-map-marker-alt me-1" />{ecole.ville || '—'}</span>
                                             </div>
-                                            <span className="badge" style={{ background: planCouleur }}>{ecole.plan}</span>
                                         </div>
 
                                         {/* Effectifs */}

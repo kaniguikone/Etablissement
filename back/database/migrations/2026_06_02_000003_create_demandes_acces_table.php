@@ -11,6 +11,9 @@ return new class extends Migration
 
     public function up(): void
     {
+        // La base centrale MySQL n'est pas disponible en tests (SQLite in-memory)
+        if (app()->environment('testing')) return;
+
         Schema::connection('mysql')->create('demandes_acces', function (Blueprint $table) {
             $table->id();
             $table->string('nom_etablissement');
@@ -30,6 +33,8 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (app()->environment('testing')) return;
+
         Schema::connection('mysql')->dropIfExists('demandes_acces');
     }
 };

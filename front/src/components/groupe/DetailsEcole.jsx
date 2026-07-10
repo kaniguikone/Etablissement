@@ -124,9 +124,6 @@ const DetailsEcole = () => {
                             <div className="d-flex gap-3 text-muted small flex-wrap">
                                 {tenant.ville && <span><i className="fas fa-map-marker-alt me-1" />{tenant.ville}</span>}
                                 <span>
-                                    Plan : <span className={`badge bg-${tenant.plan === 'pro' ? 'primary' : tenant.plan === 'basic' ? 'success' : 'secondary'}`}>{tenant.plan}</span>
-                                </span>
-                                <span>
                                     <i className={`fas fa-circle me-1 ${tenant.actif ? 'text-success' : 'text-danger'}`} style={{ fontSize: 9 }} />
                                     {tenant.actif ? 'Actif' : 'Inactif'}
                                 </span>

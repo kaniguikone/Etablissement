@@ -95,7 +95,6 @@ class GroupDashboardController extends Controller
                 'nom'     => $tenant->nom,
                 'ville'   => $tenant->ville,
                 'domaine' => $tenant->domains->first()?->domain,
-                'plan'    => $tenant->plan,
                 'stats'   => compact(
                     'totalEleves', 'totalEnseignants', 'totalClasses', 'totalParents',
                     'totalDu', 'totalEncaisse', 'tauxRecouvrement', 'impayes',

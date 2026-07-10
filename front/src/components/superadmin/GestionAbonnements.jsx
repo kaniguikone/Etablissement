@@ -13,13 +13,6 @@ const TYPES_ETABLISSEMENT = [
     { value: 'primaire',      label: 'École Primaire',  desc: 'CP1 → CM2' },
 ];
 
-const PLANS_COLORS = {
-    demo:    { bg: 'bg-secondary', text: 'Démo' },
-    basic:   { bg: 'bg-info',      text: 'Starter' },
-    pro:     { bg: 'bg-primary',   text: 'Pro' },
-    premium: { bg: 'bg-warning',   text: 'Premium' },
-};
-
 const STATUT_CONFIG = {
     actif:           { cls: 'success', icon: 'bi-check-circle-fill', label: 'Actif' },
     expire_bientot:  { cls: 'warning', icon: 'bi-exclamation-triangle-fill', label: 'Expire bientôt' },
@@ -31,7 +24,7 @@ const PERIODES = ['mensuel', 'annuel', 'offert', 'personnalise'];
 const MODES_PAI = ['especes', 'cheque', 'virement', 'mobile_money', 'offert'];
 
 const FORM_VIDE = {
-    tenant_id: '', plan: 'basic', periode: 'annuel',
+    tenant_id: '', periode: 'annuel',
     date_debut: new Date().toISOString().slice(0, 10),
     duree_mois: '', montant_ht: '', taux_tva: 18,
     mode_paiement: 'virement', reference_paiement: '',
@@ -40,7 +33,6 @@ const FORM_VIDE = {
 
 export default function GestionAbonnements() {
     const [data, setData]               = useState(null);
-    const [plans, setPlans]             = useState({});
     const [chargement, setChargement]   = useState(true);
     const [modal, setModal]             = useState(false);
     const [form, setForm]               = useState(FORM_VIDE);
@@ -63,12 +55,8 @@ export default function GestionAbonnements() {
         setChargement(true);
         setErreur('');
         try {
-            const [rBilling, rPlans] = await Promise.all([
-                centralApi.get('/superadmin/billing'),
-                centralApi.get('/superadmin/billing/plans'),
-            ]);
+            const rBilling = await centralApi.get('/superadmin/billing');
             setData(rBilling.data);
-            setPlans(rPlans.data);
         } catch (e) {
             setErreur('Impossible de charger les données de billing.');
         } finally { setChargement(false); }
@@ -98,33 +86,9 @@ export default function GestionAbonnements() {
     };
 
     const ouvrirModalRenouvellement = (tenant) => {
-        const planCourant = plans[tenant.plan] ?? {};
-        setForm({
-            ...FORM_VIDE,
-            tenant_id: tenant.id,
-            plan: tenant.plan,
-            montant_ht: planCourant.prix_annuel ?? '',
-        });
+        setForm({ ...FORM_VIDE, tenant_id: tenant.id });
         setErreurs({});
         setModal(true);
-    };
-
-    const changerPlan = (plan) => {
-        const planConfig = plans[plan] ?? {};
-        const montant = form.periode === 'annuel'
-            ? (planConfig.prix_annuel ?? 0)
-            : (planConfig.prix_mensuel ?? 0);
-        setForm(f => ({ ...f, plan, montant_ht: montant }));
-    };
-
-    const changerPeriode = (periode) => {
-        const planConfig = plans[form.plan] ?? {};
-        const montant = periode === 'annuel'
-            ? (planConfig.prix_annuel ?? 0)
-            : periode === 'mensuel'
-                ? (planConfig.prix_mensuel ?? 0)
-                : 0;
-        setForm(f => ({ ...f, periode, montant_ht: montant }));
     };
 
     const montantTtc = () => {
@@ -192,7 +156,7 @@ export default function GestionAbonnements() {
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h4 className="mb-0">Gestion des abonnements SaaS</h4>
-                    <small className="text-muted">Suivi des plans et renouvellements des établissements</small>
+                    <small className="text-muted">Suivi des abonnements et renouvellements des établissements</small>
                 </div>
                 <button className="btn btn-primary" onClick={() => { setForm(FORM_VIDE); setErreurs({}); setModal(true); }}>
                     <i className="bi bi-plus-lg me-1" />Nouvel abonnement
@@ -215,20 +179,6 @@ export default function GestionAbonnements() {
                     </div>
                 ))}
             </div>
-
-            {/* Répartition par plan */}
-            {stats.par_plan && (
-                <div className="d-flex gap-2 mb-3 flex-wrap">
-                    {Object.entries(stats.par_plan).map(([plan, count]) => {
-                        const pc = PLANS_COLORS[plan] ?? { bg: 'bg-secondary', text: plan };
-                        return (
-                            <span key={plan} className={`badge ${pc.bg} fs-6 px-3 py-2`}>
-                                {pc.text} : {count}
-                            </span>
-                        );
-                    })}
-                </div>
-            )}
 
             {/* Filtres */}
             <div className="card border-0 shadow-sm mb-4">
@@ -260,7 +210,6 @@ export default function GestionAbonnements() {
                             <tr>
                                 <th>Établissement</th>
                                 <th>Code</th>
-                                <th>Plan</th>
                                 <th>Expiration</th>
                                 <th className="text-center">Jours restants</th>
                                 <th className="text-center">Statut</th>
@@ -269,10 +218,9 @@ export default function GestionAbonnements() {
                         </thead>
                         <tbody>
                             {tenantsFiltres.length === 0 ? (
-                                <tr><td colSpan={7} className="text-center text-muted py-4">Aucun établissement trouvé.</td></tr>
+                                <tr><td colSpan={6} className="text-center text-muted py-4">Aucun établissement trouvé.</td></tr>
                             ) : tenantsFiltres.map(t => {
                                 const sc = STATUT_CONFIG[t.statut] ?? STATUT_CONFIG.actif;
-                                const pc = PLANS_COLORS[t.plan] ?? PLANS_COLORS.demo;
                                 return (
                                     <tr key={t.id}>
                                         <td>
@@ -280,7 +228,6 @@ export default function GestionAbonnements() {
                                             {t.domaine && <div className="text-muted small">{t.domaine}</div>}
                                         </td>
                                         <td><code>{t.code}</code></td>
-                                        <td><span className={`badge ${pc.bg}`}>{pc.text}</span></td>
                                         <td>
                                             {t.date_expiration
                                                 ? new Date(t.date_expiration).toLocaleDateString('fr-FR')
@@ -348,34 +295,11 @@ export default function GestionAbonnements() {
                                         {erreurs.tenant_id && <div className="invalid-feedback">{erreurs.tenant_id}</div>}
                                     </div>
 
-                                    {/* Plan */}
-                                    <div className="mb-3">
-                                        <label className="form-label">Plan <span className="text-danger">*</span></label>
-                                        <div className="row g-2">
-                                            {Object.entries(plans).map(([key, p]) => (
-                                                <div key={key} className="col-6 col-md-3">
-                                                    <div className={`border rounded p-2 text-center h-100 ${form.plan === key ? 'border-primary bg-primary bg-opacity-10' : ''}`}
-                                                        style={{ cursor: 'pointer' }}
-                                                        onClick={() => changerPlan(key)}>
-                                                        <input type="radio" className="d-none" checked={form.plan === key} onChange={() => {}} />
-                                                        <div className={`badge ${PLANS_COLORS[key]?.bg ?? 'bg-secondary'} mb-1`}>{p.label ?? key}</div>
-                                                        <div className="small text-muted">{p.description}</div>
-                                                        <div className="small fw-bold mt-1">
-                                                            {p.prix_annuel > 0
-                                                                ? `${Number(p.prix_annuel).toLocaleString('fr-FR')} FCFA/an`
-                                                                : 'Gratuit'}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
                                     <div className="row g-3 mb-3">
                                         <div className="col-md-4">
                                             <label className="form-label">Période</label>
                                             <select className="form-select" value={form.periode}
-                                                onChange={e => changerPeriode(e.target.value)}>
+                                                onChange={e => setForm(f => ({ ...f, periode: e.target.value }))}>
                                                 {PERIODES.map(p => (
                                                     <option key={p} value={p}>
                                                         {p === 'mensuel' ? 'Mensuel' : p === 'annuel' ? 'Annuel' : p === 'offert' ? 'Offert (30 j)' : 'Personnalisé'}
@@ -400,9 +324,10 @@ export default function GestionAbonnements() {
                                     {/* Montants */}
                                     <div className="row g-3 mb-3">
                                         <div className="col-md-4">
-                                            <label className="form-label">Montant HT (FCFA)</label>
+                                            <label className="form-label">Montant HT négocié (FCFA)</label>
                                             <input type="number" min="0" className="form-control" value={form.montant_ht}
                                                 onChange={e => setForm(f => ({ ...f, montant_ht: e.target.value }))} />
+                                            <div className="form-text">Le tarif licence/élève (page publique) n'est qu'indicatif — saisir ici le montant réellement négocié.</div>
                                         </div>
                                         <div className="col-md-4">
                                             <label className="form-label">TVA (%)</label>
@@ -580,7 +505,6 @@ export default function GestionAbonnements() {
                                         <table className="table table-sm align-middle">
                                             <thead className="table-light">
                                                 <tr>
-                                                    <th>Plan</th>
                                                     <th>Période</th>
                                                     <th>Du</th>
                                                     <th>Au</th>
@@ -593,7 +517,6 @@ export default function GestionAbonnements() {
                                             <tbody>
                                                 {historique.map(a => (
                                                     <tr key={a.id}>
-                                                        <td><span className={`badge ${PLANS_COLORS[a.plan]?.bg ?? 'bg-secondary'}`}>{a.plan}</span></td>
                                                         <td className="small">{a.periode}</td>
                                                         <td className="small">{new Date(a.date_debut).toLocaleDateString('fr-FR')}</td>
                                                         <td className="small">{new Date(a.date_fin).toLocaleDateString('fr-FR')}</td>

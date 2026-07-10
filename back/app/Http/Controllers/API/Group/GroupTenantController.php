@@ -139,7 +139,7 @@ class GroupTenantController extends Controller
         tenancy()->end();
 
         return response()->json([
-            'tenant' => $tenant->only(['id', 'nom', 'ville', 'plan', 'actif']),
+            'tenant' => $tenant->only(['id', 'nom', 'ville', 'actif']),
             'mois'   => $mois,
             'stats'  => compact(
                 'eleves', 'enseignants', 'classes', 'parents',
@@ -502,7 +502,7 @@ class GroupTenantController extends Controller
         tenancy()->end();
 
         return response()->json([
-            'tenant'      => $tenant->only(['id', 'nom', 'ville', 'plan', 'actif']),
+            'tenant'      => $tenant->only(['id', 'nom', 'ville', 'actif']),
             'mois'        => $mois,
             'enseignants' => $result->values(),
         ]);
@@ -752,7 +752,7 @@ class GroupTenantController extends Controller
         tenancy()->end();
 
         return response()->json([
-            'tenant' => $tenant->only(['id', 'nom', 'ville', 'plan', 'actif']),
+            'tenant' => $tenant->only(['id', 'nom', 'ville', 'actif']),
             'mois'   => $mois,
             'eleves' => $result->values(),
         ]);

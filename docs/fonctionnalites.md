@@ -299,9 +299,9 @@ L'application propose quatre portails distincts selon le profil :
 - Gestion des versions de l'application mobile (versionning, URL de téléchargement, mise à jour forcée)
 
 ### Module SaaS billing
-- Gestion des **abonnements** par établissement (plans demo, basic, pro, premium)
+- Gestion des **abonnements** par établissement — montant négocié au cas par cas (pas de plans fixes), tarif licence/élève affiché à titre indicatif sur la page publique
 - **Génération automatique de factures PDF** à chaque renouvellement
-- Dashboard super-admin : revenus par plan, statut des abonnements, historique des paiements
+- Dashboard super-admin : statut des abonnements, historique des paiements
 - Base de données centrale séparée des données pédagogiques des tenants
 
 ---

@@ -40,13 +40,13 @@ const ListeEcoles = () => {
                         ? new Date(ecole.date_expiration).toLocaleDateString('fr-FR')
                         : 'Illimitée';
                     const expired = ecole.date_expiration && new Date(ecole.date_expiration) < new Date();
-                    const planCouleur = ecole.plan === 'pro' ? '#0d6efd' : ecole.plan === 'basic' ? '#198754' : '#6c757d';
+                    const accent = '#0d6efd';
 
                     return (
                         <div key={ecole.id} className="col-12 col-md-6 col-lg-4">
                             <div className="card shadow-sm h-100" style={{
                                 borderRadius: 12,
-                                borderTop: `4px solid ${planCouleur}`,
+                                borderTop: `4px solid ${accent}`,
                             }}>
                                 <div className="card-body d-flex flex-column gap-3">
 
@@ -55,10 +55,10 @@ const ListeEcoles = () => {
                                         <div className="d-flex align-items-center gap-2">
                                             <div style={{
                                                 width: 40, height: 40, borderRadius: 8, flexShrink: 0,
-                                                background: planCouleur + '15',
+                                                background: accent + '15',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                             }}>
-                                                <i className="fas fa-school" style={{ color: planCouleur, fontSize: 18 }} />
+                                                <i className="fas fa-school" style={{ color: accent, fontSize: 18 }} />
                                             </div>
                                             <div>
                                                 <div className="fw-bold" style={{ fontSize: 14 }}>{ecole.nom}</div>
@@ -81,10 +81,6 @@ const ListeEcoles = () => {
                                             <code style={{ fontSize: 11 }}>{domaine}</code>
                                         </div>
                                         <div className="d-flex align-items-center justify-content-between">
-                                            <span className="text-muted"><i className="fas fa-tag me-2" />Plan</span>
-                                            <span className="badge" style={{ background: planCouleur }}>{ecole.plan}</span>
-                                        </div>
-                                        <div className="d-flex align-items-center justify-content-between">
                                             <span className="text-muted"><i className="fas fa-calendar-alt me-2" />Expiration</span>
                                             <span className={expired ? 'text-danger fw-semibold' : 'text-muted'} style={{ fontSize: 12 }}>
                                                 {expired && <i className="fas fa-exclamation-triangle me-1" />}
@@ -97,7 +93,7 @@ const ListeEcoles = () => {
                                     <div className="mt-auto">
                                         <button
                                             className="btn btn-sm w-100 fw-semibold"
-                                            style={{ background: planCouleur + '15', color: planCouleur, border: 'none', borderRadius: 8 }}
+                                            style={{ background: accent + '15', color: accent, border: 'none', borderRadius: 8 }}
                                             onClick={() => navigate(`/groupe/ecoles/${ecole.id}`)}
                                         >
                                             <i className="fas fa-chart-bar me-2" />Voir les statistiques

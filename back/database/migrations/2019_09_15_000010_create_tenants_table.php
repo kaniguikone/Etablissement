@@ -20,7 +20,6 @@ class CreateTenantsTable extends Migration
             $table->string('telephone')->nullable();
             $table->string('ville')->nullable();
             $table->string('pays')->nullable();
-            $table->enum('plan', ['demo', 'basic', 'pro'])->default('demo');
             $table->boolean('actif')->default(true);
             $table->date('date_expiration')->nullable();  // null = pas d'expiration
 
