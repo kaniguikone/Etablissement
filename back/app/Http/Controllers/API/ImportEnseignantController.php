@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\CentralUser;
 use App\Models\Enseignant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -152,7 +153,7 @@ class ImportEnseignantController extends Controller
             $dateNaissance = $this->parseDate($row['G'] ?? '');
             $dateEmbauche  = $this->parseDate($row['H'] ?? '');
 
-            Enseignant::create([
+            $enseignant = Enseignant::create([
                 'matricule_enseignant'    => $matricule,
                 'nom_enseignant'          => $nom,
                 'prenoms_enseignant'      => $prenoms,
@@ -164,6 +165,10 @@ class ImportEnseignantController extends Controller
                 'statut_enseignant'       => $statut ?: null,
                 'password'                => Hash::make('Enseignant@' . $matricule),
             ]);
+
+            if ($enseignant->telephone_enseignant) {
+                CentralUser::lierEnseignant($enseignant, tenant('id'));
+            }
 
             $inseres++;
         }

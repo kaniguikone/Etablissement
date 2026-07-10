@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class StorageService {
@@ -118,6 +119,35 @@ class StorageService {
     'prenom': await _storage.read(key: _keyEnseignantPrenom),
     'numero': await _storage.read(key: _keyEnseignantNumero),
   };
+
+  // ── Session centrale multi-écoles (parent central) ───────────────────────
+
+  static const _keySessionCentrale  = 'central_session';
+  static const _keyEcoleActiveIndex = 'ecole_active_index';
+
+  /// Sauvegarde la réponse complète du login central.
+  static Future<void> saveSessionCentrale(Map<String, dynamic> data) =>
+      _storage.write(key: _keySessionCentrale, value: jsonEncode(data));
+
+  /// Charge la session centrale. Retourne null si aucune session.
+  static Future<Map<String, dynamic>?> getSessionCentrale() async {
+    final raw = await _storage.read(key: _keySessionCentrale);
+    if (raw == null) return null;
+    return jsonDecode(raw) as Map<String, dynamic>;
+  }
+
+  static Future<void> saveEcoleActiveIndex(int index) =>
+      _storage.write(key: _keyEcoleActiveIndex, value: index.toString());
+
+  static Future<int> getEcoleActiveIndex() async {
+    final v = await _storage.read(key: _keyEcoleActiveIndex);
+    return int.tryParse(v ?? '') ?? 0;
+  }
+
+  static Future<void> clearSessionCentrale() async {
+    await _storage.delete(key: _keySessionCentrale);
+    await _storage.delete(key: _keyEcoleActiveIndex);
+  }
 
   // ── Utilitaire ────────────────────────────────────────────────────────────
 

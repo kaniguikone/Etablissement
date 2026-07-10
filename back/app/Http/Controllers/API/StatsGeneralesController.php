@@ -164,8 +164,8 @@ class StatsGeneralesController extends Controller
             $c = $item['classes'];
             $e  = $this->eff($c);
             $af = $this->eff($c, ['est_affecte' => true]);
-            $bo = $this->eff($c, ['est_boursier' => true]);
-            $db = $this->eff($c, ['est_demi_boursier' => true]);
+            $bo = $this->eff($c, ['statut_bourse' => 'boursier']);
+            $db = $this->eff($c, ['statut_bourse' => 'demi_boursier']);
 
             $lignes[] = [
                 'niveau'         => $item['niveau']->abbr_niveau,

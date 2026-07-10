@@ -18,7 +18,6 @@ class BienvenuEtablissement extends Mailable
         public readonly string $domaine,
         public readonly string $email,
         public readonly string $motDePasse,
-        public readonly string $expireLe,
     ) {}
 
     public function envelope(): Envelope

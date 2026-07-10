@@ -67,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
       case LoginSuccess():
         Navigator.of(context).popUntil((route) => route.isFirst);
 
-      case LoginChoix(:final dataParent, :final dataEnseignant):
+      case LoginChoix(:final dataParentCentral, :final dataEnseignantCentral):
         await showModalBottomSheet<void>(
           context: context,
           isScrollControlled: true,
@@ -75,8 +75,8 @@ class _LoginScreenState extends State<LoginScreen> {
           isDismissible: false,
           enableDrag: false,
           builder: (_) => _RoleChoiceSheet(
-            dataParent:     dataParent,
-            dataEnseignant: dataEnseignant,
+            dataParentCentral:     dataParentCentral,
+            dataEnseignantCentral: dataEnseignantCentral,
           ),
         );
 
@@ -320,12 +320,12 @@ class _LoginScreenState extends State<LoginScreen> {
 // ── Bottom sheet : choix du rôle quand le user est parent ET enseignant ────────
 
 class _RoleChoiceSheet extends StatefulWidget {
-  final Map<String, dynamic> dataParent;
-  final Map<String, dynamic> dataEnseignant;
+  final Map<String, dynamic> dataParentCentral;
+  final Map<String, dynamic> dataEnseignantCentral;
 
   const _RoleChoiceSheet({
-    required this.dataParent,
-    required this.dataEnseignant,
+    required this.dataParentCentral,
+    required this.dataEnseignantCentral,
   });
 
   @override
@@ -337,7 +337,9 @@ class _RoleChoiceSheetState extends State<_RoleChoiceSheet> {
 
   Future<void> _choisir(String role) async {
     setState(() => _loading = true);
-    final data = role == 'enseignant' ? widget.dataEnseignant : widget.dataParent;
+    final data = role == 'enseignant_central'
+        ? widget.dataEnseignantCentral
+        : widget.dataParentCentral;
     await context.read<AuthProvider>().choisirRole(role, data);
     if (mounted) Navigator.of(context).pop();
   }
@@ -384,7 +386,7 @@ class _RoleChoiceSheetState extends State<_RoleChoiceSheet> {
                 'Consultez les notes, bulletins et absences de vos enfants.',
             color: const Color(0xFF2E7D32),
             loading: _loading,
-            onTap: () => _choisir('parent'),
+            onTap: () => _choisir('parent_central'),
           ),
           const SizedBox(height: 12),
           _RoleCard(
@@ -393,7 +395,7 @@ class _RoleChoiceSheetState extends State<_RoleChoiceSheet> {
             description: 'Gérez vos classes, devoirs et présences.',
             color: AppTheme.primary,
             loading: _loading,
-            onTap: () => _choisir('enseignant'),
+            onTap: () => _choisir('enseignant_central'),
           ),
           const SizedBox(height: 8),
         ],

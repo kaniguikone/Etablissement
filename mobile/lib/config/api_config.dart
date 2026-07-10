@@ -137,8 +137,9 @@ class ApiConfig {
   static const String periodes = '/periodes';
 
   // Endpoints Enseignant
-  static const String enseignantLogin  = '/enseignant/login';
-  static const String enseignantLogout = '/enseignant/logout';
+  static const String enseignantLogin            = '/enseignant/login';
+  static const String enseignantLogout           = '/enseignant/logout';
+  static const String enseignantChangerMotDePasse = '/enseignant/changer-mot-de-passe';
   static const String enseignantMe     = '/enseignant/me';
   static const String enseignantClasses     = '/enseignant/classes';
   static const String enseignantDevoirs     = '/enseignant/devoirs';

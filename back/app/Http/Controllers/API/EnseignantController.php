@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\CentralUser;
 use App\Models\Classe;
 use App\Models\Enseignant;
 use App\Models\Matiere;
@@ -63,6 +64,10 @@ class EnseignantController extends Controller
             'statut_enseignant'        => $request->statut_enseignant,
             'password'                 => $request->filled('password') ? $request->password : null,
         ]);
+
+        if ($enseignant->telephone_enseignant && $enseignant->password) {
+            CentralUser::lierEnseignant($enseignant, tenant('id'));
+        }
 
         return response()->json(['status' => 'success', 'enseignant' => $enseignant], 201);
     }

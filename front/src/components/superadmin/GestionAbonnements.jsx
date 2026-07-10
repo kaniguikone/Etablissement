@@ -1,6 +1,18 @@
 import { useEffect, useState, useCallback } from 'react';
 import { centralApi } from '../../api/axios';
 
+const ANNEE_COURANTE = (() => {
+    const m = new Date().getMonth(), y = new Date().getFullYear();
+    return m >= 8 ? `${y}-${y + 1}` : `${y - 1}-${y}`;
+})();
+
+const TYPES_ETABLISSEMENT = [
+    { value: 'lycee',         label: 'Lycée',          desc: 'Seconde / Première / Terminale' },
+    { value: 'lycee_complet', label: 'Lycée Complet',  desc: '6ème → Terminale' },
+    { value: 'college',       label: 'Collège',         desc: '6ème / 5ème / 4ème / 3ème' },
+    { value: 'primaire',      label: 'École Primaire',  desc: 'CP1 → CM2' },
+];
+
 const PLANS_COLORS = {
     demo:    { bg: 'bg-secondary', text: 'Démo' },
     basic:   { bg: 'bg-info',      text: 'Starter' },
@@ -40,6 +52,13 @@ export default function GestionAbonnements() {
     const [filtre, setFiltre]           = useState('tous');
     const [recherche, setRecherche]     = useState('');
 
+    const [modalTemplate, setModalTemplate] = useState(false);
+    const [tenantTemplate, setTenantTemplate] = useState(null);
+    const [tplForm, setTplForm]         = useState({ type: 'college', annee: ANNEE_COURANTE, periodes_type: 'trimestre' });
+    const [tplEnvoi, setTplEnvoi]       = useState(false);
+    const [tplResultat, setTplResultat] = useState(null);
+    const [tplErreur, setTplErreur]     = useState('');
+
     const charger = useCallback(async () => {
         setChargement(true);
         setErreur('');
@@ -56,6 +75,27 @@ export default function GestionAbonnements() {
     }, []);
 
     useEffect(() => { charger(); }, [charger]);
+
+    const ouvrirModalTemplate = (tenant) => {
+        setTenantTemplate(tenant);
+        setTplForm({ type: 'college', annee: ANNEE_COURANTE, periodes_type: 'trimestre' });
+        setTplResultat(null);
+        setTplErreur('');
+        setModalTemplate(true);
+    };
+
+    const appliquerTemplate = async (e) => {
+        e.preventDefault();
+        setTplEnvoi(true); setTplResultat(null); setTplErreur('');
+        try {
+            const r = await centralApi.post(`/superadmin/tenants/${tenantTemplate.id}/apply-template`, tplForm);
+            setTplResultat(r.data);
+        } catch (err) {
+            setTplErreur(err.response?.data?.message || 'Erreur lors de l\'application du modèle.');
+        } finally {
+            setTplEnvoi(false);
+        }
+    };
 
     const ouvrirModalRenouvellement = (tenant) => {
         const planCourant = plans[tenant.plan] ?? {};
@@ -224,7 +264,7 @@ export default function GestionAbonnements() {
                                 <th>Expiration</th>
                                 <th className="text-center">Jours restants</th>
                                 <th className="text-center">Statut</th>
-                                <th />
+                                <th className="text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -258,15 +298,19 @@ export default function GestionAbonnements() {
                                                 <i className={`bi ${sc.icon} me-1`} />{sc.label}
                                             </span>
                                         </td>
-                                        <td>
-                                            <div className="d-flex gap-1 justify-content-end">
-                                                <button className="btn btn-sm btn-outline-primary"
-                                                    onClick={() => ouvrirModalRenouvellement(t)} title="Renouveler">
-                                                    <i className="bi bi-arrow-clockwise" />
+                                        <td className="text-center">
+                                            <div className="d-flex gap-2 justify-content-center">
+                                                <button className="btn btn-sm btn-primary"
+                                                    onClick={() => ouvrirModalRenouvellement(t)}>
+                                                    <i className="bi bi-arrow-clockwise me-1" />Renouveler
                                                 </button>
                                                 <button className="btn btn-sm btn-outline-secondary"
-                                                    onClick={() => voirHistorique(t)} title="Historique">
-                                                    <i className="bi bi-clock-history" />
+                                                    onClick={() => voirHistorique(t)}>
+                                                    <i className="bi bi-clock-history me-1" />Historique
+                                                </button>
+                                                <button className="btn btn-sm btn-outline-warning"
+                                                    onClick={() => ouvrirModalTemplate(t)}>
+                                                    <i className="fas fa-layer-group me-1" />Modèle
                                                 </button>
                                             </div>
                                         </td>
@@ -412,6 +456,101 @@ export default function GestionAbonnements() {
                                         {sauvegarde
                                             ? <><span className="spinner-border spinner-border-sm me-2" />Enregistrement…</>
                                             : 'Créer l\'abonnement'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Modal ré-application modèle ── */}
+            {modalTemplate && tenantTemplate && (
+                <div className="modal show d-block" style={{ background: 'rgba(0,0,0,.5)' }}>
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">
+                                    <i className="fas fa-layer-group me-2 text-warning" />
+                                    Ré-appliquer un modèle
+                                </h5>
+                                <button className="btn-close" onClick={() => setModalTemplate(false)} />
+                            </div>
+                            <form onSubmit={appliquerTemplate}>
+                                <div className="modal-body">
+                                    <div className="alert alert-warning py-2 small mb-3">
+                                        <i className="fas fa-exclamation-triangle me-2" />
+                                        Les éléments déjà existants ne seront pas modifiés — seuls les éléments manquants seront créés.
+                                    </div>
+
+                                    <div className="mb-1 fw-semibold">{tenantTemplate.nom}</div>
+                                    <div className="text-muted small mb-3">{tenantTemplate.domaine}</div>
+
+                                    <div className="mb-3">
+                                        <label className="form-label fw-semibold">Type d'établissement</label>
+                                        <div className="row g-2">
+                                            {TYPES_ETABLISSEMENT.map(t => (
+                                                <div key={t.value} className="col-6">
+                                                    <div className={`border rounded p-2 ${tplForm.type === t.value ? 'border-warning bg-warning bg-opacity-10' : ''}`}
+                                                        style={{ cursor: 'pointer' }}
+                                                        onClick={() => setTplForm(f => ({ ...f, type: t.value }))}>
+                                                        <div className="d-flex align-items-center gap-2">
+                                                            <input type="radio" className="form-check-input mt-0"
+                                                                checked={tplForm.type === t.value} onChange={() => {}} />
+                                                            <div>
+                                                                <div className="fw-semibold small">{t.label}</div>
+                                                                <div className="text-muted" style={{ fontSize: 11 }}>{t.desc}</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="row g-3">
+                                        <div className="col-7">
+                                            <label className="form-label fw-semibold">Année scolaire</label>
+                                            <input type="text" className="form-control" value={tplForm.annee}
+                                                onChange={e => setTplForm(f => ({ ...f, annee: e.target.value }))}
+                                                pattern="\d{4}-\d{4}" placeholder="2025-2026" required />
+                                        </div>
+                                        <div className="col-5">
+                                            <label className="form-label fw-semibold">Périodes</label>
+                                            <select className="form-select" value={tplForm.periodes_type}
+                                                onChange={e => setTplForm(f => ({ ...f, periodes_type: e.target.value }))}>
+                                                <option value="trimestre">Trimestriel</option>
+                                                <option value="semestre">Semestriel</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {tplErreur && (
+                                        <div className="alert alert-danger py-2 small mt-3">
+                                            <i className="fas fa-exclamation-circle me-2" />{tplErreur}
+                                        </div>
+                                    )}
+
+                                    {tplResultat && (
+                                        <div className="alert alert-success py-2 small mt-3">
+                                            <i className="fas fa-check-circle me-2" />Modèle appliqué.
+                                            {tplResultat.stats && (
+                                                <ul className="mb-0 mt-1 ps-3">
+                                                    {Object.entries(tplResultat.stats).map(([k, v]) => (
+                                                        <li key={k}>{k.replace(/_/g, ' ')} : <strong>{v}</strong> créé(s)</li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-outline-secondary"
+                                        onClick={() => setModalTemplate(false)}>Fermer</button>
+                                    <button type="submit" className="btn btn-warning" disabled={tplEnvoi}>
+                                        {tplEnvoi
+                                            ? <><span className="spinner-border spinner-border-sm me-2" />Application…</>
+                                            : <><i className="fas fa-layer-group me-2" />Appliquer</>}
                                     </button>
                                 </div>
                             </form>

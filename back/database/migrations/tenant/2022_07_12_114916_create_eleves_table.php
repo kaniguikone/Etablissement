@@ -21,8 +21,7 @@ return new class extends Migration
             $table->string('photo_eleve')->nullable();
             $table->string('statut_eleve', 20)->default('actif'); // actif | inactif | abandon | decede
             $table->enum('langue2', ['espagnol', 'allemand', 'autre'])->nullable();
-            $table->boolean('est_boursier')->default(false);
-            $table->boolean('est_demi_boursier')->default(false);
+            $table->enum('statut_bourse', ['non_boursier', 'demi_boursier', 'boursier'])->default('non_boursier');
             $table->boolean('est_affecte')->default(false);
             $table->json('types_handicap')->nullable(); // tableau ex: ["moteur","malvoyant"]
             $table->enum('statut_orphelin', ['pere', 'mere', 'les_deux'])->nullable();

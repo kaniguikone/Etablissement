@@ -22,7 +22,8 @@ return new class extends Migration
             $table->string('email');
             $table->string('statut')->default('en_attente'); // en_attente | acceptee | refusee
             $table->text('notes')->nullable();             // notes internes opérateur
-            $table->string('tenant_id')->nullable();       // rempli après acceptation
+            $table->string('tenant_id')->nullable();          // rempli après acceptation
+            $table->string('mot_de_passe_initial')->nullable();
             $table->timestamps();
         });
     }

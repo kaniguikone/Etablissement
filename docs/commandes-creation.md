@@ -56,7 +56,6 @@ Les 3 premiers arguments sont positionnels : `id`, `nom`, `domaine`.
 
 ```bash
 php artisan school:create lycee-moderne "Lycée Moderne d'Abidjan" lycee-moderne.suiviscolaire.ci \
-  --plan=pro \
   --email=contact@lycee-moderne.ci \
   --ville=Abidjan \
   --admin-email=admin@lycee-moderne.ci \
@@ -67,7 +66,6 @@ php artisan school:create lycee-moderne "Lycée Moderne d'Abidjan" lycee-moderne
 
 ```bash
 php artisan school:create lycee-moderne "Lycée Moderne d'Abidjan" lycee-moderne.suiviscolaire.ci \
-  --plan=pro \
   --email=contact@lycee-moderne.ci \
   --ville=Abidjan \
   --group-id=1 \
@@ -75,9 +73,10 @@ php artisan school:create lycee-moderne "Lycée Moderne d'Abidjan" lycee-moderne
   --admin-password=secret123
 ```
 
+Pas de notion de plan tarifaire ni de date d'expiration à la création — un établissement créé ainsi (ou via une demande d'accès acceptée) est un accès de démonstration commerciale sans limite de durée.
+
 | Option | Défaut | Description |
 |---|---|---|
-| `--plan` | `demo` | `demo` \| `basic` \| `pro` \| `premium` |
 | `--email` | — | Email de contact |
 | `--ville` | — | Ville |
 | `--group-id` | — | ID du groupe (optionnel) |

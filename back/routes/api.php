@@ -12,6 +12,7 @@ use App\Http\Controllers\API\Group\GroupDashboardController;
 use App\Http\Controllers\API\Group\GroupTenantController;
 use App\Http\Controllers\API\Group\TemplateController;
 use App\Http\Controllers\API\SuperAdmin\SuperAdminTemplateController;
+use App\Http\Controllers\API\SeederController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,7 +28,8 @@ Route::get('/tarifs', [TarifsLicenceController::class, 'public']);
 // ─── Demande d'accès établissement (formulaire public) ───────────────────────
 Route::post('/demande-acces', [DemandeAccesController::class, 'store']);
 
-// ─── Inscription parent depuis landing page (cross-tenant) ───────────────────
+// ─── Portail parent central (cross-tenant) ────────────────────────────────────
+Route::post('/parent/login',            [ParentCentralController::class, 'login']);
 Route::get('/parent/valider-matricule', [ParentCentralController::class, 'validerMatricule']);
 Route::post('/parent/inscription',      [ParentCentralController::class, 'inscrire']);
 
@@ -106,4 +108,8 @@ Route::middleware('auth:sanctum')->prefix('superadmin')->group(function () {
     Route::get('/templates/{type}',                  [TemplateController::class, 'show']);
     Route::put('/templates/{type}',                  [TemplateController::class, 'update']);
     Route::post('/tenants/{tenantId}/apply-template',[TemplateController::class, 'appliquer']);
+
+    // ── Seed (dev) ────────────────────────────────────────────────────────────
+    Route::post('/seeder/lancer',               [SeederController::class, 'lancerCentral']);
+    Route::get('/seeder/status/{jobId}',        [SeederController::class, 'statutCentral']);
 });

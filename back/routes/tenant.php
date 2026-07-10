@@ -126,6 +126,7 @@ Route::middleware([
     // auth:sanctum résout Enseignant (token mobile) ou User (token web avec enseignant_id)
     Route::post('/enseignant/login', [EnseignantAuthController::class, 'login']);
     Route::middleware('auth:sanctum')->prefix('enseignant')->group(function () {
+        Route::post('/changer-mot-de-passe',        [EnseignantAuthController::class, 'changerMotDePasse']);
         Route::get('/notifications',                [NotificationController::class, 'index']);
         Route::get('/notifications/non-lues',       [NotificationController::class, 'nonLues']);
         Route::post('/notifications/{id}/lire',     [NotificationController::class, 'lire']);

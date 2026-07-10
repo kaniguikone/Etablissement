@@ -19,7 +19,7 @@ const NouvelEleve = () => {
         date_naissance_eleve: '', genre_eleve: '',
         lieu_naissance_eleve: '', nationalite_eleve: '', adresse_eleve: '',
         classe_id: '',
-        langue2: '', est_boursier: false, est_demi_boursier: false, est_affecte: false,
+        langue2: '', statut_bourse: 'non_boursier', est_affecte: false,
         types_handicap: [], statut_orphelin: '',
     });
 
@@ -29,6 +29,10 @@ const NouvelEleve = () => {
 
     const handleChange = (e) => {
         const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+        if (e.target.name === 'est_affecte' && !val) {
+            setForm({ ...form, est_affecte: false, statut_bourse: 'non_boursier' });
+            return;
+        }
         setForm({ ...form, [e.target.name]: val });
     };
 
@@ -206,13 +210,14 @@ const NouvelEleve = () => {
                                             <input className="form-check-input" type="checkbox" id="est_affecte" name="est_affecte" checked={form.est_affecte} onChange={handleChange} />
                                             <label className="form-check-label" htmlFor="est_affecte">Affecté de l'État</label>
                                         </div>
-                                        <div className="form-check mb-0">
-                                            <input className="form-check-input" type="checkbox" id="est_boursier" name="est_boursier" checked={form.est_boursier} onChange={handleChange} />
-                                            <label className="form-check-label" htmlFor="est_boursier">Boursier</label>
-                                        </div>
-                                        <div className="form-check mb-0">
-                                            <input className="form-check-input" type="checkbox" id="est_demi_boursier" name="est_demi_boursier" checked={form.est_demi_boursier} onChange={handleChange} />
-                                            <label className="form-check-label" htmlFor="est_demi_boursier">Demi-boursier</label>
+                                        <div className="d-flex align-items-center gap-2">
+                                            <label className="form-label mb-0 small" htmlFor="statut_bourse">Statut bourse</label>
+                                            <select className="form-select form-select-sm" style={{ width: 'auto' }} id="statut_bourse" name="statut_bourse"
+                                                value={form.statut_bourse} onChange={handleChange} disabled={!form.est_affecte}>
+                                                <option value="non_boursier">Non boursier</option>
+                                                <option value="demi_boursier">Demi-boursier</option>
+                                                <option value="boursier">Boursier</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>

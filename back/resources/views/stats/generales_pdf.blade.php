@@ -3,19 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <style>
+@page { margin: 1cm 1.2cm; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: DejaVu Sans, sans-serif; font-size: 7.5px; color: #000; }
-h1 { font-size: 10px; font-weight: bold; text-align: center; margin-bottom: 2px; }
-h2 { font-size: 8.5px; font-weight: bold; margin-bottom: 3px; background: #1a3a5c; color: #fff; padding: 2px 5px; }
-.annee { font-size: 8px; text-align: center; color: #555; margin-bottom: 6px; }
-table { width: 100%; border-collapse: collapse; margin-bottom: 3px; table-layout: fixed; }
-th, td { border: 1px solid #aaa; padding: 1.5px 2px; text-align: center; word-wrap: break-word; overflow: hidden; }
-th { background: #1a3a5c; color: #fff; font-weight: bold; font-size: 7px; }
+body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #1a1a1a; }
+h1 { font-size: 14px; font-weight: bold; text-align: center; margin-bottom: 4px; }
+h2 { font-size: 12px; font-weight: bold; margin-bottom: 5px; background: #1a3a5c; color: #fff; padding: 4px 8px; }
+.annee { font-size: 11px; text-align: center; color: #444; margin-bottom: 8px; }
+table { width: 100%; border-collapse: collapse; margin-bottom: 6px; table-layout: fixed; }
+th, td { border: 1px solid #bbb; padding: 3px 4px; text-align: center; word-wrap: break-word; overflow: hidden; font-size: 10px; }
+th { background: #1a3a5c; color: #fff; font-weight: bold; }
 th.sub { background: #3a6090; color: #fff; }
-td.label { text-align: left; font-size: 7px; }
-tr.total td { background: #fff3b0; font-weight: bold; }
+td.label { text-align: left; }
+tr.total td { background: #fff3b0 !important; font-weight: bold; }
 .page-break { page-break-before: always; }
-.section { margin-bottom: 8px; }
+.section { margin-bottom: 10px; }
 </style>
 </head>
 <body>
@@ -51,7 +52,7 @@ tr.total td { background: #fff3b0; font-weight: bold; }
 </div>
 
 {{-- S2 --}}
-<div class="section page-break">
+<div class="section">
 <h2>2. EFFECTIFS ET BOURSIERS — 1ER CYCLE</h2>
 @php $s = $data['s2_effectifs_bours']; $niveaux = array_column($s['lignes'], 'niveau'); @endphp
 <table>
@@ -79,7 +80,7 @@ tr.total td { background: #fff3b0; font-weight: bold; }
 </div>
 
 {{-- S3 --}}
-<div class="section page-break">
+<div class="section">
 <h2>3. RÉPARTITION PAR LANGUE 2 — 1ER CYCLE</h2>
 @php $s = $data['s3_langues']; @endphp
 @if(count($s))
@@ -146,7 +147,7 @@ tr.total td { background: #fff3b0; font-weight: bold; }
 @if(!empty($data['s5_nats_2c']['lignes']))
 <div class="section page-break">
 <h2>5. RÉPARTITION PAR NATIONALITÉ — 2ND CYCLE</h2>
-@php $s = $data['s5_nats_2c']; $colonnes = $s['colonnes']; @endphp
+@php $s = $data['s5_nats_2c'] ?? []; $colonnes = $s['colonnes'] ?? []; @endphp
 <table>
   <thead>
     <tr>
@@ -174,9 +175,9 @@ tr.total td { background: #fff3b0; font-weight: bold; }
 @endif
 
 {{-- S6 --}}
-<div class="section page-break">
+<div class="section">
 <h2>6. ÉLÈVES AFFECTÉS DE L'ÉTAT — 1ER CYCLE</h2>
-@php $s = $data['s6_affectes_1c']; $colonnes = $s['colonnes']; @endphp
+@php $s = $data['s6_affectes_1c'] ?? []; $colonnes = $s['colonnes'] ?? []; @endphp
 <table>
   <thead>
     <tr>
@@ -209,7 +210,7 @@ tr.total td { background: #fff3b0; font-weight: bold; }
 @if(!empty($data['s7_affectes_2c']['colonnes']))
 <div class="section page-break">
 <h2>7. ÉLÈVES AFFECTÉS DE L'ÉTAT — 2ND CYCLE</h2>
-@php $s = $data['s7_affectes_2c']; $colonnes = $s['colonnes']; @endphp
+@php $s = $data['s7_affectes_2c'] ?? []; $colonnes = $s['colonnes'] ?? []; @endphp
 <table>
   <thead>
     <tr>
@@ -242,7 +243,7 @@ tr.total td { background: #fff3b0; font-weight: bold; }
 {{-- S8 --}}
 <div class="section page-break">
 <h2>8. RÉPARTITION PAR TRANCHE D'ÂGE — 1ER CYCLE</h2>
-@php $s = $data['s8_ages_1c']; $colonnes = $s['colonnes']; @endphp
+@php $s = $data['s8_ages_1c'] ?? []; $colonnes = $s['colonnes'] ?? []; @endphp
 <table>
   <thead>
     <tr>
@@ -271,7 +272,7 @@ tr.total td { background: #fff3b0; font-weight: bold; }
 {{-- S9 --}}
 <div class="section page-break">
 <h2>9. REDOUBLANTS PAR TRANCHE D'ÂGE — 1ER CYCLE</h2>
-@php $s = $data['s9_redoub_ages_1c']; $colonnes = $s['colonnes']; @endphp
+@php $s = $data['s9_redoub_ages_1c'] ?? []; $colonnes = $s['colonnes'] ?? []; @endphp
 <table>
   <thead>
     <tr>
@@ -301,7 +302,7 @@ tr.total td { background: #fff3b0; font-weight: bold; }
 @if(!empty($data['s10_ages_2c']['colonnes']))
 <div class="section page-break">
 <h2>10. RÉPARTITION PAR TRANCHE D'ÂGE — 2ND CYCLE</h2>
-@php $s = $data['s10_ages_2c']; $colonnes = $s['colonnes']; @endphp
+@php $s = $data['s10_ages_2c'] ?? []; $colonnes = $s['colonnes'] ?? []; @endphp
 <table>
   <thead>
     <tr>
@@ -332,7 +333,7 @@ tr.total td { background: #fff3b0; font-weight: bold; }
 @if(!empty($data['s11_redoub_ages_2c']['colonnes']))
 <div class="section page-break">
 <h2>11. REDOUBLANTS PAR TRANCHE D'ÂGE — 2ND CYCLE</h2>
-@php $s = $data['s11_redoub_ages_2c']; $colonnes = $s['colonnes']; @endphp
+@php $s = $data['s11_redoub_ages_2c'] ?? []; $colonnes = $s['colonnes'] ?? []; @endphp
 <table>
   <thead>
     <tr>
@@ -360,7 +361,7 @@ tr.total td { background: #fff3b0; font-weight: bold; }
 @endif
 
 {{-- S12 --}}
-<div class="section page-break">
+<div class="section">
 <h2>12. RÉSULTATS AUX EXAMENS (BEPC / BAC)</h2>
 @php $s = $data['s12_examens']; @endphp
 <table>

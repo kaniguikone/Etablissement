@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Models\CentralUser;
 use App\Models\Eleve;
 use App\Models\Parents;
 use Illuminate\Http\Request;
@@ -51,6 +52,8 @@ class ParentController extends Controller
             'profession_parent' => $request->profession_parent,
         ]);
 
+        $central = CentralUser::lierParent($parent);
+
         // Associer les élèves par matricule
         if ($request->filled('matricules')) {
             // Vérifier qu'aucun élève n'est déjà rattaché à un autre parent
@@ -68,6 +71,10 @@ class ParentController extends Controller
 
             Eleve::whereIn('matricule_eleve', $request->matricules)
                 ->update(['parent_id' => $parent->id]);
+
+            foreach ($request->matricules as $matricule) {
+                CentralUser::ajouterEnfant($central, tenant('id'), $matricule, 'school_collects');
+            }
         }
 
         $response = $parent->load('eleves')->toArray();

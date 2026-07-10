@@ -25,6 +25,11 @@ class ImportEleveController extends Controller
         'G' => 'Nationalité',
         'H' => 'Adresse',
         'I' => 'Classe (abréviation) *',
+        'J' => 'Langue 2',
+        'K' => 'Statut bourse',
+        'L' => 'Affecté (O/N)',
+        'M' => 'Handicap(s)',
+        'N' => 'Statut orphelin',
     ];
 
     public function template()
@@ -36,8 +41,8 @@ class ImportEleveController extends Controller
         $sheet->setTitle('Élèves');
 
         // Ligne 1 : instructions
-        $sheet->setCellValue('A1', '* Champs obligatoires. Ne pas modifier les en-têtes (ligne 2). Supprimer la ligne d\'exemple (ligne 3) avant import. Dates au format JJ/MM/AAAA. La classe doit correspondre à une abréviation existante (voir feuille Références).');
-        $sheet->mergeCells('A1:I1');
+        $sheet->setCellValue('A1', '* Champs obligatoires. Ne pas modifier les en-têtes (ligne 2). Supprimer la ligne d\'exemple (ligne 3) avant import. Dates au format JJ/MM/AAAA. Classe = abréviation (voir feuille Références). Statut bourse : non_boursier, demi_boursier ou boursier (ignoré si Affecté = N). Affecté : O ou N. Handicap(s) : valeurs séparées par une virgule (moteur, malvoyant, malentendant, mental, autre). Statut orphelin : pere, mere ou les_deux.');
+        $sheet->mergeCells('A1:N1');
         $sheet->getStyle('A1')->applyFromArray([
             'font' => ['italic' => true, 'color' => ['rgb' => '856404']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'fff3cd']],
@@ -47,42 +52,58 @@ class ImportEleveController extends Controller
         foreach ($this->colonnes as $col => $label) {
             $sheet->setCellValue("{$col}2", $label);
         }
-        $sheet->getStyle('A2:I2')->applyFromArray([
+        $sheet->getStyle('A2:N2')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1a73e8']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
         ]);
 
         // Ligne 3 : exemple
-        $exemples = ['EL001', 'KONE', 'Aminata', 'F', '20/05/2010', 'Abidjan', 'Ivoirienne', 'Cocody', '6eA'];
+        $exemples = ['EL001', 'KONE', 'Aminata', 'F', '20/05/2010', 'Abidjan', 'Ivoirienne', 'Cocody', '6eA', 'espagnol', 'non_boursier', 'O', '', ''];
         foreach (array_values($exemples) as $i => $valeur) {
             $col = chr(65 + $i);
             $sheet->setCellValue("{$col}3", $valeur);
         }
-        $sheet->getStyle('A3:I3')->applyFromArray([
+        $sheet->getStyle('A3:N3')->applyFromArray([
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'e8f0fe']],
         ]);
 
-        // Dropdown Genre (D3:D1001)
-        foreach (range(3, 1001) as $row) {
-            $v = $sheet->getCell("D{$row}")->getDataValidation();
-            $v->setType(DataValidation::TYPE_LIST)
-                ->setErrorStyle(DataValidation::STYLE_STOP)
-                ->setAllowBlank(true)->setShowDropDown(true)
-                ->setShowErrorMessage(true)
-                ->setErrorTitle('Valeur invalide')->setError('Choisir M ou F')
-                ->setFormula1('"M,F"');
+        // Dropdowns (lignes 3 à 1001)
+        $dropdowns = [
+            'D' => ['"M,F"',                       'Valeur invalide', 'Choisir M ou F'],
+            'J' => ['"espagnol,allemand,autre"',    'Valeur invalide', 'espagnol, allemand ou autre'],
+            'K' => ['"non_boursier,demi_boursier,boursier"', 'Valeur invalide', 'non_boursier, demi_boursier ou boursier'],
+            'L' => ['"O,N"',                        'Valeur invalide', 'O (oui) ou N (non)'],
+            'N' => ['"pere,mere,les_deux"',         'Valeur invalide', 'pere, mere ou les_deux'],
+        ];
+
+        foreach ($dropdowns as $col => [$formula, $errTitle, $errMsg]) {
+            foreach (range(3, 1001) as $row) {
+                $v = $sheet->getCell("{$col}{$row}")->getDataValidation();
+                $v->setType(DataValidation::TYPE_LIST)
+                    ->setErrorStyle(DataValidation::STYLE_STOP)
+                    ->setAllowBlank(true)->setShowDropDown(true)
+                    ->setShowErrorMessage(true)
+                    ->setErrorTitle($errTitle)->setError($errMsg)
+                    ->setFormula1($formula);
+            }
         }
 
         // Largeurs
-        $largeurs = ['A' => 15, 'B' => 18, 'C' => 22, 'D' => 10, 'E' => 28, 'F' => 20, 'G' => 18, 'H' => 22, 'I' => 18];
+        $largeurs = [
+            'A' => 15, 'B' => 18, 'C' => 22, 'D' => 10, 'E' => 28,
+            'F' => 20, 'G' => 18, 'H' => 22, 'I' => 18,
+            'J' => 14, 'K' => 18, 'L' => 14, 'M' => 30, 'N' => 18,
+        ];
         foreach ($largeurs as $col => $width) {
             $sheet->getColumnDimension($col)->setWidth($width);
         }
 
-        // --- Feuille Références : liste des classes ---
+        // --- Feuille Références ---
         $ref = $spreadsheet->createSheet();
         $ref->setTitle('Références');
+
+        // Classes
         $ref->setCellValue('A1', 'Abréviation');
         $ref->setCellValue('B1', 'Nom de la classe');
         $ref->getStyle('A1:B1')->applyFromArray([
@@ -90,7 +111,6 @@ class ImportEleveController extends Controller
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1a73e8']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
         ]);
-
         $classes = Classe::orderBy('abbr_classe')->get(['abbr_classe', 'nom_classe']);
         foreach ($classes as $i => $classe) {
             $row = $i + 2;
@@ -99,6 +119,19 @@ class ImportEleveController extends Controller
         }
         $ref->getColumnDimension('A')->setWidth(16);
         $ref->getColumnDimension('B')->setWidth(26);
+
+        // Valeurs Handicap(s)
+        $ref->setCellValue('D1', 'Valeurs Handicap(s)');
+        $ref->getStyle('D1')->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1a73e8']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+        ]);
+        $handicaps = ['moteur', 'malvoyant', 'malentendant', 'mental', 'autre'];
+        foreach ($handicaps as $i => $h) {
+            $ref->setCellValue("D" . ($i + 2), $h);
+        }
+        $ref->getColumnDimension('D')->setWidth(20);
 
         $spreadsheet->setActiveSheetIndex(0);
 
@@ -125,20 +158,18 @@ class ImportEleveController extends Controller
 
         $rows = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
 
-        // Pré-charger le map abbr_classe → id
         $classesMap = Classe::pluck('id', 'abbr_classe')->all();
 
         $inseres = 0;
         $erreurs = [];
 
         foreach ($rows as $ligne => $row) {
-            if ($ligne <= 2) continue; // instructions + en-têtes
+            if ($ligne <= 2) continue;
 
             $matricule = trim($row['A'] ?? '');
             $nom       = trim($row['B'] ?? '');
             $prenoms   = trim($row['C'] ?? '');
 
-            // Ligne vide → stop
             if ($matricule === '' && $nom === '' && $prenoms === '') break;
 
             $ligneErreurs = [];
@@ -166,6 +197,28 @@ class ImportEleveController extends Controller
                 $ligneErreurs[] = "Matricule « {$matricule} » déjà existant";
             }
 
+            // Langue 2 (J)
+            $langue2Raw = strtolower(trim($row['J'] ?? ''));
+            $langue2 = in_array($langue2Raw, ['espagnol', 'allemand', 'autre']) ? $langue2Raw : null;
+
+            // Statut bourse (K) et affecté (L)
+            $estAffecte      = strtoupper(trim($row['L'] ?? '')) === 'O';
+            $statutBourseRaw = strtolower(trim($row['K'] ?? ''));
+            $statutBourse    = $estAffecte && in_array($statutBourseRaw, ['demi_boursier', 'boursier'])
+                ? $statutBourseRaw
+                : 'non_boursier';
+
+            // Handicap(s) (M) — valeurs séparées par virgule
+            $handicapsRaw = trim($row['M'] ?? '');
+            $typesHandicap = $handicapsRaw !== ''
+                ? array_values(array_filter(array_map('trim', explode(',', $handicapsRaw))))
+                : null;
+
+            // Statut orphelin (N)
+            $orphelinRaw = strtolower(trim($row['N'] ?? ''));
+            $orphelinMap = ['pere' => 'pere', 'père' => 'pere', 'mere' => 'mere', 'mère' => 'mere', 'les_deux' => 'les_deux', 'les deux' => 'les_deux'];
+            $statutOrphelin = $orphelinMap[$orphelinRaw] ?? null;
+
             if (!empty($ligneErreurs)) {
                 $erreurs[] = ['ligne' => $ligne, 'erreurs' => $ligneErreurs];
                 continue;
@@ -182,6 +235,11 @@ class ImportEleveController extends Controller
                 'adresse_eleve'        => trim($row['H'] ?? '') ?: null,
                 'classe_id'            => $classesMap[$abbrClasse],
                 'statut_eleve'         => 'actif',
+                'langue2'              => $langue2,
+                'statut_bourse'        => $statutBourse,
+                'est_affecte'          => $estAffecte,
+                'types_handicap'       => $typesHandicap,
+                'statut_orphelin'      => $statutOrphelin,
             ]);
 
             $inseres++;
@@ -209,7 +267,6 @@ class ImportEleveController extends Controller
 
         $str = trim((string) $value);
 
-        // JJ/MM/AAAA ou JJ-MM-AAAA
         if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/', $str, $m)) {
             return sprintf('%04d-%02d-%02d', $m[3], $m[2], $m[1]);
         }

@@ -70,13 +70,15 @@ class EleveController extends Controller
             'parent_id'            => 'nullable|exists:parents,id',
             'photo_eleve'          => 'nullable|image|max:2048',
             'langue2'              => 'nullable|in:espagnol,allemand,autre',
-            'est_boursier'         => 'nullable|boolean',
-            'est_demi_boursier'    => 'nullable|boolean',
+            'statut_bourse'        => 'nullable|in:non_boursier,demi_boursier,boursier',
             'est_affecte'          => 'nullable|boolean',
             'types_handicap'       => 'nullable|array',
             'types_handicap.*'     => 'in:moteur,malvoyant,malentendant,albinisme,nanisme,begayement,autiste',
             'statut_orphelin'      => 'nullable|in:pere,mere,les_deux',
         ]);
+
+        $estAffecte   = $request->boolean('est_affecte');
+        $statutBourse = $estAffecte ? ($request->input('statut_bourse') ?: 'non_boursier') : 'non_boursier';
 
         $photoPath = null;
         if ($request->hasFile('photo_eleve')) {
@@ -101,9 +103,8 @@ class EleveController extends Controller
             'classe_id'            => $request->classe_id,
             'parent_id'            => $request->parent_id,
             'langue2'              => $request->langue2 ?: null,
-            'est_boursier'         => $request->boolean('est_boursier'),
-            'est_demi_boursier'    => $request->boolean('est_demi_boursier'),
-            'est_affecte'          => $request->boolean('est_affecte'),
+            'statut_bourse'        => $statutBourse,
+            'est_affecte'          => $estAffecte,
             'types_handicap'       => $request->input('types_handicap') ?: null,
             'statut_orphelin'      => $request->statut_orphelin ?: null,
         ]);
@@ -128,8 +129,7 @@ class EleveController extends Controller
             'photo_eleve'          => 'nullable|image|max:2048',
             'statut_eleve'         => 'nullable|in:actif,inactif,abandon,decede',
             'langue2'              => 'nullable|in:espagnol,allemand,autre',
-            'est_boursier'         => 'nullable|boolean',
-            'est_demi_boursier'    => 'nullable|boolean',
+            'statut_bourse'        => 'nullable|in:non_boursier,demi_boursier,boursier',
             'est_affecte'          => 'nullable|boolean',
             'types_handicap'       => 'nullable|array',
             'types_handicap.*'     => 'in:moteur,malvoyant,malentendant,albinisme,nanisme,begayement,autiste',
@@ -137,6 +137,9 @@ class EleveController extends Controller
         ]);
 
         $eleve = Eleve::findOrFail($id);
+
+        $estAffecte   = $request->boolean('est_affecte');
+        $statutBourse = $estAffecte ? ($request->input('statut_bourse') ?: 'non_boursier') : 'non_boursier';
 
         $data = [
             'matricule_eleve'      => $request->matricule_eleve,
@@ -151,9 +154,8 @@ class EleveController extends Controller
             'parent_id'            => $request->parent_id,
             'statut_eleve'         => $request->statut_eleve ?? $eleve->statut_eleve,
             'langue2'              => $request->langue2 ?: null,
-            'est_boursier'         => $request->boolean('est_boursier'),
-            'est_demi_boursier'    => $request->boolean('est_demi_boursier'),
-            'est_affecte'          => $request->boolean('est_affecte'),
+            'statut_bourse'        => $statutBourse,
+            'est_affecte'          => $estAffecte,
             'types_handicap'       => $request->input('types_handicap') ?: null,
             'statut_orphelin'      => $request->statut_orphelin ?: null,
         ];

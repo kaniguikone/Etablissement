@@ -6,6 +6,7 @@ import { useToast } from '../../context/ToastContext';
 import { useConfirm } from '../../context/ConfirmContext';
 
 const MODES = { especes: 'Espèces', cheque: 'Chèque', virement: 'Virement', autre: 'Autre' };
+const fmtDate = (d) => d ? d.slice(0, 10).split('-').reverse().join('/') : '—';
 
 const telechargerFichier = async (apiUrl, nomFichier, type = 'application/octet-stream') => {
     const r = await api.get(apiUrl, { responseType: 'blob' });
@@ -130,7 +131,7 @@ const ListePaiements = () => {
                             {paiements.map((p, i) => (
                                 <tr key={p.id}>
                                     <td>{(currentPage - 1) * 20 + i + 1}</td>
-                                    <td>{p.date_paiement}</td>
+                                    <td>{fmtDate(p.date_paiement)}</td>
                                     <td>{p.eleve?.nom_eleve} {p.eleve?.prenoms_eleve}</td>
                                     <td>{p.scolarite?.libelle_echeance}</td>
                                     <td className="fw-bold">{Number(p.montant_paye).toLocaleString('fr-FR')}</td>

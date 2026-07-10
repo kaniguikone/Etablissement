@@ -16,14 +16,12 @@ class Eleve extends Model
         "matricule_eleve", "nom_eleve", "prenoms_eleve", "date_naissance_eleve",
         "genre_eleve", "lieu_naissance_eleve", "nationalite_eleve", "adresse_eleve",
         "photo_eleve", "classe_id", "parent_id", "statut_eleve",
-        "langue2", "est_boursier", "est_demi_boursier", "est_affecte",
+        "langue2", "statut_bourse", "est_affecte",
         "types_handicap", "statut_orphelin",
     ];
 
     protected $casts = [
         'date_naissance_eleve' => 'date:Y-m-d',
-        'est_boursier'         => 'boolean',
-        'est_demi_boursier'    => 'boolean',
         'est_affecte'          => 'boolean',
         'types_handicap'       => 'array',
     ];

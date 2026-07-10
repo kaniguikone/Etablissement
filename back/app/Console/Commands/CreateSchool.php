@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Models\Tenant;
+use App\Services\TemplateService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -15,12 +16,14 @@ class CreateSchool extends Command
         {id : Identifiant unique (slug) ex: lycee-moderne}
         {nom : Nom complet de l\'établissement}
         {domaine : Domaine complet ex: lycee-moderne.monapp.ci}
-        {--plan=demo : Plan tarifaire (demo|basic|pro)}
         {--email= : Email de contact}
         {--ville= : Ville}
         {--group-id= : ID du groupe auquel rattacher l\'établissement (optionnel)}
         {--admin-email= : Email du premier administrateur}
-        {--admin-password= : Mot de passe du premier administrateur}';
+        {--admin-password= : Mot de passe du premier administrateur}
+        {--type= : Type d\'établissement pour pré-remplissage (lycee, lycee_complet, college, primaire)}
+        {--annee= : Année scolaire du pré-remplissage, ex: 2025-2026 (défaut : année courante)}
+        {--periodes=trimestre : Type de périodes du pré-remplissage (trimestre ou semestre)}';
 
     protected $description = 'Créer un nouvel établissement (tenant) avec sa base de données';
 
@@ -41,6 +44,12 @@ class CreateSchool extends Command
             return 1;
         }
 
+        $type = $this->option('type');
+        if ($type && !array_key_exists($type, TemplateService::liste())) {
+            $this->error("Type invalide '$type'. Valeurs possibles : " . implode(', ', array_keys(TemplateService::liste())) . '.');
+            return 1;
+        }
+
         $this->info("Création de l'établissement '$nom'...");
 
         $groupId = $this->option('group-id') ? (int) $this->option('group-id') : null;
@@ -58,7 +67,6 @@ class CreateSchool extends Command
         $tenant->nom           = $nom;
         $tenant->email_contact = $this->option('email');
         $tenant->ville         = $this->option('ville');
-        $tenant->plan          = $this->option('plan') ?? 'demo';
         $tenant->group_id      = $groupId;
         $tenant->actif         = true;
         $tenant->save();
@@ -78,12 +86,22 @@ class CreateSchool extends Command
 
         \App\Models\Etablissement::create([
             'nom'   => $nom,
+            'type'  => $type,
             'ville' => $this->option('ville'),
             'email' => $this->option('email'),
             'pays'  => "Côte d'Ivoire",
         ]);
 
         $this->info("✓ Établissement initialisé : $nom");
+
+        if ($type) {
+            $annee = $this->option('annee') ?: $this->anneeEnCours();
+            $stats = app(TemplateService::class)->appliquer($id, $type, $annee, $this->option('periodes'));
+            // TemplateService appelle tenancy()->end() en interne — ré-initialiser
+            tenancy()->initialize($tenant);
+
+            $this->info("✓ Modèle '$type' appliqué ($annee) : " . collect($stats)->filter(fn ($v) => $v > 0)->map(fn ($v, $k) => "$v $k")->implode(', '));
+        }
 
         if ($adminEmail && $adminPassword) {
             $role = \App\Models\Role::create([
@@ -114,7 +132,6 @@ class CreateSchool extends Command
                 ['Code établissement', $code],
                 ['Nom', $nom],
                 ['Domaine', $domaine],
-                ['Plan', $this->option('plan')],
                 ['Groupe', $groupId ? "#$groupId" : '(indépendant)'],
                 ['URL API', "https://$domaine/api"],
             ]
@@ -130,5 +147,12 @@ class CreateSchool extends Command
         } while (Tenant::where('code', $code)->exists());
 
         return $code;
+    }
+
+    private function anneeEnCours(): string
+    {
+        $mois = (int) now()->format('m');
+        $an   = (int) now()->format('Y');
+        return $mois >= 9 ? "{$an}-" . ($an + 1) : ($an - 1) . "-{$an}";
     }
 }

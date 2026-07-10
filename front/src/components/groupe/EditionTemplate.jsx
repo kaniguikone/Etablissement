@@ -267,7 +267,7 @@ const EditionTemplate = ({ basePath = '/groupe' }) => {
             <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
                 <div className="d-flex align-items-center gap-2">
                     <button className="btn btn-sm btn-outline-secondary"
-                        onClick={() => navigate('/groupe/templates')}>
+                        onClick={() => navigate(`${basePath}/templates`)}>
                         <i className="fas fa-arrow-left me-1" /> Retour
                     </button>
                     <div>

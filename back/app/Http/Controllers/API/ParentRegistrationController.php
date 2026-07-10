@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\CentralUser;
 use App\Models\Eleve;
 use App\Models\Etablissement;
 use App\Models\Parents;
@@ -86,6 +87,9 @@ class ParentRegistrationController extends Controller
             'numero_parent' => $request->numero_parent,
             'password'      => Hash::make($request->password),
         ]);
+
+        $central = CentralUser::lierParent($parent);
+        CentralUser::ajouterEnfant($central, tenant('id'), $request->matricule_eleve, $mode);
 
         // Lier au pivot eleve_parent
         $eleve->parents()->attach($parent->id, [

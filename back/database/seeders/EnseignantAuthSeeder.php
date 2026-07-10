@@ -2,15 +2,15 @@
 
 namespace Database\Seeders;
 
+use App\Models\CentralUser;
 use App\Models\Enseignant;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 /**
- * Initialise les numéros et mots de passe des enseignants
- * pour l'accès à l'application mobile enseignant.
+ * Initialise les mots de passe des enseignants et crée leurs comptes centraux.
  *
- * Utilisation : php artisan db:seed --class=EnseignantAuthSeeder
+ * Utilisation : php artisan db:seed --class=EnseignantAuthSeeder (depuis un tenant)
  */
 class EnseignantAuthSeeder extends Seeder
 {
@@ -23,12 +23,22 @@ class EnseignantAuthSeeder extends Seeder
             return;
         }
 
+        $tenantId = tenant('id');
+        $lies     = 0;
+
         foreach ($enseignants as $enseignant) {
             $enseignant->update([
                 'password' => Hash::make('12345'),
             ]);
+
+            if (! $enseignant->telephone_enseignant) {
+                continue;
+            }
+
+            CentralUser::lierEnseignant($enseignant, $tenantId);
+            $lies++;
         }
 
-        $this->command->info("✓ {$enseignants->count()} enseignant(s) mis à jour avec le mot de passe « 12345 ».");
+        $this->command->info("✓ {$enseignants->count()} enseignant(s) mis à jour, {$lies} compte(s) central(aux) créé(s).");
     }
 }

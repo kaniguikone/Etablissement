@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\CentralUser;
 use App\Models\DemandeInscription;
 use App\Models\Eleve;
 use App\Models\Niveau;
@@ -143,6 +144,8 @@ class InscriptionController extends Controller
             ]);
         }
 
+        $centralParent = CentralUser::lierParent($parent);
+
         // Créer l'élève
         $eleve = Eleve::create([
             'matricule_eleve'      => $this->genererMatricule(),
@@ -156,6 +159,8 @@ class InscriptionController extends Controller
             'classe_id'            => $request->classe_id,
             'parent_id'            => $parent->id,
         ]);
+
+        CentralUser::ajouterEnfant($centralParent, tenant('id'), $eleve->matricule_eleve, 'school_collects');
 
         $demande->update([
             'statut'   => 'validee',
@@ -253,6 +258,8 @@ class InscriptionController extends Controller
             ]);
         }
 
+        $centralParent = CentralUser::lierParent($parent);
+
         $eleve = Eleve::create([
             'matricule_eleve'      => $this->genererMatricule(),
             'nom_eleve'            => $request->nom_eleve,
@@ -265,6 +272,8 @@ class InscriptionController extends Controller
             'classe_id'            => $request->classe_id,
             'parent_id'            => $parent->id,
         ]);
+
+        CentralUser::ajouterEnfant($centralParent, tenant('id'), $eleve->matricule_eleve, 'school_collects');
 
         return response()->json([
             'message' => 'Inscription effectuée avec succès.',

@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('enseignants', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('central_user_id')->nullable();
             $table->string('matricule_enseignant');
             $table->string('nom_enseignant');
             $table->string('prenoms_enseignant');

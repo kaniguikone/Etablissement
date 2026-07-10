@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../main.dart' show navigatorKey;
+import '../models/ecole_session.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../services/storage_service.dart';
@@ -9,20 +10,14 @@ enum AuthStatus { unknown, authenticated, unauthenticated }
 enum UserRole   { parent, enseignant }
 
 /// Résultat d'un loginUnifie.
-/// [LoginSuccess] : un seul rôle trouvé, connexion établie.
-/// [LoginChoix]   : deux rôles trouvés, l'UI doit présenter le choix.
-/// [LoginErreur]  : identifiants incorrects ou erreur réseau.
 sealed class LoginResult {}
-
-class LoginSuccess extends LoginResult {}
-
-class LoginChoix extends LoginResult {
-  final Map<String, dynamic> dataParent;
-  final Map<String, dynamic> dataEnseignant;
-  LoginChoix({required this.dataParent, required this.dataEnseignant});
+class LoginSuccess  extends LoginResult {}
+class LoginChoix    extends LoginResult {
+  final Map<String, dynamic> dataParentCentral;
+  final Map<String, dynamic> dataEnseignantCentral;
+  LoginChoix({required this.dataParentCentral, required this.dataEnseignantCentral});
 }
-
-class LoginErreur extends LoginResult {
+class LoginErreur   extends LoginResult {
   final String message;
   LoginErreur(this.message);
 }
@@ -34,31 +29,39 @@ class AuthProvider extends ChangeNotifier {
   String?    _prenom;
   String?    _numero;
   int?       _id;
+  bool       _sessionExpiree = false;
 
-  bool _sessionExpiree = false;
+  // ── Session centrale multi-écoles ────────────────────────────────────────
+  List<EcoleSession> _ecoles      = [];
+  int                _ecoleIndex  = 0;
+  bool               _isCentral   = false;
 
-  AuthStatus get status        => _status;
-  UserRole?  get role          => _role;
-  String?    get nom           => _nom;
-  String?    get prenom        => _prenom;
-  String?    get numero        => _numero;
-  int?       get id            => _id;
-  bool get sessionExpiree      => _sessionExpiree;
-  bool get isAuthenticated     => _status == AuthStatus.authenticated;
-  bool get isEnseignant        => _role == UserRole.enseignant;
-  bool get isParent            => _role == UserRole.parent;
+  AuthStatus         get status         => _status;
+  UserRole?          get role           => _role;
+  String?            get nom            => _nom;
+  String?            get prenom         => _prenom;
+  String?            get numero         => _numero;
+  int?               get id             => _id;
+  bool               get sessionExpiree => _sessionExpiree;
+  bool               get isAuthenticated=> _status == AuthStatus.authenticated;
+  bool               get isEnseignant   => _role == UserRole.enseignant;
+  bool               get isParent       => _role == UserRole.parent;
+  bool               get isCentral      => _isCentral;
+  List<EcoleSession> get ecoles         => _ecoles;
+  EcoleSession?      get ecoleActive    => _ecoles.isEmpty ? null : _ecoles[_ecoleIndex];
+
+  /// Tous les enfants de toutes les écoles, avec leur école injectée.
+  List<Map<String, dynamic>> get tousLesEnfants => [
+    for (final e in _ecoles)
+      for (final enfant in e.enfants)
+        {...enfant, '_ecole_nom': e.nom, '_ecole_index': _ecoles.indexOf(e)},
+  ];
 
   final _authService = AuthService();
 
   AuthProvider() {
     ApiService.onUnauthorized = () {
-      _status        = AuthStatus.unauthenticated;
-      _sessionExpiree = true;
-      _role   = null;
-      _nom    = null;
-      _prenom = null;
-      _numero = null;
-      _id     = null;
+      _resetState();
       notifyListeners();
       navigatorKey.currentState?.popUntil((route) => route.isFirst);
     };
@@ -74,20 +77,13 @@ class AuthProvider extends ChangeNotifier {
       final loggedIn = await _authService.isLoggedIn();
       if (loggedIn) {
         final roleStr = await StorageService.getRole();
+
         if (roleStr == 'enseignant') {
-          _role = UserRole.enseignant;
-          final info = await StorageService.getEnseignantInfo();
-          _nom    = info['nom'];
-          _prenom = info['prenom'];
-          _numero = info['numero'];
-          _id     = int.tryParse(info['id'] ?? '');
+          await _restaurerEnseignant();
+        } else if (roleStr == 'parent_central' || roleStr == 'enseignant_central') {
+          await _restaurerSessionCentrale(roleStr!);
         } else {
-          _role = UserRole.parent;
-          final info = await StorageService.getParentInfo();
-          _nom    = info['nom'];
-          _prenom = info['prenom'];
-          _numero = info['numero'];
-          _id     = int.tryParse(info['id'] ?? '');
+          await _restaurerParent();
         }
         _status = AuthStatus.authenticated;
       } else {
@@ -99,72 +95,46 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ── Login unifié tenant ──────────────────────────────────────────────────
+
   Future<LoginResult> loginUnifie(String numero, String password) async {
     try {
-      final data  = await ApiService().loginUnifie(numero, password);
-      final roles = List<String>.from(data['roles'] as List);
+      final data      = await ApiService().loginUnifie(numero, password);
+      final roles     = List<String>.from(data['roles'] as List);
       final rolesData = data['data'] as Map<String, dynamic>;
 
-      if (roles.contains('parent') && roles.contains('enseignant')) {
+      final hasParent     = roles.contains('parent_central');
+      final hasEnseignant = roles.contains('enseignant_central');
+
+      if (hasParent && hasEnseignant) {
         return LoginChoix(
-          dataParent:      rolesData['parent']      as Map<String, dynamic>,
-          dataEnseignant:  rolesData['enseignant']  as Map<String, dynamic>,
+          dataParentCentral:     rolesData['parent_central']     as Map<String, dynamic>,
+          dataEnseignantCentral: rolesData['enseignant_central'] as Map<String, dynamic>,
         );
       }
-
-      if (roles.contains('enseignant')) {
-        await _appliquerEnseignant(rolesData['enseignant'] as Map<String, dynamic>);
+      if (hasEnseignant) {
+        await _appliquerSession('enseignant_central', rolesData['enseignant_central'] as Map<String, dynamic>);
         return LoginSuccess();
       }
-
-      await _appliquerParent(rolesData['parent'] as Map<String, dynamic>);
-      return LoginSuccess();
+      if (hasParent) {
+        await _appliquerSession('parent_central', rolesData['parent_central'] as Map<String, dynamic>);
+        return LoginSuccess();
+      }
+      return LoginErreur('Aucun accès actif trouvé pour ce numéro.');
     } catch (e) {
       return LoginErreur(mapErrorToMessage(e));
     }
   }
 
   Future<void> choisirRole(String role, Map<String, dynamic> roleData) async {
-    if (role == 'enseignant') {
-      await _appliquerEnseignant(roleData);
-    } else {
-      await _appliquerParent(roleData);
-    }
+    await _appliquerSession(role, roleData);
   }
 
-  Future<void> _appliquerParent(Map<String, dynamic> d) async {
-    await StorageService.saveToken(d['token'] as String);
-    await StorageService.saveRole('parent');
-    await StorageService.saveParentInfo(
-      id:     d['id'] as int,
-      nom:    d['nom'] as String? ?? '',
-      prenom: d['prenom'] as String? ?? '',
-      numero: d['numero'] as String? ?? '',
-    );
-    _role   = UserRole.parent;
-    _nom    = d['nom'] as String?;
-    _prenom = d['prenom'] as String?;
-    _numero = d['numero'] as String?;
-    _id     = d['id'] as int?;
-    _status = AuthStatus.authenticated;
-    notifyListeners();
-  }
-
-  Future<void> _appliquerEnseignant(Map<String, dynamic> d) async {
-    await StorageService.saveToken(d['token'] as String);
-    await StorageService.saveRole('enseignant');
-    await StorageService.saveEnseignantInfo(
-      id:      d['id'] as int,
-      nom:     d['nom'] as String? ?? '',
-      prenoms: d['prenoms'] as String? ?? '',
-      numero:  d['numero'] as String? ?? '',
-    );
-    _role   = UserRole.enseignant;
-    _nom    = d['nom'] as String?;
-    _prenom = d['prenoms'] as String?;
-    _numero = d['numero'] as String?;
-    _id     = d['id'] as int?;
-    _status = AuthStatus.authenticated;
+  Future<void> switchEcole(int index) async {
+    if (index < 0 || index >= _ecoles.length) return;
+    _ecoleIndex = index;
+    await StorageService.saveEcoleActiveIndex(index);
+    ApiService().switchEcole(_ecoles[index]);
     notifyListeners();
   }
 
@@ -172,7 +142,9 @@ class AuthProvider extends ChangeNotifier {
     try {
       final success = await _authService.loginParent(numero, password);
       if (success) {
-        _role = UserRole.parent;
+        _isCentral = false;
+        _ecoles    = [];
+        _role      = UserRole.parent;
         final info = await StorageService.getParentInfo();
         _nom    = info['nom'];
         _prenom = info['prenom'];
@@ -192,7 +164,9 @@ class AuthProvider extends ChangeNotifier {
     try {
       final success = await _authService.loginEnseignant(numero, password);
       if (success) {
-        _role = UserRole.enseignant;
+        _isCentral = false;
+        _ecoles    = [];
+        _role      = UserRole.enseignant;
         final info = await StorageService.getEnseignantInfo();
         _nom    = info['nom'];
         _prenom = info['prenom'];
@@ -210,13 +184,103 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> logout() async {
     await _authService.logout();
-    _status = AuthStatus.unauthenticated;
-    _role   = null;
-    _nom    = null;
-    _prenom = null;
-    _numero = null;
-    _id     = null;
+    await StorageService.clearSessionCentrale();
+    _resetState();
     notifyListeners();
     navigatorKey.currentState?.popUntil((route) => route.isFirst);
+  }
+
+  // ── Privé ────────────────────────────────────────────────────────────────
+
+  /// Applique une session centrale (parent_central ou enseignant_central).
+  Future<void> _appliquerSession(String role, Map<String, dynamic> userData) async {
+    final ecoles = (userData['ecoles'] as List)
+        .map((e) => EcoleSession.fromJson(e as Map<String, dynamic>))
+        .toList();
+
+    _ecoles     = ecoles;
+    _ecoleIndex = 0;
+    _isCentral  = true;
+    _role       = role == 'parent_central' ? UserRole.parent : UserRole.enseignant;
+    _nom        = userData['nom']       as String?;
+    _prenom     = userData['prenom']    as String?;
+    _numero     = userData['telephone'] as String?;
+    _id         = userData['id']        as int?;
+    _status     = AuthStatus.authenticated;
+
+    await StorageService.saveRole(role);
+    await StorageService.saveSessionCentrale({
+      'identity': {
+        'nom':       _nom,
+        'prenom':    _prenom,
+        'telephone': _numero,
+        'id':        _id,
+      },
+      'ecoles': ecoles.map((e) => e.toJson()).toList(),
+    });
+    await StorageService.saveEcoleActiveIndex(0);
+
+    if (ecoles.isNotEmpty) {
+      ApiService().switchEcole(ecoles[0]);
+    }
+
+    notifyListeners();
+  }
+
+  Future<void> _restaurerSessionCentrale(String roleStr) async {
+    final session = await StorageService.getSessionCentrale();
+    if (session == null) return;
+
+    final identity = session['identity'] as Map<String, dynamic>;
+    final ecoles   = (session['ecoles'] as List)
+        .map((e) => EcoleSession.fromJson(e as Map<String, dynamic>))
+        .toList();
+    final index = await StorageService.getEcoleActiveIndex();
+
+    _ecoles     = ecoles;
+    _ecoleIndex = index.clamp(0, ecoles.isEmpty ? 0 : ecoles.length - 1);
+    _isCentral  = true;
+    _role       = roleStr == 'parent_central' ? UserRole.parent : UserRole.enseignant;
+    _nom        = identity['nom']       as String?;
+    _prenom     = identity['prenom']    as String?;
+    _numero     = identity['telephone'] as String?;
+    _id         = identity['id']        as int?;
+
+    if (ecoles.isNotEmpty) {
+      ApiService().switchEcole(_ecoles[_ecoleIndex]);
+    }
+  }
+
+  Future<void> _restaurerParent() async {
+    _isCentral = false;
+    _role      = UserRole.parent;
+    final info = await StorageService.getParentInfo();
+    _nom    = info['nom'];
+    _prenom = info['prenom'];
+    _numero = info['numero'];
+    _id     = int.tryParse(info['id'] ?? '');
+  }
+
+  Future<void> _restaurerEnseignant() async {
+    _isCentral = false;
+    _role      = UserRole.enseignant;
+    final info = await StorageService.getEnseignantInfo();
+    _nom    = info['nom'];
+    _prenom = info['prenom'];
+    _numero = info['numero'];
+    _id     = int.tryParse(info['id'] ?? '');
+  }
+
+  void _resetState() {
+    _status         = AuthStatus.unauthenticated;
+    _sessionExpiree = true;
+    _role           = null;
+    _nom            = null;
+    _prenom         = null;
+    _numero         = null;
+    _id             = null;
+    _isCentral      = false;
+    _ecoles         = [];
+    _ecoleIndex     = 0;
   }
 }

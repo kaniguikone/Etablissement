@@ -19,6 +19,7 @@ return new class extends Migration
             // role_id sans contrainte FK (roles est créé après dans l'ordre des migrations)
             $table->unsignedBigInteger('role_id')->nullable();
             $table->boolean('actif')->default(true);
+            $table->boolean('must_change_password')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });

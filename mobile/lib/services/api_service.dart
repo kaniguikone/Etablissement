@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../config/api_config.dart';
+import '../models/ecole_session.dart';
 import '../models/periode.dart';
 import 'storage_service.dart';
 
@@ -65,6 +66,13 @@ class ApiService {
     _dio.options.baseUrl = ApiConfig.baseUrl;
   }
 
+  /// Pointe le Dio principal vers l'école sélectionnée.
+  void switchEcole(EcoleSession ecole) {
+    final scheme = ecole.domain.contains(':') || ecole.domain == 'localhost' ? 'http' : 'https';
+    _dio.options.baseUrl = '$scheme://${ecole.domain}/api';
+    StorageService.saveToken(ecole.token);
+  }
+
   // ─── Auth mobile unifiée ─────────────────────────────────────────────────────
 
   Future<Map<String, dynamic>> loginUnifie(String numero, String password) async {
@@ -101,6 +109,17 @@ class ApiService {
 
   Future<void> logoutEnseignant() async {
     await _dio.post(ApiConfig.enseignantLogout);
+  }
+
+  Future<void> changerMotDePasseEnseignant({
+    required String ancienMotDePasse,
+    required String nouveauMotDePasse,
+  }) async {
+    await _dio.post(ApiConfig.enseignantChangerMotDePasse, data: {
+      'ancien_mot_de_passe':                ancienMotDePasse,
+      'nouveau_mot_de_passe':               nouveauMotDePasse,
+      'nouveau_mot_de_passe_confirmation':  nouveauMotDePasse,
+    });
   }
 
   // ─── Portail Enseignant ──────────────────────────────────────────────────────

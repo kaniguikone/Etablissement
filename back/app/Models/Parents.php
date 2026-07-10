@@ -17,6 +17,7 @@ class Parents extends Authenticatable
     protected $fillable = [
         'numero_parent', 'nom_parent', 'prenom_parent', 'password',
         'email_parent', 'adresse_parent', 'relation_parent', 'profession_parent',
+        'central_user_id',
     ];
 
     protected $hidden = ['password'];

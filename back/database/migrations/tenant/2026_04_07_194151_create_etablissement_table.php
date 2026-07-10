@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('etablissement', function (Blueprint $table) {
             $table->id();
             $table->string('nom')->default('Mon Etablissement');
+            $table->string('type')->nullable();            // lycee | lycee_complet | college | primaire
+            $table->string('code_ministere')->nullable();  // code officiel MENET
             $table->string('slogan')->nullable();
             $table->string('logo')->nullable();          // chemin stockage
             $table->string('adresse')->nullable();

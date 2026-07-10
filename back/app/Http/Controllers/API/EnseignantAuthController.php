@@ -36,6 +36,24 @@ class EnseignantAuthController extends Controller
         ]);
     }
 
+    public function changerMotDePasse(Request $request)
+    {
+        $request->validate([
+            'ancien_mot_de_passe'    => 'required|string',
+            'nouveau_mot_de_passe'   => 'required|string|min:6|confirmed',
+        ]);
+
+        $enseignant = $request->user();
+
+        if (! Hash::check($request->ancien_mot_de_passe, $enseignant->password)) {
+            return response()->json(['message' => 'Mot de passe actuel incorrect.'], 422);
+        }
+
+        $enseignant->update(['password' => Hash::make($request->nouveau_mot_de_passe)]);
+
+        return response()->json(['message' => 'Mot de passe modifié avec succès.']);
+    }
+
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();

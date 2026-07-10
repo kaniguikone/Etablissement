@@ -27,7 +27,7 @@
         <p>Votre établissement <strong>{{ $nomEtablissement }}</strong> est prêt.</p>
     </div>
     <div class="body">
-        <p>Votre demande d'accès a été acceptée. Vous disposez d'un accès <strong>Démo gratuit</strong> valable jusqu'au <strong>{{ $expireLe }}</strong>.</p>
+        <p>Votre demande d'accès a été acceptée. Vous disposez d'un accès de démonstration à la plateforme.</p>
 
         <div class="credentials">
             <div class="cred-row">

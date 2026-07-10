@@ -17,8 +17,7 @@ class SeederController extends Controller
     }
 
     /**
-     * POST /seeder/lancer
-     * Lance `php artisan seed:web {job_id}` en arrière-plan et retourne le job_id.
+     * POST /seeder/lancer  (route tenant — tenant_id déduit du contexte)
      */
     public function lancer(Request $request): JsonResponse
     {
@@ -30,15 +29,68 @@ class SeederController extends Controller
             return response()->json(['message' => 'Réservé aux super administrateurs.'], 403);
         }
 
-        $params = $request->validate([
-            'template'       => 'string|in:lycee,lycee_complet,college,primaire',
-            'classes_min'    => 'integer|min:1|max:10',
-            'classes_max'    => 'integer|min:1|max:15',
-            'eleves_min'     => 'integer|min:1|max:60',
-            'eleves_max'     => 'integer|min:1|max:60',
-            'nb_enseignants' => 'integer|min:1|max:200',
-            'annee'          => ['string', 'regex:/^\d{4}-\d{4}$/'],
-            'periodes_type'  => 'string|in:trimestre,semestre',
+        $params = $this->validerParams($request);
+        $params['tenant_id'] = tenant()->getTenantKey();
+
+        return $this->creerJob($params);
+    }
+
+    /**
+     * POST /superadmin/seeder/lancer  (route centrale — tenant_id fourni dans le body)
+     */
+    public function lancerCentral(Request $request): JsonResponse
+    {
+        if (app()->isProduction()) {
+            return response()->json(['message' => 'Non disponible en production.'], 403);
+        }
+
+        $params = $this->validerParams($request);
+        $params['tenant_id'] = $request->validate(['tenant_id' => 'required|string'])['tenant_id'];
+
+        return $this->creerJob($params);
+    }
+
+    /**
+     * GET /seeder/status/{jobId}
+     */
+    public function statut(Request $request, string $jobId): JsonResponse
+    {
+        if (app()->isProduction()) {
+            return response()->json(['message' => 'Non disponible en production.'], 403);
+        }
+
+        if (!$request->user()?->estSuperAdmin()) {
+            return response()->json(['message' => 'Réservé aux super administrateurs.'], 403);
+        }
+
+        return $this->lireStatut($jobId);
+    }
+
+    /**
+     * GET /superadmin/seeder/status/{jobId}  (route centrale)
+     */
+    public function statutCentral(Request $request, string $jobId): JsonResponse
+    {
+        if (app()->isProduction()) {
+            return response()->json(['message' => 'Non disponible en production.'], 403);
+        }
+
+        return $this->lireStatut($jobId);
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private function validerParams(Request $request): array
+    {
+        return $request->validate([
+            'template'               => 'string|in:lycee,lycee_complet,college,primaire',
+            'classes_min'            => 'integer|min:1|max:10',
+            'classes_max'            => 'integer|min:1|max:15',
+            'eleves_min'             => 'integer|min:1|max:60',
+            'eleves_max'             => 'integer|min:1|max:60',
+            'nb_enseignants'         => 'integer|min:1|max:200',
+            'annee'                  => ['string', 'regex:/^\d{4}-\d{4}$/'],
+            'periodes_type'          => 'string|in:trimestre,semestre',
             'avec_eleves'            => 'boolean',
             'avec_emploi'            => 'boolean',
             'avec_devoirs'           => 'boolean',
@@ -47,11 +99,12 @@ class SeederController extends Controller
             'devoirs_max'            => 'integer|min:1|max:5',
             'assiduites_par_periode' => 'integer|min:1|max:8',
         ]);
+    }
 
-        $params['tenant_id'] = tenant()->getTenantKey();
-
-        $jobId  = Str::uuid()->toString();
-        $dir    = self::jobDir($jobId);
+    private function creerJob(array $params): JsonResponse
+    {
+        $jobId = Str::uuid()->toString();
+        $dir   = self::jobDir($jobId);
 
         if (!is_dir($dir)) {
             mkdir($dir, 0755, true);
@@ -71,19 +124,8 @@ class SeederController extends Controller
         return response()->json(['job_id' => $jobId]);
     }
 
-    /**
-     * GET /seeder/status/{jobId}
-     */
-    public function statut(Request $request, string $jobId): JsonResponse
+    private function lireStatut(string $jobId): JsonResponse
     {
-        if (app()->isProduction()) {
-            return response()->json(['message' => 'Non disponible en production.'], 403);
-        }
-
-        if (!$request->user()?->estSuperAdmin()) {
-            return response()->json(['message' => 'Réservé aux super administrateurs.'], 403);
-        }
-
         $file = self::jobDir($jobId) . '/status.json';
 
         if (!file_exists($file)) {
@@ -92,8 +134,6 @@ class SeederController extends Controller
 
         return response()->json(json_decode(file_get_contents($file), true));
     }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
 
     private function lancerProcessus(string $jobId): void
     {

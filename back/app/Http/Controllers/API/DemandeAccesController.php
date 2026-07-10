@@ -108,8 +108,6 @@ class DemandeAccesController extends Controller
         $tenant->email_contact   = $demande->email;
         $tenant->telephone       = $demande->telephone;
         $tenant->ville           = $demande->ville;
-        $tenant->plan            = 'demo';
-        $tenant->date_expiration = now()->addDays(30);
         $tenant->actif           = true;
         $tenant->save();
 
@@ -162,7 +160,6 @@ class DemandeAccesController extends Controller
                 domaine:          $domaine,
                 email:            $demande->email,
                 motDePasse:       $motDePasse,
-                expireLe:         now()->addDays(30)->format('d/m/Y'),
             ));
             $emailEnvoye = true;
         } catch (\Throwable $e) {
@@ -177,7 +174,6 @@ class DemandeAccesController extends Controller
             'domaine'       => $domaine,
             'email'         => $demande->email,
             'mot_de_passe'  => $motDePasse,
-            'expire_le'     => now()->addDays(30)->format('d/m/Y'),
         ]);
     }
 

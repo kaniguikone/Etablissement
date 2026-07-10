@@ -20,3 +20,6 @@ mobile/node_modules/
 # Build
 front/dist/
 mobile/dist/
+
+# Exports personnels
+/Stat/

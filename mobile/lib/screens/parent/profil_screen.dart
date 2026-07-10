@@ -2,9 +2,82 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/etablissement_provider.dart';
+import '../../services/api_service.dart';
+import '../../utils/error_helper.dart';
 
 class ProfilScreen extends StatelessWidget {
   const ProfilScreen({super.key});
+
+  Future<void> _changerMotDePasse(BuildContext context) async {
+    final ancienCtrl   = TextEditingController();
+    final nouveauCtrl  = TextEditingController();
+    final confirmCtrl  = TextEditingController();
+    final formKey      = GlobalKey<FormState>();
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Changer le mot de passe'),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _PasswordField(controller: ancienCtrl,  label: 'Mot de passe actuel'),
+              const SizedBox(height: 12),
+              _PasswordField(
+                controller: nouveauCtrl,
+                label: 'Nouveau mot de passe',
+                validator: (v) => (v == null || v.length < 6)
+                    ? 'Au moins 6 caractères'
+                    : null,
+              ),
+              const SizedBox(height: 12),
+              _PasswordField(
+                controller: confirmCtrl,
+                label: 'Confirmer le nouveau mot de passe',
+                validator: (v) => v != nouveauCtrl.text
+                    ? 'Les mots de passe ne correspondent pas'
+                    : null,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (formKey.currentState!.validate()) Navigator.pop(ctx, true);
+            },
+            child: const Text('Confirmer'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !context.mounted) return;
+
+    try {
+      await ApiService().changerMotDePasseEnseignant(
+        ancienMotDePasse:  ancienCtrl.text,
+        nouveauMotDePasse: nouveauCtrl.text,
+      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Mot de passe modifié avec succès.')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(mapErrorToMessage(e))),
+        );
+      }
+    }
+  }
 
   Future<void> _logout(BuildContext context) async {
     final confirm = await showDialog<bool>(
@@ -114,6 +187,24 @@ class ProfilScreen extends StatelessWidget {
           ),
           const SizedBox(height: 28),
 
+          // ── Changer mot de passe (enseignant uniquement) ──
+          if (auth.isEnseignant) ...[
+            SizedBox(
+              height: 52,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                icon: const Icon(Icons.lock_outline),
+                label: const Text('Changer le mot de passe',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                onPressed: () => _changerMotDePasse(context),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+
           // ── Déconnexion ──
           SizedBox(
             height: 52,
@@ -132,6 +223,43 @@ class ProfilScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _PasswordField extends StatefulWidget {
+  final TextEditingController controller;
+  final String label;
+  final String? Function(String?)? validator;
+
+  const _PasswordField({
+    required this.controller,
+    required this.label,
+    this.validator,
+  });
+
+  @override
+  State<_PasswordField> createState() => _PasswordFieldState();
+}
+
+class _PasswordFieldState extends State<_PasswordField> {
+  bool _obscure = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: widget.controller,
+      obscureText: _obscure,
+      decoration: InputDecoration(
+        labelText: widget.label,
+        border: const OutlineInputBorder(),
+        suffixIcon: IconButton(
+          icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
+          onPressed: () => setState(() => _obscure = !_obscure),
+        ),
+      ),
+      validator: widget.validator ??
+          (v) => (v == null || v.isEmpty) ? 'Champ requis' : null,
     );
   }
 }

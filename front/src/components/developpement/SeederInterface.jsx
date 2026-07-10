@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import api from '../../api/axios';
+import { centralApi } from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 
 const ANNEE_COURANTE = (() => {
@@ -70,17 +70,45 @@ const RangeRow = ({ label, nameMin, nameMax, min, max, params, onChange }) => {
 const SeederInterface = () => {
     const { toast } = useToast();
 
+    const [tenants, setTenants]       = useState([]);
+    const [tenantId, setTenantId]     = useState('');
+    const [loadingTenants, setLoadingTenants] = useState(true);
+
+    const guessTemplate = (tenant) => {
+        const hay = ((tenant?.nom ?? '') + ' ' + (tenant?.id ?? '')).toLowerCase();
+        if (hay.includes('primaire') || hay.includes('ecole') || hay.includes('école')) return 'primaire';
+        if (hay.includes('college') || hay.includes('collège'))                          return 'college';
+        if (hay.includes('lycee_complet') || hay.includes('lycée complet'))              return 'lycee_complet';
+        if (hay.includes('lycee') || hay.includes('lycée'))                              return 'lycee_complet';
+        return 'lycee_complet';
+    };
+
     const [params, setParams]       = useState(DEFAUTS);
     const [confirmer, setConfirmer] = useState(false);
 
     // État du job en cours
-    const [jobId, setJobId]     = useState(null);
-    const [jobStatus, setJobStatus] = useState(null); // null | 'pending' | 'running' | 'done' | 'error'
-    const [etape, setEtape]     = useState('');
-    const [stats, setStats]     = useState(null);
-    const [errors, setErrors]   = useState({});
+    const [jobId, setJobId]         = useState(null);
+    const [jobStatus, setJobStatus] = useState(null);
+    const [etape, setEtape]         = useState('');
+    const [stats, setStats]         = useState(null);
+    const [errors, setErrors]       = useState({});
 
     const pollRef = useRef(null);
+
+    // ── Chargement des tenants ────────────────────────────────────────────────
+    useEffect(() => {
+        centralApi.get('/superadmin/tenants')
+            .then(({ data }) => {
+                const liste = data.data ?? data;
+                setTenants(liste);
+                if (liste.length > 0) {
+                    setTenantId(liste[0].id);
+                    setParams(p => ({ ...p, template: guessTemplate(liste[0]) }));
+                }
+            })
+            .catch(() => toast.error('Impossible de charger la liste des établissements.'))
+            .finally(() => setLoadingTenants(false));
+    }, []);
 
     // ── Polling ──────────────────────────────────────────────────────────────
     useEffect(() => {
@@ -88,7 +116,7 @@ const SeederInterface = () => {
 
         const poll = async () => {
             try {
-                const { data } = await api.get(`/seeder/status/${jobId}`);
+                const { data } = await centralApi.get(`/superadmin/seeder/status/${jobId}`);
                 setJobStatus(data.status);
                 setEtape(data.etape || '');
                 if (data.stats)  setStats(data.stats);
@@ -129,7 +157,7 @@ const SeederInterface = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
         try {
-            const { data } = await api.post('/seeder/lancer', params);
+            const { data } = await centralApi.post('/superadmin/seeder/lancer', { ...params, tenant_id: tenantId });
             setJobId(data.job_id);
             setJobStatus('pending');
         } catch (e) {
@@ -160,11 +188,35 @@ const SeederInterface = () => {
                 </div>
             </div>
 
+            {/* ── Sélecteur de tenant ── */}
+            <div className="card border mb-4">
+                <div className="card-body py-3">
+                    <label className="form-label fw-semibold mb-1">
+                        <i className="fas fa-school me-2 text-primary" />Établissement cible
+                    </label>
+                    {loadingTenants ? (
+                        <div className="text-muted small"><i className="fas fa-spinner fa-spin me-2" />Chargement…</div>
+                    ) : (
+                        <select className="form-select" value={tenantId}
+                            onChange={e => {
+                                const t = tenants.find(x => x.id === e.target.value);
+                                setTenantId(e.target.value);
+                                setParams(p => ({ ...p, template: guessTemplate(t) }));
+                            }}
+                            disabled={enCours}>
+                            {tenants.map(t => (
+                                <option key={t.id} value={t.id}>{t.nom || t.id} — {t.id}</option>
+                            ))}
+                        </select>
+                    )}
+                </div>
+            </div>
+
             <div className="alert alert-warning d-flex align-items-center gap-2 mb-4">
                 <i className="fas fa-exclamation-triangle fa-lg flex-shrink-0" />
                 <span>
-                    <strong>Attention :</strong> cette opération <strong>efface toutes les données</strong> du tenant
-                    courant. Le seed tourne en arrière-plan — vous pouvez continuer à naviguer.
+                    <strong>Attention :</strong> cette opération <strong>efface toutes les données</strong> de
+                    l'établissement sélectionné. Le seed tourne en arrière-plan — vous pouvez continuer à naviguer.
                 </span>
             </div>
 
@@ -217,11 +269,14 @@ const SeederInterface = () => {
                             <div className="mb-3">
                                 <label className="form-label fw-semibold">Cycle scolaire</label>
                                 <select name="template" value={params.template}
-                                    onChange={handleChange} className="form-select" disabled={enCours}>
+                                    className="form-select" disabled>
                                     {Object.entries(TEMPLATES).map(([key, t]) => (
                                         <option key={key} value={key}>{t.label}</option>
                                     ))}
                                 </select>
+                                <div className="form-text text-muted">
+                                    <i className="fas fa-lock me-1" />Déduit de l'établissement sélectionné
+                                </div>
                             </div>
                             <div className="row g-3 mb-3">
                                 <div className="col-md-6">

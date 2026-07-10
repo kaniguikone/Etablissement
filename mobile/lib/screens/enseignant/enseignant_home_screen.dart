@@ -46,6 +46,58 @@ class _EnseignantHomeScreenState extends State<EnseignantHomeScreen> {
     ];
   }
 
+  void _changerEcole(BuildContext context, AuthProvider auth) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.all(12),
+              child: Text(
+                'Choisir un établissement',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ),
+            ...auth.ecoles.asMap().entries.map((entry) {
+              final i     = entry.key;
+              final ecole = entry.value;
+              final isActive = i == auth.ecoles.indexOf(auth.ecoleActive!);
+              return ListTile(
+                leading: Icon(
+                  Icons.school,
+                  color: isActive ? AppTheme.primary : Colors.grey,
+                ),
+                title: Text(ecole.nom),
+                trailing: isActive
+                    ? const Icon(Icons.check, color: AppTheme.primary)
+                    : null,
+                onTap: () async {
+                  Navigator.pop(context);
+                  await auth.switchEcole(i);
+                  setState(() => _index = 0);
+                },
+              );
+            }),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _openMore(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -100,7 +152,9 @@ class _EnseignantHomeScreenState extends State<EnseignantHomeScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(etablissement?.nom ?? 'Espace Enseignant'),
+            Text(auth.isCentral
+                ? (auth.ecoleActive?.nom ?? 'Espace Enseignant')
+                : (etablissement?.nom ?? 'Espace Enseignant')),
             if (auth.nom != null)
               Text(
                 '${auth.prenom ?? ''} ${auth.nom ?? ''}'.trim(),
@@ -109,6 +163,12 @@ class _EnseignantHomeScreenState extends State<EnseignantHomeScreen> {
           ],
         ),
         actions: [
+          if (auth.isCentral && auth.ecoles.length > 1)
+            IconButton(
+              icon: const Icon(Icons.swap_horiz),
+              tooltip: 'Changer d\'établissement',
+              onPressed: () => _changerEcole(context, auth),
+            ),
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Déconnexion',

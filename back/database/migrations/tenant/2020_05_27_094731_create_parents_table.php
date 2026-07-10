@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('parents', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('central_user_id')->nullable();
             $table->string('numero_parent')->unique();
             $table->string('nom_parent')->nullable();
             $table->string('prenom_parent')->nullable();

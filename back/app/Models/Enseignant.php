@@ -17,7 +17,7 @@ class Enseignant extends Authenticatable
         "matricule_enseignant", "nom_enseignant", "prenoms_enseignant",
         "genre_enseignant", "telephone_enseignant", "email_enseignant",
         "date_naissance_enseignant", "date_embauche_enseignant", "statut_enseignant",
-        "password",
+        "password", "central_user_id",
     ];
 
     protected $hidden = ['password'];

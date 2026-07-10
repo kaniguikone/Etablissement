@@ -84,10 +84,6 @@ const DemandesAcces = () => {
                                     <div className="fw-semibold">{resultat.domaine}</div>
                                 </div>
                                 <div className="col-sm-6">
-                                    <div className="text-muted">Accès valable jusqu'au</div>
-                                    <div className="fw-semibold">{resultat.expire_le}</div>
-                                </div>
-                                <div className="col-sm-6">
                                     <div className="text-muted">Email admin</div>
                                     <div className="fw-semibold d-flex align-items-center gap-2">
                                         {resultat.email}

@@ -28,6 +28,8 @@ const Attestation = () => {
 
     const [chargement,     setChargement]     = useState(false);
     const [telechargement, setTelechargement] = useState(false);
+    const [matriculeInput,    setMatriculeInput]    = useState('');
+    const [rechercheEnCours, setRechercheEnCours]  = useState(false);
 
     useEffect(() => {
         api.get('/niveaux').then((r) => setNiveaux(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
@@ -69,6 +71,33 @@ const Attestation = () => {
         }
     };
 
+    const rechercherParMatricule = async (e) => {
+        e?.preventDefault();
+        const m = matriculeInput.trim();
+        if (!m) return;
+        setRechercheEnCours(true);
+        setEleve(null);
+        setEleveId('');
+        try {
+            const r = await api.get(`/eleves?s=${encodeURIComponent(m)}`);
+            const liste = Array.isArray(r.data) ? r.data : (r.data?.data ?? []);
+            const found = liste.find(el => el.matricule_eleve?.toLowerCase() === m.toLowerCase()) ?? liste[0];
+            if (!found) {
+                toast.error(`Aucun élève trouvé avec le matricule « ${m} ».`);
+                return;
+            }
+            setChargement(true);
+            const detail = await api.get(`/eleves/${found.id}`);
+            setEleve(detail.data);
+            setEleveId(String(found.id));
+        } catch {
+            toast.error('Erreur lors de la recherche.');
+        } finally {
+            setRechercheEnCours(false);
+            setChargement(false);
+        }
+    };
+
     const telechargerPdf = async () => {
         setTelechargement(true);
         try {
@@ -92,6 +121,33 @@ const Attestation = () => {
                 <div className="d-flex justify-content-between align-items-center mt-2 mb-3">
                     <h4 className="mb-0">Attestation de scolarité</h4>
                 </div>
+
+                {/* Accès rapide par matricule */}
+                <form className="row g-2 align-items-end mb-3" onSubmit={rechercherParMatricule}>
+                    <div className="col-md-4">
+                        <label className="form-label fw-semibold">
+                            <i className="fas fa-search me-1 text-primary" />
+                            Recherche par matricule
+                        </label>
+                        <input
+                            type="text"
+                            className="form-control form-control-sm"
+                            placeholder="Ex. : 2024-0001"
+                            value={matriculeInput}
+                            onChange={e => setMatriculeInput(e.target.value)}
+                        />
+                    </div>
+                    <div className="col-auto">
+                        <button type="submit" className="btn btn-primary btn-sm" disabled={rechercheEnCours || !matriculeInput.trim()}>
+                            {rechercheEnCours
+                                ? <span className="spinner-border spinner-border-sm" />
+                                : <><i className="fas fa-search me-1" />Rechercher</>}
+                        </button>
+                    </div>
+                    <div className="col-auto align-self-end">
+                        <span className="text-muted small">ou sélectionner via la cascade ci-dessous</span>
+                    </div>
+                </form>
 
                 {/* Sélection en cascade */}
                 <div className="row g-3 mb-4 align-items-end">

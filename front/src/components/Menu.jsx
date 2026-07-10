@@ -96,9 +96,10 @@ const GROUPES = [
         icon: 'fas fa-cash-register',
         permissions: ['finances_caisse'],
         items: [
-            { to: '/Paiements',      icon: 'fas fa-hand-holding-usd', label: 'Paiements' },
-            { to: '/RecapPaiements', icon: 'fas fa-table',            label: 'Récap par niveau' },
-            { to: '/Echeancier',     icon: 'fas fa-calendar-alt',     label: 'Échéancier' },
+            { to: '/NouveauPaiement', icon: 'fas fa-plus-circle',      label: 'Nouveau paiement' },
+            { to: '/Paiements',       icon: 'fas fa-list',             label: 'Historique' },
+            { to: '/RecapPaiements',  icon: 'fas fa-table',            label: 'Récap par niveau' },
+            { to: '/Echeancier',      icon: 'fas fa-calendar-alt',     label: 'Échéancier' },
         ],
     },
 
@@ -172,6 +173,7 @@ const GROUPES = [
             { to: '/RapportMinistere',  icon: 'fas fa-file-alt',   label: 'Rapport Ministère' },
         ],
     },
+
 ];
 
 const MenuGroup = ({ group, open, onToggle }) => {
@@ -237,17 +239,16 @@ const Menu = () => {
             <div className="sidebar">
                 {/* En-tête établissement */}
                 <div style={{
-                    padding: '0 14px',
-                    height: 66,
+                    padding: '14px',
                     borderBottom: '1px solid rgba(255,255,255,0.12)',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 10,
+                    gap: 12,
                     flexShrink: 0,
                 }}>
                     <div style={{
-                        width: 46, height: 46, borderRadius: 10, overflow: 'hidden',
-                        flexShrink: 0, background: 'rgba(255,255,255,0.15)',
+                        width: 80, height: 80, borderRadius: 14, overflow: 'hidden',
+                        flexShrink: 0, background: '#ffffff',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
                         <img
@@ -258,13 +259,13 @@ const Menu = () => {
                     </div>
                     <div style={{ overflow: 'hidden' }}>
                         <div style={{
-                            color: 'white', fontWeight: 700, fontSize: 13,
+                            color: 'white', fontWeight: 700, fontSize: 15,
                             whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                         }}>
                             {etablissement?.nom || 'Mon Établissement'}
                         </div>
                         {etablissement?.ville && (
-                            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 11 }}>
+                            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12 }}>
                                 {etablissement.ville}
                             </div>
                         )}

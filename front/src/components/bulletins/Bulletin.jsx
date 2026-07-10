@@ -378,50 +378,46 @@ const ExportMoyennes = ({ niveaux, periodes }) => {
 const Bulletin = () => {
     const { toast } = useToast();
     const [niveaux, setNiveaux]   = useState([]);
-    const [classes, setClasses]   = useState([]);
-    const [eleves, setEleves]     = useState([]);
     const [periodes, setPeriodes] = useState([]);
 
-    const [niveauId, setNiveauId]   = useState('');
-    const [classeId, setClasseId]   = useState('');
     const [eleveId, setEleveId]     = useState('');
     const [periodeId, setPeriodeId] = useState('');
 
-    const [bulletin, setBulletin]     = useState(null);
-    const [chargement, setChargement] = useState(false);
+    const [bulletin, setBulletin]         = useState(null);
+    const [chargement, setChargement]     = useState(false);
+    const [pdfEnCours, setPdfEnCours]     = useState(false);
+    const [matriculeInput,   setMatriculeInput]   = useState('');
+    const [rechercheEnCours, setRechercheEnCours] = useState(false);
+    const [eleveNom,         setEleveNom]         = useState('');
 
     useEffect(() => {
-        api.get('/niveaux').then((r) => setNiveaux(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
-        api.get('/periodes').then((r) => setPeriodes(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
+        api.get('/niveaux').then((r) => setNiveaux(r.data)).catch(() => {});
+        api.get('/periodes').then((r) => setPeriodes(r.data)).catch(() => toast.error('Erreur de chargement des périodes.'));
     }, []);
 
-    const handleNiveauChange = (e) => {
-        const val = e.target.value;
-        setNiveauId(val);
-        setClasseId('');
+    const rechercherParMatricule = async (e) => {
+        e?.preventDefault();
+        const m = matriculeInput.trim();
+        if (!m) return;
+        setRechercheEnCours(true);
         setEleveId('');
-        setClasses([]);
-        setEleves([]);
+        setEleveNom('');
         setBulletin(null);
-        if (val) {
-            api.get(`/classesNiveaux/${val}`).then((r) => setClasses(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
+        try {
+            const r = await api.get(`/eleves?s=${encodeURIComponent(m)}`);
+            const liste = Array.isArray(r.data) ? r.data : (r.data?.data ?? []);
+            const found = liste.find(el => el.matricule_eleve?.toLowerCase() === m.toLowerCase()) ?? liste[0];
+            if (!found) {
+                toast.error(`Aucun élève trouvé avec le matricule « ${m} ».`);
+                return;
+            }
+            setEleveId(String(found.id));
+            setEleveNom(`${found.nom_eleve} ${found.prenoms_eleve}`);
+        } catch {
+            toast.error('Erreur lors de la recherche.');
+        } finally {
+            setRechercheEnCours(false);
         }
-    };
-
-    const handleClasseChange = (e) => {
-        const val = e.target.value;
-        setClasseId(val);
-        setEleveId('');
-        setEleves([]);
-        setBulletin(null);
-        if (val) {
-            api.get(`/elevesClasse/${val}`).then((r) => setEleves(r.data.data ?? r.data)).catch(() => toast.error('Erreur de chargement des données.'));
-        }
-    };
-
-    const handleEleveChange = (e) => {
-        setEleveId(e.target.value);
-        setBulletin(null);
     };
 
     const chargerBulletin = () => {
@@ -434,20 +430,28 @@ const Bulletin = () => {
     };
 
     const telechargerPdf = async () => {
+        setPdfEnCours(true);
         try {
             const r = await api.get(`/bulletin/${eleveId}/${periodeId}/pdf`, { responseType: 'blob', timeout: 60000 });
             const periode = periodes.find((p) => String(p.id) === String(periodeId));
             const labelPeriode = periode?.code_periode ?? periode?.abbr_libelle_periode ?? periodeId;
-            const nomFichier = `bulletin_${bulletin.eleve.nom_eleve.toLowerCase()}_${bulletin.eleve.prenoms_eleve.toLowerCase()}_${labelPeriode}_${periode?.annee ?? ''}.pdf`
-                .replace(/\s+/g, '_');
+            const nomBase = bulletin?.eleve
+                ? `${bulletin.eleve.nom_eleve}_${bulletin.eleve.prenoms_eleve}`
+                : eleveNom;
+            const nomFichier = `bulletin_${nomBase}_${labelPeriode}_${periode?.annee ?? ''}.pdf`
+                .toLowerCase().replace(/\s+/g, '_');
             const url  = URL.createObjectURL(new Blob([r.data], { type: 'application/pdf' }));
             const lien = document.createElement('a');
             lien.href  = url;
             lien.download = nomFichier;
+            document.body.appendChild(lien);
             lien.click();
+            document.body.removeChild(lien);
             URL.revokeObjectURL(url);
         } catch (err) {
             toast.error(await lireErreurBlob(err));
+        } finally {
+            setPdfEnCours(false);
         }
     };
 
@@ -463,72 +467,87 @@ const Bulletin = () => {
                     <h4 className="mb-0">Bulletins de notes</h4>
                 </div>
 
-                {/* Sélection en cascade */}
-                <div className="row g-3 mb-3 align-items-end">
-                    <div className="col-md-3">
-                        <label className="form-label">Niveau</label>
-                        <select className="form-select form-select-sm" value={niveauId} onChange={handleNiveauChange}>
-                            <option value="">— Niveau —</option>
-                            {niveaux.map((n) => (
-                                <option key={n.id} value={n.id}>{n.nom_niveau}</option>
-                            ))}
-                        </select>
+                {/* Accès rapide par matricule */}
+                <form className="row g-2 align-items-end mb-3" onSubmit={rechercherParMatricule}>
+                    <div className="col-md-4">
+                        <label className="form-label fw-semibold">
+                            <i className="fas fa-search me-1 text-primary" />
+                            Recherche par matricule
+                        </label>
+                        <input
+                            type="text"
+                            className="form-control form-control-sm"
+                            placeholder="Ex. : 2024-0001"
+                            value={matriculeInput}
+                            onChange={e => setMatriculeInput(e.target.value)}
+                        />
                     </div>
-                    <div className="col-md-3">
-                        <label className="form-label">Classe</label>
-                        <select className="form-select form-select-sm" value={classeId} onChange={handleClasseChange} disabled={!niveauId}>
-                            <option value="">— Classe —</option>
-                            {classes.map((c) => (
-                                <option key={c.id} value={c.id}>{c.nom_classe}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="col-md-3">
-                        <label className="form-label">Élève</label>
-                        <select className="form-select form-select-sm" value={eleveId} onChange={handleEleveChange} disabled={!classeId}>
-                            <option value="">— Élève —</option>
-                            {eleves.map((e) => (
-                                <option key={e.id} value={e.id}>{e.nom_eleve} {e.prenoms_eleve} — {e.matricule_eleve}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="col-md-3">
-                        <label className="form-label">Période</label>
-                        <select className="form-select form-select-sm" value={periodeId} onChange={(e) => { setPeriodeId(e.target.value); setBulletin(null); }}>
-                            <option value="">— Période —</option>
-                            {periodes.map((p) => (
-                                <option key={p.id} value={p.id}>{p.libelle_periode} — {p.annee}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="col-12 d-flex gap-2">
-                        <button className="btn btn-primary btn-sm" onClick={chargerBulletin} disabled={!eleveId || !periodeId || chargement}>
-                            {chargement && <span className="spinner-border spinner-border-sm me-1" />}
-                            Afficher
+                    <div className="col-auto">
+                        <button type="submit" className="btn btn-primary btn-sm" disabled={rechercheEnCours || !matriculeInput.trim()}>
+                            {rechercheEnCours
+                                ? <span className="spinner-border spinner-border-sm" />
+                                : <><i className="fas fa-search me-1" />Rechercher</>}
                         </button>
-                        {bulletin && (
-                            <button className="btn btn-danger btn-sm" onClick={telechargerPdf}>
-                                <i className="fas fa-file-pdf me-1"></i> Bulletin PDF
-                            </button>
-                        )}
-                        {eleveId && periodeId && (() => {
-                            const annee = periodes.find(p => String(p.id) === String(periodeId))?.annee;
-                            return annee ? (
-                                <button className="btn btn-outline-secondary btn-sm" onClick={async () => {
-                                    try {
-                                        const r = await api.get(`/releve-annuel/${eleveId}/${encodeURIComponent(annee)}`, { responseType: 'blob', timeout: 90000 });
-                                        const url = URL.createObjectURL(new Blob([r.data], { type: 'application/pdf' }));
-                                        const a = document.createElement('a');
-                                        a.href = url; a.download = `releve_annuel_${annee.replace('/', '-')}.pdf`; a.click();
-                                        URL.revokeObjectURL(url);
-                                    } catch (err) { toast.error(await lireErreurBlob(err)); }
-                                }}>
-                                    <i className="fas fa-list-alt me-1"></i> Relevé annuel
-                                </button>
-                            ) : null;
-                        })()}
                     </div>
-                </div>
+                    {eleveNom && (
+                        <div className="col-auto align-self-end">
+                            <span className="badge bg-success fs-6">
+                                <i className="fas fa-check me-1" />{eleveNom}
+                            </span>
+                        </div>
+                    )}
+                </form>
+
+                {/* Période + actions — visibles dès qu'un élève est sélectionné */}
+                {eleveId && (
+                    <div className="row g-2 align-items-end mb-3 p-2 bg-light rounded border">
+                        <div className="col-md-4">
+                            <label className="form-label fw-semibold mb-1">
+                                <i className="fas fa-calendar-alt me-1 text-primary" />
+                                Période *
+                            </label>
+                            <select className="form-select form-select-sm" value={periodeId} onChange={(e) => { setPeriodeId(e.target.value); setBulletin(null); }}>
+                                <option value="">— Sélectionner une période —</option>
+                                {periodes.map((p) => (
+                                    <option key={p.id} value={p.id}>{p.libelle_periode} — {p.annee}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="col-auto d-flex gap-2 flex-wrap">
+                            <button className="btn btn-primary btn-sm" onClick={chargerBulletin} disabled={!periodeId || chargement}>
+                                {chargement && <span className="spinner-border spinner-border-sm me-1" />}
+                                <i className="fas fa-eye me-1" />Afficher
+                            </button>
+                            <button className="btn btn-danger btn-sm" onClick={telechargerPdf} disabled={!periodeId || pdfEnCours}>
+                                {pdfEnCours
+                                    ? <><span className="spinner-border spinner-border-sm me-1" />Génération…</>
+                                    : <><i className="fas fa-file-pdf me-1" />Télécharger PDF</>
+                                }
+                            </button>
+                            {periodeId && (() => {
+                                const annee = periodes.find(p => String(p.id) === String(periodeId))?.annee;
+                                return annee ? (
+                                    <button className="btn btn-outline-secondary btn-sm" onClick={async () => {
+                                        try {
+                                            const r = await api.get(`/releve-annuel/${eleveId}/${encodeURIComponent(annee)}`, { responseType: 'blob', timeout: 90000 });
+                                            const url = URL.createObjectURL(new Blob([r.data], { type: 'application/pdf' }));
+                                            const a = document.createElement('a');
+                                            a.href = url; a.download = `releve_annuel_${annee.replace('/', '-')}.pdf`; a.click();
+                                            URL.revokeObjectURL(url);
+                                        } catch (err) { toast.error(await lireErreurBlob(err)); }
+                                    }}>
+                                        <i className="fas fa-list-alt me-1" />Relevé annuel
+                                    </button>
+                                ) : null;
+                            })()}
+                            {bulletin && (
+                                <span className="text-muted small align-self-center">
+                                    <i className="fas fa-check-circle text-success me-1" />bulletin affiché ci-dessous
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 {/* Affichage du bulletin */}
                 {bulletin && (

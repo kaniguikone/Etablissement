@@ -2,7 +2,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 const PrivateRoute = ({ children, permissions, superOnly }) => {
-    const { user, peutAcceder, estGroupe } = useAuth();
+    const { user, peutAcceder, estGroupe, estSuperAdmin } = useAuth();
     const location = useLocation();
 
     if (!user) {
@@ -20,7 +20,7 @@ const PrivateRoute = ({ children, permissions, superOnly }) => {
         return <Navigate to="/groupe" replace />;
     }
 
-    if (superOnly && !user?.super) {
+    if (superOnly && !user?.super && !estSuperAdmin) {
         return (
             <div className="page-wrapper d-flex align-items-center justify-content-center" style={{ minHeight: '60vh' }}>
                 <div className="text-center">

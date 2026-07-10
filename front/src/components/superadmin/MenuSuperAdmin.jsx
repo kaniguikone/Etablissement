@@ -5,7 +5,11 @@ const ITEMS = [
     { to: '/superadmin/demandes',    icon: 'fas fa-inbox',       label: "Demandes d'accès" },
     { to: '/superadmin/abonnements', icon: 'fas fa-credit-card', label: 'Abonnements' },
     { to: '/superadmin/tarifs',      icon: 'fas fa-tags',        label: 'Tarifs & Licences' },
-    { to: '/superadmin/templates',   icon: 'fas fa-layer-group', label: 'Modèles d\'établissement' },
+    { to: '/superadmin/templates',   icon: 'fas fa-layer-group', label: "Modèles d'établissement" },
+];
+
+const ITEMS_DEV = [
+    { to: '/Seeder', icon: 'fas fa-database', label: 'Générateur de données' },
 ];
 
 const MenuSuperAdmin = () => {
@@ -67,6 +71,21 @@ const MenuSuperAdmin = () => {
                     </div>
                     <ul className="menu-flat">
                         {ITEMS.map(({ to, icon, label }) => (
+                            <li key={to}>
+                                <NavLink to={to}>
+                                    <span className="icon"><i className={icon} /></span>
+                                    <span className="item">{label}</span>
+                                </NavLink>
+                            </li>
+                        ))}
+                    </ul>
+                    <div style={{ padding: '6px 16px 4px', marginTop: 8 }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'rgba(255,255,255,0.4)' }}>
+                            Outils
+                        </span>
+                    </div>
+                    <ul className="menu-flat">
+                        {ITEMS_DEV.map(({ to, icon, label }) => (
                             <li key={to}>
                                 <NavLink to={to}>
                                     <span className="icon"><i className={icon} /></span>

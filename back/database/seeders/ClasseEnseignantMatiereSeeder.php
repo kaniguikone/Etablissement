@@ -8,11 +8,11 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Affecte les matières aux classes en s'appuyant sur la table niveau_matieres
- * (alimentée depuis le template du cycle), puis assigne un enseignant par
- * triplet (classe × matière).
- *
- * Règles enseignants : max 3 matières différentes, max 7 classes distinctes.
+ * Règles :
+ * - Chaque enseignant a exactement 1 matière de spécialité (hors EDHC).
+ * - Les spécialités sont distribuées en round-robin sur tous les enseignants.
+ * - L'EDHC n'a pas de prof dédié : n'importe quel enseignant peut l'assurer
+ *   (affecté en round-robin sur l'ensemble des enseignants).
  */
 class ClasseEnseignantMatiereSeeder extends Seeder
 {
@@ -21,14 +21,14 @@ class ClasseEnseignantMatiereSeeder extends Seeder
         DB::table('classe_enseignant_matiere')->truncate();
 
         $classes     = Classe::orderBy('niveau_id')->orderBy('id')->get();
-        $enseignants = Enseignant::all();
+        $enseignants = Enseignant::all()->values();
 
         if ($classes->isEmpty() || $enseignants->isEmpty()) {
             $this->command->warn('Données manquantes (classes ou enseignants absents).');
             return;
         }
 
-        // Matières par niveau depuis niveau_matieres (union de toutes les séries)
+        // Matières par niveau depuis niveau_matieres
         $matieresParNiveau = DB::table('niveau_matieres')
             ->select('niveau_id', 'matiere_id')
             ->get()
@@ -39,106 +39,70 @@ class ClasseEnseignantMatiereSeeder extends Seeder
         $matieresParClasse = [];
         foreach ($classes as $classe) {
             $mats = $matieresParNiveau[$classe->niveau_id] ?? [];
-            if (empty($mats)) continue;
-            $matieresParClasse[$classe->id] = $mats;
+            if (!empty($mats)) {
+                $matieresParClasse[$classe->id] = $mats;
+            }
         }
 
         if (empty($matieresParClasse)) {
-            $this->command->warn('Aucune matière trouvée dans niveau_matieres — seed du template exécuté ?');
+            $this->command->warn('Aucune matière trouvée dans niveau_matieres.');
             return;
         }
 
-        // ── Étape 1 : nombre d'enseignants nécessaires par matière ───────────
-        // 1 enseignant pour au plus 7 classes → ceil(nbClasses / 7)
+        // ID de la matière EDHC (pas de spécialiste dédié)
+        $edhcId = DB::table('matieres')->where('abbr_matiere', 'EDHC')->value('id');
 
-        $classesParMatiere = [];
-        foreach ($matieresParClasse as $mats) {
-            foreach ($mats as $mid) {
-                $classesParMatiere[$mid] = ($classesParMatiere[$mid] ?? 0) + 1;
-            }
+        // Toutes les matières non-EDHC présentes dans les classes
+        $matieresNonEdhc = collect($matieresParClasse)
+            ->flatten()->unique()
+            ->filter(fn ($mid) => $mid !== $edhcId)
+            ->values()->toArray();
+
+        // ── Étape 1 : 1 spécialité par enseignant (round-robin) ──────────────
+
+        $nbEns      = count($enseignants);
+        $nbMatieres = count($matieresNonEdhc);
+        $specialite = []; // enseignant_id => matiere_id
+
+        for ($i = 0; $i < $nbEns; $i++) {
+            $specialite[$enseignants[$i]->id] = $matieresNonEdhc[$i % $nbMatieres];
         }
 
-        $ensNeededParMatiere = [];
-        foreach ($classesParMatiere as $mid => $nbClasses) {
-            $ensNeededParMatiere[$mid] = max(1, (int) ceil($nbClasses / 7));
-        }
-
-        // ── Étape 2 : affectation déterministe enseignant → matières ─────────
-
-        $ensList       = $enseignants->values()->all();
-        $nbEns         = count($ensList);
-        $specParEns    = [];
+        // Index inverse : matiere_id => [enseignant_ids]
         $ensParMatiere = [];
-
-        foreach ($ensList as $ens) {
-            $specParEns[$ens->id] = [];
+        foreach ($specialite as $ensId => $mid) {
+            $ensParMatiere[$mid][] = $ensId;
         }
 
-        $cursor = 0;
+        // ── Étape 2 : affectation (classe × matière) → enseignant ────────────
 
-        foreach ($ensNeededParMatiere as $mid => $nbRequis) {
-            $affectes = 0;
-            $essais   = 0;
-
-            while ($affectes < $nbRequis && $essais < $nbEns * 3) {
-                $ens = $ensList[$cursor % $nbEns];
-                $cursor++;
-                $essais++;
-
-                if (
-                    count($specParEns[$ens->id]) < 3 &&
-                    !in_array($mid, $specParEns[$ens->id])
-                ) {
-                    $specParEns[$ens->id][]  = $mid;
-                    $ensParMatiere[$mid][]   = $ens->id;
-                    $affectes++;
-                }
-            }
-
-            if ($affectes < $nbRequis) {
-                $this->command->warn("Seulement {$affectes}/{$nbRequis} enseignants pour matière #{$mid}");
-            }
-        }
-
-        // ── Étape 3 : affectation (classe × matière) → enseignant ────────────
-
-        $classesDistinctesParEns = array_fill_keys(array_keys($specParEns), []);
-        $rows = [];
+        $chargeParEns = array_fill_keys($enseignants->pluck('id')->toArray(), 0);
+        $ensIds       = $enseignants->pluck('id')->toArray();
+        $edhcCursor   = 0;
+        $rows         = [];
 
         foreach ($matieresParClasse as $classeId => $matiereIds) {
             foreach ($matiereIds as $mid) {
-                $candidats = $ensParMatiere[$mid] ?? [];
 
-                usort($candidats, fn ($a, $b) =>
-                    count($classesDistinctesParEns[$a] ?? []) <=>
-                    count($classesDistinctesParEns[$b] ?? [])
-                );
+                if ($mid === $edhcId) {
+                    // EDHC : round-robin sur tous les enseignants
+                    $choisi = $ensIds[$edhcCursor % $nbEns];
+                    $edhcCursor++;
+                } else {
+                    // Spécialité : le prof de cette matière le moins chargé
+                    $candidats = $ensParMatiere[$mid] ?? [];
 
-                $choisi = null;
-                foreach ($candidats as $eid) {
-                    if (count($classesDistinctesParEns[$eid] ?? []) < 7) {
-                        $choisi = $eid;
-                        break;
+                    if (empty($candidats)) {
+                        // Sécurité : le moins chargé de tous
+                        asort($chargeParEns);
+                        $choisi = array_key_first($chargeParEns);
+                    } else {
+                        usort($candidats, fn ($a, $b) => $chargeParEns[$a] <=> $chargeParEns[$b]);
+                        $choisi = $candidats[0];
                     }
                 }
 
-                if ($choisi === null && !empty($candidats)) {
-                    $choisi = $candidats[0];
-                }
-
-                if ($choisi === null) {
-                    $tous = array_keys($specParEns);
-                    usort($tous, fn ($a, $b) =>
-                        count($classesDistinctesParEns[$a] ?? []) <=>
-                        count($classesDistinctesParEns[$b] ?? [])
-                    );
-                    $choisi = $tous[0];
-                }
-
-                if (!in_array($classeId, $classesDistinctesParEns[$choisi])) {
-                    $classesDistinctesParEns[$choisi][] = $classeId;
-                }
-
+                $chargeParEns[$choisi]++;
                 $rows[] = [
                     'classe_id'     => $classeId,
                     'enseignant_id' => $choisi,
@@ -151,13 +115,10 @@ class ClasseEnseignantMatiereSeeder extends Seeder
             DB::table('classe_enseignant_matiere')->insert($chunk);
         }
 
-        $nbClassesParEns = array_map(fn ($cl) => count($cl), $classesDistinctesParEns);
-        $max = !empty($nbClassesParEns) ? max($nbClassesParEns) : 0;
-        $avg = count($ensList) > 0
-            ? round(array_sum($nbClassesParEns) / count($ensList), 1)
-            : 0;
+        $max = !empty($chargeParEns) ? max($chargeParEns) : 0;
+        $avg = $nbEns > 0 ? round(array_sum($chargeParEns) / $nbEns, 1) : 0;
 
         $this->command->info('✓ ' . count($rows) . ' affectations insérées.');
-        $this->command->info("  → max classes distinctes/enseignant : {$max}, moyenne : {$avg}");
+        $this->command->info("  → max classes/enseignant : {$max}, moyenne : {$avg}");
     }
 }

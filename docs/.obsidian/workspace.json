@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "guide-production.md",
+                "file": "commandes-creation.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "guide-production"
+              "title": "commandes-creation"
             }
           }
         ]
@@ -183,8 +183,11 @@
       "bases:Créer une nouvelle base": false
     }
   },
-  "active": "64e474c9d1cd1ed8",
+  "active": "d574e5a8177cf752",
   "lastOpenFiles": [
+    "commandes-creation.md.tmp.15760.8c3cfa68fa80",
+    "guide-deploiement.md",
+    "guide-production.md",
     "commandes-creation.md.tmp.25700.8e8d667109ca",
     "fonctionnalites.md",
     "roadmap-commerciale.md",
@@ -198,12 +201,9 @@
     "roadmap-commerciale.md.tmp.40008.857864e52b04",
     "roadmap-commerciale.md.tmp.40008.fd43b6e85682",
     "analyse-experte.md",
-    "guide-production.md.tmp.6136.bd4c31e76b0e",
     "Sans titre.md",
     "Sans titre/Sans titre.md",
-    "guide-production.md",
     "~$nctionnalites.md",
-    "guide-administrateur.md",
-    "guide-deploiement.md"
+    "guide-administrateur.md"
   ]
 }

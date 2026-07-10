@@ -1,6 +1,7 @@
 ﻿import React, { useEffect, useState, useCallback } from 'react';
 import api from '../../api/axios';
 import { NavLink } from 'react-router-dom';
+import { useToast } from '../../context/ToastContext';
 
 const STATUT = {
     retard:  { label: 'En retard',  cls: 'danger',  icon: 'fas fa-exclamation-circle' },
@@ -18,6 +19,7 @@ const fmtMontant = (n) =>
     n != null ? Number(n).toLocaleString('fr-FR') + ' F' : '—';
 
 const Echeancier = () => {
+    const { toast } = useToast();
     const [niveaux, setNiveaux]   = useState([]);
     const [classes, setClasses]   = useState([]);
     const [niveauId, setNiveauId] = useState('');
@@ -28,7 +30,9 @@ const Echeancier = () => {
     const [chargement, setChargement] = useState(false);
 
     useEffect(() => {
-        api.get('/niveaux').then(r => setNiveaux(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
+        api.get('/niveaux')
+            .then(r => setNiveaux(Array.isArray(r.data) ? r.data : (r.data?.data ?? [])))
+            .catch(() => toast.error('Erreur de chargement des niveaux.'));
     }, []);
 
     useEffect(() => {
@@ -69,7 +73,7 @@ const Echeancier = () => {
                         <select className="form-select form-select-sm" value={niveauId}
                             onChange={e => setNiveauId(e.target.value)}>
                             <option value="">Tous les niveaux</option>
-                            {niveaux.map(n => <option key={n.id} value={n.id}>{n.libelle_niveau}</option>)}
+                            {niveaux.map(n => <option key={n.id} value={n.id}>{n.nom_niveau}</option>)}
                         </select>
                     </div>
                     <div className="col-md-3">
