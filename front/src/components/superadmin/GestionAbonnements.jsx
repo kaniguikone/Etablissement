@@ -50,6 +50,7 @@ export default function GestionAbonnements() {
     const [tplEnvoi, setTplEnvoi]       = useState(false);
     const [tplResultat, setTplResultat] = useState(null);
     const [tplErreur, setTplErreur]     = useState('');
+    const [tplTypeLoading, setTplTypeLoading] = useState(false);
 
     const charger = useCallback(async () => {
         setChargement(true);
@@ -64,12 +65,23 @@ export default function GestionAbonnements() {
 
     useEffect(() => { charger(); }, [charger]);
 
-    const ouvrirModalTemplate = (tenant) => {
+    const ouvrirModalTemplate = async (tenant) => {
         setTenantTemplate(tenant);
-        setTplForm({ type: 'college', annee: ANNEE_COURANTE, periodes_type: 'trimestre' });
+        setTplForm({ type: '', annee: ANNEE_COURANTE, periodes_type: 'trimestre' });
         setTplResultat(null);
         setTplErreur('');
         setModalTemplate(true);
+
+        // Pré-sélectionne le type réel de l'établissement (table `etablissement` de sa base tenant).
+        setTplTypeLoading(true);
+        try {
+            const { data } = await centralApi.get(`/superadmin/tenants/${tenant.id}/type-etablissement`);
+            if (data.type) setTplForm(f => ({ ...f, type: data.type }));
+        } catch {
+            // Silencieux — l'opérateur reste libre de choisir le type manuellement.
+        } finally {
+            setTplTypeLoading(false);
+        }
     };
 
     const appliquerTemplate = async (e) => {
@@ -413,6 +425,12 @@ export default function GestionAbonnements() {
 
                                     <div className="mb-3">
                                         <label className="form-label fw-semibold">Type d'établissement</label>
+                                        {tplTypeLoading && (
+                                            <div className="text-muted small mb-2">
+                                                <span className="spinner-border spinner-border-sm me-1" />
+                                                Lecture du type réel de l'établissement…
+                                            </div>
+                                        )}
                                         <div className="row g-2">
                                             {TYPES_ETABLISSEMENT.map(t => (
                                                 <div key={t.value} className="col-6">
@@ -472,7 +490,7 @@ export default function GestionAbonnements() {
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-outline-secondary"
                                         onClick={() => setModalTemplate(false)}>Fermer</button>
-                                    <button type="submit" className="btn btn-warning" disabled={tplEnvoi}>
+                                    <button type="submit" className="btn btn-warning" disabled={tplEnvoi || !tplForm.type}>
                                         {tplEnvoi
                                             ? <><span className="spinner-border spinner-border-sm me-2" />Application…</>
                                             : <><i className="fas fa-layer-group me-2" />Appliquer</>}

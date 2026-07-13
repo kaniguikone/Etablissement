@@ -89,6 +89,7 @@ Route::middleware('auth:sanctum')->prefix('superadmin')->group(function () {
     Route::get('/tenants',                      [TenantController::class, 'index']);
     Route::post('/tenants',                     [TenantController::class, 'store']);
     Route::get('/tenants/{id}',                 [TenantController::class, 'show']);
+    Route::get('/tenants/{id}/type-etablissement', [TenantController::class, 'typeEtablissement']);
     Route::put('/tenants/{id}',                 [TenantController::class, 'update']);
     Route::delete('/tenants/{id}',              [TenantController::class, 'destroy']);
     Route::post('/tenants/{id}/toggle-actif',   [TenantController::class, 'toggleActif']);

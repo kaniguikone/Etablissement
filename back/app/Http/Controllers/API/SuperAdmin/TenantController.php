@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -98,6 +99,18 @@ class TenantController extends Controller
     {
         $tenant = Tenant::with('domains')->findOrFail($id);
         return response()->json($tenant);
+    }
+
+    /** Type d'établissement réel (lycee | lycee_complet | college | primaire), lu dans la base tenant. */
+    public function typeEtablissement(string $id): JsonResponse
+    {
+        $tenant = Tenant::findOrFail($id);
+
+        tenancy()->initialize($tenant);
+        $type = DB::table('etablissement')->value('type');
+        tenancy()->end();
+
+        return response()->json(['type' => $type]);
     }
 
     public function update(Request $request, string $id): JsonResponse

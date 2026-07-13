@@ -36,13 +36,13 @@ php artisan group:create "Groupe Scolaire Avenir" \
   --tenants=college-avenir
 ```
 
-| Option | Description |
-|---|---|
-| `--email` | Email de contact du groupe |
-| `--admin-email` | Email de l'administrateur |
-| `--admin-password` | Mot de passe de l'administrateur |
-| `--admin-nom` | Nom de l'administrateur |
-| `--tenants` | ID d'un établissement à rattacher (répéter l'option pour en ajouter plusieurs) |
+| Option             | Description                                                                    |
+| ------------------ | ------------------------------------------------------------------------------ |
+| `--email`          | Email de contact du groupe                                                     |
+| `--admin-email`    | Email de l'administrateur                                                      |
+| `--admin-password` | Mot de passe de l'administrateur                                               |
+| `--admin-nom`      | Nom de l'administrateur                                                        |
+| `--tenants`        | ID d'un établissement à rattacher (répéter l'option pour en ajouter plusieurs) |
 
 Login : `POST /api/group/login`
 

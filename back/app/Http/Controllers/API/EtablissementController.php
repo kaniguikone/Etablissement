@@ -26,7 +26,7 @@ class EtablissementController extends Controller
     {
         $request->validate([
             'nom'             => 'required|string|max:255',
-            'type'            => 'nullable|in:lycee,lycee_complet,college,primaire',
+            'type'            => 'required|in:lycee,lycee_complet,college,primaire',
             'code_ministere'  => 'nullable|string|max:50',
             'slogan'          => 'nullable|string|max:255',
             'adresse'         => 'nullable|string|max:255',

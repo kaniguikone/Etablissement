@@ -73,14 +73,24 @@ const SeederInterface = () => {
     const [tenants, setTenants]       = useState([]);
     const [tenantId, setTenantId]     = useState('');
     const [loadingTenants, setLoadingTenants] = useState(true);
+    const [loadingType, setLoadingType] = useState(false);
 
-    const guessTemplate = (tenant) => {
-        const hay = ((tenant?.nom ?? '') + ' ' + (tenant?.id ?? '')).toLowerCase();
-        if (hay.includes('primaire') || hay.includes('ecole') || hay.includes('école')) return 'primaire';
-        if (hay.includes('college') || hay.includes('collège'))                          return 'college';
-        if (hay.includes('lycee_complet') || hay.includes('lycée complet'))              return 'lycee_complet';
-        if (hay.includes('lycee') || hay.includes('lycée'))                              return 'lycee_complet';
-        return 'lycee_complet';
+    // Lit le vrai type d'établissement (table `etablissement` de la base tenant) — la seule source fiable.
+    const chargerTemplate = async (id) => {
+        if (!id) return;
+        setLoadingType(true);
+        try {
+            const { data } = await centralApi.get(`/superadmin/tenants/${id}/type-etablissement`);
+            if (data.type && TEMPLATES[data.type]) {
+                setParams(p => ({ ...p, template: data.type }));
+            } else {
+                toast.error("Type d'établissement non défini pour cet établissement — vérifiez sa fiche.");
+            }
+        } catch {
+            toast.error("Impossible de déterminer le type d'établissement.");
+        } finally {
+            setLoadingType(false);
+        }
     };
 
     const [params, setParams]       = useState(DEFAUTS);
@@ -103,7 +113,7 @@ const SeederInterface = () => {
                 setTenants(liste);
                 if (liste.length > 0) {
                     setTenantId(liste[0].id);
-                    setParams(p => ({ ...p, template: guessTemplate(liste[0]) }));
+                    chargerTemplate(liste[0].id);
                 }
             })
             .catch(() => toast.error('Impossible de charger la liste des établissements.'))
@@ -199,9 +209,8 @@ const SeederInterface = () => {
                     ) : (
                         <select className="form-select" value={tenantId}
                             onChange={e => {
-                                const t = tenants.find(x => x.id === e.target.value);
                                 setTenantId(e.target.value);
-                                setParams(p => ({ ...p, template: guessTemplate(t) }));
+                                chargerTemplate(e.target.value);
                             }}
                             disabled={enCours}>
                             {tenants.map(t => (
@@ -275,7 +284,9 @@ const SeederInterface = () => {
                                     ))}
                                 </select>
                                 <div className="form-text text-muted">
-                                    <i className="fas fa-lock me-1" />Déduit de l'établissement sélectionné
+                                    {loadingType
+                                        ? <><i className="fas fa-spinner fa-spin me-1" />Lecture du type d'établissement…</>
+                                        : <><i className="fas fa-lock me-1" />Type réel de l'établissement (fiche établissement)</>}
                                 </div>
                             </div>
                             <div className="row g-3 mb-3">
@@ -407,7 +418,7 @@ const SeederInterface = () => {
 
                     {/* Bouton / confirmation */}
                     {!confirmer && !enCours && (
-                        <button className="btn btn-danger w-100 py-2 mb-3"
+                        <button className="btn btn-danger w-100 py-2 mb-3" disabled={loadingType}
                             onClick={() => setConfirmer(true)}>
                             <i className="fas fa-play me-2" />Lancer le seed
                         </button>

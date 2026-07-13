@@ -74,6 +74,7 @@ const ParametresEtablissement = () => {
 
     const sauvegarder = () => {
         if (!form.nom.trim()) return;
+        if (!form.type) { toast.error("Le type d'établissement est obligatoire."); return; }
         setEnregistrement(true);
         api.put('/etablissement', form)
             .then((r) => {
@@ -289,8 +290,8 @@ const ParametresEtablissement = () => {
                             </div>
                             <div className="col-md-5">
                                 <label className="form-label small fw-bold">Type d'établissement</label>
-                                <select name="type" className="form-select form-select-sm" value={form.type} onChange={handleChange}>
-                                    <option value="">— Non défini —</option>
+                                <select name="type" className="form-select form-select-sm" value={form.type} onChange={handleChange} required>
+                                    <option value="" disabled>— Choisir —</option>
                                     <option value="college">Collège (6ème → 3ème)</option>
                                     <option value="lycee">Lycée (Seconde → Terminale)</option>
                                     <option value="lycee_complet">Lycée Complet (6ème → Terminale)</option>

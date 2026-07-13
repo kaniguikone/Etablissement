@@ -21,7 +21,7 @@ class CreateSchool extends Command
         {--group-id= : ID du groupe auquel rattacher l\'établissement (optionnel)}
         {--admin-email= : Email du premier administrateur}
         {--admin-password= : Mot de passe du premier administrateur}
-        {--type= : Type d\'établissement pour pré-remplissage (lycee, lycee_complet, college, primaire)}
+        {--type= : Type d\'établissement, obligatoire (lycee, lycee_complet, college, primaire)}
         {--annee= : Année scolaire du pré-remplissage, ex: 2025-2026 (défaut : année courante)}
         {--periodes=trimestre : Type de périodes du pré-remplissage (trimestre ou semestre)}';
 
@@ -45,7 +45,11 @@ class CreateSchool extends Command
         }
 
         $type = $this->option('type');
-        if ($type && !array_key_exists($type, TemplateService::liste())) {
+        if (!$type) {
+            $this->error("L'option --type est obligatoire. Valeurs possibles : " . implode(', ', array_keys(TemplateService::liste())) . '.');
+            return 1;
+        }
+        if (!array_key_exists($type, TemplateService::liste())) {
             $this->error("Type invalide '$type'. Valeurs possibles : " . implode(', ', array_keys(TemplateService::liste())) . '.');
             return 1;
         }
