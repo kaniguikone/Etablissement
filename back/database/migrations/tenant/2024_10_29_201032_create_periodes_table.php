@@ -10,7 +10,8 @@ return new class extends Migration
     {
         Schema::create('periodes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('annee_scolaire_id')->nullable()->constrained('annees_scolaires')->nullOnDelete();
+            // FK vers 'annees_scolaires' ajoutée dans 2026_07_13_000001 (table créée bien plus tard chronologiquement)
+            $table->foreignId('annee_scolaire_id')->nullable();
             $table->string('libelle_periode');
             $table->string('abbr_libelle_periode');
             $table->string('code_periode', 10)->nullable();

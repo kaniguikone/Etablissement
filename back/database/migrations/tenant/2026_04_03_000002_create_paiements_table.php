@@ -10,7 +10,8 @@ return new class extends Migration
     {
         Schema::create('paiements', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('annee_scolaire_id')->nullable()->constrained('annees_scolaires')->nullOnDelete();
+            // FK vers 'annees_scolaires' ajoutée dans 2026_07_13_000001 (table créée bien plus tard chronologiquement)
+            $table->foreignId('annee_scolaire_id')->nullable();
             $table->foreignId('eleve_id')->constrained('eleves')->onDelete('cascade');
             $table->foreignId('scolarite_id')->constrained('scolarites')->onDelete('cascade');
             $table->decimal('montant_paye', 10, 2);

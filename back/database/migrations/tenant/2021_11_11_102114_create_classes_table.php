@@ -21,9 +21,8 @@ return new class extends Migration
                   ->onDelete('restrict')
                   ->onUpdate('restrict');
 
-            $table->foreignId('serie_id')
-                  ->nullable()
-                  ->constrained('series')->nullOnDelete();
+            // FK vers 'series' ajoutée dans 2026_07_13_000001 (table créée bien plus tard chronologiquement)
+            $table->foreignId('serie_id')->nullable();
 
             $table->foreignId('professeur_principal_id')
                   ->nullable()

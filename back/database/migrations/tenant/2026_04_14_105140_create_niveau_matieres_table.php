@@ -15,9 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('niveau_id')
                   ->constrained('niveaux')->onDelete('cascade');
-            $table->foreignId('serie_id')
-                  ->nullable()
-                  ->constrained('series')->nullOnDelete();
+            // FK vers 'series' ajoutée dans 2026_07_13_000001 (table créée bien plus tard chronologiquement)
+            $table->foreignId('serie_id')->nullable();
             $table->foreignId('matiere_id')
                   ->constrained('matieres')->onDelete('cascade');
             // null = matière obligatoire, sinon rattachée à un groupe alternatif (LV2…)
