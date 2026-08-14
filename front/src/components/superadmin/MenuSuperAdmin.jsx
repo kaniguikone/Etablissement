@@ -9,7 +9,7 @@ const ITEMS = [
 ];
 
 const ITEMS_DEV = [
-    { to: '/Seeder', icon: 'fas fa-database', label: 'Générateur de données' },
+    { to: '/superadmin/seeder', icon: 'fas fa-database', label: 'Générateur de données' },
 ];
 
 const MenuSuperAdmin = () => {

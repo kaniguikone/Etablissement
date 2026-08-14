@@ -40,7 +40,7 @@ Route::get('/etablissements/code/{code}', [TenantController::class, 'lookupParCo
 // ─── Auth Group Admin ────────────────────────────────────────────────────────
 Route::post('/group/login', [GroupAuthController::class, 'login']);
 
-Route::middleware('auth:sanctum')->prefix('group')->group(function () {
+Route::middleware(['auth:sanctum', 'account.type:App\Models\GroupAdmin'])->prefix('group')->group(function () {
     Route::post('/logout', [GroupAuthController::class, 'logout']);
     Route::get('/me',      [GroupAuthController::class, 'me']);
 
@@ -69,7 +69,7 @@ Route::middleware('auth:sanctum')->prefix('group')->group(function () {
 Route::post('/superadmin/login', [SuperAdminAuthController::class, 'login']);
 
 // ─── Gestion des tenants (établissements) ────────────────────────────────────
-Route::middleware('auth:sanctum')->prefix('superadmin')->group(function () {
+Route::middleware(['auth:sanctum', 'account.type:App\Models\SuperAdmin'])->prefix('superadmin')->group(function () {
     Route::post('/logout',    [SuperAdminAuthController::class, 'logout']);
     Route::get('/me',         [SuperAdminAuthController::class, 'me']);
 

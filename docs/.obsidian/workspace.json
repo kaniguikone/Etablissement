@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "commandes-creation.md",
+                "file": "audit-tests-2026-08-14.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "commandes-creation"
+              "title": "audit-tests-2026-08-14"
             }
           }
         ]
@@ -185,6 +185,8 @@
   },
   "active": "d574e5a8177cf752",
   "lastOpenFiles": [
+    "audit-tests-2026-08-14.md.tmp.41764.8538bcab87a9",
+    "commandes-creation.md",
     "commandes-creation.md.tmp.15760.8c3cfa68fa80",
     "guide-deploiement.md",
     "guide-production.md",
@@ -199,7 +201,6 @@
     "roadmap-commerciale.md.tmp.40008.cef98ed2f5fe",
     "roadmap-commerciale.md.tmp.40008.387838185e27",
     "roadmap-commerciale.md.tmp.40008.857864e52b04",
-    "roadmap-commerciale.md.tmp.40008.fd43b6e85682",
     "analyse-experte.md",
     "Sans titre.md",
     "Sans titre/Sans titre.md",

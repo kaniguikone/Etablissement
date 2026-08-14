@@ -1,14 +1,36 @@
-import { createContext, useContext, useState, useCallback } from 'react';
-import api, { centralApi } from '../api/axios';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import api, { centralApi, getSessionType, sessionKey } from '../api/axios';
 
 const AuthContext = createContext(null);
 
+const lireSession = (type) => {
+    const raw = localStorage.getItem(sessionKey(type));
+    return raw ? JSON.parse(raw) : null;
+};
+
+const ecrireSession = (type, tok, u) => {
+    localStorage.setItem(sessionKey(type), JSON.stringify({ token: tok, user: u }));
+};
+
+const supprimerSession = (type) => {
+    localStorage.removeItem(sessionKey(type));
+};
+
 export const AuthProvider = ({ children }) => {
-    const [user, setUser]   = useState(() => {
-        const saved = localStorage.getItem('user');
-        return saved ? JSON.parse(saved) : null;
-    });
-    const [token, setToken] = useState(() => localStorage.getItem('token') || null);
+    const location = useLocation();
+    const [user, setUser]   = useState(() => lireSession(getSessionType())?.user ?? null);
+    const [token, setToken] = useState(() => lireSession(getSessionType())?.token ?? null);
+
+    // Chaque espace (/groupe, /superadmin·/backoffice, /enseignant, école) a sa propre
+    // session en localStorage : on recharge celle qui correspond à l'URL courante à chaque
+    // navigation, ce qui permet de rester connecté simultanément à plusieurs espaces
+    // dans des onglets différents du même navigateur.
+    useEffect(() => {
+        const s = lireSession(getSessionType());
+        setUser(s?.user ?? null);
+        setToken(s?.token ?? null);
+    }, [location.pathname]);
 
     // Connexion admin école (tenant)
     const connexion = useCallback(async (email, password) => {
@@ -21,8 +43,7 @@ export const AuthProvider = ({ children }) => {
             group_nom: group_nom ?? null,
             must_change_password: !!must_change_password,
         };
-        localStorage.setItem('token', tok);
-        localStorage.setItem('user', JSON.stringify(userAvecType));
+        ecrireSession('school', tok, userAvecType);
         setToken(tok);
         setUser(userAvecType);
     }, []);
@@ -37,8 +58,7 @@ export const AuthProvider = ({ children }) => {
             name: `${enseignant.prenoms ?? ''} ${enseignant.nom ?? ''}`.trim(),
             role_label: 'Enseignant',
         };
-        localStorage.setItem('token', tok);
-        localStorage.setItem('user', JSON.stringify(userAvecType));
+        ecrireSession('enseignant', tok, userAvecType);
         setToken(tok);
         setUser(userAvecType);
     }, []);
@@ -48,8 +68,7 @@ export const AuthProvider = ({ children }) => {
         const res = await centralApi.post('/group/login', { email, password });
         const { token: tok, admin } = res.data;
         const userAvecType = { ...admin, _type: 'group' };
-        localStorage.setItem('token', tok);
-        localStorage.setItem('user', JSON.stringify(userAvecType));
+        ecrireSession('group', tok, userAvecType);
         setToken(tok);
         setUser(userAvecType);
     }, []);
@@ -59,8 +78,7 @@ export const AuthProvider = ({ children }) => {
         const res = await centralApi.post('/superadmin/login', { email, password });
         const { token: tok, admin } = res.data;
         const userAvecType = { ...admin, _type: 'superadmin' };
-        localStorage.setItem('token', tok);
-        localStorage.setItem('user', JSON.stringify(userAvecType));
+        ecrireSession('superadmin', tok, userAvecType);
         setToken(tok);
         setUser(userAvecType);
     }, []);
@@ -75,16 +93,14 @@ export const AuthProvider = ({ children }) => {
                 await api.post('/logout');
             }
         } catch (_) {}
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        supprimerSession(getSessionType());
         setToken(null);
         setUser(null);
     }, [user]);
 
     const mettreAJourSession = useCallback((tok, u) => {
         const userAvecType = { ...u, _type: 'school', group_id: u.group_id ?? null, group_nom: u.group_nom ?? null };
-        localStorage.setItem('token', tok);
-        localStorage.setItem('user', JSON.stringify(userAvecType));
+        ecrireSession('school', tok, userAvecType);
         setToken(tok);
         setUser(userAvecType);
     }, []);

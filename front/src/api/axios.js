@@ -27,14 +27,41 @@ const getBase = () => {
 
 const BASE = getBase();
 
+/**
+ * Détermine quel "espace" est actif d'après l'URL courante, pour permettre
+ * plusieurs sessions simultanées dans le même navigateur (ex : /groupe dans
+ * un onglet, /backoffice dans un autre) sans qu'elles s'écrasent l'une l'autre.
+ */
+export const getSessionType = () => {
+    const p = window.location.pathname;
+    if (p.startsWith('/groupe')) return 'group';
+    if (p.startsWith('/superadmin') || p === '/backoffice') return 'superadmin';
+    if (p.startsWith('/enseignant')) return 'enseignant';
+    return 'school';
+};
+
+export const sessionKey = (type) => `session_${type}`;
+
+const lireToken = (type) => {
+    const raw = localStorage.getItem(sessionKey(type));
+    return raw ? JSON.parse(raw).token : null;
+};
+
+const gererNonAutorise = (type) => {
+    const onAuthPage = window.location.pathname === '/login' || window.location.pathname === '/backoffice';
+    if (onAuthPage) return;
+    localStorage.removeItem(sessionKey(type));
+    window.location.href = type === 'superadmin' ? '/backoffice' : '/login';
+};
+
 const api = axios.create({
     baseURL: BASE + '/api',
     timeout: 10000,
 });
 
-// Injecte automatiquement le token Bearer sur chaque requête
+// Injecte automatiquement le token Bearer de la session active (école ou enseignant)
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
+    const token = lireToken(getSessionType());
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
@@ -46,12 +73,7 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            const onLoginPage = window.location.pathname === '/login';
-            if (!onLoginPage) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = '/login';
-            }
+            gererNonAutorise(getSessionType());
         } else if (error.code === 'ECONNABORTED') {
             // Timeout — signalé via le rejet, les composants affichent leur propre message
             error._userMessage = 'La requête a pris trop de temps. Vérifiez votre connexion.';
@@ -77,8 +99,9 @@ export const centralApi = axios.create({
     timeout: 10000,
 });
 
+// Injecte automatiquement le token Bearer de la session active (groupe ou opérateur)
 centralApi.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
+    const token = lireToken(getSessionType());
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
@@ -89,12 +112,7 @@ centralApi.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            const onLoginPage = window.location.pathname === '/login';
-            if (!onLoginPage) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = '/login';
-            }
+            gererNonAutorise(getSessionType());
         }
         return Promise.reject(error);
     }

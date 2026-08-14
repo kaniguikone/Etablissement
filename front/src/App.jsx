@@ -18,9 +18,10 @@ const SIDEBAR_WIDTH = 310;
 const AppInterne = () => {
     const { user, estGroupe, estEnseignant, estSuperAdmin } = useAuth();
     const location = useLocation();
-    const surLogin = location.pathname === '/login';
+    const PAGES_PUBLIQUES = ['/login', '/backoffice', '/', '/inscription-etablissement', '/inscription-parent', '/reinitialiser-mot-de-passe'];
+    const surPagePublique = PAGES_PUBLIQUES.includes(location.pathname);
 
-    const connecte = user && !surLogin;
+    const connecte = user && !surPagePublique;
     const avecSidebar = connecte && !estSuperAdmin;
 
     const renderMenu = () => {

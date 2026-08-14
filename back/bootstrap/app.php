@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'permission'     => \App\Http\Middleware\CheckRole::class,
             'tenant.active'  => \App\Http\Middleware\CheckTenantActive::class,
+            'account.type'   => \App\Http\Middleware\EnsureAccountType::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

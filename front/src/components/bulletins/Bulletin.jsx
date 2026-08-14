@@ -540,75 +540,86 @@ const Bulletin = () => {
                                     </button>
                                 ) : null;
                             })()}
-                            {bulletin && (
-                                <span className="text-muted small align-self-center">
-                                    <i className="fas fa-check-circle text-success me-1" />bulletin affiché ci-dessous
-                                </span>
-                            )}
                         </div>
                     </div>
                 )}
 
-                {/* Affichage du bulletin */}
+                {/* Modal d'affichage du bulletin */}
                 {bulletin && (
-                    <div>
-                        <div className="bg-light p-3 rounded mb-3 border">
-                            <div className="row">
-                                <div className="col-md-6">
-                                    <strong>{bulletin.eleve.nom_eleve} {bulletin.eleve.prenoms_eleve}</strong>
-                                    <span className="text-muted ms-2">({bulletin.eleve.matricule_eleve})</span>
+                    <div className="modal show d-block" style={{ background: 'rgba(0,0,0,.4)' }} onClick={() => setBulletin(null)}>
+                        <div className="modal-dialog modal-dialog-scrollable modal-dialog-centered" style={{ maxWidth: '95vw', width: 1100, height: '90vh' }} onClick={(e) => e.stopPropagation()}>
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">
+                                        <i className="fas fa-file-alt me-2 text-primary" />
+                                        Bulletin de notes
+                                    </h5>
+                                    <button type="button" className="btn-close" onClick={() => setBulletin(null)} />
                                 </div>
-                                <div className="col-md-6 text-end">
-                                    Classe : <strong>{bulletin.eleve.classe?.nom_classe}</strong>
+                                <div className="modal-body">
+                                    <div className="bg-light p-3 rounded mb-3 border">
+                                        <div className="row">
+                                            <div className="col-md-6">
+                                                <strong>{bulletin.eleve.nom_eleve} {bulletin.eleve.prenoms_eleve}</strong>
+                                                <span className="text-muted ms-2">({bulletin.eleve.matricule_eleve})</span>
+                                            </div>
+                                            <div className="col-md-6 text-end">
+                                                Classe : <strong>{bulletin.eleve.classe?.nom_classe}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {Object.keys(bulletin.parMatiere).length === 0 ? (
+                                        <div className="alert alert-info">Aucune note disponible pour cette période.</div>
+                                    ) : (
+                                        <table className="table table-bordered table-sm">
+                                            <thead className="table-dark">
+                                                <tr>
+                                                    <th>Matière</th>
+                                                    <th style={{ width: 60 }} className="text-center">Coeff</th>
+                                                    <th>Notes</th>
+                                                    <th style={{ width: 100 }}>Moyenne</th>
+                                                    <th style={{ width: 130 }}>Appréciation</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {Object.entries(bulletin.parMatiere).map(([matiere, info]) => (
+                                                    <tr key={matiere}>
+                                                        <td className="fw-bold">{matiere}</td>
+                                                        <td className="text-center text-muted">{info.coeff_matiere ?? 1}</td>
+                                                        <td>
+                                                            {info.notes.map((n, i) => (
+                                                                <span key={i} className="me-2">
+                                                                    <small className="text-muted">{n.type}(×{n.coeff})</small> : <strong>{n.note ?? '—'}</strong>
+                                                                </span>
+                                                            ))}
+                                                        </td>
+                                                        <td className="text-center">
+                                                            <span className={`badge ${BADGE_MOY(info.moyenne)}`}>
+                                                                {info.moyenne !== null ? `${info.moyenne}/20` : '—'}
+                                                            </span>
+                                                        </td>
+                                                        <td>{mention(info.moyenne)}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                            <tfoot className="table-secondary">
+                                                <tr>
+                                                    <td colSpan={3} className="text-end fw-bold">Moyenne générale pondérée</td>
+                                                    <td className="text-center">
+                                                        <span className={`badge ${BADGE_MOY(parseFloat(moy))} fs-6`}>{moy}/20</span>
+                                                    </td>
+                                                    <td className="fw-bold">{mention(parseFloat(moy))}</td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    )}
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary btn-sm" onClick={() => setBulletin(null)}>Fermer</button>
                                 </div>
                             </div>
                         </div>
-
-                        {Object.keys(bulletin.parMatiere).length === 0 ? (
-                            <div className="alert alert-info">Aucune note disponible pour cette période.</div>
-                        ) : (
-                            <table className="table table-bordered table-sm">
-                                <thead className="table-dark">
-                                    <tr>
-                                        <th>Matière</th>
-                                        <th style={{ width: 60 }} className="text-center">Coeff</th>
-                                        <th>Notes</th>
-                                        <th style={{ width: 100 }}>Moyenne</th>
-                                        <th style={{ width: 130 }}>Appréciation</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {Object.entries(bulletin.parMatiere).map(([matiere, info]) => (
-                                        <tr key={matiere}>
-                                            <td className="fw-bold">{matiere}</td>
-                                            <td className="text-center text-muted">{info.coeff_matiere ?? 1}</td>
-                                            <td>
-                                                {info.notes.map((n, i) => (
-                                                    <span key={i} className="me-2">
-                                                        <small className="text-muted">{n.type}(×{n.coeff})</small> : <strong>{n.note ?? '—'}</strong>
-                                                    </span>
-                                                ))}
-                                            </td>
-                                            <td className="text-center">
-                                                <span className={`badge ${BADGE_MOY(info.moyenne)}`}>
-                                                    {info.moyenne !== null ? `${info.moyenne}/20` : '—'}
-                                                </span>
-                                            </td>
-                                            <td>{mention(info.moyenne)}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                                <tfoot className="table-secondary">
-                                    <tr>
-                                        <td colSpan={3} className="text-end fw-bold">Moyenne générale pondérée</td>
-                                        <td className="text-center">
-                                            <span className={`badge ${BADGE_MOY(parseFloat(moy))} fs-6`}>{moy}/20</span>
-                                        </td>
-                                        <td className="fw-bold">{mention(parseFloat(moy))}</td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        )}
                     </div>
                 )}
 

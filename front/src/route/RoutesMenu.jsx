@@ -178,11 +178,11 @@ const RoutesMenu = () => (
             <Route path="/enseignant/appreciations"  element={<PrivateRoute><EnseignantAppreciations /></PrivateRoute>} />
 
             {/* ── SuperAdmin ────────────────────────────────────────────── */}
-            <Route path="/superadmin/abonnements"       element={<PrivateRoute><GestionAbonnements /></PrivateRoute>} />
-            <Route path="/superadmin/demandes"          element={<PrivateRoute><DemandesAcces /></PrivateRoute>} />
-            <Route path="/superadmin/tarifs"            element={<PrivateRoute><ConfigTarifs /></PrivateRoute>} />
-            <Route path="/superadmin/templates"         element={<PrivateRoute><GestionTemplatesSuperAdmin /></PrivateRoute>} />
-            <Route path="/superadmin/templates/:type"   element={<PrivateRoute><EditionTemplate basePath="/superadmin" /></PrivateRoute>} />
+            <Route path="/superadmin/abonnements"       element={<PrivateRoute superOnly><GestionAbonnements /></PrivateRoute>} />
+            <Route path="/superadmin/demandes"          element={<PrivateRoute superOnly><DemandesAcces /></PrivateRoute>} />
+            <Route path="/superadmin/tarifs"            element={<PrivateRoute superOnly><ConfigTarifs /></PrivateRoute>} />
+            <Route path="/superadmin/templates"         element={<PrivateRoute superOnly><GestionTemplatesSuperAdmin /></PrivateRoute>} />
+            <Route path="/superadmin/templates/:type"   element={<PrivateRoute superOnly><EditionTemplate basePath="/superadmin" /></PrivateRoute>} />
 
             {/* ── Espace Groupe Scolaire ─────────────────────────────────── */}
             <Route path="/groupe"                  element={<PrivateRoute><DashboardGroupe /></PrivateRoute>} />
@@ -207,7 +207,7 @@ const RoutesMenu = () => (
             <Route path="/Archivage" element={<PrivateRoute permissions={R_PARAM}><ArchivageWizard /></PrivateRoute>} />
 
             {/* Seed (dev) */}
-            <Route path="/Seeder" element={<PrivateRoute superOnly><SeederInterface /></PrivateRoute>} />
+            <Route path="/superadmin/seeder" element={<PrivateRoute superOnly><SeederInterface /></PrivateRoute>} />
 
             {/* Statistiques */}
             <Route path="/Statistiques"     element={<PrivateRoute permissions={R_STATS}><Statistiques /></PrivateRoute>} />

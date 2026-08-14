@@ -1,7 +1,16 @@
 import { useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import api, { backendUrl } from '../../api/axios';
+import api, { backendUrl, getSessionType, sessionKey } from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
+
+// Met à jour l'utilisateur stocké pour la session active, sans toucher au token
+const mettreAJourUtilisateurStocke = (patch) => {
+    const type = getSessionType();
+    const raw = localStorage.getItem(sessionKey(type));
+    const session = raw ? JSON.parse(raw) : { token: null, user: {} };
+    session.user = { ...session.user, ...patch };
+    localStorage.setItem(sessionKey(type), JSON.stringify(session));
+};
 
 const MonProfil = () => {
     const { user, connexion } = useAuth();
@@ -38,10 +47,8 @@ const MonProfil = () => {
             const res = await api.post('/mon-profil/photo', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
-            // Mettre à jour le localStorage avec la nouvelle photo_url
-            const userActuel = JSON.parse(localStorage.getItem('user') || '{}');
-            const userMaj = { ...userActuel, photo_url: res.data.photo_url };
-            localStorage.setItem('user', JSON.stringify(userMaj));
+            // Mettre à jour la session stockée avec la nouvelle photo_url
+            mettreAJourUtilisateurStocke({ photo_url: res.data.photo_url });
             setPhotoPreview(backendUrl(res.data.photo_url));
             toast.success('Photo mise à jour.');
         } catch {
@@ -71,7 +78,7 @@ const MonProfil = () => {
                 payload.password        = form.password;
             }
             const res = await api.put('/mon-profil', payload);
-            localStorage.setItem('user', JSON.stringify(res.data));
+            mettreAJourUtilisateurStocke(res.data);
             toast.success('Profil mis à jour avec succès.');
             setForm(f => ({ ...f, password_actuel: '', password: '', password_confirm: '' }));
         } catch (err) {
