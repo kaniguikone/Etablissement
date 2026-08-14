@@ -139,7 +139,7 @@ class AssiduitesController extends Controller
             // Notifier le parent uniquement si l'élève est absent ou en retard (et que ce n'était pas déjà le cas)
             if (in_array($item['statut'], ['absent', 'retard']) && $statutPrecedent !== $item['statut']) {
                 $eleve = Eleve::with('parents')->find($item['eleve_id']);
-                if ($eleve?->parents) {
+                if ($eleve && $eleve->parents->isNotEmpty()) {
                     $label        = $item['statut'] === 'absent' ? 'absent(e)' : 'en retard';
                     $matiereNom   = $matiere?->libelle_matiere ?? 'un cours';
                     $heureInfo    = $request->heure_debut ? " ({$request->heure_debut}–{$request->heure_fin})" : '';
@@ -147,22 +147,24 @@ class AssiduitesController extends Controller
                     $titreAbsence = 'Absence signalée';
                     $corpsAbsence = "{$eleve->prenoms_eleve} {$eleve->nom_eleve} a été signalé(e) {$label} en {$matiereNom}{$heureInfo} le {$request->date_assiduite}{$dureeInfo}.";
 
-                    $notifService->notifierParent(
-                        $eleve->parents->id,
-                        'absence',
-                        $titreAbsence,
-                        $corpsAbsence,
-                        ['eleve_id' => $eleve->id, 'date' => $request->date_assiduite]
-                    );
+                    foreach ($eleve->parents as $parent) {
+                        $notifService->notifierParent(
+                            $parent->id,
+                            'absence',
+                            $titreAbsence,
+                            $corpsAbsence,
+                            ['eleve_id' => $eleve->id, 'date' => $request->date_assiduite]
+                        );
 
-                    $notifService->envoyerEmailParent(
-                        $eleve->parents->id,
-                        $eleve->id,
-                        "Absence signalée — {$eleve->prenoms_eleve} {$eleve->nom_eleve}",
-                        $titreAbsence,
-                        $corpsAbsence,
-                        '#e67e22'
-                    );
+                        $notifService->envoyerEmailParent(
+                            $parent->id,
+                            $eleve->id,
+                            "Absence signalée — {$eleve->prenoms_eleve} {$eleve->nom_eleve}",
+                            $titreAbsence,
+                            $corpsAbsence,
+                            '#e67e22'
+                        );
+                    }
                 }
             }
         }

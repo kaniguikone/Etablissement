@@ -47,7 +47,7 @@ class EnseignantController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'matricule_enseignant' => 'required',
+            'matricule_enseignant' => 'required|unique:enseignants,matricule_enseignant',
             'nom_enseignant'       => 'required',
             'prenoms_enseignant'   => 'required',
         ]);
@@ -82,7 +82,7 @@ class EnseignantController extends Controller
     public function update(Request $request, Enseignant $enseignant)
     {
         $request->validate([
-            'matricule_enseignant' => 'required',
+            'matricule_enseignant' => 'required|unique:enseignants,matricule_enseignant,' . $enseignant->id,
             'nom_enseignant'       => 'required',
             'prenoms_enseignant'   => 'required',
         ]);

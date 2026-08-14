@@ -16,7 +16,7 @@ class ImportScolariteController extends Controller
 {
     private array $colonnes = [
         'A' => 'Libellé échéance *',
-        'B' => 'Date échéance * (AAAA-MM-JJ)',
+        'B' => 'Date échéance * (JJ/MM/AAAA)',
         'C' => 'Montant *',
         'D' => 'Niveau * (nom exact)',
     ];
@@ -47,7 +47,7 @@ class ImportScolariteController extends Controller
 
         // Ligne 3 : exemple
         $sheet->setCellValue('A3', '1ère tranche');
-        $sheet->setCellValue('B3', '2025-10-01');
+        $sheet->setCellValue('B3', '01/10/2025');
         $sheet->setCellValue('C3', '150000');
         $sheet->setCellValue('D3', '6ème');
         $sheet->getStyle('A3:D3')->applyFromArray([
@@ -112,14 +112,19 @@ class ImportScolariteController extends Controller
             $montant  = trim($row['C'] ?? '');
             $niveauNom = trim($row['D'] ?? '');
 
-            if ($libelle === '' && $date === '' && $montant === '' && $niveauNom === '') break;
+            if ($libelle === '' && $date === '' && $montant === '' && $niveauNom === '') continue;
 
             $ligneErreurs = [];
 
             if ($libelle === '')   $ligneErreurs[] = 'Libellé manquant';
             if ($date === '')      $ligneErreurs[] = 'Date manquante';
-            if ($montant === '')   $ligneErreurs[] = 'Montant manquant';
             if ($niveauNom === '') $ligneErreurs[] = 'Niveau manquant';
+
+            if ($montant === '') {
+                $ligneErreurs[] = 'Montant manquant';
+            } elseif (!is_numeric(str_replace([' ', ','], ['', '.'], $montant))) {
+                $ligneErreurs[] = 'Montant invalide (nombre attendu)';
+            }
 
             // Résolution du niveau
             $niveauId = null;
@@ -131,23 +136,9 @@ class ImportScolariteController extends Controller
             }
 
             // Validation date
-            $dateParsed = null;
-            if ($date !== '') {
-                if (is_numeric($date)) {
-                    try {
-                        $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((float) $date);
-                        $dateParsed = $dt->format('Y-m-d');
-                    } catch (\Exception) {
-                        $ligneErreurs[] = 'Date invalide';
-                    }
-                } else {
-                    $dt = date_create($date);
-                    if (!$dt) {
-                        $ligneErreurs[] = 'Date invalide (format attendu : AAAA-MM-JJ)';
-                    } else {
-                        $dateParsed = $dt->format('Y-m-d');
-                    }
-                }
+            $dateParsed = $this->parseDate($date);
+            if ($date !== '' && $dateParsed === null) {
+                $ligneErreurs[] = 'Date invalide (format attendu : JJ/MM/AAAA)';
             }
 
             if (!empty($ligneErreurs)) {
@@ -158,7 +149,7 @@ class ImportScolariteController extends Controller
             Scolarites::create([
                 'libelle_echeance' => $libelle,
                 'date_echeance'    => $dateParsed,
-                'montant_echeance' => $montant,
+                'montant_echeance' => (float) str_replace([' ', ','], ['', '.'], $montant),
                 'niveau_id'        => $niveauId,
             ]);
 
@@ -170,5 +161,27 @@ class ImportScolariteController extends Controller
             'erreurs' => $erreurs,
             'message' => "{$inseres} scolarité(s) importée(s)" . (count($erreurs) ? ', ' . count($erreurs) . ' ligne(s) ignorée(s).' : '.'),
         ]);
+    }
+
+    private function parseDate(mixed $value): ?string
+    {
+        if ($value === null || trim((string) $value) === '') return null;
+
+        if (is_numeric($value)) {
+            try {
+                $date = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((float) $value);
+                return $date->format('Y-m-d');
+            } catch (\Exception) {
+                return null;
+            }
+        }
+
+        $str = trim((string) $value);
+
+        if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/', $str, $m)) {
+            return sprintf('%04d-%02d-%02d', $m[3], $m[2], $m[1]);
+        }
+
+        return null;
     }
 }

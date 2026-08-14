@@ -11,6 +11,7 @@ use App\Models\Periodes;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class NoteController extends Controller
 {
@@ -104,18 +105,20 @@ class NoteController extends Controller
                 // Notifier uniquement si la note est nouvelle ou modifiée
                 if ((string) $ancienneNote !== (string) $item['note']) {
                     $eleve = Eleve::with('parents')->find($item['eleve_id']);
-                    if ($eleve?->parents) {
+                    if ($eleve && $eleve->parents->isNotEmpty()) {
                         $matiereNom = $devoir->matiere->libelle_matiere;
                         $typeNom    = $devoir->typeDevoir->libelle_type_devoir ?? $devoir->typeDevoir->code_type_devoir;
                         $noteVal    = number_format((float) $item['note'], 2, ',', '');
                         $action     = $ancienneNote === null ? 'a reçu' : 'a une note modifiée :';
-                        $notifService->notifierParent(
-                            $eleve->parents->id,
-                            'note',
-                            'Nouvelle note',
-                            "{$eleve->prenoms_eleve} {$eleve->nom_eleve} {$action} {$noteVal}/20 en {$matiereNom} ({$typeNom}).",
-                            ['eleve_id' => $eleve->id, 'devoir_id' => $devoirId]
-                        );
+                        foreach ($eleve->parents as $parent) {
+                            $notifService->notifierParent(
+                                $parent->id,
+                                'note',
+                                'Nouvelle note',
+                                "{$eleve->prenoms_eleve} {$eleve->nom_eleve} {$action} {$noteVal}/20 en {$matiereNom} ({$typeNom}).",
+                                ['eleve_id' => $eleve->id, 'devoir_id' => $devoirId]
+                            );
+                        }
                     }
                 }
             }
@@ -269,7 +272,7 @@ class NoteController extends Controller
         $ignores = 0;
 
         foreach ($eleves as $eleve) {
-            if (!$eleve->parents) {
+            if ($eleve->parents->isEmpty()) {
                 $ignores++;
                 continue;
             }
@@ -277,22 +280,24 @@ class NoteController extends Controller
             $titre = 'Bulletin disponible';
             $corps = "Le bulletin de {$eleve->prenoms_eleve} {$eleve->nom_eleve} pour la période « {$periode->libelle_periode} » est disponible. Connectez-vous pour le consulter.";
 
-            $service->notifierParent(
-                $eleve->parents->id,
-                'bulletin',
-                $titre,
-                $corps,
-                ['eleve_id' => $eleve->id, 'periode_id' => $periode->id]
-            );
+            foreach ($eleve->parents as $parent) {
+                $service->notifierParent(
+                    $parent->id,
+                    'bulletin',
+                    $titre,
+                    $corps,
+                    ['eleve_id' => $eleve->id, 'periode_id' => $periode->id]
+                );
 
-            $service->envoyerEmailParent(
-                $eleve->parents->id,
-                $eleve->id,
-                "Bulletin scolaire disponible — {$periode->libelle_periode}",
-                $titre,
-                $corps,
-                '#1a56a0'
-            );
+                $service->envoyerEmailParent(
+                    $parent->id,
+                    $eleve->id,
+                    "Bulletin scolaire disponible — {$periode->libelle_periode}",
+                    $titre,
+                    $corps,
+                    '#1a56a0'
+                );
+            }
 
             $envoyes++;
         }
@@ -313,7 +318,7 @@ class NoteController extends Controller
         $eleve   = Eleve::with(['classe', 'parents'])->findOrFail($eleveId);
         $periode = Periodes::findOrFail($periodeId);
 
-        if (!$eleve->parents) {
+        if ($eleve->parents->isEmpty()) {
             return response()->json(['message' => 'Aucun parent associé à cet élève.'], 422);
         }
 
@@ -321,22 +326,24 @@ class NoteController extends Controller
         $titre   = 'Bulletin disponible';
         $corps   = "Le bulletin de {$eleve->prenoms_eleve} {$eleve->nom_eleve} pour la période « {$periode->libelle_periode} » est disponible. Connectez-vous pour le consulter.";
 
-        $service->notifierParent(
-            $eleve->parents->id,
-            'bulletin',
-            $titre,
-            $corps,
-            ['eleve_id' => $eleve->id, 'periode_id' => $periode->id]
-        );
+        foreach ($eleve->parents as $parent) {
+            $service->notifierParent(
+                $parent->id,
+                'bulletin',
+                $titre,
+                $corps,
+                ['eleve_id' => $eleve->id, 'periode_id' => $periode->id]
+            );
 
-        $service->envoyerEmailParent(
-            $eleve->parents->id,
-            $eleve->id,
-            "Bulletin scolaire disponible — {$periode->libelle_periode}",
-            $titre,
-            $corps,
-            '#1a56a0'
-        );
+            $service->envoyerEmailParent(
+                $parent->id,
+                $eleve->id,
+                "Bulletin scolaire disponible — {$periode->libelle_periode}",
+                $titre,
+                $corps,
+                '#1a56a0'
+            );
+        }
 
         return response()->json(['message' => 'Notification envoyée au parent.']);
     }
@@ -374,7 +381,12 @@ class NoteController extends Controller
         $matieres = $notes->map(fn($n) => $n->devoir->matiere->libelle_matiere)
             ->unique()->sort()->values()->all();
 
-        $filename = sprintf('notes_%s_%s_%s.csv', $classe->nom_classe, $periode->libelle_periode ?? $periodeId, date('Y-m-d'));
+        $filename = sprintf(
+            'notes_%s_%s_%s.csv',
+            Str::slug($classe->nom_classe),
+            Str::slug($periode->libelle_periode ?? $periodeId),
+            date('Y-m-d')
+        );
 
         return response()->streamDownload(function () use ($eleves, $notes, $matieres) {
             $handle = fopen('php://output', 'w');

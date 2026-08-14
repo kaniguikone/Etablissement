@@ -15,6 +15,12 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
 class ImportEleveController extends Controller
 {
+    private const MATRICULE_EXEMPLE = 'EL001';
+
+    private const HANDICAPS_VALIDES = [
+        'moteur', 'malvoyant', 'malentendant', 'albinisme', 'nanisme', 'begayement', 'autiste',
+    ];
+
     private array $colonnes = [
         'A' => 'Matricule *',
         'B' => 'Nom *',
@@ -41,7 +47,7 @@ class ImportEleveController extends Controller
         $sheet->setTitle('Élèves');
 
         // Ligne 1 : instructions
-        $sheet->setCellValue('A1', '* Champs obligatoires. Ne pas modifier les en-têtes (ligne 2). Supprimer la ligne d\'exemple (ligne 3) avant import. Dates au format JJ/MM/AAAA. Classe = abréviation (voir feuille Références). Statut bourse : non_boursier, demi_boursier ou boursier (ignoré si Affecté = N). Affecté : O ou N. Handicap(s) : valeurs séparées par une virgule (moteur, malvoyant, malentendant, mental, autre). Statut orphelin : pere, mere ou les_deux.');
+        $sheet->setCellValue('A1', '* Champs obligatoires. Ne pas modifier les en-têtes (ligne 2). Supprimer la ligne d\'exemple (ligne 3) avant import. Dates au format JJ/MM/AAAA. Classe = abréviation (voir feuille Références). Statut bourse : non_boursier, demi_boursier ou boursier (ignoré si Affecté = N). Affecté : O ou N. Handicap(s) : valeurs séparées par une virgule (' . implode(', ', self::HANDICAPS_VALIDES) . '). Statut orphelin : pere, mere ou les_deux.');
         $sheet->mergeCells('A1:N1');
         $sheet->getStyle('A1')->applyFromArray([
             'font' => ['italic' => true, 'color' => ['rgb' => '856404']],
@@ -127,8 +133,7 @@ class ImportEleveController extends Controller
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1a73e8']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
         ]);
-        $handicaps = ['moteur', 'malvoyant', 'malentendant', 'mental', 'autre'];
-        foreach ($handicaps as $i => $h) {
+        foreach (self::HANDICAPS_VALIDES as $i => $h) {
             $ref->setCellValue("D" . ($i + 2), $h);
         }
         $ref->getColumnDimension('D')->setWidth(20);
@@ -170,7 +175,9 @@ class ImportEleveController extends Controller
             $nom       = trim($row['B'] ?? '');
             $prenoms   = trim($row['C'] ?? '');
 
-            if ($matricule === '' && $nom === '' && $prenoms === '') break;
+            if ($matricule === '' && $nom === '' && $prenoms === '') continue;
+
+            if ($matricule === self::MATRICULE_EXEMPLE) continue;
 
             $ligneErreurs = [];
 
@@ -210,9 +217,17 @@ class ImportEleveController extends Controller
 
             // Handicap(s) (M) — valeurs séparées par virgule
             $handicapsRaw = trim($row['M'] ?? '');
-            $typesHandicap = $handicapsRaw !== ''
-                ? array_values(array_filter(array_map('trim', explode(',', $handicapsRaw))))
-                : null;
+            $typesHandicap = null;
+            if ($handicapsRaw !== '') {
+                $valeurs   = array_values(array_filter(array_map('trim', explode(',', $handicapsRaw))));
+                $invalides = array_diff($valeurs, self::HANDICAPS_VALIDES);
+                if (!empty($invalides)) {
+                    $ligneErreurs[] = 'Handicap(s) invalide(s) : ' . implode(', ', $invalides)
+                        . ' (valeurs autorisées : ' . implode(', ', self::HANDICAPS_VALIDES) . ')';
+                } else {
+                    $typesHandicap = $valeurs;
+                }
+            }
 
             // Statut orphelin (N)
             $orphelinRaw = strtolower(trim($row['N'] ?? ''));

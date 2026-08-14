@@ -2,6 +2,22 @@ import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 
+const lireErreurExport = async (err) => {
+    if (err.code === 'ECONNABORTED' || !err.response) {
+        return 'La génération a pris trop de temps. Réessayez, ou contactez l\'administrateur si le problème persiste.';
+    }
+    if (err.response?.data instanceof Blob) {
+        try {
+            const texte = await err.response.data.text();
+            const json  = JSON.parse(texte);
+            return json.message || 'Erreur lors de la génération du fichier.';
+        } catch {
+            return 'Erreur lors de la génération du fichier.';
+        }
+    }
+    return err.response?.data?.message || 'Erreur lors de la génération du fichier.';
+};
+
 const Paire = ({ v }) => v
     ? <span>{v[0]}<small className="text-muted ms-1">({v[1]}F)</small></span>
     : <span className="text-muted">—</span>;
@@ -159,7 +175,7 @@ const StatsGenerales = () => {
                 ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
                 : 'application/pdf';
 
-            const response = await api.get(endpoint, { responseType: 'blob' });
+            const response = await api.get(endpoint, { responseType: 'blob', timeout: 120000 });
 
             const url  = URL.createObjectURL(new Blob([response.data], { type: mime }));
             const a    = document.createElement('a');
@@ -167,8 +183,8 @@ const StatsGenerales = () => {
             a.download = `stats_generales_${anneeLibelle || 'annee'}${ext}`;
             a.click();
             URL.revokeObjectURL(url);
-        } catch {
-            toast.error(`Erreur lors de l'export ${format.toUpperCase()}.`);
+        } catch (err) {
+            toast.error(await lireErreurExport(err));
         } finally {
             setExporting('');
         }

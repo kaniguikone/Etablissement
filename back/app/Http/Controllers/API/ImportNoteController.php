@@ -163,8 +163,8 @@ class ImportNoteController extends Controller
             $eleveId  = trim($row['A'] ?? '');
             $noteVal  = $row['E'] ?? null;
 
-            // Ligne entièrement vide → fin
-            if ($eleveId === '' && ($noteVal === null || trim((string) $noteVal) === '')) break;
+            // Ligne entièrement vide → ignorée
+            if ($eleveId === '' && ($noteVal === null || trim((string) $noteVal) === '')) continue;
 
             // Ignorer lignes sans ID (ligne de note explicative en fin de fichier)
             if ($eleveId === '') continue;
@@ -201,18 +201,20 @@ class ImportNoteController extends Controller
             if ((string) $ancienneNote !== (string) $noteFloat) {
                 $eleve = $elevesClasse[$eleveId];
                 $eleveAvecParent = Eleve::with('parents')->find($eleveId);
-                if ($eleveAvecParent?->parents) {
+                if ($eleveAvecParent && $eleveAvecParent->parents->isNotEmpty()) {
                     $matiereNom = $devoir->matiere->libelle_matiere;
                     $typeNom    = $devoir->typeDevoir->libelle_type_devoir ?? $devoir->typeDevoir->code_type_devoir;
                     $noteAff    = number_format($noteFloat, 2, ',', '');
                     $action     = $ancienneNote === null ? 'a reçu' : 'a une note modifiée :';
-                    $notifService->notifierParent(
-                        $eleveAvecParent->parents->id,
-                        'note',
-                        'Nouvelle note',
-                        "{$eleveAvecParent->prenoms_eleve} {$eleveAvecParent->nom_eleve} {$action} {$noteAff}/20 en {$matiereNom} ({$typeNom}).",
-                        ['eleve_id' => $eleveId, 'devoir_id' => $devoirId]
-                    );
+                    foreach ($eleveAvecParent->parents as $parent) {
+                        $notifService->notifierParent(
+                            $parent->id,
+                            'note',
+                            'Nouvelle note',
+                            "{$eleveAvecParent->prenoms_eleve} {$eleveAvecParent->nom_eleve} {$action} {$noteAff}/20 en {$matiereNom} ({$typeNom}).",
+                            ['eleve_id' => $eleveId, 'devoir_id' => $devoirId]
+                        );
+                    }
                 }
             }
 

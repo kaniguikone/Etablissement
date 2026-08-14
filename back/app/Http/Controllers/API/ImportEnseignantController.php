@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\CentralUser;
 use App\Models\Enseignant;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -16,6 +16,8 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
 class ImportEnseignantController extends Controller
 {
+    private const MATRICULE_EXEMPLE = 'ENS001';
+
     private array $colonnes = [
         'A' => 'Matricule *',
         'B' => 'Nom *',
@@ -23,9 +25,10 @@ class ImportEnseignantController extends Controller
         'D' => 'Genre',
         'E' => 'Téléphone',
         'F' => 'Email',
-        'G' => 'Date de naissance (AAAA-MM-JJ)',
-        'H' => 'Date d\'embauche (AAAA-MM-JJ)',
+        'G' => 'Date de naissance (JJ/MM/AAAA)',
+        'H' => 'Date d\'embauche (JJ/MM/AAAA)',
         'I' => 'Statut',
+        'J' => 'Créer accès portail (O/N)',
     ];
 
     public function template()
@@ -35,8 +38,8 @@ class ImportEnseignantController extends Controller
         $sheet->setTitle('Enseignants');
 
         // Ligne 1 : instructions (sautée à l'import)
-        $sheet->setCellValue('A1', '* Champs obligatoires. Ne pas modifier les en-têtes (ligne 2). Supprimer la ligne d\'exemple (ligne 3) avant import.');
-        $sheet->mergeCells('A1:I1');
+        $sheet->setCellValue('A1', '* Champs obligatoires. Ne pas modifier les en-têtes (ligne 2). Supprimer la ligne d\'exemple (ligne 3) avant import. Créer accès portail : O pour générer un accès au portail enseignant (mot de passe aléatoire, communiqué séparément), N ou vide pour ne pas créer de compte (nécessite un téléphone renseigné).');
+        $sheet->mergeCells('A1:J1');
         $sheet->getStyle('A1')->applyFromArray([
             'font' => ['italic' => true, 'color' => ['rgb' => '856404']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'fff3cd']],
@@ -46,19 +49,19 @@ class ImportEnseignantController extends Controller
         foreach ($this->colonnes as $col => $label) {
             $sheet->setCellValue("{$col}2", $label);
         }
-        $sheet->getStyle('A2:I2')->applyFromArray([
+        $sheet->getStyle('A2:J2')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1a73e8']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
         ]);
 
         // Ligne 3 : exemple
-        $exemples = ['ENS001', 'KONE', 'Abou', 'M', '0701020304', 'abou@ecole.ci', '1985-03-15', '2020-09-01', 'CDI'];
+        $exemples = [self::MATRICULE_EXEMPLE, 'KONE', 'Abou', 'M', '0701020304', 'abou@ecole.ci', '15/03/1985', '01/09/2020', 'CDI', 'N'];
         foreach (array_values($exemples) as $i => $valeur) {
             $col = chr(65 + $i);
             $sheet->setCellValue("{$col}3", $valeur);
         }
-        $sheet->getStyle('A3:I3')->applyFromArray([
+        $sheet->getStyle('A3:J3')->applyFromArray([
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'e8f0fe']],
         ]);
 
@@ -79,10 +82,18 @@ class ImportEnseignantController extends Controller
                 ->setShowErrorMessage(true)
                 ->setErrorTitle('Valeur invalide')->setError('Choisir parmi : CDI, CDD, Stagiaire, Vacataire')
                 ->setFormula1('"CDI,CDD,Stagiaire,Vacataire"');
+
+            $v3 = $sheet->getCell("J{$row}")->getDataValidation();
+            $v3->setType(DataValidation::TYPE_LIST)
+                ->setErrorStyle(DataValidation::STYLE_STOP)
+                ->setAllowBlank(true)->setShowDropDown(true)
+                ->setShowErrorMessage(true)
+                ->setErrorTitle('Valeur invalide')->setError('Choisir O ou N')
+                ->setFormula1('"O,N"');
         }
 
         // Largeurs
-        $largeurs = ['A' => 15, 'B' => 18, 'C' => 22, 'D' => 12, 'E' => 15, 'F' => 25, 'G' => 28, 'H' => 28, 'I' => 30];
+        $largeurs = ['A' => 15, 'B' => 18, 'C' => 22, 'D' => 12, 'E' => 15, 'F' => 25, 'G' => 28, 'H' => 28, 'I' => 30, 'J' => 22];
         foreach ($largeurs as $col => $width) {
             $sheet->getColumnDimension($col)->setWidth($width);
         }
@@ -122,8 +133,11 @@ class ImportEnseignantController extends Controller
             $nom       = trim($row['B'] ?? '');
             $prenoms   = trim($row['C'] ?? '');
 
-            // Ligne vide → stop
-            if ($matricule === '' && $nom === '' && $prenoms === '') break;
+            // Ligne vide → ignorée, on continue avec les lignes suivantes
+            if ($matricule === '' && $nom === '' && $prenoms === '') continue;
+
+            // Ligne d'exemple du template non supprimée par l'utilisateur
+            if ($matricule === self::MATRICULE_EXEMPLE) continue;
 
             $ligneErreurs = [];
 
@@ -145,6 +159,12 @@ class ImportEnseignantController extends Controller
                 $ligneErreurs[] = "Matricule « {$matricule} » déjà existant";
             }
 
+            $telephone   = trim($row['E'] ?? '') ?: null;
+            $creerAcces  = strtoupper(trim($row['J'] ?? '')) === 'O';
+            if ($creerAcces && !$telephone) {
+                $ligneErreurs[] = 'Téléphone requis pour créer un accès portail';
+            }
+
             if (!empty($ligneErreurs)) {
                 $erreurs[] = ['ligne' => $ligne, 'erreurs' => $ligneErreurs];
                 continue;
@@ -158,15 +178,15 @@ class ImportEnseignantController extends Controller
                 'nom_enseignant'          => $nom,
                 'prenoms_enseignant'      => $prenoms,
                 'genre_enseignant'        => $genre ?: null,
-                'telephone_enseignant'    => trim($row['E'] ?? '') ?: null,
+                'telephone_enseignant'    => $telephone,
                 'email_enseignant'        => trim($row['F'] ?? '') ?: null,
                 'date_naissance_enseignant' => $dateNaissance,
                 'date_embauche_enseignant'  => $dateEmbauche,
                 'statut_enseignant'       => $statut ?: null,
-                'password'                => Hash::make('Enseignant@' . $matricule),
+                'password'                => $creerAcces ? Str::password(16) : null,
             ]);
 
-            if ($enseignant->telephone_enseignant) {
+            if ($creerAcces) {
                 CentralUser::lierEnseignant($enseignant, tenant('id'));
             }
 
@@ -195,7 +215,11 @@ class ImportEnseignantController extends Controller
         }
 
         $str = trim((string) $value);
-        $parsed = date_create($str);
-        return $parsed ? $parsed->format('Y-m-d') : null;
+
+        if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/', $str, $m)) {
+            return sprintf('%04d-%02d-%02d', $m[3], $m[2], $m[1]);
+        }
+
+        return null;
     }
 }

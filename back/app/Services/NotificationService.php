@@ -181,7 +181,7 @@ class NotificationService
                     continue;
                 }
 
-                if (!$eleve->parents || empty($eleve->parents->email_parent)) {
+                if ($eleve->parents->isEmpty()) {
                     $ignores++;
                     continue;
                 }
@@ -191,22 +191,24 @@ class NotificationService
                        . "est en retard. Solde restant : {$montantFormate} FCFA. "
                        . "Merci de régulariser au plus tôt auprès de l'administration.";
 
-                $this->notifierParent(
-                    $eleve->parents->id,
-                    'paiement',
-                    'Rappel de paiement',
-                    $corps,
-                    ['eleve_id' => $eleve->id, 'scolarite_id' => $echeance->id, 'solde' => $solde]
-                );
+                foreach ($eleve->parents as $parent) {
+                    $this->notifierParent(
+                        $parent->id,
+                        'paiement',
+                        'Rappel de paiement',
+                        $corps,
+                        ['eleve_id' => $eleve->id, 'scolarite_id' => $echeance->id, 'solde' => $solde]
+                    );
 
-                $this->envoyerEmailParent(
-                    $eleve->parents->id,
-                    $eleve->id,
-                    "Rappel : paiement en retard — {$echeance->libelle_echeance}",
-                    'Rappel de paiement',
-                    $corps,
-                    '#e67e22'
-                );
+                    $this->envoyerEmailParent(
+                        $parent->id,
+                        $eleve->id,
+                        "Rappel : paiement en retard — {$echeance->libelle_echeance}",
+                        'Rappel de paiement',
+                        $corps,
+                        '#e67e22'
+                    );
+                }
 
                 $envoyes++;
             }

@@ -164,7 +164,7 @@ class ImportAffectationController extends Controller
             $abbrClasse = trim($row['B'] ?? '');
             $abbrMat    = trim($row['C'] ?? '');
 
-            if ($matricule === '' && $abbrClasse === '' && $abbrMat === '') break;
+            if ($matricule === '' && $abbrClasse === '' && $abbrMat === '') continue;
 
             $ligneErreurs = [];
 

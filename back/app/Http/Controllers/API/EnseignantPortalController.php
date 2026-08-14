@@ -342,15 +342,17 @@ class EnseignantPortalController extends Controller
 
             if (in_array($item['statut'], ['absent', 'retard']) && $statutPrecedent !== $item['statut']) {
                 $eleve = $elevesMap[$item['eleve_id']] ?? null;
-                if ($eleve?->parents) {
+                if ($eleve && $eleve->parents->isNotEmpty()) {
                     $label = $item['statut'] === 'absent' ? 'absent(e)' : 'en retard';
-                    $notifService->notifierParent(
-                        $eleve->parents->id,
-                        'absence',
-                        'Absence signalée',
-                        "{$eleve->prenoms_eleve} {$eleve->nom_eleve} a été signalé(e) {$label} le {$request->date}.",
-                        ['eleve_id' => $eleve->id, 'date' => $request->date]
-                    );
+                    foreach ($eleve->parents as $parent) {
+                        $notifService->notifierParent(
+                            $parent->id,
+                            'absence',
+                            'Absence signalée',
+                            "{$eleve->prenoms_eleve} {$eleve->nom_eleve} a été signalé(e) {$label} le {$request->date}.",
+                            ['eleve_id' => $eleve->id, 'date' => $request->date]
+                        );
+                    }
                 }
             }
         }

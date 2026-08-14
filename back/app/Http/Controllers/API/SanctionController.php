@@ -151,7 +151,7 @@ class SanctionController extends Controller
     private function notifierParent(Sanction $sanction): void
     {
         $eleve = $sanction->eleve;
-        if (!$eleve?->parents) return;
+        if (!$eleve || $eleve->parents->isEmpty()) return;
 
         $labels = [
             'avertissement' => 'Avertissement',
@@ -173,21 +173,23 @@ class SanctionController extends Controller
         $service = app(NotificationService::class);
         $titre   = $label . ' — ' . $eleve->prenoms_eleve . ' ' . $eleve->nom_eleve;
 
-        $service->notifierParent(
-            $eleve->parents->id,
-            'sanction',
-            $titre,
-            $corps,
-            ['eleve_id' => $eleve->id, 'sanction_id' => $sanction->id]
-        );
+        foreach ($eleve->parents as $parent) {
+            $service->notifierParent(
+                $parent->id,
+                'sanction',
+                $titre,
+                $corps,
+                ['eleve_id' => $eleve->id, 'sanction_id' => $sanction->id]
+            );
 
-        $service->envoyerEmailParent(
-            $eleve->parents->id,
-            $eleve->id,
-            "Sanction scolaire — {$eleve->prenoms_eleve} {$eleve->nom_eleve}",
-            $titre,
-            $corps,
-            '#c0392b'
-        );
+            $service->envoyerEmailParent(
+                $parent->id,
+                $eleve->id,
+                "Sanction scolaire — {$eleve->prenoms_eleve} {$eleve->nom_eleve}",
+                $titre,
+                $corps,
+                '#c0392b'
+            );
+        }
     }
 }

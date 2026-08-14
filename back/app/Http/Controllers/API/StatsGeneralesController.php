@@ -620,6 +620,7 @@ class StatsGeneralesController extends Controller
     public function exportExcel(Request $request)
     {
         ini_set('memory_limit', '512M');
+        set_time_limit(300);
         $annee = $this->annee($request);
         $data  = $this->agregat($annee);
 

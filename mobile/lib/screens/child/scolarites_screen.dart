@@ -1,12 +1,10 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:open_file/open_file.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../models/eleve.dart';
 import '../../models/paiement.dart';
 import '../../models/scolarite.dart';
 import '../../services/api_service.dart';
+import '../../utils/pdf_downloader.dart';
 import '../../widgets/loading_error_widget.dart';
 
 class ScolaritesScreen extends StatefulWidget {
@@ -115,10 +113,7 @@ class _ScolaritesScreenState extends State<ScolaritesScreen> {
     setState(() => _recuEnCours = paiementId);
     try {
       final bytes = await _api.getPaiementRecuPdf(paiementId);
-      final dir   = await getTemporaryDirectory();
-      final file  = File('${dir.path}/recu_$paiementId.pdf');
-      await file.writeAsBytes(bytes);
-      await OpenFile.open(file.path, type: 'application/pdf');
+      await ouvrirPdf(bytes, 'recu_$paiementId.pdf');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(

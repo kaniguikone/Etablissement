@@ -182,9 +182,9 @@ class DevoirController extends Controller
         }
 
         $query->get()->each(function (Eleve $eleve) use ($notifService, $type, $titre, $corps, $devoir) {
-            if ($eleve->parents) {
+            foreach ($eleve->parents as $parent) {
                 $notifService->notifierParent(
-                    $eleve->parents->id,
+                    $parent->id,
                     $type,
                     $titre,
                     $corps,
