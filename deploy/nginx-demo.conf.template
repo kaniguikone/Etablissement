@@ -1,0 +1,56 @@
+# ============================================================================
+# nginx-demo.conf.template — Vhost Nginx pour le domaine central + wildcard tenants
+#
+# À adapter puis copier dans /etc/nginx/sites-available/, puis :
+#   sudo ln -s /etc/nginx/sites-available/suivi-scolaire /etc/nginx/sites-enabled/
+#   sudo nginx -t
+#   sudo systemctl reload nginx
+#
+# Remplacer avant usage :
+#   {{DOMAIN}}       → ex: demo.votreapp.ci
+#   {{APP_DIR}}      → ex: /var/www/suivi-scolaire
+#   {{PHP_SOCKET}}   → ex: /var/run/php/php8.2-fpm.sock
+# ============================================================================
+
+# Domaine central (page d'accueil publique + super-admin)
+server {
+    listen 443 ssl;
+    server_name {{DOMAIN}};
+    root {{APP_DIR}}/back/public;
+
+    ssl_certificate     /etc/letsencrypt/live/{{DOMAIN}}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{DOMAIN}}/privkey.pem;
+
+    index index.php;
+    location / { try_files $uri $uri/ /index.php?$query_string; }
+    location ~ \.php$ {
+        fastcgi_pass unix:{{PHP_SOCKET}};
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+    }
+}
+
+# Sous-domaines tenants (wildcard) — couvre l'instance de démo publique
+server {
+    listen 443 ssl;
+    server_name *.{{DOMAIN}};
+    root {{APP_DIR}}/back/public;
+
+    ssl_certificate     /etc/letsencrypt/live/{{DOMAIN}}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{DOMAIN}}/privkey.pem;
+
+    index index.php;
+    location / { try_files $uri $uri/ /index.php?$query_string; }
+    location ~ \.php$ {
+        fastcgi_pass unix:{{PHP_SOCKET}};
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+    }
+}
+
+# Redirection HTTP → HTTPS
+server {
+    listen 80;
+    server_name {{DOMAIN}} *.{{DOMAIN}};
+    return 301 https://$host$request_uri;
+}
