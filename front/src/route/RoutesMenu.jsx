@@ -1,142 +1,146 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import PrivateRoute from '../components/auth/PrivateRoute';
-import LoginPage from '../components/auth/LoginPage';
-import BackofficeLogin from '../components/auth/BackofficeLogin';
-import ChangerMotDePasseInitial from '../components/auth/ChangerMotDePasseInitial';
-import LandingPage from '../components/landing/LandingPage';
-import InscriptionEtablissement from '../components/landing/InscriptionEtablissement';
-import DashboardGroupe from '../components/groupe/DashboardGroupe';
-import ListeEcoles from '../components/groupe/ListeEcoles';
-import DetailsEcole from '../components/groupe/DetailsEcole';
-import ActivitesEnseignants from '../components/groupe/ActivitesEnseignants';
-import FinancesGroupe from '../components/groupe/FinancesGroupe';
-import ActivitesEleves from '../components/groupe/ActivitesEleves';
-import GestionTemplates from '../components/groupe/GestionTemplates';
-import EditionTemplate from '../components/groupe/EditionTemplate';
-import MonProfil from '../components/auth/MonProfil';
 
-import Accueil from '../components/Accueil';
-import Statistiques from '../components/stats/Statistiques';
-import StatsGenerales from '../components/stats/StatsGenerales';
+// Toutes les pages sont chargées à la demande (code-splitting par route) pour
+// éviter d'expédier l'intégralité de l'application dans un seul bundle initial.
+const LoginPage = lazy(() => import('../components/auth/LoginPage'));
+const BackofficeLogin = lazy(() => import('../components/auth/BackofficeLogin'));
+const ChangerMotDePasseInitial = lazy(() => import('../components/auth/ChangerMotDePasseInitial'));
+const LandingPage = lazy(() => import('../components/landing/LandingPage'));
+const InscriptionEtablissement = lazy(() => import('../components/landing/InscriptionEtablissement'));
+const DashboardGroupe = lazy(() => import('../components/groupe/DashboardGroupe'));
+const ListeEcoles = lazy(() => import('../components/groupe/ListeEcoles'));
+const DetailsEcole = lazy(() => import('../components/groupe/DetailsEcole'));
+const ActivitesEnseignants = lazy(() => import('../components/groupe/ActivitesEnseignants'));
+const FinancesGroupe = lazy(() => import('../components/groupe/FinancesGroupe'));
+const ActivitesEleves = lazy(() => import('../components/groupe/ActivitesEleves'));
+const GestionTemplates = lazy(() => import('../components/groupe/GestionTemplates'));
+const EditionTemplate = lazy(() => import('../components/groupe/EditionTemplate'));
+const MonProfil = lazy(() => import('../components/auth/MonProfil'));
 
-import ListeEleves from '../components/eleves/ListeEleves';
-import ListeEnseignants from '../components/enseignants/ListeEnseignants';
-import ListeProfsParMatiere from '../components/enseignants/ListeProfsParMatiere';
-import ListeClasses from '../components/classes/ListeClasses';
-import ListeNiveaux from '../components/niveaux/ListeNiveaux';
-import ListeMatieres from '../components/matieres/ListeMatieres';
-import ListePeriodes from '../components/periodes/ListePeriodes';
-import ListeParents from '../components/parents/ListeParents';
-import InscriptionParent from '../components/parents/InscriptionParent';
-import InscriptionParentPublique from '../components/parents/InscriptionParentPublique';
-import DemandesParents from '../components/parents/DemandesParents';
-import ListeScolarites from '../components/scolarites/ListeScolarites';
-import ListeInformations from '../components/informations/ListeInformations';
+const Accueil = lazy(() => import('../components/Accueil'));
+const Statistiques = lazy(() => import('../components/stats/Statistiques'));
+const StatsGenerales = lazy(() => import('../components/stats/StatsGenerales'));
 
-import NouvelEleve from '../components/eleves/NouvelEleve';
-import NouvelEnseignant from '../components/enseignants/NouvelEnseignant';
-import NouvelleClasse from '../components/classes/NouvelleClasse';
-import NouveauNiveau from '../components/niveaux/NouveauNiveau';
-import NouvelleMatiere from '../components/matieres/NouvelleMatiere';
-import NouvellePeriode from '../components/periodes/NouvellePeriode';
-import NouveauParent from '../components/parents/NouveauParent';
-import NouvelleScolarite from '../components/scolarites/NouvelleScolarite';
-import NouvelleInformation from '../components/informations/NouvelleInformation';
+const ListeEleves = lazy(() => import('../components/eleves/ListeEleves'));
+const ListeEnseignants = lazy(() => import('../components/enseignants/ListeEnseignants'));
+const ListeProfsParMatiere = lazy(() => import('../components/enseignants/ListeProfsParMatiere'));
+const ListeClasses = lazy(() => import('../components/classes/ListeClasses'));
+const ListeNiveaux = lazy(() => import('../components/niveaux/ListeNiveaux'));
+const ListeMatieres = lazy(() => import('../components/matieres/ListeMatieres'));
+const ListePeriodes = lazy(() => import('../components/periodes/ListePeriodes'));
+const ListeParents = lazy(() => import('../components/parents/ListeParents'));
+const InscriptionParent = lazy(() => import('../components/parents/InscriptionParent'));
+const InscriptionParentPublique = lazy(() => import('../components/parents/InscriptionParentPublique'));
+const DemandesParents = lazy(() => import('../components/parents/DemandesParents'));
+const ListeScolarites = lazy(() => import('../components/scolarites/ListeScolarites'));
+const ListeInformations = lazy(() => import('../components/informations/ListeInformations'));
 
-import DetailsEleve from '../components/eleves/DetailsEleve';
-import DetailsEnseignant from '../components/enseignants/DetailsEnseignant';
-import DetailsClasse from '../components/classes/DetailsClasse';
-import DetailsNiveau from '../components/niveaux/DetailsNiveau';
-import DetailsMatiere from '../components/matieres/DetailsMatiere';
-import ConfigurationMatieres from '../components/matieres/ConfigurationMatieres';
-import DetailsPeriode from '../components/periodes/DetailsPeriode';
-import DetailsParent from '../components/parents/DetailsParent';
-import DetailsScolarite from '../components/scolarites/DetailsScolarite';
-import DetailsInformation from '../components/informations/DetailsInformation';
+const NouvelEleve = lazy(() => import('../components/eleves/NouvelEleve'));
+const NouvelEnseignant = lazy(() => import('../components/enseignants/NouvelEnseignant'));
+const NouvelleClasse = lazy(() => import('../components/classes/NouvelleClasse'));
+const NouveauNiveau = lazy(() => import('../components/niveaux/NouveauNiveau'));
+const NouvelleMatiere = lazy(() => import('../components/matieres/NouvelleMatiere'));
+const NouvellePeriode = lazy(() => import('../components/periodes/NouvellePeriode'));
+const NouveauParent = lazy(() => import('../components/parents/NouveauParent'));
+const NouvelleScolarite = lazy(() => import('../components/scolarites/NouvelleScolarite'));
+const NouvelleInformation = lazy(() => import('../components/informations/NouvelleInformation'));
 
-import ListeEmploiDuTemps from '../components/emploidutemps/ListeEmploiDuTemps';
-import NouvelEmploiDuTemps from '../components/emploidutemps/NouvelEmploiDuTemps';
-import DetailsEmploiDuTemps from '../components/emploidutemps/DetailsEmploiDuTemps';
+const DetailsEleve = lazy(() => import('../components/eleves/DetailsEleve'));
+const DetailsEnseignant = lazy(() => import('../components/enseignants/DetailsEnseignant'));
+const DetailsClasse = lazy(() => import('../components/classes/DetailsClasse'));
+const DetailsNiveau = lazy(() => import('../components/niveaux/DetailsNiveau'));
+const DetailsMatiere = lazy(() => import('../components/matieres/DetailsMatiere'));
+const ConfigurationMatieres = lazy(() => import('../components/matieres/ConfigurationMatieres'));
+const DetailsPeriode = lazy(() => import('../components/periodes/DetailsPeriode'));
+const DetailsParent = lazy(() => import('../components/parents/DetailsParent'));
+const DetailsScolarite = lazy(() => import('../components/scolarites/DetailsScolarite'));
+const DetailsInformation = lazy(() => import('../components/informations/DetailsInformation'));
 
-import ListeAssiduites from '../components/assiduites/ListeAssiduites';
-import FeuillePresence from '../components/assiduites/FeuillePresence';
-import DetailsAssiduite from '../components/assiduites/DetailsAssiduite';
+const ListeEmploiDuTemps = lazy(() => import('../components/emploidutemps/ListeEmploiDuTemps'));
+const NouvelEmploiDuTemps = lazy(() => import('../components/emploidutemps/NouvelEmploiDuTemps'));
+const DetailsEmploiDuTemps = lazy(() => import('../components/emploidutemps/DetailsEmploiDuTemps'));
 
-import ListeSeries from '../components/series/ListeSeries';
-import ListeTypeDevoirs from '../components/typedevoirs/ListeTypeDevoirs';
-import NouveauTypeDevoir from '../components/typedevoirs/NouveauTypeDevoir';
-import DetailsTypeDevoir from '../components/typedevoirs/DetailsTypeDevoir';
+const ListeAssiduites = lazy(() => import('../components/assiduites/ListeAssiduites'));
+const FeuillePresence = lazy(() => import('../components/assiduites/FeuillePresence'));
+const DetailsAssiduite = lazy(() => import('../components/assiduites/DetailsAssiduite'));
 
-import ListeDevoirs from '../components/devoirs/ListeDevoirs';
-import NouveauDevoir from '../components/devoirs/NouveauDevoir';
-import DetailsDevoir from '../components/devoirs/DetailsDevoir';
-import SaisieNotes from '../components/devoirs/SaisieNotes';
+const ListeSeries = lazy(() => import('../components/series/ListeSeries'));
+const ListeTypeDevoirs = lazy(() => import('../components/typedevoirs/ListeTypeDevoirs'));
+const NouveauTypeDevoir = lazy(() => import('../components/typedevoirs/NouveauTypeDevoir'));
+const DetailsTypeDevoir = lazy(() => import('../components/typedevoirs/DetailsTypeDevoir'));
 
-import Bulletin from '../components/bulletins/Bulletin';
-import Attestation from '../components/attestations/Attestation';
+const ListeDevoirs = lazy(() => import('../components/devoirs/ListeDevoirs'));
+const NouveauDevoir = lazy(() => import('../components/devoirs/NouveauDevoir'));
+const DetailsDevoir = lazy(() => import('../components/devoirs/DetailsDevoir'));
+const SaisieNotes = lazy(() => import('../components/devoirs/SaisieNotes'));
 
-import ListePaiements from '../components/paiements/ListePaiements';
-import NouveauPaiement from '../components/paiements/NouveauPaiement';
-import DetailsPaiement from '../components/paiements/DetailsPaiement';
-import RecapPaiements from '../components/paiements/RecapPaiements';
-import PaiementsEleve from '../components/paiements/PaiementsEleve';
-import PaiementRetour from '../components/paiements/PaiementRetour';
-import TableauImpayes from '../components/paiements/TableauImpayes';
-import Echeancier from '../components/paiements/Echeancier';
-import ListeSalles from '../components/salles/ListeSalles';
-import FormSalle from '../components/salles/FormSalle';
-import PlanningSalle from '../components/salles/PlanningSalle';
-import ListeRemplacements from '../components/remplacements/ListeRemplacements';
-import FormRemplacement from '../components/remplacements/FormRemplacement';
-import Messagerie from '../components/messagerie/Messagerie';
-import GestionCreneauxRdv from '../components/rdv/GestionCreneauxRdv';
-import CalendrierScolaire from '../components/calendrier/CalendrierScolaire';
-import ListeSanctions from '../components/sanctions/ListeSanctions';
-import FormSanction from '../components/sanctions/FormSanction';
-import SanctionsEleve from '../components/sanctions/SanctionsEleve';
+const Bulletin = lazy(() => import('../components/bulletins/Bulletin'));
+const Attestation = lazy(() => import('../components/attestations/Attestation'));
 
-import ListeInscriptions from '../components/inscriptions/ListeInscriptions';
-import DetailsInscription from '../components/inscriptions/DetailsInscription';
+const ListePaiements = lazy(() => import('../components/paiements/ListePaiements'));
+const NouveauPaiement = lazy(() => import('../components/paiements/NouveauPaiement'));
+const DetailsPaiement = lazy(() => import('../components/paiements/DetailsPaiement'));
+const RecapPaiements = lazy(() => import('../components/paiements/RecapPaiements'));
+const PaiementsEleve = lazy(() => import('../components/paiements/PaiementsEleve'));
+const PaiementRetour = lazy(() => import('../components/paiements/PaiementRetour'));
+const TableauImpayes = lazy(() => import('../components/paiements/TableauImpayes'));
+const Echeancier = lazy(() => import('../components/paiements/Echeancier'));
+const ListeSalles = lazy(() => import('../components/salles/ListeSalles'));
+const FormSalle = lazy(() => import('../components/salles/FormSalle'));
+const PlanningSalle = lazy(() => import('../components/salles/PlanningSalle'));
+const ListeRemplacements = lazy(() => import('../components/remplacements/ListeRemplacements'));
+const FormRemplacement = lazy(() => import('../components/remplacements/FormRemplacement'));
+const Messagerie = lazy(() => import('../components/messagerie/Messagerie'));
+const GestionCreneauxRdv = lazy(() => import('../components/rdv/GestionCreneauxRdv'));
+const CalendrierScolaire = lazy(() => import('../components/calendrier/CalendrierScolaire'));
+const ListeSanctions = lazy(() => import('../components/sanctions/ListeSanctions'));
+const FormSanction = lazy(() => import('../components/sanctions/FormSanction'));
+const SanctionsEleve = lazy(() => import('../components/sanctions/SanctionsEleve'));
 
-import GestionChapitres from '../components/programme/GestionChapitres';
-import SuiviProgressions from '../components/programme/SuiviProgressions';
-import ParametresEtablissement from '../components/etablissement/ParametresEtablissement';
-import VolumeHoraire from '../components/volumes/VolumeHoraire';
-import ConformiteEdt from '../components/volumes/ConformiteEdt';
-import ChargeEnseignants from '../components/volumes/ChargeEnseignants';
+const ListeInscriptions = lazy(() => import('../components/inscriptions/ListeInscriptions'));
+const DetailsInscription = lazy(() => import('../components/inscriptions/DetailsInscription'));
 
-import ListeUtilisateurs from '../components/utilisateurs/ListeUtilisateurs';
-import NouvelUtilisateur from '../components/utilisateurs/NouvelUtilisateur';
-import ListeRoles from '../components/roles/ListeRoles';
-import NouveauRole from '../components/roles/NouveauRole';
-import AuditLogs from '../components/audit/AuditLogs';
-import RapportMinistere from '../components/rapports/RapportMinistere';
-import FraisAnnexesConfig from '../components/fraisannexes/FraisAnnexesConfig';
-import ImpayesFraisAnnexes from '../components/fraisannexes/ImpayesFraisAnnexes';
-import FraisAnnexeEleve from '../components/fraisannexes/FraisAnnexeEleve';
-import ExportComptable from '../components/comptabilite/ExportComptable';
-import GestionAbonnements from '../components/superadmin/GestionAbonnements';
-import DemandesAcces from '../components/superadmin/DemandesAcces';
-import ConfigTarifs from '../components/superadmin/ConfigTarifs';
-import GestionTemplatesSuperAdmin from '../components/superadmin/GestionTemplatesSuperAdmin';
-import GestionDocumentation from '../components/aide/GestionDocumentation';
-import Notifications from '../components/notifications/Notifications';
-import ArchivageWizard from '../components/archivage/ArchivageWizard';
+const GestionChapitres = lazy(() => import('../components/programme/GestionChapitres'));
+const SuiviProgressions = lazy(() => import('../components/programme/SuiviProgressions'));
+const ParametresEtablissement = lazy(() => import('../components/etablissement/ParametresEtablissement'));
+const VolumeHoraire = lazy(() => import('../components/volumes/VolumeHoraire'));
+const ConformiteEdt = lazy(() => import('../components/volumes/ConformiteEdt'));
+const ChargeEnseignants = lazy(() => import('../components/volumes/ChargeEnseignants'));
 
-import SeederInterface from '../components/developpement/SeederInterface';
+const ListeUtilisateurs = lazy(() => import('../components/utilisateurs/ListeUtilisateurs'));
+const NouvelUtilisateur = lazy(() => import('../components/utilisateurs/NouvelUtilisateur'));
+const ListeRoles = lazy(() => import('../components/roles/ListeRoles'));
+const NouveauRole = lazy(() => import('../components/roles/NouveauRole'));
+const AuditLogs = lazy(() => import('../components/audit/AuditLogs'));
+const RapportMinistere = lazy(() => import('../components/rapports/RapportMinistere'));
+const FraisAnnexesConfig = lazy(() => import('../components/fraisannexes/FraisAnnexesConfig'));
+const ImpayesFraisAnnexes = lazy(() => import('../components/fraisannexes/ImpayesFraisAnnexes'));
+const FraisAnnexeEleve = lazy(() => import('../components/fraisannexes/FraisAnnexeEleve'));
+const ExportComptable = lazy(() => import('../components/comptabilite/ExportComptable'));
+const GestionAbonnements = lazy(() => import('../components/superadmin/GestionAbonnements'));
+const DemandesAcces = lazy(() => import('../components/superadmin/DemandesAcces'));
+const ConfigTarifs = lazy(() => import('../components/superadmin/ConfigTarifs'));
+const GestionTemplatesSuperAdmin = lazy(() => import('../components/superadmin/GestionTemplatesSuperAdmin'));
+const GestionDocumentation = lazy(() => import('../components/aide/GestionDocumentation'));
+const Notifications = lazy(() => import('../components/notifications/Notifications'));
+const ArchivageWizard = lazy(() => import('../components/archivage/ArchivageWizard'));
 
-import EnseignantDashboard    from '../components/enseignant/EnseignantDashboard';
-import EnseignantDevoirs      from '../components/enseignant/EnseignantDevoirs';
-import EnseignantPresence     from '../components/enseignant/EnseignantPresence';
-import EnseignantProgramme    from '../components/enseignant/EnseignantProgramme';
-import EnseignantEmploi       from '../components/enseignant/EnseignantEmploi';
-import EnseignantRemplacements from '../components/enseignant/EnseignantRemplacements';
-import EnseignantMessagerie   from '../components/enseignant/EnseignantMessagerie';
-import EnseignantRdv          from '../components/enseignant/EnseignantRdv';
-import EnseignantInformations from '../components/enseignant/EnseignantInformations';
-import EnseignantAppreciations from '../components/enseignant/EnseignantAppreciations';
-import ConseilClasse from '../components/conseil/ConseilClasse';
-import ReinitialisationMotDePasse from '../components/auth/ReinitialisationMotDePasse';
+const SeederInterface = lazy(() => import('../components/developpement/SeederInterface'));
+
+const EnseignantDashboard = lazy(() => import('../components/enseignant/EnseignantDashboard'));
+const EnseignantDevoirs = lazy(() => import('../components/enseignant/EnseignantDevoirs'));
+const EnseignantPresence = lazy(() => import('../components/enseignant/EnseignantPresence'));
+const EnseignantProgramme = lazy(() => import('../components/enseignant/EnseignantProgramme'));
+const EnseignantEmploi = lazy(() => import('../components/enseignant/EnseignantEmploi'));
+const EnseignantRemplacements = lazy(() => import('../components/enseignant/EnseignantRemplacements'));
+const EnseignantMessagerie = lazy(() => import('../components/enseignant/EnseignantMessagerie'));
+const EnseignantRdv = lazy(() => import('../components/enseignant/EnseignantRdv'));
+const EnseignantInformations = lazy(() => import('../components/enseignant/EnseignantInformations'));
+const EnseignantAppreciations = lazy(() => import('../components/enseignant/EnseignantAppreciations'));
+const ConseilClasse = lazy(() => import('../components/conseil/ConseilClasse'));
+const ReinitialisationMotDePasse = lazy(() => import('../components/auth/ReinitialisationMotDePasse'));
 
 // Rôles constants pour éviter les répétitions
 const R_STATS            = ['pedagogie_saisie', 'pedagogie_pilotage', 'finances_caisse', 'finances_gestion'];
@@ -152,8 +156,17 @@ const R_FINANCES_GESTION = ['finances_gestion'];
 const R_COMM             = ['communication'];
 const R_ADMIN            = ['utilisateurs'];
 
+const ChargementPage = () => (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Chargement…</span>
+        </div>
+    </div>
+);
+
 const RoutesMenu = () => (
     <div>
+        <Suspense fallback={<ChargementPage />}>
         <Routes>
             {/* Pages publiques */}
             <Route path="/" element={<LandingPage />} />
@@ -347,6 +360,7 @@ const RoutesMenu = () => (
                 </div>
             } />
         </Routes>
+        </Suspense>
     </div>
 );
 
