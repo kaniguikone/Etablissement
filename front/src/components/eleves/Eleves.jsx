@@ -14,7 +14,7 @@ const Eleves = () => {
                                 </h4>
                             </div>
                             <div className='card-body'>
-                                <table class="table table-striped">
+                                <table className="table table-striped">
                                     <thead>
                                         <tr>
                                             <th>#</th>

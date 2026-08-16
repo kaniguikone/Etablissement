@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
+import { useConfirm } from '../../context/ConfirmContext';
 
 const STATUTS = {
     en_attente: { label: 'En attente', cls: 'bg-warning text-dark' },
@@ -13,6 +14,7 @@ const heure = (str) => str?.slice(0, 5) ?? '—';
 
 const EnseignantRdv = () => {
     const { toast } = useToast();
+    const { confirmer } = useConfirm();
 
     const [onglet, setOnglet]             = useState('reservations');
     const [reservations, setReservations] = useState([]);
