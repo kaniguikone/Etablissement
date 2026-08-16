@@ -9,6 +9,7 @@ const BackofficeLogin = lazy(() => import('../components/auth/BackofficeLogin'))
 const ChangerMotDePasseInitial = lazy(() => import('../components/auth/ChangerMotDePasseInitial'));
 const LandingPage = lazy(() => import('../components/landing/LandingPage'));
 const InscriptionEtablissement = lazy(() => import('../components/landing/InscriptionEtablissement'));
+const PolitiqueConfidentialite = lazy(() => import('../components/legal/PolitiqueConfidentialite'));
 const DashboardGroupe = lazy(() => import('../components/groupe/DashboardGroupe'));
 const ListeEcoles = lazy(() => import('../components/groupe/ListeEcoles'));
 const DetailsEcole = lazy(() => import('../components/groupe/DetailsEcole'));
@@ -123,6 +124,7 @@ const ExportComptable = lazy(() => import('../components/comptabilite/ExportComp
 const GestionAbonnements = lazy(() => import('../components/superadmin/GestionAbonnements'));
 const DemandesAcces = lazy(() => import('../components/superadmin/DemandesAcces'));
 const ConfigTarifs = lazy(() => import('../components/superadmin/ConfigTarifs'));
+const ConfigRgpd = lazy(() => import('../components/superadmin/ConfigRgpd'));
 const GestionTemplatesSuperAdmin = lazy(() => import('../components/superadmin/GestionTemplatesSuperAdmin'));
 const GestionDocumentation = lazy(() => import('../components/aide/GestionDocumentation'));
 const Notifications = lazy(() => import('../components/notifications/Notifications'));
@@ -176,6 +178,7 @@ const RoutesMenu = () => (
             <Route path="/backoffice" element={<BackofficeLogin />} />
             <Route path="/changer-mot-de-passe" element={<PrivateRoute><ChangerMotDePasseInitial /></PrivateRoute>} />
             <Route path="/inscription-etablissement" element={<InscriptionEtablissement />} />
+            <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
             <Route path="/inscription-parent" element={<InscriptionParentPublique />} />
             <Route path="/reinitialiser-mot-de-passe" element={<ReinitialisationMotDePasse />} />
             <Route path="/inscription-parent" element={<InscriptionParent />} />
@@ -198,6 +201,7 @@ const RoutesMenu = () => (
             <Route path="/superadmin/tarifs"            element={<PrivateRoute superOnly><ConfigTarifs /></PrivateRoute>} />
             <Route path="/superadmin/templates"         element={<PrivateRoute superOnly><GestionTemplatesSuperAdmin /></PrivateRoute>} />
             <Route path="/superadmin/templates/:type"   element={<PrivateRoute superOnly><EditionTemplate basePath="/superadmin" /></PrivateRoute>} />
+            <Route path="/superadmin/rgpd"              element={<PrivateRoute superOnly><ConfigRgpd /></PrivateRoute>} />
 
             {/* ── Espace Groupe Scolaire ─────────────────────────────────── */}
             <Route path="/groupe"                  element={<PrivateRoute><DashboardGroupe /></PrivateRoute>} />

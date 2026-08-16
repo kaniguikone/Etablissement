@@ -330,6 +330,29 @@ Cette étape ne peut pas être automatisée depuis le dépôt : elle nécessite 
 
 ---
 
+## 9. RGPD / protection des données
+
+Politique de confidentialité publique (`/politique-confidentialite`), durée de rétention configurable, droit à l'effacement (suppression d'établissement renforcée + anonymisation ciblée élève/parent) et chiffrement au repos des champs sensibles — écran de gestion : `/superadmin/rgpd`.
+
+**Après tout déploiement introduisant de nouvelles migrations tenant (ex. : cette fonctionnalité)**, ne pas oublier :
+
+```bash
+php artisan migrate            # migrations centrales
+php artisan tenants:migrate    # migrations tenant, sur CHAQUE tenant existant
+```
+
+Pour cette fonctionnalité spécifiquement, exécuter une fois en plus (idempotent, peut être relancé sans risque) :
+
+```bash
+php artisan rgpd:chiffrer-donnees-existantes
+```
+
+Cette commande chiffre les téléphones `User`/`Etablissement`/`DemandeAcces` déjà en base (le cast Eloquent `encrypted` ne chiffre que ce qui est écrit *après* son activation — les données existantes doivent être migrées explicitement, sans quoi leur lecture échouerait). À exécuter après `tenants:migrate` (élargissement des colonnes) et avant de considérer la fonctionnalité opérationnelle en production.
+
+**Limites connues (périmètre volontairement restreint, voir `docs/roadmap-commerciale.md` §3.4) :** `numero_parent` et `telephone_enseignant` restent en clair (identifiants de connexion) ; l'anonymisation d'un parent ne déprovisionne pas son profil `CentralUser` cross-établissements.
+
+---
+
 ## 9. Sauvegardes
 
 Sauvegarder **toutes** les bases de données (centrale + tenants) :

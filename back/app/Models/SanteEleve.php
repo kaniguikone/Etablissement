@@ -15,6 +15,18 @@ class SanteEleve extends Model
         'assurance_compagnie', 'assurance_numero_police',
     ];
 
+    protected $casts = [
+        'groupe_sanguin'            => 'encrypted',
+        'allergies'                 => 'encrypted',
+        'medecin_nom'               => 'encrypted',
+        'medecin_telephone'         => 'encrypted',
+        'contact_urgence_nom'       => 'encrypted',
+        'contact_urgence_lien'      => 'encrypted',
+        'contact_urgence_telephone' => 'encrypted',
+        'assurance_compagnie'       => 'encrypted',
+        'assurance_numero_police'   => 'encrypted',
+    ];
+
     public function eleve()
     {
         return $this->belongsTo(Eleve::class);

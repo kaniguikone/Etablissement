@@ -29,6 +29,7 @@ class User extends Authenticatable
             'password'          => 'hashed',
             'actif'                => 'boolean',
             'must_change_password' => 'boolean',
+            'telephone'            => 'encrypted',
         ];
     }
 

@@ -14,6 +14,10 @@ class DemandeAcces extends Model
         'nom_responsable', 'email', 'statut', 'notes', 'tenant_id', 'mot_de_passe_initial',
     ];
 
+    protected $casts = [
+        'telephone' => 'encrypted',
+    ];
+
     public const TYPES = [
         'college'       => 'Collège',
         'lycee'         => 'Lycée',

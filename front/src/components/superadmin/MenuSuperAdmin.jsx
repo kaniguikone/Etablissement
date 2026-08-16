@@ -6,6 +6,7 @@ const ITEMS = [
     { to: '/superadmin/abonnements', icon: 'fas fa-credit-card', label: 'Abonnements' },
     { to: '/superadmin/tarifs',      icon: 'fas fa-tags',        label: 'Tarifs & Licences' },
     { to: '/superadmin/templates',   icon: 'fas fa-layer-group', label: "Modèles d'établissement" },
+    { to: '/superadmin/rgpd',        icon: 'fas fa-user-shield', label: 'RGPD & Conformité' },
 ];
 
 const ITEMS_DEV = [

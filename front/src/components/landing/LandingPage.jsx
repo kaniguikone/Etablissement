@@ -354,7 +354,8 @@ const LandingPage = () => {
                         </div>
                         <div className="col-md-6 text-md-end">
                             <Link to="/login" className="text-white-50 text-decoration-none small me-3">Connexion</Link>
-                            <Link to="/inscription-etablissement" className="text-white-50 text-decoration-none small">Inscription</Link>
+                            <Link to="/inscription-etablissement" className="text-white-50 text-decoration-none small me-3">Inscription</Link>
+                            <Link to="/politique-confidentialite" className="text-white-50 text-decoration-none small">Confidentialité</Link>
                         </div>
                     </div>
                 </div>

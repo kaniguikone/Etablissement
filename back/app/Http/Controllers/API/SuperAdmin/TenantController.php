@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\API\SuperAdmin;
 
 use App\Http\Controllers\Controller;
+use App\Models\EffacementTenant;
 use App\Models\Tenant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -132,9 +133,28 @@ class TenantController extends Controller
         return response()->json($tenant->load('domains'));
     }
 
-    public function destroy(string $id): JsonResponse
+    /**
+     * Suppression RGPD irréversible d'un établissement (droit à l'effacement).
+     * Exige de retaper le code du tenant en confirmation, et trace l'action
+     * dans la DB centrale avant la suppression (la base du tenant va disparaître).
+     */
+    public function destroy(Request $request, string $id): JsonResponse
     {
         $tenant = Tenant::findOrFail($id);
+
+        $request->validate(['confirmation' => 'required|string']);
+        if ($request->input('confirmation') !== $tenant->code) {
+            return response()->json(['message' => "Confirmation invalide : le code de l'établissement ne correspond pas."], 422);
+        }
+
+        EffacementTenant::create([
+            'tenant_id_original' => $tenant->id,
+            'nom_etablissement'  => $tenant->nom,
+            'super_admin_id'     => $request->user()?->id,
+            'motif'              => $request->input('motif'),
+            'created_at'         => now(),
+        ]);
+
         $tenant->delete(); // Déclenche Jobs\DeleteDatabase via TenancyServiceProvider
         return response()->json(['message' => 'Tenant supprimé.']);
     }

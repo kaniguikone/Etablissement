@@ -48,10 +48,9 @@ class SanteEleveTest extends TestCase
                  ->assertJsonPath('groupe_sanguin', 'O+')
                  ->assertJsonPath('allergies', 'Arachides');
 
-        $this->assertDatabaseHas('sante_eleves', [
-            'eleve_id'       => $this->eleve->id,
-            'groupe_sanguin' => 'O+',
-        ]);
+        // Chiffré au repos : on vérifie via le modèle (déchiffrement transparent),
+        // pas la colonne brute qui contient désormais un blob chiffré.
+        $this->assertSame('O+', SanteEleve::where('eleve_id', $this->eleve->id)->first()->groupe_sanguin);
     }
 
     /** @test */

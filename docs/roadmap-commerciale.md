@@ -167,16 +167,22 @@ Flutter permet de compiler pour iOS avec peu d'effort supplémentaire. Ce qui pr
 
 ---
 
-#### 3.4 — RGPD / politique de protection des données
-**Priorité :** ★★☆☆☆ | **Effort :** ~2 jours | **Criticité :** Partenaires internationaux
+#### 3.4 — RGPD / politique de protection des données ✅ Livré (2026-08-16)
+**Priorité :** ★★☆☆☆ | **Effort :** ~2 jours (réévalué en cours de route, périmètre plus large que prévu) | **Criticité :** Partenaires internationaux
 
 Les données d'enfants mineurs sont ultra-sensibles. Même si la réglementation ivoirienne est moins mature que le RGPD européen, les établissements avec des partenaires ONG ou internationaux le demanderont.
 
-**À mettre en place :**
-- Politique de confidentialité publique (page légale)
-- Durée de rétention des données (ex. : données archivées conservées 10 ans)
-- Procédure de droit à l'effacement (via super-admin)
-- Chiffrement au repos des données sensibles (numéros de téléphone, données médicales)
+**Livré :**
+- Politique de confidentialité publique : `/politique-confidentialite`, liée depuis le footer public
+- Durée de rétention configurable par le super-admin (écran `/superadmin/rgpd`), affichée dynamiquement sur la page publique
+- Droit à l'effacement — deux mécanismes :
+  - Suppression d'établissement renforcée (confirmation par saisie du code + trace conservée dans la DB centrale avant suppression)
+  - Anonymisation ciblée d'un élève ou d'un parent (recherche + action depuis l'écran RGPD super-admin) — anonymise plutôt que supprime physiquement, pour préserver l'intégrité des notes/paiements déjà liés
+- Chiffrement au repos (cast Eloquent `encrypted`) : fiche santé élève (tous champs), téléphone `User`, `Etablissement`, `DemandeAcces`
+
+**Limites connues, documentées volontairement plutôt que livrées à moitié :**
+- `numero_parent` et `telephone_enseignant` restent en clair : ce sont des identifiants de connexion (recherche exacte + `UNIQUE`), les chiffrer casserait l'authentification sans un chantier séparé (index de recherche dédié)
+- L'anonymisation d'un parent ne touche que sa fiche locale au tenant ; le profil `CentralUser` (identité cross-établissements) n'est pas déprovisionné — limite acceptée pour rester dans un périmètre raisonnable
 
 ---
 
@@ -200,10 +206,10 @@ Les données d'enfants mineurs sont ultra-sensibles. Même si la réglementation
 | **3** | 3.1 | Bibliothèque de ressources pédagogiques                    | ~4-5 j | ★★☆☆☆    | ⬜ À faire |
 | **3** | 3.2 | Module SaaS billing (abonnements tenants)                  | ~5-7 j | ★★★☆☆    | ✅ Livré   |
 | **3** | 3.3 | Application iOS (App Store)                                | ~3-5 j | ★★☆☆☆    | ⬜ À faire |
-| **3** | 3.4 | RGPD / politique de données                                | ~2 j   | ★★☆☆☆    | ⬜ À faire |
+| **3** | 3.4 | RGPD / politique de données                                | ~2 j   | ★★☆☆☆    | ✅ Livré   |
 | **3** | 3.5 | Documentation in-app et aide contextuelle                  | ~3 j   | ★★☆☆☆    | ✅ Livré   |
 
-**Livré :** 10 fonctionnalités sur 17 (hors démo et monitoring, désormais partiels plutôt qu'à faire) — **Restant :** ~16-22 jours de développement
+**Livré :** 11 fonctionnalités sur 17 (hors démo et monitoring, désormais partiels plutôt qu'à faire) — **Restant :** ~14-20 jours de développement
 
 *Hors ce tableau de priorités initial, plusieurs chantiers non prévus à l'origine ont également été livrés depuis : page d'accueil publique, gestion des demandes d'accès et de la tarification, compte central unifié parent/enseignant, mot de passe initial obligatoire, isolation des sessions par espace, import Excel en masse (5 flux), type d'établissement obligatoire — voir le tableau « Ce qui est livré et opérationnel » ci-dessus.*
 

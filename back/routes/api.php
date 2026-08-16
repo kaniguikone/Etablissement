@@ -6,6 +6,7 @@ use App\Http\Controllers\API\ParentCentralController;
 use App\Http\Controllers\API\SuperAdmin\SuperAdminAuthController;
 use App\Http\Controllers\API\SuperAdmin\TarifsLicenceController;
 use App\Http\Controllers\API\SuperAdmin\TenantController;
+use App\Http\Controllers\API\SuperAdmin\RgpdController;
 use App\Http\Controllers\API\SuperAdmin\AbonnementSaasController;
 use App\Http\Controllers\API\Group\GroupAuthController;
 use App\Http\Controllers\API\Group\GroupDashboardController;
@@ -24,6 +25,9 @@ use App\Http\Controllers\API\SeederController;
 
 // ─── Tarifs publics (landing page) ───────────────────────────────────────────
 Route::get('/tarifs', [TarifsLicenceController::class, 'public']);
+
+// ─── RGPD — config publique (page politique de confidentialité) ─────────────
+Route::get('/rgpd/config', [RgpdController::class, 'configPublique']);
 
 // ─── Demande d'accès établissement (formulaire public) ───────────────────────
 Route::post('/demande-acces', [DemandeAccesController::class, 'store']);
@@ -85,6 +89,12 @@ Route::middleware(['auth:sanctum', 'account.type:App\Models\SuperAdmin'])->prefi
     Route::delete('/tarifs/tranches/{id}',          [TarifsLicenceController::class, 'destroyTranche']);
     Route::put('/tarifs/config',                    [TarifsLicenceController::class, 'updateConfig']);
     Route::post('/tarifs/simuler',                  [TarifsLicenceController::class, 'simuler']);
+
+    // ── RGPD ────────────────────────────────────────────────────────────────
+    Route::get('/rgpd/config',                                     [RgpdController::class, 'config']);
+    Route::put('/rgpd/config',                                     [RgpdController::class, 'updateConfig']);
+    Route::get('/rgpd/tenants/{tenantId}/rechercher-personne',     [RgpdController::class, 'rechercherPersonne']);
+    Route::post('/rgpd/tenants/{tenantId}/anonymiser',             [RgpdController::class, 'anonymiser']);
 
     Route::get('/tenants',                      [TenantController::class, 'index']);
     Route::post('/tenants',                     [TenantController::class, 'store']);

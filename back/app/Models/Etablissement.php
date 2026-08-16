@@ -14,6 +14,11 @@ class Etablissement extends Model
         'telephone', 'telephone2', 'email', 'site_web', 'pays',
     ];
 
+    protected $casts = [
+        'telephone'  => 'encrypted',
+        'telephone2' => 'encrypted',
+    ];
+
     protected $appends = ['logo_url'];
 
     public function getLogoUrlAttribute(): ?string
