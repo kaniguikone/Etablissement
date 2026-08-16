@@ -87,19 +87,19 @@ Le code de démo est complet (`DemoSeeder.php`, `CreerDemo.php`, 4 templates), e
 
 ---
 
-#### 1.2 — Gestion santé élève
+#### 1.2 — Gestion santé élève ✅ Livré (2026-08-16)
 **Priorité :** ★★★☆☆ | **Effort :** ~1 jour | **Criticité :** Systématiquement demandé
 
 Demandé par les infirmières scolaires et les directeurs prudents dès la démonstration.
 
-**Champs à ajouter sur la fiche élève :**
+**Champs disponibles sur la fiche santé :**
 - Groupe sanguin
 - Allergies connues (champ texte libre)
 - Médecin traitant (nom + téléphone)
 - Contact urgence distinct des parents (nom, lien de parenté, téléphone)
 - Assurance scolaire (compagnie + numéro de police)
 
-**Implémentation :** Table `sante_eleves` (1-1 avec `eleves`) ou colonnes JSON sur `eleves`. Onglet "Santé" dans la fiche élève, visible uniquement par admin et infirmier.
+**Implémentation livrée :** table `sante_eleves` dédiée (1-1 avec `eleves`, `SanteEleveController`), nouvelle page `/SanteEleve/:id` accessible depuis un bouton sur la fiche élève. Accès gated par une nouvelle permission `sante` (accordée par défaut à `super_admin`/`directeur` ; à activer manuellement pour un rôle "infirmier" si l'établissement le crée, via l'écran de gestion des rôles existant). Aucune modification du module élève existant (table `eleves`, contrôleur, routes CRUD) — implémentation entièrement additive.
 
 ---
 
@@ -190,7 +190,7 @@ Les données d'enfants mineurs sont ultra-sensibles. Même si la réglementation
 | **1** | 1.1 | Rapport statistique Ministère PDF                          | ~3-4 j | ★★★★★    | ✅ Livré   |
 | **1** | 1.1b | Statistiques générales MENET (formulaire 14 sections)     | ~2 j   | ★★★★★    | ✅ Livré   |
 | **1** | 1.1c | Inscription parent autonome (flow matricule + validation)  | ~2 j   | ★★★★☆    | ✅ Livré   |
-| **1** | 1.2 | Gestion santé élève                                        | ~1 j   | ★★★☆☆    | ⬜ À faire |
+| **1** | 1.2 | Gestion santé élève                                        | ~1 j   | ★★★☆☆    | ✅ Livré   |
 | **1** | 1.3 | Authentification 2FA admin/comptable                       | ~2 j   | ★★★☆☆    | ⬜ À faire |
 | **1** | 1.4 | Monitoring infrastructure (Sentry + UptimeRobot)           | ~1 j   | ★★★★☆    | 🟡 Partiel |
 | **2** | 2.1 | Portail élève dans l'app mobile (rôle distinct)            | ~3 j   | ★★★☆☆    | ⬜ À faire |
@@ -203,7 +203,7 @@ Les données d'enfants mineurs sont ultra-sensibles. Même si la réglementation
 | **3** | 3.4 | RGPD / politique de données                                | ~2 j   | ★★☆☆☆    | ⬜ À faire |
 | **3** | 3.5 | Documentation in-app et aide contextuelle                  | ~3 j   | ★★☆☆☆    | ✅ Livré   |
 
-**Livré :** 9 fonctionnalités sur 17 (hors démo et monitoring, désormais partiels plutôt qu'à faire) — **Restant :** ~17-23 jours de développement
+**Livré :** 10 fonctionnalités sur 17 (hors démo et monitoring, désormais partiels plutôt qu'à faire) — **Restant :** ~16-22 jours de développement
 
 *Hors ce tableau de priorités initial, plusieurs chantiers non prévus à l'origine ont également été livrés depuis : page d'accueil publique, gestion des demandes d'accès et de la tarification, compte central unifié parent/enseignant, mot de passe initial obligatoire, isolation des sessions par espace, import Excel en masse (5 flux), type d'établissement obligatoire — voir le tableau « Ce qui est livré et opérationnel » ci-dessus.*
 
