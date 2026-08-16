@@ -56,6 +56,7 @@ Les 3 premiers arguments sont positionnels : `id`, `nom`, `domaine`.
 
 ```bash
 php artisan school:create lycee-moderne "Lycée Moderne d'Abidjan" lycee-moderne.suiviscolaire.ci \
+  --type=lycee \
   --email=contact@lycee-moderne.ci \
   --ville=Abidjan \
   --admin-email=admin@lycee-moderne.ci \
@@ -66,6 +67,7 @@ php artisan school:create lycee-moderne "Lycée Moderne d'Abidjan" lycee-moderne
 
 ```bash
 php artisan school:create lycee-moderne "Lycée Moderne d'Abidjan" lycee-moderne.suiviscolaire.ci \
+  --type=lycee \
   --email=contact@lycee-moderne.ci \
   --ville=Abidjan \
   --group-id=1 \
@@ -75,13 +77,18 @@ php artisan school:create lycee-moderne "Lycée Moderne d'Abidjan" lycee-moderne
 
 Pas de notion de plan tarifaire ni de date d'expiration à la création — un établissement créé ainsi (ou via une demande d'accès acceptée) est un accès de démonstration commerciale sans limite de durée.
 
+`--type` déclenche automatiquement le pré-remplissage pédagogique du modèle choisi (niveaux, matières, séries...) pour l'année scolaire indiquée (ou l'année en cours par défaut).
+
 | Option | Défaut | Description |
 |---|---|---|
+| `--type` | **obligatoire** | `lycee` \| `lycee_complet` \| `college` \| `primaire` |
 | `--email` | — | Email de contact |
 | `--ville` | — | Ville |
 | `--group-id` | — | ID du groupe (optionnel) |
 | `--admin-email` | — | Email du premier administrateur |
 | `--admin-password` | — | Mot de passe du premier administrateur |
+| `--annee` | année en cours | Année scolaire du pré-remplissage, ex: `2025-2026` |
+| `--periodes` | `trimestre` | `trimestre` \| `semestre` |
 
 ---
 
@@ -140,5 +147,11 @@ DB::table('tenants')->delete();
 DB::table('group_admins')->delete();
 DB::table('groups')->delete();
 DB::table('super_admins')->delete();
+DB::table('demandes_acces')->delete();
+DB::table('tarifs_licence')->delete();
+DB::table('config_saas')->delete();
+DB::table('central_users')->delete();
 "
 ```
+
+Les tables `abonnements_saas`, `factures_saas`, `central_parent_links` et `central_enseignant_links` sont nettoyées automatiquement par cascade (clé étrangère `ON DELETE CASCADE` sur `tenant_id`/`central_user_id`) et n'ont pas besoin d'être vidées manuellement.

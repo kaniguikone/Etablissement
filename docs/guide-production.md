@@ -151,7 +151,7 @@ CINETPAY_API_KEY=ta_cle_prod
 CINETPAY_SITE_ID=ton_site_id_prod
 CINETPAY_BASE_URL=https://api-checkout.cinetpay.com/v2
 
-SENTRY_LARAVEL_DSN=https://xxxx@oXXX.ingest.sentry.io/YYYY
+# SENTRY_LARAVEL_DSN=...   # optionnel — Sentry n'est pas encore installé dans le projet (composer require sentry/sentry-laravel requis au préalable)
 ```
 
 ---
@@ -172,7 +172,9 @@ SENTRY_LARAVEL_DSN=https://xxxx@oXXX.ingest.sentry.io/YYYY
 cd /var/www/etablissement/back
 
 # Migrations base centrale
-# Crée notamment : tenants, domains, super_admins, abonnements_saas, factures_saas
+# Crée notamment : tenants, domains, super_admins, groups, group_admins,
+# abonnements_saas, factures_saas, demandes_acces, tarifs_licence, config_saas,
+# central_users, central_parent_links, central_enseignant_links
 php artisan migrate --force
 
 # Optimisations production
@@ -360,22 +362,22 @@ php artisan group:create "Groupe Excellence CI" \
   --admin-password=MotDePasseFort123 \
   --admin-nom="Administrateur Groupe"
 
-# Créer un tenant indépendant
-php artisan tenants:create \
-  --id=lycee-moderne \
-  --nom="Lycée Moderne Abidjan" \
-  --domain=lycee-moderne.tondomaine.ci
+# Créer un tenant indépendant (--type est obligatoire ; applique déjà
+# automatiquement le modèle pédagogique correspondant)
+php artisan school:create lycee-moderne "Lycée Moderne Abidjan" lycee-moderne.tondomaine.ci \
+  --type=lycee_complet \
+  --admin-email=admin@lycee.ci \
+  --admin-password=motdepasse
 
-# Créer un tenant dans le groupe (remplacer 1 par l'ID du groupe)
-php artisan tenants:create \
-  --id=lycee-excellence \
-  --nom="Lycée Excellence Cocody" \
-  --domain=lycee-excellence.tondomaine.ci \
-  --group=1
+# Créer un tenant rattaché à un groupe (remplacer 1 par l'ID du groupe)
+php artisan school:create lycee-excellence "Lycée Excellence Cocody" lycee-excellence.tondomaine.ci \
+  --type=lycee_complet \
+  --group-id=1 \
+  --admin-email=admin@lycee-excellence.ci \
+  --admin-password=motdepasse
 
-# Appliquer un template de données scolaires
+# Pour réappliquer/changer un template a posteriori sur un tenant existant :
 php artisan template:apply lycee-moderne lycee_complet 2025-2026
-php artisan template:apply lycee-excellence lycee_complet 2025-2026
 ```
 
 ---

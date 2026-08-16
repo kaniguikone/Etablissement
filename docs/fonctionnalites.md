@@ -13,18 +13,20 @@ Application complète de gestion scolaire en architecture multi-tenant, permetta
 
 ## Portails d'accès
 
-L'application propose quatre portails distincts selon le profil :
-
 | Portail | Interface | Utilisateurs |
 |---|---|---|
 | **Back-office administrateur** | Web (React) | Personnels administratifs |
 | **Portail enseignant** | Web + Mobile | Enseignants |
 | **Portail parent** | Mobile | Parents d'élèves |
-| **Portail élève** | Mobile | Élèves |
+
+> Il n'existe pas aujourd'hui de compte/rôle « élève » distinct : l'accès mobile aux données d'un élève (notes, EDT, devoirs, absences) se fait exclusivement via le compte du **parent**, qui sélectionne l'enfant concerné. Un portail élève avec identifiants propres est identifié comme fonctionnalité à livrer (voir `roadmap-commerciale.md`, item 2.1).
 
 ---
 
 ## 1. Organisation scolaire
+
+### Fiche établissement
+- Informations générales (nom, type, ville, contact) et **type d'établissement obligatoire** (lycée, lycée complet, collège, primaire) — conditionne le pré-remplissage pédagogique à la création et la génération des documents officiels
 
 ### Niveaux et classes
 - Création et gestion des niveaux scolaires (6ème, 5ème, Terminale, etc.)
@@ -114,13 +116,13 @@ L'application propose quatre portails distincts selon le profil :
 ## 5. Gestion des enseignants
 
 - CRUD complet avec photo de profil
-- **Import en masse** via modèles Excel (enseignants + affectations classes/matières)
+- **Import en masse** via modèles Excel (enseignants + affectations classes/matières), avec création du compte portail **optionnelle** (colonne dédiée dans le modèle) — mot de passe généré aléatoirement, jamais prévisible
 - Affectations multiples : un enseignant peut enseigner plusieurs matières dans plusieurs classes
 - Gestion des **remplacements** avec notification au remplaçant
 
 ### Portail enseignant (web et mobile)
 - Tableau de bord personnel (classes, devoirs à venir, absences récentes)
-- Saisie des présences et des notes directement depuis le mobile
+- Saisie des présences et des notes directement depuis le mobile, avec **mode hors-ligne** (présences et notes) et synchronisation automatique au retour du réseau
 - Import de notes via modèle Excel
 - Consultation et suivi du programme
 - Gestion des créneaux de rendez-vous parents-professeurs
@@ -268,7 +270,7 @@ L'application propose quatre portails distincts selon le profil :
 
 | Données | Import | Export |
 |---|---|---|
-| Élèves | — | CSV |
+| Élèves | Excel | CSV |
 | Enseignants | Excel | — |
 | Affectations | Excel | — |
 | Scolarités | Excel | — |
@@ -293,10 +295,24 @@ L'application propose quatre portails distincts selon le profil :
 - Consultation des données de chaque établissement du groupe
 - Système de **templates de données** pour initialiser rapidement un nouvel établissement (niveaux, matières, types de devoirs préconfigurés)
 
+### Entonnoir commercial
+- **Page d'accueil publique** (landing) : présentation, tarifs indicatifs, badge d'accès démo gratuit 30 jours
+- **Demande d'accès en ligne** (`/inscription-etablissement`) : un prospect soumet sa demande sans intervention manuelle préalable
+- **Traitement des demandes** par le super-admin : validation, tarification, provisionnement de l'établissement
+
 ### Super-administration
 - Création et gestion des établissements (tenants)
 - Activation / désactivation d'un établissement
+- **Gestion des demandes d'accès** entrantes (validation, rejet, suivi)
+- **Tarifs & Licences** : configuration des tranches tarifaires indicatives et simulateur de coût
+- **Modèles d'établissement** : gestion des templates de pré-remplissage pédagogique (lycée, collège, primaire, lycée complet)
+- **Générateur de données** : outil de seed pour peupler rapidement un tenant (démonstration, tests)
 - Gestion des versions de l'application mobile (versionning, URL de téléchargement, mise à jour forcée)
+
+### Compte central unifié (parent / enseignant)
+- Identité unique par numéro de téléphone, indépendante des établissements
+- Un parent ou un enseignant présent dans plusieurs établissements (ou dans un groupe scolaire) n'a **qu'un seul compte** à retenir, relié à chaque établissement séparément
+- Évite la recréation d'un compte à chaque nouvel établissement rattaché
 
 ### Module SaaS billing
 - Gestion des **abonnements** par établissement — montant négocié au cas par cas (pas de plans fixes), tarif licence/élève affiché à titre indicatif sur la page publique
@@ -309,7 +325,9 @@ L'application propose quatre portails distincts selon le profil :
 ## 14. Sécurité et contrôle d'accès
 
 - Authentification par token via **Laravel Sanctum**
-- Portails distincts avec tokens séparés (admin web, enseignant mobile, parent mobile)
+- **Isolation des sessions par espace** (école/admin, groupe, super-admin, enseignant, parent) : chaque espace utilise sa propre clé de session, ce qui permet plusieurs sessions simultanées dans le même navigateur (ex. admin école et super-admin en même temps, dans deux onglets)
+- **Middleware anti-confusion de tokens** : vérifie côté serveur que le token authentifié correspond bien au type de compte attendu par la route (un token "groupe" ne peut pas être utilisé sur les routes "superadmin", et inversement)
+- **Mot de passe initial obligatoire** : changement forcé à la première connexion, avant tout accès à l'application
 - **Système de rôles et permissions** granulaire :
 
 | Permission | Périmètre |

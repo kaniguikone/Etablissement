@@ -1,6 +1,6 @@
 # Roadmap commerciale — Application de gestion scolaire
 
-> Document de référence — Mis à jour le 2026-05-29
+> Document de référence — Mis à jour le 2026-08-16
 > Synthèse de l'analyse experte (2026-04-30) et de l'état réel du code
 
 ---
@@ -30,11 +30,10 @@
 | **Rapport statistique annuel Ministère PDF**                        | **Complet** — 6 sections, A4 paysage, DomPDF                                      |
 | **Statistiques générales MENET (formulaire officiel)**              | **Complet** — 14 sections (effectifs, langues, nationalités, âges, résultats examens BEPC/BAC/CEPE), exports Excel + PDF |
 | **Inscription parent autonome depuis l'app mobile**                 | **Complet** — flow 3 étapes via matricule élève, validation admin, slots/abonnements |
-| **Monitoring infrastructure**                                       | **Complet** — Sentry (PHP + JS), UptimeRobot, Telescope                           |
 | **Frais annexes** (tenues, manuels, examens, transport…)            | **Complet** — config par niveau, suivi paiements, impayés, reçus PDF              |
 | **Export comptable structuré**                                      | **Complet** — Excel 3 feuilles (OHADA) + FEC/CSV SAGE                             |
 | **Module SaaS billing**                                             | **Complet** — dashboard super-admin, abonnements, factures PDF                    |
-| **Documentation in-app et aide contextuelle**                       | **Complet** — panneau "?" contextuel, gestion BDD, 26 articles pré-rédigés        |
+| **Documentation in-app et aide contextuelle**                       | **Complet** — panneau "?" contextuel, gestion BDD, 27 articles pré-rédigés        |
 | Statistiques avancées (KPIs, classements, évolution inter-périodes) | Complet                                                                           |
 | Gestion des remplacements d'enseignants                             | Complet                                                                           |
 | Progression du programme par matière/classe                         | Complet                                                                           |
@@ -46,10 +45,17 @@
 | Architecture multi-tenant isolée                                    | Complet                                                                           |
 | Portail enseignant mobile (Flutter/Android)                         | Complet                                                                           |
 | Portail parent mobile (Flutter/Android)                             | Complet                                                                           |
-| Mode hors-ligne mobile pour les présences                           | Complet (SharedPreferences + sync auto)                                           |
 | Templates de démarrage rapide (lycée, collège, primaire)            | Complet (4 templates JSON)                                                        |
 | Instance démo (code + commande `php artisan demo:creer`)            | Code complet — déploiement public manquant                                        |
-| **85 tests automatisés**                                            | **Complet** — couverture frais annexes, export, documentation, stats MENET, portail parent |
+| **Page d'accueil publique** (landing)                                | **Complet** — formulaire de demande d'accès, tarifs publics, badge démo 30 jours  |
+| **Demandes d'accès & tarification** (super-admin)                   | **Complet** — traitement des demandes entrantes, tranches tarifaires indicatives, simulateur |
+| **Compte central unifié parent/enseignant**                         | **Complet** — identité unique par téléphone, accès à plusieurs établissements sans recréer de compte |
+| **Mot de passe initial obligatoire** (1ère connexion)                | **Complet** — changement forcé avant tout accès                                   |
+| **Isolation des sessions par espace** (école/groupe/superadmin/enseignant) | **Complet** — sessions simultanées dans le même navigateur + middleware anti-confusion de tokens |
+| **Import Excel en masse** (élèves, enseignants, affectations, scolarités, notes) | **Complet** — 5 flux avec gestion d'erreurs ligne par ligne                |
+| **Type d'établissement obligatoire**                                 | **Complet** — condition la génération du bulletin/relevé et le pré-remplissage pédagogique |
+| Mode hors-ligne mobile (présences **et notes**)                     | Complet (sync auto)                                                               |
+| **94 tests automatisés**                                            | **Complet** — couverture frais annexes, export, documentation, stats MENET, portail parent, imports Excel |
 
 ---
 
@@ -63,15 +69,14 @@
 ---
 
 #### 0.1 — Déploiement public de l'instance démo
-**Priorité :** ★★★★★ | **Effort :** ~1 jour | **Criticité :** Bloquant vente
+**Priorité :** ★★★★★ | **Effort :** ~0,5 jour restant | **Criticité :** Bloquant vente
 
-Le code de démo est complet (`DemoSeeder.php`, `CreerDemo.php`, 4 templates). Ce qui manque c'est uniquement le déploiement sur un serveur public avec un sous-domaine wildcard.
+Le code de démo est complet (`DemoSeeder.php`, `CreerDemo.php`, 4 templates), et la **page d'accueil publique existe déjà** (`front/src/components/landing/LandingPage.jsx`, route `/`) avec formulaire de demande d'accès, tarifs publics et badge « accès démo gratuit 30 jours ». Ce qui reste : le déploiement infrastructure (VPS + DNS wildcard) — non vérifiable depuis le dépôt de code.
 
-**Ce qu'il faut faire :**
+**Ce qu'il reste à faire :**
 - Déployer sur un VPS avec `demo.votreapp.ci` (wildcard DNS `*.demo.votreapp.ci`)
 - Lancer `php artisan demo:creer` pour créer `lycee.demo.votreapp.ci` prépeuplé
-- Ajouter une page d'accueil publique avec les credentials de démo (en clair pour les prospects)
-- Données fictives réalistes : un établissement complet (élèves, notes, bulletins, paiements)
+- Vérifier que la landing page pointe vers la bonne instance de démo une fois en ligne
 
 **Impact :** Un directeur peut tester seul depuis son bureau, à n'importe quelle heure. C'est l'argument de vente numéro un.
 
@@ -179,7 +184,7 @@ Les données d'enfants mineurs sont ultra-sensibles. Même si la réglementation
 
 | Phase | #   | Fonctionnalité                                             | Effort | Priorité | Statut    |
 | ----- | --- | ---------------------------------------------------------- | ------ | -------- | --------- |
-| **0** | 0.1 | Déploiement instance démo publique                         | ~1 j   | ★★★★★    | ⬜ À faire |
+| **0** | 0.1 | Déploiement instance démo publique (landing déjà livrée, reste l'infra) | ~0,5 j | ★★★★★    | 🟡 Partiel |
 | **0** | 0.2 | Notifications email (bulletin, absence, sanction, relance) | ~2 j   | ★★★★★    | ✅ Livré   |
 | **0** | 0.3 | Journal d'audit (notes, paiements, sanctions)              | ~2 j   | ★★★★☆    | ✅ Livré   |
 | **1** | 1.1 | Rapport statistique Ministère PDF                          | ~3-4 j | ★★★★★    | ✅ Livré   |
@@ -187,7 +192,7 @@ Les données d'enfants mineurs sont ultra-sensibles. Même si la réglementation
 | **1** | 1.1c | Inscription parent autonome (flow matricule + validation)  | ~2 j   | ★★★★☆    | ✅ Livré   |
 | **1** | 1.2 | Gestion santé élève                                        | ~1 j   | ★★★☆☆    | ⬜ À faire |
 | **1** | 1.3 | Authentification 2FA admin/comptable                       | ~2 j   | ★★★☆☆    | ⬜ À faire |
-| **1** | 1.4 | Monitoring infrastructure (Sentry + UptimeRobot)           | ~1 j   | ★★★★☆    | ✅ Livré   |
+| **1** | 1.4 | Monitoring infrastructure (Sentry + UptimeRobot)           | ~1 j   | ★★★★☆    | ⬜ À faire |
 | **2** | 2.1 | Portail élève dans l'app mobile (rôle distinct)            | ~3 j   | ★★★☆☆    | ⬜ À faire |
 | **2** | 2.2 | Frais annexes (fournitures, tenues, examens)               | ~3-4 j | ★★★☆☆    | ✅ Livré   |
 | **2** | 2.3 | Export comptable structuré (SAGE/Excel + FEC)              | ~2 j   | ★★☆☆☆    | ✅ Livré   |
@@ -198,7 +203,9 @@ Les données d'enfants mineurs sont ultra-sensibles. Même si la réglementation
 | **3** | 3.4 | RGPD / politique de données                                | ~2 j   | ★★☆☆☆    | ⬜ À faire |
 | **3** | 3.5 | Documentation in-app et aide contextuelle                  | ~3 j   | ★★☆☆☆    | ✅ Livré   |
 
-**Livré :** 10 fonctionnalités sur 17 (hors démo) — **Restant :** ~17-23 jours de développement
+**Livré :** 9 fonctionnalités sur 17 (hors démo, qui est désormais partielle plutôt qu'à faire) — **Restant :** ~18-24 jours de développement
+
+*Hors ce tableau de priorités initial, plusieurs chantiers non prévus à l'origine ont également été livrés depuis : page d'accueil publique, gestion des demandes d'accès et de la tarification, compte central unifié parent/enseignant, mot de passe initial obligatoire, isolation des sessions par espace, import Excel en masse (5 flux), type d'établissement obligatoire — voir le tableau « Ce qui est livré et opérationnel » ci-dessus.*
 
 ---
 
@@ -220,6 +227,10 @@ Les données d'enfants mineurs sont ultra-sensibles. Même si la réglementation
 - **Frais annexes** (tenues, manuels, examens — facturation complémentaire intégrée)
 - **Export comptable OHADA** (Excel 3 feuilles + FEC SAGE — zéro ressaisie)
 - **Module SaaS billing** (abonnements, factures, dashboard super-admin)
-- **Documentation in-app contextuelle** (aide par module, 26 articles pré-rédigés)
-- 85 tests automatisés
+- **Documentation in-app contextuelle** (aide par module, 27 articles pré-rédigés)
+- 94 tests automatisés
 - Templates de démarrage rapide (mise en service en moins d'une heure)
+- **Page d'accueil publique avec entonnoir commercial** (demande d'accès → validation → tarification, sans intervention manuelle par email)
+- **Compte central unifié parent/enseignant** (une seule identité pour accéder à plusieurs établissements, y compris dans un groupe scolaire)
+- **Isolation des sessions par espace** (un directeur peut être connecté simultanément en admin et en super-admin dans le même navigateur, sans conflit)
+- **Import Excel en masse** (élèves, enseignants, affectations, scolarités, notes — onboarding rapide pour les gros effectifs)

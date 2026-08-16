@@ -83,7 +83,7 @@ php artisan tinker
 
 ```php
 \App\Models\SuperAdmin::create([
-    'name'     => 'Super Admin',
+    'nom'      => 'Super Admin',
     'email'    => 'admin@monapp.ci',
     'password' => bcrypt('motdepasse_securise'),
 ]);
@@ -158,16 +158,20 @@ server {
 ```bash
 cd /var/www/suivi-scolaire/back
 php artisan school:create lycee-moderne "Lycée Moderne d'Abidjan" lycee-moderne.monapp.ci \
-    --plan=basic \
+    --type=lycee \
     --email=contact@lycee-moderne.ci \
-    --ville=Abidjan
+    --ville=Abidjan \
+    --admin-email=admin@lycee-moderne.ci \
+    --admin-password=motdepasse_securise
 ```
+
+`--type` est **obligatoire** (valeurs possibles : `lycee`, `lycee_complet`, `college`, `primaire` — détermine le modèle de pré-remplissage pédagogique appliqué automatiquement). `--admin-email`/`--admin-password` créent directement le premier compte administrateur ; sans eux, il faudra le créer manuellement ensuite. Options additionnelles : `--group-id=` (rattacher à un groupe scolaire existant), `--annee=` (ex: `2025-2026`, défaut : année en cours), `--periodes=` (`trimestre` par défaut ou `semestre`).
 
 Cela crée automatiquement :
 - L'entrée dans la table `tenants`
 - Le domaine dans la table `domains`
-- La base de données `tenant_lycee-moderne`
-- Les migrations dans cette base
+- La base de données `tenant_lycee-moderne`, migrée
+- La fiche établissement (type, ville, contact) et le pré-remplissage pédagogique du type choisi (niveaux, matières, séries...)
 
 ### 3.2 Seeder les données initiales
 
@@ -274,32 +278,30 @@ npm run dev
 | `php artisan tenants:migrate-fresh --tenants=<id>` | Réinitialiser la base d'un tenant |
 | `php artisan tenants:seed --tenants=<id>` | Seeder un tenant |
 | `php artisan tenants:seed --tenants=<id> --class=AdminSeeder` | Seeder spécifique |
-| `php artisan school:create <id> <nom> <domaine>` | Créer un établissement |
+| `php artisan school:create <id> <nom> <domaine> --type=<type>` | Créer un établissement (`--type` obligatoire) |
 
 ---
 
-## 7. Plans tarifaires
+## 7. Facturation
 
-| Plan      | Description                                          |
-| --------- | ---------------------------------------------------- |
-| `demo`    | Accès limité dans le temps (date_expiration requise) |
-| `basic`   | Fonctionnalités standard                             |
-| `pro`     | Toutes les fonctionnalités                           |
-| `premium` | Pro + SLA prioritaire et support dédié               |
+Il n'y a plus de plans tarifaires fixes (`demo`/`basic`/`pro`/`premium`). Chaque établissement est facturé sur un **montant négocié au cas par cas**, avec un tarif licence/élève affiché à titre indicatif seulement (non branché automatiquement sur la facturation réelle).
 
-Modifier le plan d'un tenant via le super-admin : `https://monapp.ci/superadmin`
+Le super-admin gère cela via `https://monapp.ci/superadmin` :
+- **Tarifs & Licences** : configuration des tranches tarifaires indicatives et simulateur de coût (`TarifsLicenceController`).
+- **Abonnements** : suivi de l'abonnement et de la facturation par établissement (tables `abonnements_saas`, `factures_saas`).
+- **Demandes d'accès** : traitement des demandes entrantes (formulaire public `/inscription-etablissement`) avant provisionnement d'un nouvel établissement via `school:create`.
 
 ---
 
-## 8. Monitoring et erreurs (Sentry)
+## 8. Monitoring et erreurs (non implémenté)
 
-L'application intègre **Sentry** pour la capture automatique des erreurs PHP et JavaScript en production.
+> ⚠️ **Pas encore intégré au code.** Sentry (ou équivalent) n'est installé ni côté backend (`composer.json`) ni côté frontend (`package.json`) à ce jour. Cette section décrit une intégration **à faire**, pas l'état actuel — voir `docs/analyse-experte.md` point 18 (monitoring/alertes d'infrastructure).
 
-### Configurer Sentry
+Pistes pour l'ajouter :
 
 1. Créer un projet sur [sentry.io](https://sentry.io) (ou instance auto-hébergée)
-2. Récupérer le **DSN** du projet
-3. Ajouter dans le `.env` du backend :
+2. `composer require sentry/sentry-laravel` côté backend, `npm install @sentry/react` côté frontend
+3. Récupérer le **DSN** du projet et l'ajouter dans le `.env` du backend :
 
 ```env
 SENTRY_LARAVEL_DSN=https://xxxx@oXXX.ingest.sentry.io/YYYY
@@ -311,11 +313,11 @@ SENTRY_LARAVEL_DSN=https://xxxx@oXXX.ingest.sentry.io/YYYY
 VITE_SENTRY_DSN=https://xxxx@oXXX.ingest.sentry.io/YYYY
 ```
 
-Toutes les exceptions PHP non catchées et les erreurs JS critiques remontent automatiquement dans le tableau de bord Sentry.
+En attendant, la seule visibilité sur les erreurs backend en production est le fichier `back/storage/logs/laravel.log`.
 
 ---
 
-## 8. Sauvegardes
+## 9. Sauvegardes
 
 Sauvegarder **toutes** les bases de données (centrale + tenants) :
 

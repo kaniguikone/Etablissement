@@ -11,9 +11,10 @@
 8. [Communication](#8-communication)
 9. [Application mobile](#9-application-mobile)
 10. [Tableau de bord & Statistiques](#10-tableau-de-bord--statistiques)
-11. [Journal d'audit](#11-journal-daudit)
-12. [Documentation in-app](#12-documentation-in-app)
-13. [Questions fréquentes](#13-questions-fréquentes)
+11. [Imports Excel en masse](#11-imports-excel-en-masse)
+12. [Utilisateurs, rôles et journal d'audit](#12-utilisateurs-rôles-et-journal-daudit)
+13. [Documentation in-app](#13-documentation-in-app)
+14. [Questions fréquentes](#14-questions-fréquentes)
 
 ---
 
@@ -26,17 +27,17 @@ https://votre-ecole.tondomaine.ci
 ```
 Connectez-vous avec les identifiants communiqués lors de l'installation.
 
+> **Première connexion :** un changement de mot de passe est **obligatoire** avant tout accès à l'application. Choisissez un mot de passe que vous seul connaissez.
+
 ### Ordre de configuration recommandé
-Respectez cet ordre lors de la mise en place initiale :
-1. **Paramétrer l'établissement** (nom, logo, coordonnées)
-2. **Créer l'année scolaire** et ses périodes
-3. **Créer les niveaux** (ex : 6ème, 5ème, Terminale…)
-4. **Créer les classes** et les rattacher aux niveaux
-5. **Créer les matières** et les types de devoirs
-6. **Ajouter les enseignants** et les affecter aux classes
-7. **Ajouter les élèves**
-8. **Rattacher les parents** aux élèves
-9. **Distribuer l'application mobile**
+Votre établissement est livré avec l'année scolaire en cours et un modèle pédagogique de base déjà appliqués (niveaux, matières, types de devoirs — selon le type d'établissement choisi à la création). Il reste à :
+1. **Compléter la fiche établissement** (logo, coordonnées, type d'établissement)
+2. **Vérifier/ajuster les niveaux et classes** générés par le modèle, ou en créer de nouveaux
+3. **Vérifier les matières et types de devoirs**, ajuster si besoin
+4. **Ajouter les enseignants** et les affecter aux classes (manuellement ou par import Excel)
+5. **Ajouter les élèves** (manuellement ou par import Excel)
+6. **Rattacher les parents** aux élèves
+7. **Distribuer l'application mobile**
 
 ### Rôles disponibles
 | Rôle | Accès |
@@ -52,50 +53,62 @@ Respectez cet ordre lors de la mise en place initiale :
 ## 2. Paramétrage de l'établissement
 
 ### Informations générales
-*Menu : Paramètres → Établissement*
+*Menu : Paramétrage → Établissement*
 
 Renseignez :
 - Nom officiel de l'établissement
+- **Type d'établissement** (lycée, lycée complet, collège, primaire) — **obligatoire**, conditionne certains documents générés
 - Logo (format PNG ou JPG, recommandé : 512×512 px)
 - Adresse, téléphone, email
 - Directeur / Responsable
 
 Ces informations apparaissent sur les bulletins et attestations PDF.
 
-### Années scolaires
-*Menu : Paramètres → Années scolaires*
+### Périodes
+*Menu : Paramétrage → Périodes*
 
-Créez l'année scolaire en cours (ex : **2024-2025**) et définissez les périodes (trimestres ou semestres).
+L'année scolaire en cours et ses périodes (trimestres ou semestres) sont créées automatiquement à la mise en place de votre établissement. Vous pouvez ajuster leurs dates de début/fin depuis ce menu.
 
-> **Important :** Avant de saisir des notes ou des absences, une année scolaire et ses périodes doivent être créées et actives.
+> **Important :** Avant de saisir des notes ou des absences, la période concernée doit être active.
 
-### Niveaux et classes
-Créez d'abord les niveaux (6ème, 5ème, 2nde…) puis les classes rattachées à chaque niveau (6ème A, 6ème B…).
+### Niveaux, classes et séries
+*Menu : Paramétrage → Niveaux / Classes / Séries*
+
+Les niveaux (6ème, 5ème, 2nde…) et leurs classes (6ème A, 6ème B…) sont pré-remplis par le modèle pédagogique choisi à la création de l'établissement ; ajustez ou complétez-les depuis ces menus. Pour les lycées, la gestion des **séries** (A, C, D…) et de la **configuration matières/niveaux** (matières différentes par série) se fait depuis *Paramétrage → Séries* et *Paramétrage → Config. matières/niveaux*.
 
 ### Types de devoirs
+*Menu : Paramétrage → Types de devoirs*
+
 Configurez vos types d'évaluations : Devoir Surveillé, Interrogation, Examen, etc., avec leur coefficient.
 
-### Salles
-Ajoutez les salles de classe pour la gestion des emplois du temps et éviter les conflits de planning.
+### Salles et volumes horaires
+*Menu : Paramétrage → Salles / Volumes horaires*
+
+Ajoutez les salles de classe pour la gestion des emplois du temps et éviter les conflits de planning. Le menu **Volumes horaires** permet de définir le nombre d'heures attendu par matière et par classe, comparé ensuite à l'emploi du temps réel (voir *Conformité EDT*, section 6).
 
 ### Passage de classe (fin d'année)
-*Menu : Paramètres → Années scolaires → Initier la clôture*
+*Menu : Paramétrage → Archivage fin d'année*
 
-L'assistant vous guide étape par étape : validation des passages de classe, archivage des données de l'année.
+L'assistant vous guide étape par étape : validation des passages de classe, archivage des données de l'année. Un retour en arrière (rollback) reste possible en cas d'erreur.
 
 ---
 
 ## 3. Gestion des enseignants
 
 ### Ajouter un enseignant
-*Menu : Enseignants → Nouvel enseignant*
+*Menu : Enseignants → Ajouter un enseignant*
 
-Un **compte mobile** est automatiquement créé. Le mot de passe provisoire est affiché une seule fois — communiquez-le à l'enseignant.
+Le compte mobile **n'est pas créé automatiquement** : le champ mot de passe est optionnel dans le formulaire. Laissez-le vide si l'enseignant n'a pas besoin d'accès mobile pour l'instant, ou renseignez un mot de passe (avec le téléphone) pour activer son accès immédiatement.
+
+### Import Excel (en masse)
+*Menu : Enseignants → Liste des enseignants → bouton Import*
+
+Téléchargez le modèle Excel, remplissez une ligne par enseignant, puis importez le fichier. Le modèle inclut une colonne **« Créer accès portail (O/N) »** : si `O` et qu'un téléphone est renseigné, un compte mobile est créé automatiquement avec un **mot de passe généré aléatoirement** (à communiquer séparément à l'enseignant) ; sinon aucun compte n'est créé. Les erreurs de saisie (matricule en doublon, statut invalide…) sont signalées ligne par ligne sans bloquer l'import des lignes valides.
 
 ### Affecter un enseignant à une matière / classe
-Sur la fiche de l'enseignant → onglet **Affectations** → sélectionnez la classe et la matière.
+Sur la fiche de l'enseignant → onglet **Affectations** → sélectionnez la classe et la matière (max. 3 matières et 7 classes par enseignant).
 
-Un enseignant peut enseigner plusieurs matières dans plusieurs classes.
+Un enseignant peut enseigner plusieurs matières dans plusieurs classes. Pour affecter plusieurs enseignants d'un coup, un **import Excel dédié** est disponible depuis le même écran (colonnes : matricule enseignant, abréviation classe, abréviation matière).
 
 ### Remplacements
 *Menu : Pédagogie → Remplacements*
@@ -107,7 +120,7 @@ Planifiez un remplacement en indiquant l'enseignant absent, le remplaçant, la d
 ## 4. Gestion des élèves
 
 ### Ajouter un élève
-*Menu : Élèves → Nouvel élève*
+*Menu : Élèves → Ajouter un élève*
 
 Champs obligatoires :
 - Nom, prénoms, date de naissance
@@ -117,10 +130,14 @@ Champs obligatoires :
 Champs optionnels :
 - Photo
 - Parent (peut être rattaché à un parent existant ou créé à la volée)
+- Handicap(s) le cas échéant (valeurs prédéfinies : moteur, malvoyant, malentendant, albinisme, nanisme, bégaiement, autiste)
 
-### Inscription en ligne
-Les parents peuvent soumettre une demande d'inscription depuis l'application mobile. Vous recevez une notification et pouvez **valider** ou **rejeter** depuis :
-*Menu : Inscriptions → Demandes en attente*
+### Import Excel (en masse)
+*Menu : Élèves → Liste des élèves → bouton Import*
+
+Téléchargez le modèle Excel, remplissez une ligne par élève (matricule, nom, classe, date de naissance au format JJ/MM/AAAA…), puis importez. Les lignes en erreur (classe introuvable, matricule en doublon, valeur de handicap non reconnue…) sont signalées individuellement ; les autres lignes sont importées normalement.
+
+> ℹ️ Le module **Inscriptions** (demande d'inscription en ligne par un parent, suivie d'une validation admin) existe dans l'application mais n'est actuellement pas activé dans le menu de navigation — module en attente d'utilisation réelle. Pour inscrire un élève aujourd'hui, utilisez l'ajout manuel ou l'import Excel ci-dessus.
 
 ### Sanctions et comportement
 *Menu : Élèves → Sanctions*
@@ -138,14 +155,14 @@ Sur la fiche d'un élève → bouton **Attestation PDF**. Le document est géné
 ## 5. Gestion des parents
 
 ### Ajouter un parent manuellement
-*Menu : Parents → Nouveau parent*
+*Menu : Parents → Ajouter un parent*
 
-Un **compte mobile** est créé automatiquement. Communiquez le numéro de téléphone et le mot de passe provisoire au parent.
+Un mot de passe par défaut est pré-rempli dans le formulaire (modifiable avant enregistrement). Communiquez le numéro de téléphone et le mot de passe choisi au parent.
 
 ### Rattacher un élève à un parent
 Sur la fiche de l'élève → champ **Parent** → sélectionnez dans la liste.
 
-Un parent peut avoir plusieurs enfants dans l'établissement.
+Un parent peut avoir plusieurs enfants dans l'établissement (jusqu'à 2 parents par élève). Son identité (numéro de téléphone) est **unique et partagée entre établissements** : un parent déjà connu dans un autre établissement du même groupe n'a pas besoin de recréer un compte.
 
 ### Inscription autonome du parent depuis l'app mobile
 Le parent peut créer son propre compte sans que vous interveniez au préalable :
@@ -181,25 +198,41 @@ Créez les créneaux en sélectionnant : classe, matière, enseignant, salle, jo
 Renseignez les absences par classe et par séance. Les parents reçoivent une notification automatique (push mobile + email) à chaque absence enregistrée.
 
 ### Saisie des notes
-*Menu : Pédagogie → Devoirs*
+*Menu : Pédagogie → Devoirs / Notes*
 
 1. Créez un devoir (type, classe, matière, date, coefficient)
 2. Cliquez sur le devoir → **Saisir les notes**
-3. Entrez les notes pour chaque élève
+3. Entrez les notes pour chaque élève, ou importez-les en masse via le modèle Excel du devoir (bouton **Import**)
 4. Cliquez **Enregistrer**
 
+Les enseignants peuvent également saisir les notes depuis l'application mobile, y compris **hors connexion** (synchronisation automatique au retour du réseau).
+
 ### Bulletins
-*Menu : Pédagogie → Bulletins*
+*Menu : Pilotage pédagogique → Bulletins*
 
 Sélectionnez un élève et une période → **Voir le bulletin**. Le bulletin PDF peut être :
-- Téléchargé directement
+- Téléchargé directement (individuellement ou en masse pour une classe entière)
 - **Envoyé au parent** via notification push + email (bouton « Notifier »)
 
+Le bulletin inclut les appréciations par matière saisies par les enseignants, l'appréciation du professeur principal, et — au dernier conseil de la période (T3/S2) — la **décision de fin d'année** (admis, redoublement, exclusion…).
+
+### Conseil de classe
+*Menu : Pilotage pédagogique → Conseil de classe*
+
+Enregistrez les appréciations générales par classe et, au dernier conseil de l'année, la décision de passage de chaque élève.
+
+### Conformité EDT et charge enseignants
+*Menu : Pilotage pédagogique → Conformité EDT / Charge enseignants*
+
+Comparez l'emploi du temps réellement planifié aux volumes horaires définis en paramétrage (*Conformité EDT*), et suivez la charge horaire et l'avancement du programme de chaque enseignant (*Charge enseignants*).
+
 ### Progression du programme
-Suivez l'avancement de chaque chapitre par matière et par classe.
+*Menu : Pédagogie → Programme*
+
+Suivez l'avancement de chaque chapitre par matière et par classe (vue de suivi consolidée disponible dans *Pilotage pédagogique → Suivi des progressions*).
 
 ### Calendrier scolaire
-*Menu : Communication → Calendrier*
+*Menu : Pédagogie → Calendrier scolaire*
 
 Planifiez les événements (conseils de classe, vacances, examens, portes ouvertes…). Visible sur l'application mobile des parents et enseignants.
 
@@ -210,12 +243,12 @@ Planifiez les événements (conseils de classe, vacances, examens, portes ouvert
 ### Scolarités
 *Menu : Finances → Scolarités*
 
-Définissez les montants de scolarité par niveau. Vous pouvez configurer jusqu'à 3 échéances (mensuel, trimestriel, annuel).
+Définissez les montants de scolarité par niveau. Vous pouvez configurer jusqu'à 3 échéances (mensuel, trimestriel, annuel), ou importer les échéances en masse via le modèle Excel (bouton **Import**).
 
 ### Enregistrer un paiement de scolarité
-*Menu : Finances → Paiements → Nouveau paiement*
+*Menu : Caisse → Nouveau paiement*
 
-Sélectionnez l'élève, le montant et le mode de paiement. Un **reçu PDF** est généré automatiquement.
+Sélectionnez l'élève, le montant et le mode de paiement. Un **reçu PDF** est généré automatiquement. L'historique complet, le récapitulatif par niveau et l'échéancier sont disponibles dans les autres écrans du menu **Caisse**.
 
 ### Frais annexes
 *Menu : Finances → Frais annexes*
@@ -310,9 +343,12 @@ Il peut consulter : notes, bulletins, assiduités, paiements, emploi du temps, m
 ### Compte enseignant
 L'enseignant se connecte avec :
 - **Identifiant :** son numéro de téléphone
-- **Mot de passe :** fourni lors de la création du compte
+- **Mot de passe :** fourni lors de la création du compte (manuelle) ou généré aléatoirement (import Excel avec accès portail activé)
 
-Il peut : saisir notes et absences, voir son emploi du temps, gérer ses RDV, envoyer des messages.
+Il peut : saisir notes et absences (y compris **hors connexion**, avec synchronisation automatique au retour du réseau), voir son emploi du temps, gérer ses RDV, envoyer des messages.
+
+### Sessions multiples
+Chaque espace (école, groupe, super-admin, enseignant, parent) gère sa propre session. Un même navigateur peut donc garder plusieurs sessions actives simultanément (par exemple un compte admin école et un compte super-admin dans deux onglets), sans qu'elles ne s'écrasent l'une l'autre.
 
 ---
 
@@ -380,7 +416,40 @@ Les données (effectifs, redoublants, passages) sont calculées automatiquement 
 
 ---
 
-## 11. Journal d'audit
+## 11. Imports Excel en masse
+
+Cinq flux permettent d'onboarder rapidement un établissement avec de gros effectifs, plutôt que de tout saisir manuellement. Le principe est le même partout :
+
+1. Depuis la liste concernée, cliquez **Télécharger le modèle** — un fichier Excel pré-formaté s'ouvre, avec en-têtes, exemples et listes déroulantes pour les champs à choix.
+2. Remplissez une ligne par élément (supprimez la ligne d'exemple).
+3. Cliquez **Importer**, sélectionnez votre fichier rempli.
+4. Le résultat indique le nombre de lignes importées avec succès, et la liste des lignes en erreur (avec le numéro de ligne et le motif) — les lignes valides sont importées même si d'autres lignes du même fichier sont en erreur.
+
+| Flux | Menu | Colonnes clés |
+|---|---|---|
+| Élèves | Élèves → Liste des élèves → Import | Matricule, nom, prénoms, date de naissance (JJ/MM/AAAA), classe, handicap(s)… |
+| Enseignants | Enseignants → Liste des enseignants → Import | Matricule, nom, prénoms, téléphone, statut, **Créer accès portail (O/N)** |
+| Affectations classe/matière | Enseignants → Liste des enseignants → Import affectations | Matricule enseignant, abréviation classe, abréviation matière |
+| Scolarités | Finances → Scolarités → Import | Libellé échéance, date (JJ/MM/AAAA), montant, niveau |
+| Notes | Pédagogie → Devoirs → [un devoir] → Import | Généré automatiquement par devoir (matricule élève + note) |
+
+> Pour les élèves et les enseignants, la ligne d'exemple pré-remplie dans le modèle est automatiquement ignorée si vous oubliez de la supprimer.
+
+---
+
+## 12. Utilisateurs, rôles et journal d'audit
+
+### Gestion des utilisateurs
+*Menu : Administration → Utilisateurs*
+
+Créez et gérez les comptes des personnels administratifs (directeur, censeur, secrétaire, comptable…) et leur rôle associé.
+
+### Rôles et permissions
+*Menu : Administration → Rôles et permissions*
+
+Chaque rôle définit les modules accessibles (élèves, enseignants, parents, pédagogie, finances, communication…). Voir le tableau des rôles disponibles en section 1. Les menus et routes sont automatiquement masqués pour un utilisateur qui n'a pas la permission correspondante.
+
+### Journal d'audit
 
 *Menu : Administration → Journal d'audit*
 
@@ -396,7 +465,7 @@ Chaque entrée indique : **qui** a fait **quoi**, **quand**, et la valeur **avan
 
 ---
 
-## 12. Documentation in-app
+## 13. Documentation in-app
 
 Un panneau d'aide est accessible depuis n'importe quelle page en cliquant sur le bouton **?** en bas à droite de l'écran.
 
@@ -404,17 +473,20 @@ Un panneau d'aide est accessible depuis n'importe quelle page en cliquant sur le
 - **Recherche** : tapez un mot-clé pour trouver un article dans toute la documentation
 - **Gestion admin** (*Menu : Administration → Documentation*) : créez, modifiez ou désactivez des articles
 
-L'application est livrée avec **26 articles pré-rédigés** couvrant tous les modules.
+L'application est livrée avec **27 articles pré-rédigés** couvrant tous les modules.
 
 ---
 
-## 13. Questions fréquentes
+## 14. Questions fréquentes
 
 **Q : Un parent a oublié son mot de passe. Que faire ?**  
 R : Dans la fiche du parent (*Menu : Parents → [nom du parent]*), cliquez **Réinitialiser le mot de passe**. Un nouveau mot de passe provisoire est généré.
 
 **Q : Comment passer à l'année scolaire suivante ?**  
-R : *Menu : Paramètres → Années scolaires → Initier la clôture*. L'assistant vous guide étape par étape : validation des passages de classe, archivage des données.
+R : *Menu : Paramétrage → Archivage fin d'année*. L'assistant vous guide étape par étape : validation des passages de classe, archivage des données.
+
+**Q : Comment importer mes élèves ou enseignants sans tout ressaisir un par un ?**  
+R : Utilisez l'import Excel disponible depuis chaque liste (bouton **Import**) — voir section 11. Un modèle pré-formaté est téléchargeable, et les erreurs éventuelles sont signalées ligne par ligne sans bloquer l'import du reste du fichier.
 
 **Q : Les notes d'une période précédente sont-elles accessibles après clôture ?**  
 R : Oui. Toutes les données des années archivées restent consultables en lecture seule.
@@ -426,7 +498,7 @@ R : Sur la fiche de l'élève, modifiez la **classe d'affectation**. Les notes d
 R : Vérifiez que l'utilisateur a bien téléchargé **l'application de votre établissement**. Vérifiez également que les identifiants (numéro de téléphone + mot de passe) sont corrects.
 
 **Q : Comment exporter toutes les notes pour les transmettre à l'inspection ?**  
-R : *Menu : Pédagogie → Notes → Exporter CSV* — sélectionnez la période souhaitée.
+R : *Menu : Pédagogie → Devoirs / Notes → Exporter CSV* — sélectionnez la classe et la période souhaitées.
 
 **Q : Un frais annexe apparaît dans les impayés alors que l'élève est exempté. Comment corriger ?**  
 R : Les frais annexes marqués **Obligatoire** apparaissent automatiquement pour tous les élèves du niveau concerné. Si un élève est exempté, décochez l'option obligatoire pour ce frais ou enregistrez un paiement à 0 pour solder son compte.
