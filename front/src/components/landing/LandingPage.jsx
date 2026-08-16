@@ -92,7 +92,7 @@ const LandingPage = () => {
                     </p>
                     <div className="d-flex gap-3 justify-content-center flex-wrap">
                         <Link to="/inscription-etablissement" className="btn btn-warning btn-lg px-4 fw-bold">
-                            <i className="fas fa-rocket me-2" />Demander un accès — 30 jours gratuits
+                            <i className="fas fa-rocket me-2" />Demander un accès
                         </Link>
                         <a href="#fonctionnalites" className="btn btn-outline-light btn-lg px-4">
                             <i className="fas fa-play-circle me-2" />Voir les fonctionnalités
@@ -215,11 +215,6 @@ const LandingPage = () => {
                         </div>
                     )}
 
-                    <div className="text-center mt-4">
-                        <span className="badge bg-success-subtle text-success px-3 py-2">
-                            <i className="fas fa-gift me-2" />Accès démo gratuit 30 jours — aucune carte bancaire
-                        </span>
-                    </div>
                 </div>
             </section>
 
@@ -336,7 +331,7 @@ const LandingPage = () => {
                                     </div>
                                     <div className="text-center mt-4">
                                         <Link to="/inscription-etablissement" className="btn btn-primary btn-lg w-100 fw-semibold" style={{ borderRadius: 10 }}>
-                                            <i className="fas fa-rocket me-2" />Créer mon compte gratuitement
+                                            <i className="fas fa-rocket me-2" />Demander un accès
                                         </Link>
                                     </div>
                                 </div>
