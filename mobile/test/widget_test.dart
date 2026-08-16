@@ -1,18 +1,34 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// Smoke test : l'écran d'accueil (onboarding) doit s'afficher sans lever
+// d'exception, avec les providers minimaux dont il dépend (AuthProvider,
+// EtablissementProvider). Il ne nécessite ni stockage sécurisé ni réseau au
+// premier rendu (EtablissementProvider ne charge que si un serveur est déjà
+// configuré), ce qui le rend testable sans mock de plateforme.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 
-import 'package:suivi_scolaire_parent/main.dart';
+import 'package:suivi_scolaire_parent/providers/auth_provider.dart';
+import 'package:suivi_scolaire_parent/providers/etablissement_provider.dart';
+import 'package:suivi_scolaire_parent/screens/onboarding/onboarding_screen.dart';
 
 void main() {
-  testWidgets('App démarre sans erreur', (WidgetTester tester) async {
-    await tester.pumpWidget(const SuiviScolaireApp());
-    expect(find.byType(MaterialApp), findsOneWidget);
+  testWidgets('OnboardingScreen s\'affiche sans erreur', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => AuthProvider()),
+          ChangeNotifierProvider(create: (_) => EtablissementProvider()),
+        ],
+        child: MaterialApp(
+          home: OnboardingScreen(onSetupComplete: () {}),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(OnboardingScreen), findsOneWidget);
+    expect(find.byType(TabBar), findsOneWidget);
+    expect(find.text('Code école'), findsWidgets);
   });
 }
