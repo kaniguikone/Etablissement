@@ -81,6 +81,32 @@ class ApiConfig {
       _centralHost.contains(':') || _centralHost == 'localhost' ? 'http' : 'https';
   static String get centralBaseUrl => '$_centralScheme://$_centralHost/api';
 
+  /// Résout un domaine d'école tel que renvoyé par l'API (ex: "lycee-x.localhost",
+  /// "lycee-x.10.0.2.2:8000", "lycee-x.monapp.ci" en prod) vers l'hôte de connexion
+  /// réel, en appliquant les mêmes substitutions émulateur/dev que [baseUrl].
+  /// Utilisé par ApiService.switchEcole() après la connexion unifiée (login central).
+  static ({String host, String scheme, String? virtualHost}) resolveDomain(String domain) {
+    final ipMatch = _ipHostRegex.firstMatch(domain);
+    if (ipMatch != null) {
+      return (host: ipMatch.group(2)!, scheme: 'http', virtualHost: domain);
+    }
+
+    final localhostMatch = _localhostHostRegex.firstMatch(domain);
+    if (localhostMatch != null) {
+      var serverPart = localhostMatch.group(2)!;
+      if (!serverPart.contains(':') && _centralPort.isNotEmpty) {
+        serverPart = '$serverPart:$_centralPort';
+      }
+      if (kIsWeb) {
+        return (host: '${localhostMatch.group(1)!}.$serverPart', scheme: 'http', virtualHost: null);
+      }
+      return (host: serverPart.replaceFirst('localhost', _localIp), scheme: 'http', virtualHost: domain);
+    }
+
+    final scheme = domain.contains(':') || domain == 'localhost' ? 'http' : 'https';
+    return (host: domain, scheme: scheme, virtualHost: null);
+  }
+
   /// Corrige les URLs de stockage (localhost, 127.0.0.1, ou IP virtuelle tenant)
   static String fixStorageUrl(String? url) {
     if (url == null) return '';

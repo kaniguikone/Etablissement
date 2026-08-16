@@ -13,6 +13,10 @@ class ApiService {
 
   late final Dio _dio;
 
+  /// Host virtuel à injecter après un switchEcole() (connexion unifiée), en
+  /// plus de ApiConfig.virtualHost (onboarding "Code école" / deep link).
+  String? _virtualHostOverride;
+
   ApiService._internal() {
     _dio = Dio(
       BaseOptions(
@@ -33,7 +37,7 @@ class ApiService {
           }
           // Émulateur Android : "sous-domaine.10.0.2.2:8000" → connexion sur l'IP,
           // mais le header Host doit contenir le vrai sous-domaine pour le routing tenant.
-          final vh = ApiConfig.virtualHost;
+          final vh = _virtualHostOverride ?? ApiConfig.virtualHost;
           if (vh != null) options.headers['Host'] = vh;
           handler.next(options);
         },
@@ -64,12 +68,14 @@ class ApiService {
   /// À appeler après avoir changé l'URL serveur (onboarding ou deep link).
   void resetBaseUrl() {
     _dio.options.baseUrl = ApiConfig.baseUrl;
+    _virtualHostOverride = null;
   }
 
   /// Pointe le Dio principal vers l'école sélectionnée.
   void switchEcole(EcoleSession ecole) {
-    final scheme = ecole.domain.contains(':') || ecole.domain == 'localhost' ? 'http' : 'https';
-    _dio.options.baseUrl = '$scheme://${ecole.domain}/api';
+    final resolved = ApiConfig.resolveDomain(ecole.domain);
+    _dio.options.baseUrl = '${resolved.scheme}://${resolved.host}/api';
+    _virtualHostOverride = resolved.virtualHost;
     StorageService.saveToken(ecole.token);
   }
 
