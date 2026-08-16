@@ -118,6 +118,9 @@ const DetailsEleve = () => {
                     <NavLink to={`/SanctionsEleve/${id}`} className="btn btn-sm btn-outline-danger">
                         <i className="fas fa-gavel me-1" />Sanctions
                     </NavLink>
+                    <NavLink to={`/SanteEleve/${id}`} className="btn btn-sm btn-outline-info">
+                        <i className="fas fa-heartbeat me-1" />Santé
+                    </NavLink>
                     <NavLink to={`/PaiementsEleve/${id}`} className="btn btn-sm btn-outline-success">
                         <i className="fas fa-credit-card me-1" />Paiements
                     </NavLink>

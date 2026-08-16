@@ -19,6 +19,7 @@ class Role extends Model
         'parametrage'        => 'Paramétrage (niveaux, classes, matières, périodes, types de devoirs)',
         'inscriptions'       => 'Gestion des inscriptions',
         'eleves'             => 'Gestion des élèves',
+        'sante'              => 'Gestion santé élève',
         'enseignants'        => 'Gestion des enseignants',
         'parents'            => 'Gestion des parents',
         'pedagogie_saisie'   => 'Pédagogie — saisie (assiduités, devoirs, emploi du temps, remplacements)',

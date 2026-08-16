@@ -41,6 +41,7 @@ use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\ArchivageController;
 use App\Http\Controllers\API\CalendrierController;
 use App\Http\Controllers\API\SanctionController;
+use App\Http\Controllers\API\SanteEleveController;
 use App\Http\Controllers\API\SalleController;
 use App\Http\Controllers\API\RemplacementController;
 use App\Http\Controllers\API\MessageController;
@@ -487,6 +488,11 @@ Route::middleware([
             Route::put('/sanctions/{id}',               [SanctionController::class, 'update']);
             Route::delete('/sanctions/{id}',            [SanctionController::class, 'destroy']);
             Route::post('/sanctions/{id}/notifier',     [SanctionController::class, 'notifier']);
+        });
+
+        Route::middleware('permission:sante')->group(function () {
+            Route::get('/sante-eleves/{eleveId}', [SanteEleveController::class, 'show']);
+            Route::put('/sante-eleves/{eleveId}', [SanteEleveController::class, 'update']);
         });
 
         Route::middleware('permission:parametrage')->group(function () {

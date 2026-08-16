@@ -98,6 +98,7 @@ const CalendrierScolaire = lazy(() => import('../components/calendrier/Calendrie
 const ListeSanctions = lazy(() => import('../components/sanctions/ListeSanctions'));
 const FormSanction = lazy(() => import('../components/sanctions/FormSanction'));
 const SanctionsEleve = lazy(() => import('../components/sanctions/SanctionsEleve'));
+const SanteEleve = lazy(() => import('../components/eleves/SanteEleve'));
 
 const ListeInscriptions = lazy(() => import('../components/inscriptions/ListeInscriptions'));
 const DetailsInscription = lazy(() => import('../components/inscriptions/DetailsInscription'));
@@ -147,6 +148,7 @@ const R_STATS            = ['pedagogie_saisie', 'pedagogie_pilotage', 'finances_
 const R_PARAM            = ['parametrage'];
 const R_INSCRIP          = ['inscriptions'];
 const R_ELEVES           = ['eleves'];
+const R_SANTE            = ['sante'];
 const R_ENSEIGNANTS      = ['enseignants'];
 const R_PARENTS          = ['parents'];
 const R_PEDAGO_SAISIE    = ['pedagogie_saisie'];
@@ -264,6 +266,7 @@ const RoutesMenu = () => (
             <Route path="/NouvelleSanction"    element={<PrivateRoute permissions={R_ELEVES}><FormSanction /></PrivateRoute>} />
             <Route path="/DetailsSanction/:id" element={<PrivateRoute permissions={R_ELEVES}><FormSanction /></PrivateRoute>} />
             <Route path="/SanctionsEleve/:id"  element={<PrivateRoute permissions={R_ELEVES}><SanctionsEleve /></PrivateRoute>} />
+            <Route path="/SanteEleve/:id"      element={<PrivateRoute permissions={R_SANTE}><SanteEleve /></PrivateRoute>} />
 
             <Route path="/ConseilClasse" element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE}><ConseilClasse /></PrivateRoute>} />
 

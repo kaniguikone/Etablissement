@@ -63,4 +63,9 @@ class Eleve extends Model
     {
         return $this->hasMany(Paiement::class);
     }
+
+    public function santeEleve()
+    {
+        return $this->hasOne(SanteEleve::class);
+    }
 }
