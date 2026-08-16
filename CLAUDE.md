@@ -56,10 +56,10 @@ npm run preview
 
 ## Modèles de données
 
-Les entités principales sont : `Eleve`, `Enseignant`, `Classe`, `Niveau`, `Matiere`, `Parents`, `Scolarite`, `Assiduites`, `Devoir`, `TypeDevoir`, `Periodes`, `Informations`, `Paiement`, `FraisAnnexe`, `EmploiDuTemps`, `Sanction`, `Message`, `Notification`, `AnneeScolaire`, `AuditLog`, `HelpArticle`, `ResultatExamen`, `ParentSubscription`, `SchoolParentSlot`.
+Les entités principales sont : `Eleve`, `SanteEleve`, `Enseignant`, `Classe`, `Niveau`, `Matiere`, `Parents`, `Scolarite`, `Assiduites`, `Devoir`, `TypeDevoir`, `Periodes`, `Informations`, `Paiement`, `FraisAnnexe`, `EmploiDuTemps`, `Sanction`, `Message`, `Notification`, `AnneeScolaire`, `AuditLog`, `HelpArticle`, `ResultatExamen`, `ParentSubscription`, `SchoolParentSlot`.
 
 Relations clés :
-- Un `Eleve` appartient à une `Classe` et peut avoir un `Parents`
+- Un `Eleve` appartient à une `Classe`, peut avoir un `Parents` et une fiche `SanteEleve` (1-1)
 - Une `Classe` appartient à un `Niveau` et peut avoir plusieurs `Enseignant`
 - Un `Enseignant` peut enseigner plusieurs `Matiere` dans plusieurs `Classe` (table pivot `classe_enseignant_matiere`)
 - Les `Scolarites`, `Assiduites` et `Devoirs` sont liés aux `Periodes`
