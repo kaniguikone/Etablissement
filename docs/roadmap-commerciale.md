@@ -192,7 +192,7 @@ Les données d'enfants mineurs sont ultra-sensibles. Même si la réglementation
 | **1** | 1.1c | Inscription parent autonome (flow matricule + validation)  | ~2 j   | ★★★★☆    | ✅ Livré   |
 | **1** | 1.2 | Gestion santé élève                                        | ~1 j   | ★★★☆☆    | ⬜ À faire |
 | **1** | 1.3 | Authentification 2FA admin/comptable                       | ~2 j   | ★★★☆☆    | ⬜ À faire |
-| **1** | 1.4 | Monitoring infrastructure (Sentry + UptimeRobot)           | ~1 j   | ★★★★☆    | ⬜ À faire |
+| **1** | 1.4 | Monitoring infrastructure (Sentry + UptimeRobot)           | ~1 j   | ★★★★☆    | 🟡 Partiel |
 | **2** | 2.1 | Portail élève dans l'app mobile (rôle distinct)            | ~3 j   | ★★★☆☆    | ⬜ À faire |
 | **2** | 2.2 | Frais annexes (fournitures, tenues, examens)               | ~3-4 j | ★★★☆☆    | ✅ Livré   |
 | **2** | 2.3 | Export comptable structuré (SAGE/Excel + FEC)              | ~2 j   | ★★☆☆☆    | ✅ Livré   |
@@ -203,9 +203,11 @@ Les données d'enfants mineurs sont ultra-sensibles. Même si la réglementation
 | **3** | 3.4 | RGPD / politique de données                                | ~2 j   | ★★☆☆☆    | ⬜ À faire |
 | **3** | 3.5 | Documentation in-app et aide contextuelle                  | ~3 j   | ★★☆☆☆    | ✅ Livré   |
 
-**Livré :** 9 fonctionnalités sur 17 (hors démo, qui est désormais partielle plutôt qu'à faire) — **Restant :** ~18-24 jours de développement
+**Livré :** 9 fonctionnalités sur 17 (hors démo et monitoring, désormais partiels plutôt qu'à faire) — **Restant :** ~17-23 jours de développement
 
 *Hors ce tableau de priorités initial, plusieurs chantiers non prévus à l'origine ont également été livrés depuis : page d'accueil publique, gestion des demandes d'accès et de la tarification, compte central unifié parent/enseignant, mot de passe initial obligatoire, isolation des sessions par espace, import Excel en masse (5 flux), type d'établissement obligatoire — voir le tableau « Ce qui est livré et opérationnel » ci-dessus.*
+
+**1.4 Monitoring — détail du partiel (2026-08-16) :** le code est livré (`sentry/sentry-laravel` + `@sentry/react` intégrés, route `/up` de Laravel exposée pour le health check). Reste à faire, hors périmètre code — voir `docs/guide-deploiement.md` §8 : créer les projets Sentry (backend + frontend) et renseigner les DSN en production, créer un compte UptimeRobot et pointer un moniteur sur `/up`.
 
 ---
 

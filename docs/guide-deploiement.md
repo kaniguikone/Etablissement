@@ -293,27 +293,40 @@ Le super-admin gère cela via `https://monapp.ci/superadmin` :
 
 ---
 
-## 8. Monitoring et erreurs (non implémenté)
+## 8. Monitoring et erreurs
 
-> ⚠️ **Pas encore intégré au code.** Sentry (ou équivalent) n'est installé ni côté backend (`composer.json`) ni côté frontend (`package.json`) à ce jour. Cette section décrit une intégration **à faire**, pas l'état actuel — voir `docs/analyse-experte.md` point 18 (monitoring/alertes d'infrastructure).
+Le code est en place (`sentry/sentry-laravel` côté backend, `@sentry/react` côté frontend, route `/up` de Laravel pour la supervision de disponibilité). **Reste à faire manuellement** : créer les comptes/projets externes et renseigner les DSN — aucune valeur n'est codée en dur dans le dépôt.
 
-Pistes pour l'ajouter :
+### 8.1 Erreurs applicatives (Sentry)
 
-1. Créer un projet sur [sentry.io](https://sentry.io) (ou instance auto-hébergée)
-2. `composer require sentry/sentry-laravel` côté backend, `npm install @sentry/react` côté frontend
-3. Récupérer le **DSN** du projet et l'ajouter dans le `.env` du backend :
+1. Créer un projet **Laravel** et un projet **React** sur [sentry.io](https://sentry.io) (ou une instance auto-hébergée) — un compte gratuit suffit pour démarrer.
+2. Récupérer le DSN du projet Laravel et le renseigner dans `back/.env` (voir `back/.env.example`) :
 
 ```env
 SENTRY_LARAVEL_DSN=https://xxxx@oXXX.ingest.sentry.io/YYYY
 ```
 
-4. Ajouter dans `front/.env.production` :
+3. Récupérer le DSN du projet React et créer `front/.env.production` à partir de `front/.env.production.example` :
 
 ```env
 VITE_SENTRY_DSN=https://xxxx@oXXX.ingest.sentry.io/YYYY
 ```
 
-En attendant, la seule visibilité sur les erreurs backend en production est le fichier `back/storage/logs/laravel.log`.
+Ce fichier est ignoré par git (comme `front/.env`) — à créer sur chaque environnement de build (poste de déploiement ou CI), pas à committer.
+
+4. Rebuild du frontend (`npm run build`) pour que le DSN soit intégré au bundle.
+
+Tant que `SENTRY_LARAVEL_DSN` / `VITE_SENTRY_DSN` sont vides, le SDK reste inactif (aucun appel réseau) — l'intégration est donc sans risque à déployer avant même d'avoir créé les comptes Sentry. En attendant leur configuration, la seule visibilité sur les erreurs backend reste `back/storage/logs/laravel.log`.
+
+### 8.2 Disponibilité (UptimeRobot ou équivalent)
+
+Laravel expose nativement une route de santé sur `/up` (définie dans `back/bootstrap/app.php`) : elle répond `200 OK` si l'application a démarré correctement, sans dépendance à la base de données.
+
+1. Créer un compte sur [UptimeRobot](https://uptimerobot.com) (plan gratuit suffisant pour un moniteur).
+2. Ajouter un moniteur HTTP(S) pointant vers `https://<domaine-central>/up`, intervalle 5 min.
+3. Configurer une alerte email (et/ou SMS/Slack selon le plan) en cas de statut différent de 200.
+
+Cette étape ne peut pas être automatisée depuis le dépôt : elle nécessite un compte UptimeRobot et l'accès au domaine en production (DNS déjà pointé, cf. `deploy/install.sh`).
 
 ---
 

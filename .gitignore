@@ -8,6 +8,7 @@ back/bcrypt('password')])
 # Fichiers d'environnement frontend
 front/.env
 front/.env.local
+front/.env.production
 front/.env.*.local
 
 # Répertoire Claude Code local

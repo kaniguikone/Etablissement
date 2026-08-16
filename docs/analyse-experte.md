@@ -5,7 +5,8 @@
 > ⚠️ **Instantané figé, désormais daté.** Ce document décrit l'état du produit au 30/04/2026 et n'a pas vocation à être mis à jour en continu — c'est une photographie, pas un tableau de suivi (voir `roadmap-commerciale.md` pour le statut courant). Statut réel au 2026-08-16 des points listés ci-dessous comme « manquants » :
 > - ✅ **Livré depuis** : #1 Appréciations enseignants, #3 Décisions conseil de classe, #4 Journal d'audit, #5 Relevé de notes annuel PDF, #6 Mode hors-ligne mobile (présences et notes), #7 Rapport statistique Ministère, #8 Réinitialisation mot de passe autonome, #11 Export comptable, #12 Frais annexes, #19 Module SaaS billing, #20 Documentation in-app
 > - 🟡 **Partiellement livré** : #16 Instance démo (code complet, déploiement public sur serveur toujours en attente)
-> - ⬜ **Toujours vrai / à faire** : #2 Notifications SMS, #9 Authentification 2FA, #10 Gestion santé élève, #13 Portail élève distinct (le mobile reste organisé autour du compte parent), #14 Bibliothèque de ressources pédagogiques, #15 Application iOS, #17 RGPD, #18 Monitoring infrastructure (Sentry/UptimeRobot — aucune dépendance installée à ce jour)
+> - ⬜ **Toujours vrai / à faire** : #2 Notifications SMS, #9 Authentification 2FA, #10 Gestion santé élève, #13 Portail élève distinct (le mobile reste organisé autour du compte parent), #14 Bibliothèque de ressources pédagogiques, #15 Application iOS, #17 RGPD
+> - 🟡 **Partiellement livré** (mise à jour 2026-08-16) : #18 Monitoring infrastructure — code livré (Sentry backend/frontend, health check `/up`), reste à créer les comptes Sentry/UptimeRobot et renseigner les DSN en production (voir `docs/guide-deploiement.md` §8)
 >
 > En cas de doute sur un point précis, se référer à `docs/roadmap-commerciale.md` (état des lieux vivant) plutôt qu'à cette analyse.
 
