@@ -128,7 +128,7 @@ const PaiementsEleve = () => {
                         {recap_echeances.map((ec) => (
                             <tr key={ec.scolarite_id}>
                                 <td>{ec.libelle}</td>
-                                <td>{ec.date_echeance}</td>
+                                <td>{new Date(ec.date_echeance).toLocaleDateString('fr-FR')}</td>
                                 <td>{ec.montant_du.toLocaleString('fr-FR')}</td>
                                 <td>{ec.montant_paye.toLocaleString('fr-FR')}</td>
                                 <td className={ec.solde > 0 ? 'text-danger' : 'text-success'}>
@@ -172,7 +172,7 @@ const PaiementsEleve = () => {
                         <tbody>
                             {paiements.map((p) => (
                                 <tr key={p.id}>
-                                    <td>{p.date_paiement}</td>
+                                    <td>{new Date(p.date_paiement).toLocaleDateString('fr-FR')}</td>
                                     <td>{p.scolarite?.libelle_echeance}</td>
                                     <td className="fw-bold">{Number(p.montant_paye).toLocaleString('fr-FR')}</td>
                                     <td>{MODES[p.mode_paiement]}</td>

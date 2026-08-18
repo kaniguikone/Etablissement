@@ -17,8 +17,8 @@ class FactureSaas extends Model
     ];
 
     protected $casts = [
-        'date_emission' => 'date',
-        'date_echeance' => 'date',
+        'date_emission' => 'date:Y-m-d',
+        'date_echeance' => 'date:Y-m-d',
         'montant_ht'    => 'float',
         'montant_tva'   => 'float',
         'montant_ttc'   => 'float',

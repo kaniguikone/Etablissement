@@ -225,7 +225,7 @@ const NouveauPaiement = () => {
                                                                 key={p.id}
                                                                 className="btn btn-outline-danger btn-sm py-0 px-1 me-1"
                                                                 onClick={() => telechargerRecu(p.id)}
-                                                                title={`Reçu du ${p.date_paiement} — ${fmtMontant(p.montant_paye)}`}
+                                                                title={`Reçu du ${new Date(p.date_paiement).toLocaleDateString('fr-FR')} — ${fmtMontant(p.montant_paye)}`}
                                                             >
                                                                 <i className="fas fa-receipt" />
                                                             </button>
@@ -250,7 +250,7 @@ const NouveauPaiement = () => {
                                 <option value="">Sélectionner une échéance</option>
                                 {echeances.map((ec) => (
                                     <option key={ec.id} value={ec.id}>
-                                        {ec.libelle_echeance} — {Number(ec.montant_echeance).toLocaleString('fr-FR')} F (échéance : {ec.date_echeance})
+                                        {ec.libelle_echeance} — {Number(ec.montant_echeance).toLocaleString('fr-FR')} F (échéance : {new Date(ec.date_echeance).toLocaleDateString('fr-FR')})
                                     </option>
                                 ))}
                             </select>

@@ -18,7 +18,7 @@ class PaiementFraisAnnexe extends Model
 
     protected $casts = [
         'montant_paye'  => 'float',
-        'date_paiement' => 'date',
+        'date_paiement' => 'date:Y-m-d',
     ];
 
     public function eleve()

@@ -240,8 +240,8 @@ const ArchivageWizard = () => {
                                                         </span>
                                                     )}
                                                 </td>
-                                                <td>{a.date_debut}</td>
-                                                <td>{a.date_fin}</td>
+                                                <td>{new Date(a.date_debut).toLocaleDateString('fr-FR')}</td>
+                                                <td>{new Date(a.date_fin).toLocaleDateString('fr-FR')}</td>
                                                 <td><span className="badge rounded-pill" style={{ background: cfg.bg }}>{cfg.label}</span></td>
                                                 <td>{a.periodes_count ?? '—'}</td>
                                             </tr>

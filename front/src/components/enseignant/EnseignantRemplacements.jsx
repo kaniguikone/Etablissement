@@ -42,7 +42,7 @@ const EnseignantRemplacements = () => {
                                     <div className="card-body">
                                         <div className="d-flex justify-content-between align-items-start mb-2">
                                             <div>
-                                                <div className="fw-bold">{r.date_remplacement}</div>
+                                                <div className="fw-bold">{new Date(r.date_remplacement).toLocaleDateString('fr-FR')}</div>
                                                 <div className="text-muted small">
                                                     {r.heure_debut?.slice(0,5)} – {r.heure_fin?.slice(0,5)}
                                                 </div>

@@ -13,8 +13,8 @@ class AnneeScolaire extends Model
     protected function casts(): array
     {
         return [
-            'date_debut' => 'date',
-            'date_fin'   => 'date',
+            'date_debut' => 'date:Y-m-d',
+            'date_fin'   => 'date:Y-m-d',
         ];
     }
 

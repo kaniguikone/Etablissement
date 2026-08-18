@@ -12,7 +12,7 @@ class Remplacement extends Model
     ];
 
     protected $casts = [
-        'date_remplacement' => 'date',
+        'date_remplacement' => 'date:Y-m-d',
         'notifie_enseignant' => 'boolean',
     ];
 

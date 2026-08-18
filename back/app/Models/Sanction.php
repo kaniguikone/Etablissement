@@ -16,8 +16,8 @@ class Sanction extends Model
     protected function casts(): array
     {
         return [
-            'date_sanction'   => 'date',
-            'date_fin'        => 'date',
+            'date_sanction'   => 'date:Y-m-d',
+            'date_fin'        => 'date:Y-m-d',
             'parent_notifie'  => 'boolean',
         ];
     }

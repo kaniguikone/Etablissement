@@ -10,7 +10,7 @@ class CreneauRdv extends Model
 
     protected $fillable = ['enseignant_id', 'date_creneau', 'heure_debut', 'heure_fin', 'actif'];
 
-    protected $casts = ['date_creneau' => 'date', 'actif' => 'boolean'];
+    protected $casts = ['date_creneau' => 'date:Y-m-d', 'actif' => 'boolean'];
 
     public function enseignant()
     {

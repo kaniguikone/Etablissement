@@ -47,7 +47,7 @@ class Tenant extends BaseTenant implements TenantWithDatabase
 
     protected $casts = [
         'actif'           => 'boolean',
-        'date_expiration' => 'date',
+        'date_expiration' => 'date:Y-m-d',
         'data'            => 'array',
     ];
 

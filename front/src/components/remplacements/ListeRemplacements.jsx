@@ -159,7 +159,7 @@ const ListeRemplacements = () => {
                                     const st = STATUTS[r.statut] || STATUTS.a_couvrir;
                                     return (
                                         <tr key={r.id}>
-                                            <td className="fw-semibold">{r.date_remplacement}</td>
+                                            <td className="fw-semibold">{new Date(r.date_remplacement).toLocaleDateString('fr-FR')}</td>
                                             <td>
                                                 <div className="fw-semibold small">{r.creneau?.matiere?.libelle_matiere ?? '—'}</div>
                                                 <div className="text-muted small">

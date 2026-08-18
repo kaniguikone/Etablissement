@@ -19,8 +19,8 @@ class AbonnementSaas extends Model
     ];
 
     protected $casts = [
-        'date_debut'   => 'date',
-        'date_fin'     => 'date',
+        'date_debut'   => 'date:Y-m-d',
+        'date_fin'     => 'date:Y-m-d',
         'montant_ht'   => 'float',
         'montant_ttc'  => 'float',
         'taux_tva'     => 'float',
