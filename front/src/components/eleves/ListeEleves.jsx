@@ -87,7 +87,7 @@ const ListeEleves = () => {
     };
 
     const telechargerModele = () => {
-        api.get('/eleves/import/template', { responseType: 'blob' })
+        api.get('/eleves/import/template', { responseType: 'blob', timeout: 30000 })
             .then((res) => {
                 const url = URL.createObjectURL(res.data);
                 const a = document.createElement('a');
@@ -106,7 +106,7 @@ const ListeEleves = () => {
         setRapportImport(null);
         const formData = new FormData();
         formData.append('fichier', fichier);
-        api.post('/eleves/import', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        api.post('/eleves/import', formData, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 30000 })
             .then((res) => {
                 setRapportImport(res.data);
                 if (res.data.inseres > 0) charger(1, filtreNiveau, filtreClasse, recherche);
@@ -128,7 +128,7 @@ const ListeEleves = () => {
             if (filtreClasse) params.append('classe_id', filtreClasse);
             else if (filtreNiveau) params.append('niveau_id', filtreNiveau);
             if (recherche) params.append('search', recherche);
-            const r = await api.get(`/eleves/export?${params}`, { responseType: 'blob' });
+            const r = await api.get(`/eleves/export?${params}`, { responseType: 'blob', timeout: 30000 });
             const url  = URL.createObjectURL(new Blob([r.data], { type: 'text/csv' }));
             const lien = document.createElement('a');
             lien.href = url; lien.download = `eleves_${new Date().toISOString().slice(0,10)}.csv`; lien.click();

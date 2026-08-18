@@ -260,7 +260,7 @@ class EleveController extends Controller
                     $e->lieu_naissance_eleve,
                     $e->nationalite_eleve,
                     $e->classe?->nom_classe,
-                    $e->classe?->niveau?->libelle_niveau,
+                    $e->classe?->niveau?->nom_niveau,
                     $e->adresse_eleve,
                 ], ';');
             }

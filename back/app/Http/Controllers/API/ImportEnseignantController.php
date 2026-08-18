@@ -65,31 +65,21 @@ class ImportEnseignantController extends Controller
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'e8f0fe']],
         ]);
 
-        // Dropdowns Genre (D3:D1001) et Statut (I3:I1001)
-        foreach (range(3, 1001) as $row) {
-            $v = $sheet->getCell("D{$row}")->getDataValidation();
-            $v->setType(DataValidation::TYPE_LIST)
+        // Dropdowns Genre (D), Statut (I), Créer accès (J) — appliqués sur toute la plage 3:1001 en une seule règle
+        $dropdowns = [
+            'D' => ['"M,F"', 'Valeur invalide', 'Choisir M ou F'],
+            'I' => ['"CDI,CDD,Stagiaire,Vacataire"', 'Valeur invalide', 'Choisir parmi : CDI, CDD, Stagiaire, Vacataire'],
+            'J' => ['"O,N"', 'Valeur invalide', 'Choisir O ou N'],
+        ];
+        foreach ($dropdowns as $col => [$formula, $errTitle, $errMsg]) {
+            $validation = new DataValidation();
+            $validation->setType(DataValidation::TYPE_LIST)
                 ->setErrorStyle(DataValidation::STYLE_STOP)
                 ->setAllowBlank(true)->setShowDropDown(true)
                 ->setShowErrorMessage(true)
-                ->setErrorTitle('Valeur invalide')->setError('Choisir M ou F')
-                ->setFormula1('"M,F"');
-
-            $v2 = $sheet->getCell("I{$row}")->getDataValidation();
-            $v2->setType(DataValidation::TYPE_LIST)
-                ->setErrorStyle(DataValidation::STYLE_STOP)
-                ->setAllowBlank(true)->setShowDropDown(true)
-                ->setShowErrorMessage(true)
-                ->setErrorTitle('Valeur invalide')->setError('Choisir parmi : CDI, CDD, Stagiaire, Vacataire')
-                ->setFormula1('"CDI,CDD,Stagiaire,Vacataire"');
-
-            $v3 = $sheet->getCell("J{$row}")->getDataValidation();
-            $v3->setType(DataValidation::TYPE_LIST)
-                ->setErrorStyle(DataValidation::STYLE_STOP)
-                ->setAllowBlank(true)->setShowDropDown(true)
-                ->setShowErrorMessage(true)
-                ->setErrorTitle('Valeur invalide')->setError('Choisir O ou N')
-                ->setFormula1('"O,N"');
+                ->setErrorTitle($errTitle)->setError($errMsg)
+                ->setFormula1($formula);
+            $sheet->setDataValidation("{$col}3:{$col}1001", $validation);
         }
 
         // Largeurs

@@ -135,7 +135,7 @@ Champs optionnels :
 ### Import Excel (en masse)
 *Menu : Élèves → Liste des élèves → bouton Import*
 
-Téléchargez le modèle Excel, remplissez une ligne par élève (matricule, nom, classe, date de naissance au format JJ/MM/AAAA…), puis importez. Les lignes en erreur (classe introuvable, matricule en doublon, valeur de handicap non reconnue…) sont signalées individuellement ; les autres lignes sont importées normalement.
+Téléchargez le modèle Excel, remplissez une ligne par élève (matricule, nom, classe, date de naissance au format JJ/MM/AAAA…), puis importez. Les handicaps se renseignent via une colonne O/N dédiée par type (Moteur, Malvoyant, Malentendant, Albinisme, Nanisme, Bégaiement, Autiste) plutôt qu'un champ texte libre. Les lignes en erreur (classe introuvable, matricule en doublon, date invalide…) sont signalées individuellement ; les autres lignes sont importées normalement.
 
 > ℹ️ Le module **Inscriptions** (demande d'inscription en ligne par un parent, suivie d'une validation admin) existe dans l'application mais n'est actuellement pas activé dans le menu de navigation — module en attente d'utilisation réelle. Pour inscrire un élève aujourd'hui, utilisez l'ajout manuel ou l'import Excel ci-dessus.
 
@@ -427,7 +427,7 @@ Cinq flux permettent d'onboarder rapidement un établissement avec de gros effec
 
 | Flux | Menu | Colonnes clés |
 |---|---|---|
-| Élèves | Élèves → Liste des élèves → Import | Matricule, nom, prénoms, date de naissance (JJ/MM/AAAA), classe, handicap(s)… |
+| Élèves | Élèves → Liste des élèves → Import | Matricule, nom, prénoms, date de naissance (JJ/MM/AAAA), classe, handicap(s) (colonne O/N par type)… |
 | Enseignants | Enseignants → Liste des enseignants → Import | Matricule, nom, prénoms, téléphone, statut, **Créer accès portail (O/N)** |
 | Affectations classe/matière | Enseignants → Liste des enseignants → Import affectations | Matricule enseignant, abréviation classe, abréviation matière |
 | Scolarités | Finances → Scolarités → Import | Libellé échéance, date (JJ/MM/AAAA), montant, niveau |

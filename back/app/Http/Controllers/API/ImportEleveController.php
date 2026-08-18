@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Classe;
 use App\Models\Eleve;
 use Illuminate\Http\Request;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -17,60 +18,109 @@ class ImportEleveController extends Controller
 {
     private const MATRICULE_EXEMPLE = 'EL001';
 
-    private const HANDICAPS_VALIDES = [
-        'moteur', 'malvoyant', 'malentendant', 'albinisme', 'nanisme', 'begayement', 'autiste',
+    /** Type de handicap => libellé affiché en en-tête de colonne. Chaque type a sa propre colonne O/N. */
+    private const HANDICAPS = [
+        'moteur'       => 'Moteur',
+        'malvoyant'    => 'Malvoyant',
+        'malentendant' => 'Malentendant',
+        'albinisme'    => 'Albinisme',
+        'nanisme'      => 'Nanisme',
+        'begayement'   => 'Bégaiement',
+        'autiste'      => 'Autiste',
     ];
 
-    private array $colonnes = [
-        'A' => 'Matricule *',
-        'B' => 'Nom *',
-        'C' => 'Prénoms *',
-        'D' => 'Genre',
-        'E' => 'Date de naissance (JJ/MM/AAAA) *',
-        'F' => 'Lieu de naissance',
-        'G' => 'Nationalité',
-        'H' => 'Adresse',
-        'I' => 'Classe (abréviation) *',
-        'J' => 'Langue 2',
-        'K' => 'Statut bourse',
-        'L' => 'Affecté (O/N)',
-        'M' => 'Handicap(s)',
-        'N' => 'Statut orphelin',
+    /** Colonne (1-based, A=1) où démarrent les colonnes Handicap. */
+    private const HANDICAPS_COL_DEBUT = 13; // M
+
+    /** Libellés des colonnes fixes (avant les colonnes Handicap), dans l'ordre A, B, C… */
+    private const COLONNES_FIXES = [
+        'Matricule *',
+        'Nom *',
+        'Prénoms *',
+        'Genre',
+        'Date de naissance (JJ/MM/AAAA) *',
+        'Lieu de naissance',
+        'Nationalité',
+        'Adresse',
+        'Classe (abréviation) *',
+        'Langue 2',
+        'Statut bourse',
+        'Affecté (O/N)',
     ];
+
+    /** [type_handicap => lettre de colonne], ex: ['moteur' => 'M', 'malvoyant' => 'N', …] */
+    private function colonnesHandicap(): array
+    {
+        $colonnes = [];
+        $index = self::HANDICAPS_COL_DEBUT;
+        foreach (self::HANDICAPS as $type => $label) {
+            $colonnes[$type] = Coordinate::stringFromColumnIndex($index);
+            $index++;
+        }
+        return $colonnes;
+    }
+
+    private function colonneOrphelin(): string
+    {
+        return Coordinate::stringFromColumnIndex(self::HANDICAPS_COL_DEBUT + count(self::HANDICAPS));
+    }
+
+    /** [lettre de colonne => libellé] pour toutes les colonnes du modèle, dans l'ordre. */
+    private function colonnes(): array
+    {
+        $colonnes = [];
+        foreach (self::COLONNES_FIXES as $i => $label) {
+            $colonnes[Coordinate::stringFromColumnIndex($i + 1)] = $label;
+        }
+        foreach ($this->colonnesHandicap() as $type => $lettre) {
+            $colonnes[$lettre] = 'Handicap ' . self::HANDICAPS[$type] . ' (O/N)';
+        }
+        $colonnes[$this->colonneOrphelin()] = 'Statut orphelin';
+
+        return $colonnes;
+    }
 
     public function template()
     {
         $spreadsheet = new Spreadsheet();
+        $colonnes = $this->colonnes();
+        $lettres = array_keys($colonnes);
+        $derniereColonne = end($lettres);
 
         // --- Feuille principale ---
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Élèves');
 
         // Ligne 1 : instructions
-        $sheet->setCellValue('A1', '* Champs obligatoires. Ne pas modifier les en-têtes (ligne 2). Supprimer la ligne d\'exemple (ligne 3) avant import. Dates au format JJ/MM/AAAA. Classe = abréviation (voir feuille Références). Statut bourse : non_boursier, demi_boursier ou boursier (ignoré si Affecté = N). Affecté : O ou N. Handicap(s) : valeurs séparées par une virgule (' . implode(', ', self::HANDICAPS_VALIDES) . '). Statut orphelin : pere, mere ou les_deux.');
-        $sheet->mergeCells('A1:N1');
+        $sheet->setCellValue('A1', '* Champs obligatoires. Ne pas modifier les en-têtes (ligne 2). Supprimer la ligne d\'exemple (ligne 3) avant import. Dates au format JJ/MM/AAAA. Classe = abréviation (voir feuille Références). Statut bourse : non_boursier, demi_boursier ou boursier (ignoré si Affecté = N). Affecté : O ou N. Handicap(s) : mettre O dans la ou les colonnes concernées, N ou vide sinon. Statut orphelin : pere, mere ou les_deux.');
+        $sheet->mergeCells("A1:{$derniereColonne}1");
         $sheet->getStyle('A1')->applyFromArray([
             'font' => ['italic' => true, 'color' => ['rgb' => '856404']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'fff3cd']],
         ]);
 
         // Ligne 2 : en-têtes
-        foreach ($this->colonnes as $col => $label) {
+        foreach ($colonnes as $col => $label) {
             $sheet->setCellValue("{$col}2", $label);
         }
-        $sheet->getStyle('A2:N2')->applyFromArray([
+        $sheet->getStyle("A2:{$derniereColonne}2")->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1a73e8']],
-            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'wrapText' => true],
         ]);
+        $sheet->getRowDimension(2)->setRowHeight(30);
 
         // Ligne 3 : exemple
-        $exemples = ['EL001', 'KONE', 'Aminata', 'F', '20/05/2010', 'Abidjan', 'Ivoirienne', 'Cocody', '6eA', 'espagnol', 'non_boursier', 'O', '', ''];
+        $exemples = array_merge(
+            ['EL001', 'KONE', 'Aminata', 'F', '20/05/2010', 'Abidjan', 'Ivoirienne', 'Cocody', '6eA', 'espagnol', 'non_boursier', 'O'],
+            array_fill(0, count(self::HANDICAPS), 'N'),
+            ['']
+        );
         foreach (array_values($exemples) as $i => $valeur) {
-            $col = chr(65 + $i);
+            $col = Coordinate::stringFromColumnIndex($i + 1);
             $sheet->setCellValue("{$col}3", $valeur);
         }
-        $sheet->getStyle('A3:N3')->applyFromArray([
+        $sheet->getStyle("A3:{$derniereColonne}3")->applyFromArray([
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'e8f0fe']],
         ]);
 
@@ -80,30 +130,36 @@ class ImportEleveController extends Controller
             'J' => ['"espagnol,allemand,autre"',    'Valeur invalide', 'espagnol, allemand ou autre'],
             'K' => ['"non_boursier,demi_boursier,boursier"', 'Valeur invalide', 'non_boursier, demi_boursier ou boursier'],
             'L' => ['"O,N"',                        'Valeur invalide', 'O (oui) ou N (non)'],
-            'N' => ['"pere,mere,les_deux"',         'Valeur invalide', 'pere, mere ou les_deux'],
         ];
+        foreach ($this->colonnesHandicap() as $lettre) {
+            $dropdowns[$lettre] = ['"O,N"', 'Valeur invalide', 'O (oui) ou N (non)'];
+        }
+        $dropdowns[$this->colonneOrphelin()] = ['"pere,mere,les_deux"', 'Valeur invalide', 'pere, mere ou les_deux'];
 
         foreach ($dropdowns as $col => [$formula, $errTitle, $errMsg]) {
-            foreach (range(3, 1001) as $row) {
-                $v = $sheet->getCell("{$col}{$row}")->getDataValidation();
-                $v->setType(DataValidation::TYPE_LIST)
-                    ->setErrorStyle(DataValidation::STYLE_STOP)
-                    ->setAllowBlank(true)->setShowDropDown(true)
-                    ->setShowErrorMessage(true)
-                    ->setErrorTitle($errTitle)->setError($errMsg)
-                    ->setFormula1($formula);
-            }
+            $validation = new DataValidation();
+            $validation->setType(DataValidation::TYPE_LIST)
+                ->setErrorStyle(DataValidation::STYLE_STOP)
+                ->setAllowBlank(true)->setShowDropDown(true)
+                ->setShowErrorMessage(true)
+                ->setErrorTitle($errTitle)->setError($errMsg)
+                ->setFormula1($formula);
+            $sheet->setDataValidation("{$col}3:{$col}1001", $validation);
         }
 
         // Largeurs
         $largeurs = [
             'A' => 15, 'B' => 18, 'C' => 22, 'D' => 10, 'E' => 28,
             'F' => 20, 'G' => 18, 'H' => 22, 'I' => 18,
-            'J' => 14, 'K' => 18, 'L' => 14, 'M' => 30, 'N' => 18,
+            'J' => 14, 'K' => 18, 'L' => 14,
         ];
         foreach ($largeurs as $col => $width) {
             $sheet->getColumnDimension($col)->setWidth($width);
         }
+        foreach ($this->colonnesHandicap() as $lettre) {
+            $sheet->getColumnDimension($lettre)->setWidth(14);
+        }
+        $sheet->getColumnDimension($this->colonneOrphelin())->setWidth(18);
 
         // --- Feuille Références ---
         $ref = $spreadsheet->createSheet();
@@ -125,18 +181,6 @@ class ImportEleveController extends Controller
         }
         $ref->getColumnDimension('A')->setWidth(16);
         $ref->getColumnDimension('B')->setWidth(26);
-
-        // Valeurs Handicap(s)
-        $ref->setCellValue('D1', 'Valeurs Handicap(s)');
-        $ref->getStyle('D1')->applyFromArray([
-            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1a73e8']],
-            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
-        ]);
-        foreach (self::HANDICAPS_VALIDES as $i => $h) {
-            $ref->setCellValue("D" . ($i + 2), $h);
-        }
-        $ref->getColumnDimension('D')->setWidth(20);
 
         $spreadsheet->setActiveSheetIndex(0);
 
@@ -164,6 +208,8 @@ class ImportEleveController extends Controller
         $rows = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
 
         $classesMap = Classe::pluck('id', 'abbr_classe')->all();
+        $colonnesHandicap = $this->colonnesHandicap();
+        $colonneOrphelin = $this->colonneOrphelin();
 
         $inseres = 0;
         $erreurs = [];
@@ -215,22 +261,17 @@ class ImportEleveController extends Controller
                 ? $statutBourseRaw
                 : 'non_boursier';
 
-            // Handicap(s) (M) — valeurs séparées par virgule
-            $handicapsRaw = trim($row['M'] ?? '');
-            $typesHandicap = null;
-            if ($handicapsRaw !== '') {
-                $valeurs   = array_values(array_filter(array_map('trim', explode(',', $handicapsRaw))));
-                $invalides = array_diff($valeurs, self::HANDICAPS_VALIDES);
-                if (!empty($invalides)) {
-                    $ligneErreurs[] = 'Handicap(s) invalide(s) : ' . implode(', ', $invalides)
-                        . ' (valeurs autorisées : ' . implode(', ', self::HANDICAPS_VALIDES) . ')';
-                } else {
-                    $typesHandicap = $valeurs;
+            // Handicap(s) — une colonne O/N par type
+            $typesHandicap = [];
+            foreach ($colonnesHandicap as $type => $col) {
+                if (strtoupper(trim($row[$col] ?? '')) === 'O') {
+                    $typesHandicap[] = $type;
                 }
             }
+            $typesHandicap = $typesHandicap ?: null;
 
-            // Statut orphelin (N)
-            $orphelinRaw = strtolower(trim($row['N'] ?? ''));
+            // Statut orphelin
+            $orphelinRaw = strtolower(trim($row[$colonneOrphelin] ?? ''));
             $orphelinMap = ['pere' => 'pere', 'père' => 'pere', 'mere' => 'mere', 'mère' => 'mere', 'les_deux' => 'les_deux', 'les deux' => 'les_deux'];
             $statutOrphelin = $orphelinMap[$orphelinRaw] ?? null;
 

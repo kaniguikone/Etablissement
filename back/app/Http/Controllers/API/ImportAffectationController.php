@@ -21,6 +21,12 @@ class ImportAffectationController extends Controller
     {
         $spreadsheet = new Spreadsheet();
 
+        // Feuille 1 : récupérée et nommée avant toute autre opération. Worksheet::getStyle()
+        // a pour effet de bord de rendre son sheet actif (Worksheet.php:1428) ; appeler
+        // getActiveSheet() après avoir stylé la feuille Références renverrait cette dernière.
+        $sheet = $spreadsheet->getSheet(0);
+        $sheet->setTitle('Affectations');
+
         // ── Feuille 2 : Références ────────────────────────────────────────────
         $refSheet = $spreadsheet->createSheet();
         $refSheet->setTitle('Références');
@@ -66,10 +72,7 @@ class ImportAffectationController extends Controller
         $plageClasse = "Références!\$C\$2:\$C\$" . ($nbClasses + 1);
         $plageMat  = "Références!\$E\$2:\$E\$" . ($nbMatieres + 1);
 
-        // ── Feuille 1 : Affectations ──────────────────────────────────────────
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Affectations');
-
+        // ── Contenu feuille 1 : Affectations ──────────────────────────────────
         // Ligne 1 : instructions (sautée à l'import)
         $sheet->setCellValue('A1', '* Champs obligatoires. Ne pas modifier les en-têtes (ligne 2). Supprimer la ligne d\'exemple (ligne 3) avant import. Utiliser les abréviations exactes (voir feuille "Références"). Max 3 matières et 7 classes par enseignant.');
         $sheet->mergeCells('A1:C1');
@@ -99,19 +102,18 @@ class ImportAffectationController extends Controller
             ]);
         }
 
-        // Dropdowns données (lignes 3-1001)
-        foreach (range(3, 1001) as $row) {
-            foreach (['A' => $plageEns, 'B' => $plageClasse, 'C' => $plageMat] as $col => $plage) {
-                $v = $sheet->getCell("{$col}{$row}")->getDataValidation();
-                $v->setType(DataValidation::TYPE_LIST)
-                    ->setErrorStyle(DataValidation::STYLE_STOP)
-                    ->setAllowBlank(true)
-                    ->setShowDropDown(true)
-                    ->setShowErrorMessage(true)
-                    ->setErrorTitle('Valeur invalide')
-                    ->setError('Utiliser une valeur de la feuille Références')
-                    ->setFormula1($plage);
-            }
+        // Dropdowns données (lignes 3-1001), appliqués sur toute la plage en une seule règle par colonne
+        foreach (['A' => $plageEns, 'B' => $plageClasse, 'C' => $plageMat] as $col => $plage) {
+            $validation = new DataValidation();
+            $validation->setType(DataValidation::TYPE_LIST)
+                ->setErrorStyle(DataValidation::STYLE_STOP)
+                ->setAllowBlank(true)
+                ->setShowDropDown(true)
+                ->setShowErrorMessage(true)
+                ->setErrorTitle('Valeur invalide')
+                ->setError('Utiliser une valeur de la feuille Références')
+                ->setFormula1($plage);
+            $sheet->setDataValidation("{$col}3:{$col}1001", $validation);
         }
 
         foreach (['A' => 25, 'B' => 18, 'C' => 18] as $col => $w) {
