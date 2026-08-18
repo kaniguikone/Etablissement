@@ -24,3 +24,7 @@ mobile/dist/
 
 # Exports personnels
 /Stat/
+
+# État de fenêtre Obsidian (change à chaque ouverture/fermeture d'onglet,
+# sans rapport avec le contenu réel de docs/)
+docs/.obsidian/workspace.json
