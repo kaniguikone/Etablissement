@@ -283,7 +283,7 @@ Application complète de gestion scolaire en architecture multi-tenant, permetta
 | Reçus de paiement | — | PDF |
 | Export comptable OHADA | — | Excel (3 feuilles) |
 | Export FEC SAGE | — | CSV |
-| Rapport Ministère | — | PDF |
+| Rapport Ministère (non lié dans le menu, accessible par URL) | — | PDF |
 | Formulaire MENET (14 sections) | — | Excel + PDF |
 
 ---

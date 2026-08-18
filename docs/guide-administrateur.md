@@ -379,7 +379,7 @@ Disponibles une fois l'année scolaire bien avancée :
 Tous les rapports sont **exportables en CSV**.
 
 ### Rapport statistique Ministère
-*Menu : Statistiques → Rapport Ministère*
+*Accessible via l'URL `/RapportMinistere` — n'est actuellement plus proposé dans le menu Statistiques (fusionné visuellement avec « Stats générales »), mais la page reste fonctionnelle.*
 
 Génère un document PDF au format réglementaire (A4 paysage) incluant :
 - Effectifs par genre et par niveau

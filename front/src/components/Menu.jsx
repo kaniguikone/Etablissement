@@ -169,8 +169,7 @@ const GROUPES = [
         permissions: ['pedagogie_saisie', 'pedagogie_pilotage', 'finances_caisse', 'finances_gestion'],
         items: [
             { to: '/Statistiques',      icon: 'fas fa-chart-bar',  label: 'Tableaux de bord' },
-            { to: '/StatsGenerales',    icon: 'fas fa-table',      label: 'Stats générales (MENET)' },
-            { to: '/RapportMinistere',  icon: 'fas fa-file-alt',   label: 'Rapport Ministère' },
+            { to: '/StatsGenerales',    icon: 'fas fa-table',      label: 'Stats générales' },
         ],
     },
 
