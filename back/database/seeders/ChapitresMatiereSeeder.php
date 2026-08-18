@@ -1518,7 +1518,9 @@ class ChapitresMatiereSeeder extends Seeder
 
     public function run(): void
     {
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('chapitres_matiere')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $matieres = Matiere::all()->keyBy('abbr_matiere');
         $niveaux  = Niveau::orderBy('ordre')->get();

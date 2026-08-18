@@ -19,7 +19,6 @@ use Database\Seeders\ParentAuthSeeder;
 use Database\Seeders\ProgressionSeeder;
 use Database\Seeders\ConseilClasseSeeder;
 use Database\Seeders\SanctionSeeder;
-use Database\Seeders\VolumeHoraireSeeder;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Console\Command;
@@ -154,7 +153,6 @@ class CreerDemo extends Command
             CalendrierSeeder::class,
             ChapitresMatiereSeeder::class,
             ProgressionSeeder::class,
-            VolumeHoraireSeeder::class,
             SanctionSeeder::class,
             NotificationSeeder::class,
             ConseilClasseSeeder::class,

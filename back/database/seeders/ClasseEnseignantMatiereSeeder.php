@@ -18,7 +18,9 @@ class ClasseEnseignantMatiereSeeder extends Seeder
 {
     public function run(): void
     {
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('classe_enseignant_matiere')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $classes     = Classe::orderBy('niveau_id')->orderBy('id')->get();
         $enseignants = Enseignant::all()->values();

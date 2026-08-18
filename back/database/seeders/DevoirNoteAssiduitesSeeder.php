@@ -29,9 +29,11 @@ class DevoirNoteAssiduitesSeeder extends Seeder
 
     public function run(): void
     {
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('assiduites')->truncate();
         DB::table('notes')->truncate();
         DB::table('devoirs')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $classes     = Classe::with('eleves', 'niveau')->get();
         $periodes    = Periodes::all();

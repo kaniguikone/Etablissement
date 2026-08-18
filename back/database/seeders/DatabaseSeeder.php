@@ -15,6 +15,7 @@ use App\Models\Serie;
 use App\Models\AnneeScolaire;
 use App\Models\TypeDevoir;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
@@ -25,11 +26,12 @@ class DatabaseSeeder extends Seeder
         \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         foreach ([
             'sanctions', 'calendriers', 'notifications', 'recus_paiements',
-            'impaies', 'volume_horaires', 'progressions', 'chapitres_matiere',
+            'impaies', 'volumes_horaires', 'progressions', 'chapitres_matiere',
             'emploi_du_temps', 'paiements', 'notes', 'devoirs', 'assiduites',
             'scolarites', 'informations', 'type_devoirs', 'personal_access_tokens',
             'eleves', 'parents', 'enseignants', 'classe_enseignant_matiere',
-            'classes', 'series', 'niveaux', 'matieres', 'periodes', 'annees_scolaires',
+            'niveau_matieres', 'classes', 'series', 'niveaux', 'matieres',
+            'periodes', 'annees_scolaires',
             'etablissements', 'users', 'roles', 'salles',
         ] as $table) {
             if (\Illuminate\Support\Facades\Schema::hasTable($table)) {
@@ -175,6 +177,59 @@ class DatabaseSeeder extends Seeder
             $seriesMap[$nom] = $serie->id;
         }
 
+        // ── Niveau-matières (programme officiel MENET-CI) ───────────────────────
+        // Réutilise le mapping du template "lycee_complet" (coefficients + volumes
+        // horaires déjà maintenus dans database/templates/) plutôt que de dupliquer
+        // ces données ici. Sans ça, ClasseEnseignantMatiereSeeder / EmploiDuTempsSeeder /
+        // ProgressionSeeder n'ont aucune matière à rattacher aux niveaux et restent vides.
+        $programme   = json_decode(file_get_contents(database_path('templates/lycee_complet.json')), true);
+        $niveauxMap  = Niveau::pluck('id', 'nom_niveau');
+        $matieresMap = Matiere::pluck('id', 'libelle_matiere');
+
+        $nmRows = [];
+        $vhRows = [];
+        foreach ($programme['niveau_matieres'] as $nm) {
+            $niveauId  = $niveauxMap[$nm['niveau']] ?? null;
+            $matiereId = $matieresMap[$nm['matiere']] ?? null;
+            if (!$niveauId || !$matiereId) continue;
+
+            $serieId = null;
+            if ($nm['serie']) {
+                // Séries non modélisées ici (A1, A2, B — cf. $seriesData ci-dessus) : ignorées.
+                if (!isset($seriesMap[$nm['serie']])) continue;
+                $serieId = $seriesMap[$nm['serie']];
+            }
+
+            $nmRows[] = [
+                'niveau_id'            => $niveauId,
+                'matiere_id'           => $matiereId,
+                'serie_id'             => $serieId,
+                'groupe_alternatif_id' => null,
+                'obligatoire'          => true,
+                'coefficient'          => $nm['coefficient'],
+                'created_at'           => now(),
+                'updated_at'           => now(),
+            ];
+
+            // Volume horaire : un seul par (niveau, matière), indépendant de la série.
+            if (isset($nm['heures_semaine']) && !isset($vhRows["{$niveauId}_{$matiereId}"])) {
+                $vhRows["{$niveauId}_{$matiereId}"] = [
+                    'niveau_id'      => $niveauId,
+                    'matiere_id'     => $matiereId,
+                    'heures_semaine' => $nm['heures_semaine'],
+                    'semaines_annee' => 36,
+                    'created_at'     => now(),
+                    'updated_at'     => now(),
+                ];
+            }
+        }
+        foreach (array_chunk($nmRows, 300) as $chunk) {
+            DB::table('niveau_matieres')->insert($chunk);
+        }
+        foreach (array_chunk(array_values($vhRows), 300) as $chunk) {
+            DB::table('volumes_horaires')->insert($chunk);
+        }
+
         // ── Classes ───────────────────────────────────────────────────────────
         // Lycée (2nde → Tle) : une classe par série ; collège/primaire : numérotées
         $seriesParNiveau = [
@@ -209,10 +264,12 @@ class DatabaseSeeder extends Seeder
         // ── Élèves : 20 à 35 par classe — on calcule d'abord le total ────────
         // Règle : chaque parent a entre 1 et 4 enfants (tous les parents ont au moins 1)
         $classeSizes = [];
+        $classeOrdre = [];
         $totalEleves = 0;
-        foreach (Classe::all() as $classe) {
+        foreach (Classe::with('niveau')->get() as $classe) {
             $nb = rand(20, 35);
             $classeSizes[$classe->id] = $nb;
+            $classeOrdre[$classe->id] = $classe->niveau->ordre;
             $totalEleves += $nb;
         }
 
@@ -246,11 +303,21 @@ class DatabaseSeeder extends Seeder
         // ── Créer les élèves en puisant dans le pool ───────────────────────
         $cursor = 0;
         foreach ($classeSizes as $classeId => $nb) {
+            // Allemand/Espagnol proposés à partir de la 4ième uniquement (ordre >= 3)
+            $avantQuatrieme = $classeOrdre[$classeId] < 3;
+
             for ($j = 0; $j < $nb; $j++) {
-                Eleve::factory()->create([
+                $attrs = [
                     'classe_id' => $classeId,
                     'parent_id' => $pool[$cursor++],
-                ]);
+                ];
+                if ($avantQuatrieme) {
+                    $attrs['langue2'] = fake()->randomElement(array_merge(
+                        array_fill(0, 8, 'autre'),
+                        array_fill(0, 92, null),
+                    ));
+                }
+                Eleve::factory()->create($attrs);
             }
         }
 
@@ -280,7 +347,6 @@ class DatabaseSeeder extends Seeder
         $this->call(PhotoEleveSeeder::class);
         $this->call(ChapitresMatiereSeeder::class);
         $this->call(ProgressionSeeder::class);
-        $this->call(VolumeHoraireSeeder::class);
         $this->call(ImpaiesSeeder::class);
         $this->call(RecuPaiementSeeder::class);
         $this->call(NotificationSeeder::class);

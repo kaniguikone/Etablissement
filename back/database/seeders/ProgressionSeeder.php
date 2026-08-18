@@ -57,7 +57,9 @@ class ProgressionSeeder extends Seeder
 
     public function run(): void
     {
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('progressions')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $periodes = Periodes::all()->keyBy('code_periode');
 

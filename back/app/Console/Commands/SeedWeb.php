@@ -30,7 +30,6 @@ use Database\Seeders\PhotoEleveSeeder;
 use Database\Seeders\ProgressionSeeder;
 use Database\Seeders\RecuPaiementSeeder;
 use Database\Seeders\SanctionSeeder;
-use Database\Seeders\VolumeHoraireSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -283,10 +282,9 @@ class SeedWeb extends Command
         $this->runSeeder(EnseignantAuthSeeder::class, $errors);
         if ($avecEleves) { $this->runSeeder(PhotoEleveSeeder::class, $errors); }
 
-        $this->ecrireStatut('running', $stats, $errors, 'Chapitres, progressions, volumes…');
+        $this->ecrireStatut('running', $stats, $errors, 'Chapitres, progressions…');
         $this->runSeeder(ChapitresMatiereSeeder::class, $errors);
         $this->runSeeder(ProgressionSeeder::class, $errors);
-        $this->runSeeder(VolumeHoraireSeeder::class, $errors);
 
         if ($avecPaiements && $avecEleves) {
             $this->runSeeder(ImpaiesSeeder::class, $errors);

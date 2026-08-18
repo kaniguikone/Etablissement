@@ -50,7 +50,9 @@ class EmploiDuTempsSeeder extends Seeder
             return;
         }
 
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('emploi_du_temps')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         // Préparer les slots à plat : [jour => [[debut, fin], ...]]
         $slotsParJour = self::SLOTS;
