@@ -194,6 +194,11 @@ Route::middleware([
         Route::get('/enfant/{id}/emploi',                    [ParentPortalController::class, 'emploiDuTemps']);
         Route::get('/enfant/{id}/paiements',                 [ParentPortalController::class, 'paiements']);
         Route::get('/paiements/{id}/recu',                   [ParentPortalController::class, 'recuPdf']);
+        Route::post('/enfant/{id}/paiements/initier',        [ParentPortalController::class, 'initierPaiement']);
+        Route::get('/enfant/{id}/frais-annexes',             [ParentPortalController::class, 'fraisAnnexes']);
+        Route::post('/enfant/{id}/frais-annexes/initier',    [ParentPortalController::class, 'initierPaiementFrais']);
+        Route::get('/frais-annexes/{id}/recu',               [ParentPortalController::class, 'fraisAnnexeRecuPdf']);
+        Route::get('/paiements/statut/{transactionId}',      [ParentPortalController::class, 'statutPaiement']);
         Route::get('/messages/conversations',                [MessageController::class, 'conversations']);
         Route::get('/messages/eleve/{eleveId}',              [MessageController::class, 'fil']);
         Route::post('/messages',                             [MessageController::class, 'store']);
@@ -450,6 +455,7 @@ Route::middleware([
             Route::post('/paiements-frais-annexes',           [FraisAnnexeController::class, 'enregistrerPaiement']);
             Route::delete('/paiements-frais-annexes/{id}',    [FraisAnnexeController::class, 'supprimerPaiement']);
             Route::get('/paiements-frais-annexes/{id}/recu',  [FraisAnnexeController::class, 'recu']);
+            Route::post('/paiements-frais-annexes/initier',   [CinetPayController::class,    'initierFraisAnnexe']);
         });
 
         Route::middleware('permission:finances_caisse,finances_gestion')->group(function () {

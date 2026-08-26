@@ -112,9 +112,11 @@ Un élève sans photo uploadée affiche une icône cassée dans certains écrans
 1. **Notes & Bulletin** → montrer les notes par matière
 2. Télécharger le bulletin PDF → vérifier qu'une visionneuse s'ouvre (voir [point de vigilance 2.1](#21-ouverture-des-pdf-sur-mobile-android))
 
-### 4.3 Scolarités et reçu de paiement
-1. **Scolarités** → onglet **Échéances** (montrer les versements à venir), onglet **Paiements** (historique)
-2. Télécharger un reçu PDF → même vérification que ci-dessus
+### 4.3 Scolarités, frais annexes et reçu de paiement
+1. **Scolarités** → onglet **Échéances** (montrer les versements à venir, bouton **Payer en ligne** qui ouvre CinetPay), onglet **Paiements** (historique)
+2. **Frais annexes** : même principe pour les frais complémentaires (tenue, manuels, examens…)
+3. Télécharger un reçu PDF → même vérification que ci-dessus
+4. Si vous démontrez un paiement en direct : utiliser le mode sandbox CinetPay (voir [2.4](#24-emails-et-paiement-cinetpay)) pour ne pas engager de fonds réels, et prévoir de revenir dans l'app taper **Vérifier** après le paiement (pas de retour automatique dans l'app, le navigateur externe affiche la page de confirmation web).
 
 ### 4.4 Autres écrans utiles selon le profil du client
 - **Assiduité** : historique des absences/retards avec notification automatique

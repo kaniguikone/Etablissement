@@ -16,7 +16,8 @@ return new class extends Migration
             $table->foreignId('scolarite_id')->constrained('scolarites')->onDelete('cascade');
             $table->decimal('montant_paye', 10, 2);
             $table->date('date_paiement');
-            $table->enum('mode_paiement', ['especes', 'cheque', 'virement', 'autre'])->default('especes');
+            // 'cinetpay' ajouté dans 2026_08_26_000001 (migration supprimée après application aux tenants existants)
+            $table->enum('mode_paiement', ['especes', 'cheque', 'virement', 'cinetpay', 'autre'])->default('especes');
             $table->string('reference_paiement')->nullable();
             $table->string('remarque')->nullable();
             $table->string('transaction_id')->nullable()->unique();

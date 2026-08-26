@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\CinetPayException;
 use App\Http\Controllers\Controller;
 use App\Models\Eleve;
 use App\Models\Assiduites;
 use App\Models\Etablissement;
+use App\Models\FraisAnnexe;
 use App\Models\Note;
+use App\Models\PaiementFraisAnnexe;
 use App\Models\Periodes;
 use App\Models\Paiement;
 use App\Models\Scolarites;
 use App\Models\Informations;
 use App\Models\EmploiDuTemps;
+use App\Services\CinetPayService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Http\Controllers\API\BulletinPdfController;
 use Illuminate\Http\Request;
@@ -229,10 +233,7 @@ class ParentPortalController extends Controller
 
         $paiements = Paiement::with('scolarite')
             ->where('eleve_id', $eleve->id)
-            ->where(function ($q) {
-                $q->whereNull('statut_cinetpay')
-                  ->orWhere('statut_cinetpay', 'paid');
-            })
+            ->confirmes()
             ->whereNotNull('date_paiement')
             ->orderBy('date_paiement', 'desc')
             ->get();
@@ -266,5 +267,140 @@ class ParentPortalController extends Controller
         );
 
         return $pdf->download($nomFichier);
+    }
+
+    /**
+     * Frais annexes (dus + payés) pour un enfant du parent connecté.
+     * GET /api/parent/enfant/{id}/frais-annexes
+     */
+    public function fraisAnnexes(Request $request, int $eleveId)
+    {
+        $parent = $request->user();
+        abort_unless(in_array($eleveId, $this->eleveIds($parent)), 403);
+        $eleve  = Eleve::with('classe.niveau')->findOrFail($eleveId);
+
+        $niveauId = $eleve->classe?->niveau_id;
+        $frais = FraisAnnexe::where(fn ($q) => $q->whereNull('niveau_id')->orWhere('niveau_id', $niveauId))->get();
+
+        $paiements = PaiementFraisAnnexe::with('fraisAnnexe')
+            ->where('eleve_id', $eleveId)
+            ->confirmes()
+            ->orderBy('date_paiement', 'desc')
+            ->get();
+
+        $recap = $frais->map(function ($f) use ($paiements) {
+            $paye = $paiements->where('frais_annexe_id', $f->id)->sum('montant_paye');
+            return [
+                'frais_id'     => $f->id,
+                'nom'          => $f->nom,
+                'categorie'    => $f->categorie,
+                'montant_du'   => $f->montant,
+                'obligatoire'  => $f->obligatoire,
+                'montant_paye' => (float) $paye,
+                'solde'        => $f->obligatoire ? (float) $f->montant - (float) $paye : 0.0,
+                'statut'       => (float) $paye >= (float) $f->montant ? 'soldé' : ($paye > 0 ? 'partiel' : 'impayé'),
+            ];
+        });
+
+        return response()->json(['recap' => $recap, 'paiements' => $paiements]);
+    }
+
+    /**
+     * Reçu PDF d'un paiement de frais annexe (vérifie l'appartenance au parent connecté).
+     * GET /api/parent/frais-annexes/{id}/recu
+     */
+    public function fraisAnnexeRecuPdf(Request $request, int $paiementId)
+    {
+        $parent   = $request->user();
+        $eleveIds = $this->eleveIds($parent);
+        $paiement = PaiementFraisAnnexe::with(['eleve.classe.niveau', 'fraisAnnexe.niveau'])
+            ->where('id', $paiementId)
+            ->whereHas('eleve', fn ($q) => $q->whereIn('id', $eleveIds))
+            ->firstOrFail();
+
+        $etablissement = Etablissement::first();
+
+        $pdf = Pdf::loadView('paiements.recu_frais_annexe', compact('paiement', 'etablissement'))
+                   ->setPaper('A5', 'portrait');
+
+        $nomFichier = sprintf(
+            'recu_frais_%s_%s_%s.pdf',
+            str_pad($paiement->id, 6, '0', STR_PAD_LEFT),
+            strtolower($paiement->eleve->nom_eleve ?? 'eleve'),
+            $paiement->date_paiement
+        );
+
+        return $pdf->download($nomFichier);
+    }
+
+    /**
+     * Initier un paiement CinetPay pour une échéance de scolarité d'un enfant du parent connecté.
+     * POST /api/parent/enfant/{id}/paiements/initier
+     */
+    public function initierPaiement(Request $request, int $eleveId, CinetPayService $cinetpay)
+    {
+        $parent = $request->user();
+        abort_unless(in_array($eleveId, $this->eleveIds($parent)), 403);
+
+        $request->validate([
+            'scolarite_id' => 'required|exists:scolarites,id',
+            'montant'      => 'nullable|numeric|min:1',
+            'return_url'   => 'required|string',
+        ]);
+
+        $eleve     = Eleve::findOrFail($eleveId);
+        $scolarite = Scolarites::findOrFail($request->scolarite_id);
+
+        try {
+            $result = $cinetpay->demarrerPaiement($eleve, $scolarite, $request->input('montant'), $request->return_url);
+        } catch (CinetPayException $e) {
+            return response()->json(['message' => 'Erreur CinetPay : ' . $e->getMessage()], 502);
+        }
+
+        return response()->json($result);
+    }
+
+    /**
+     * Initier un paiement CinetPay pour un frais annexe d'un enfant du parent connecté.
+     * POST /api/parent/enfant/{id}/frais-annexes/initier
+     */
+    public function initierPaiementFrais(Request $request, int $eleveId, CinetPayService $cinetpay)
+    {
+        $parent = $request->user();
+        abort_unless(in_array($eleveId, $this->eleveIds($parent)), 403);
+
+        $request->validate([
+            'frais_annexe_id' => 'required|exists:frais_annexes,id',
+            'montant'         => 'nullable|numeric|min:1',
+            'return_url'      => 'required|string',
+        ]);
+
+        $eleve = Eleve::findOrFail($eleveId);
+        $frais = FraisAnnexe::findOrFail($request->frais_annexe_id);
+
+        try {
+            $result = $cinetpay->demarrerPaiement($eleve, $frais, $request->input('montant'), $request->return_url);
+        } catch (CinetPayException $e) {
+            return response()->json(['message' => 'Erreur CinetPay : ' . $e->getMessage()], 502);
+        }
+
+        return response()->json($result);
+    }
+
+    /**
+     * Statut d'un paiement CinetPay initié par le parent connecté (scolarité ou frais annexe).
+     * GET /api/parent/paiements/statut/{transactionId}
+     */
+    public function statutPaiement(Request $request, string $transactionId, CinetPayService $cinetpay)
+    {
+        $parent   = $request->user();
+        $eleveIds = $this->eleveIds($parent);
+
+        $paiement = $cinetpay->trouverParTransaction($transactionId);
+        abort_if(!$paiement || !in_array($paiement->eleve_id, $eleveIds), 404);
+
+        $cinetpay->rafraichirStatut($paiement);
+
+        return response()->json($paiement);
     }
 }

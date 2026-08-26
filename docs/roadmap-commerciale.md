@@ -1,6 +1,6 @@
 # Roadmap commerciale — Application de gestion scolaire
 
-> Document de référence — Mis à jour le 2026-08-16
+> Document de référence — Mis à jour le 2026-08-26
 > Synthèse de l'analyse experte (2026-04-30) et de l'état réel du code
 
 ---
@@ -31,6 +31,7 @@
 | **Statistiques générales MENET (formulaire officiel)**              | **Complet** — 14 sections (effectifs, langues, nationalités, âges, résultats examens BEPC/BAC/CEPE), exports Excel + PDF |
 | **Inscription parent autonome depuis l'app mobile**                 | **Complet** — flow 3 étapes via matricule élève, validation admin, slots/abonnements |
 | **Frais annexes** (tenues, manuels, examens, transport…)            | **Complet** — config par niveau, suivi paiements, impayés, reçus PDF              |
+| **Paiement mobile en ligne (CinetPay)**                              | **Complet** — scolarité et frais annexes, portail parent et back-office, webhook + réconciliation automatique |
 | **Export comptable structuré**                                      | **Complet** — Excel 3 feuilles (OHADA) + FEC/CSV SAGE                             |
 | **Module SaaS billing**                                             | **Complet** — dashboard super-admin, abonnements, factures PDF                    |
 | **Documentation in-app et aide contextuelle**                       | **Complet** — panneau "?" contextuel, gestion BDD, 27 articles pré-rédigés        |
@@ -55,7 +56,7 @@
 | **Import Excel en masse** (élèves, enseignants, affectations, scolarités, notes) | **Complet** — 5 flux avec gestion d'erreurs ligne par ligne                |
 | **Type d'établissement obligatoire**                                 | **Complet** — condition la génération du bulletin/relevé et le pré-remplissage pédagogique |
 | Mode hors-ligne mobile (présences **et notes**)                     | Complet (sync auto)                                                               |
-| **94 tests automatisés**                                            | **Complet** — couverture frais annexes, export, documentation, stats MENET, portail parent, imports Excel |
+| **122 tests automatisés**                                           | **Complet** — couverture frais annexes, export, documentation, stats MENET, portail parent, imports Excel, paiement mobile CinetPay |
 
 ---
 
@@ -223,7 +224,7 @@ Les données d'enfants mineurs sont ultra-sensibles. Même si la réglementation
 
 - Architecture multi-tenant isolée (rare)
 - Triple portail : web admin + enseignant mobile + parent mobile
-- Intégration CinetPay (paiement mobile money natif)
+- Intégration CinetPay (paiement mobile money natif, scolarité et frais annexes, depuis l'app parent ou le back-office)
 - Bulletins PDF avec appréciations et décisions du conseil
 - Archivage fin d'année avec rollback
 - Emploi du temps avec détection de conflits
@@ -236,7 +237,7 @@ Les données d'enfants mineurs sont ultra-sensibles. Même si la réglementation
 - **Export comptable OHADA** (Excel 3 feuilles + FEC SAGE — zéro ressaisie)
 - **Module SaaS billing** (abonnements, factures, dashboard super-admin)
 - **Documentation in-app contextuelle** (aide par module, 27 articles pré-rédigés)
-- 94 tests automatisés
+- 122 tests automatisés
 - Templates de démarrage rapide (mise en service en moins d'une heure)
 - **Page d'accueil publique avec entonnoir commercial** (demande d'accès → validation → tarification, sans intervention manuelle par email)
 - **Compte central unifié parent/enseignant** (une seule identité pour accéder à plusieurs établissements, y compris dans un groupe scolaire)

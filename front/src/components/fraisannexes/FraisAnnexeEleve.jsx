@@ -4,7 +4,8 @@ import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 import { useConfirm } from '../../context/ConfirmContext';
 
-const MODES = { especes: 'Espèces', cheque: 'Chèque', virement: 'Virement', autre: 'Autre' };
+const MODES = { especes: 'Espèces', cheque: 'Chèque', virement: 'Virement', cinetpay: 'CinetPay', autre: 'Autre' };
+const RETOUR_URL = window.location.origin + '/PaiementRetour';
 
 const STATUT = {
     soldé:   { cls: 'bg-success', label: 'Soldé' },
@@ -27,6 +28,7 @@ export default function FraisAnnexeEleve() {
     const [form, setForm]       = useState(FORM_VIDE);
     const [sauvegarde, setSauvegarde] = useState(false);
     const [erreurs, setErreurs] = useState({});
+    const [paiementEnLigneId, setPaiementEnLigneId] = useState(null);
 
     const charger = async (a = annee) => {
         setChargement(true);
@@ -91,6 +93,18 @@ export default function FraisAnnexeEleve() {
             toast.success('Paiement supprimé.');
             charger();
         } catch { toast.error('Impossible de supprimer ce paiement.'); }
+    };
+
+    const payerEnLigne = (fraisId) => {
+        setPaiementEnLigneId(fraisId);
+        api.post(`/paiements-frais-annexes/initier`, {
+            eleve_id:         eleveId,
+            frais_annexe_id:  fraisId,
+            return_url:       RETOUR_URL,
+        })
+        .then((r) => { window.open(r.data.payment_url, '_blank'); })
+        .catch(() => toast.error('Impossible d\'initier le paiement. Vérifiez la configuration CinetPay.'))
+        .finally(() => setPaiementEnLigneId(null));
     };
 
     const telechargerRecu = (paiementId) => {
@@ -195,10 +209,19 @@ export default function FraisAnnexeEleve() {
                                     </td>
                                     <td>
                                         {r.statut !== 'soldé' && (
-                                            <button className="btn btn-sm btn-outline-primary"
-                                                onClick={() => ouvrirPaiement(r.frais_id)}>
-                                                <i className="bi bi-plus" /> Payer
-                                            </button>
+                                            <div className="d-flex gap-1">
+                                                <button className="btn btn-sm btn-outline-primary"
+                                                    onClick={() => ouvrirPaiement(r.frais_id)}>
+                                                    <i className="bi bi-plus" /> Payer
+                                                </button>
+                                                <button className="btn btn-sm btn-outline-success"
+                                                    disabled={paiementEnLigneId === r.frais_id}
+                                                    onClick={() => payerEnLigne(r.frais_id)}>
+                                                    {paiementEnLigneId === r.frais_id
+                                                        ? <span className="spinner-border spinner-border-sm" />
+                                                        : <>💳 En ligne</>}
+                                                </button>
+                                            </div>
                                         )}
                                     </td>
                                 </tr>

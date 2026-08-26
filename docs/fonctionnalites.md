@@ -145,7 +145,7 @@ Application complète de gestion scolaire en architecture multi-tenant, permetta
 - Suivi des assiduités par enfant
 - Consultation de l'emploi du temps
 - Historique des paiements avec **téléchargement des reçus PDF**
-- **Paiement en ligne** via CinetPay
+- **Paiement en ligne** via CinetPay (scolarité et frais annexes)
 - Messagerie avec les enseignants
 - Réservation de créneaux de rendez-vous avec les enseignants
 - Notifications push (bulletins, devoirs, sanctions, messages)
@@ -172,7 +172,7 @@ Application complète de gestion scolaire en architecture multi-tenant, permetta
 - Suivi individuel des paiements : total dû, total payé, solde
 - Tableau des **impayés frais annexes** (élèves avec solde non nul)
 - **Génération de reçus PDF** pour chaque paiement de frais annexe
-- Modes de paiement multiples (espèces, chèque, virement, Mobile Money)
+- Modes de paiement multiples (espèces, chèque, virement, CinetPay/Mobile Money) + paiement en ligne depuis le portail parent
 
 ### Export comptable OHADA
 - **Aperçu financier JSON** : total scolarités, total frais annexes, détail par mode de paiement
@@ -182,8 +182,8 @@ Application complète de gestion scolaire en architecture multi-tenant, permetta
 - Tous les exports respectent la nomenclature comptable UEMOA
 
 ### Paiement en ligne
-- Intégration **CinetPay** pour le paiement depuis le portail parent
-- Webhook de notification et vérification du statut des transactions
+- Intégration **CinetPay** pour le paiement depuis le portail parent (scolarité et frais annexes) et depuis le back-office (paiement initié par le personnel au nom d'un parent)
+- Webhook de notification + vérification manuelle du statut, complétés par une réconciliation automatique périodique des transactions restées en attente
 
 ### Statistiques financières
 - Synthèse financière globale

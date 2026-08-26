@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\ReconcilierPaiementsCinetPay;
 use App\Console\Commands\RelancesPaiements;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -11,3 +12,6 @@ Artisan::command('inspire', function () {
 
 // Relances paiements en retard — tous les matins à 8h
 Schedule::command(RelancesPaiements::class)->dailyAt('08:00');
+
+// Réconciliation des paiements CinetPay restés 'pending' (webhook jamais reçu)
+Schedule::command(ReconcilierPaiementsCinetPay::class)->everyThirtyMinutes();

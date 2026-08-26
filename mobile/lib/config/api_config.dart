@@ -159,6 +159,12 @@ class ApiConfig {
   static String parentPaiementRecu(int paiementId) =>
       '/parent/paiements/$paiementId/recu';
 
+  static String parentFraisAnnexes(int eleveId) =>
+      '/parent/enfant/$eleveId/frais-annexes';
+
+  static String parentFraisAnnexeRecu(int paiementId) =>
+      '/parent/frais-annexes/$paiementId/recu';
+
   // Endpoint public périodes
   static const String periodes = '/periodes';
 
@@ -232,8 +238,11 @@ class ApiConfig {
       '/mobile/parent/valider-matricule/$matricule';
   static const String inscriptionParent = '/mobile/parent/register';
 
-  // Endpoints CinetPay
-  static const String initierPaiement = '/paiements/initier';
+  // Endpoints CinetPay (portail parent — accès scopé aux enfants du parent connecté)
+  static String initierPaiement(int eleveId) =>
+      '/parent/enfant/$eleveId/paiements/initier';
+  static String initierPaiementFrais(int eleveId) =>
+      '/parent/enfant/$eleveId/frais-annexes/initier';
   static String statutPaiement(String transactionId) =>
-      '/paiements/statut/$transactionId';
+      '/parent/paiements/statut/$transactionId';
 }

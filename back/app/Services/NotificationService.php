@@ -173,6 +173,7 @@ class NotificationService
             foreach ($eleves as $eleve) {
                 $totalPaye = Paiement::where('eleve_id', $eleve->id)
                     ->where('scolarite_id', $echeance->id)
+                    ->confirmes()
                     ->sum('montant_paye');
 
                 $solde = (float) $echeance->montant_echeance - (float) $totalPaye;

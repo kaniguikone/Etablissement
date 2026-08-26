@@ -90,9 +90,10 @@ class FraisAnnexeController extends Controller
 
         $frais = $query->get();
 
-        // Paiements effectués par cet élève
+        // Paiements effectués par cet élève (tentatives CinetPay non abouties exclues)
         $paiements = PaiementFraisAnnexe::with('fraisAnnexe')
             ->where('eleve_id', $eleveId)
+            ->confirmes()
             ->when($annee, fn($q) => $q->whereHas('fraisAnnexe', fn($q2) => $q2->where('annee', $annee)))
             ->orderBy('date_paiement', 'desc')
             ->get();
@@ -192,9 +193,10 @@ class FraisAnnexeController extends Controller
 
             $eleves = $eleveQuery->get();
 
-            // Paiements existants pour ce frais
+            // Paiements existants pour ce frais (tentatives CinetPay non abouties exclues)
             $payes = PaiementFraisAnnexe::where('frais_annexe_id', $frais->id)
                 ->whereIn('eleve_id', $eleves->pluck('id'))
+                ->confirmes()
                 ->select('eleve_id', DB::raw('SUM(montant_paye) as total_paye'))
                 ->groupBy('eleve_id')
                 ->pluck('total_paye', 'eleve_id');

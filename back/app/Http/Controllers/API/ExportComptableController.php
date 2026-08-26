@@ -111,10 +111,7 @@ class ExportComptableController extends Controller
     {
         // ── Paiements de scolarité ───────────────────────────────────────────
         $queryScol = Paiement::with(['eleve.classe.niveau', 'scolarite'])
-            ->where(fn ($q) => $q
-                ->whereNull('statut_cinetpay')
-                ->orWhereNotIn('statut_cinetpay', ['pending', 'cancelled'])
-            )
+            ->confirmes()
             ->orderBy('date_paiement');
 
         if ($dateDebut) $queryScol->whereDate('date_paiement', '>=', $dateDebut);
@@ -148,6 +145,7 @@ class ExportComptableController extends Controller
 
         // ── Paiements de frais annexes ───────────────────────────────────────
         $queryAnnexe = PaiementFraisAnnexe::with(['eleve.classe', 'fraisAnnexe'])
+            ->confirmes()
             ->orderBy('date_paiement');
 
         if ($dateDebut) $queryAnnexe->whereDate('date_paiement', '>=', $dateDebut);

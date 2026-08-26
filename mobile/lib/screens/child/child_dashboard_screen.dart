@@ -5,6 +5,7 @@ import '../../widgets/dashboard_card.dart';
 import 'notes_screen.dart';
 import 'assiduites_screen.dart';
 import 'scolarites_screen.dart';
+import 'frais_annexes_screen.dart';
 import 'enseignants_screen.dart';
 import 'informations_screen.dart';
 import 'emploi_du_temps_screen.dart';
@@ -42,6 +43,12 @@ class ChildDashboardScreen extends StatelessWidget {
         label: 'Scolarités',
         color: const Color(0xFF00897B),
         screen: ScolaritesScreen(eleve: eleve),
+      ),
+      _DashItem(
+        icon: Icons.checklist_outlined,
+        label: 'Frais annexes',
+        color: const Color(0xFF6D4C41),
+        screen: FraisAnnexesScreen(eleve: eleve),
       ),
       _DashItem(
         icon: Icons.calendar_today_outlined,

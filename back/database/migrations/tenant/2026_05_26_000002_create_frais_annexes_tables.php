@@ -35,6 +35,11 @@ return new class extends Migration
             // mode: especes | cheque | virement | autre
             $table->string('reference_paiement', 100)->nullable();
             $table->string('remarque', 255)->nullable();
+            // Paiement en ligne CinetPay ajouté dans 2026_08_26_000002 (migration
+            // supprimée après application aux tenants existants)
+            $table->string('transaction_id')->nullable()->unique();
+            $table->string('statut_cinetpay')->nullable();
+            $table->string('payment_url', 500)->nullable();
             $table->timestamps();
 
             $table->foreign('eleve_id')->references('id')->on('eleves')->cascadeOnDelete();

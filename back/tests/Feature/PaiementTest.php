@@ -169,6 +169,91 @@ class PaiementTest extends TestCase
     }
 
     /** @test */
+    public function recap_eleve_exclut_paiement_cinetpay_en_attente(): void
+    {
+        Paiement::create([
+            'eleve_id'        => $this->eleve->id,
+            'scolarite_id'    => $this->scolarite->id,
+            'montant_paye'    => 80000,
+            'date_paiement'   => '2026-10-01',
+            'mode_paiement'   => 'autre',
+            'transaction_id'  => 'SCOL-TEST-PENDING',
+            'statut_cinetpay' => 'pending',
+        ]);
+
+        $data = $this->getJson("/api/paiementsEleve/{$this->eleve->id}")
+            ->assertStatus(200)->json();
+
+        $this->assertEquals(0.0, $data['total_paye']);
+        $this->assertEquals(80000.0, $data['solde_restant']);
+        $this->assertEquals('impayé', $data['recap_echeances'][0]['statut']);
+        $this->assertCount(0, $data['paiements']);
+    }
+
+    /** @test */
+    public function recap_eleve_exclut_paiement_cinetpay_echoue(): void
+    {
+        Paiement::create([
+            'eleve_id'        => $this->eleve->id,
+            'scolarite_id'    => $this->scolarite->id,
+            'montant_paye'    => 80000,
+            'date_paiement'   => '2026-10-01',
+            'mode_paiement'   => 'autre',
+            'transaction_id'  => 'SCOL-TEST-FAILED',
+            'statut_cinetpay' => 'failed',
+        ]);
+
+        $data = $this->getJson("/api/paiementsEleve/{$this->eleve->id}")
+            ->assertStatus(200)->json();
+
+        $this->assertEquals(0.0, $data['total_paye']);
+    }
+
+    /** @test */
+    public function recap_eleve_inclut_paiement_cinetpay_confirme(): void
+    {
+        Paiement::create([
+            'eleve_id'        => $this->eleve->id,
+            'scolarite_id'    => $this->scolarite->id,
+            'montant_paye'    => 80000,
+            'date_paiement'   => '2026-10-01',
+            'mode_paiement'   => 'autre',
+            'transaction_id'  => 'SCOL-TEST-PAID',
+            'statut_cinetpay' => 'paid',
+        ]);
+
+        $data = $this->getJson("/api/paiementsEleve/{$this->eleve->id}")
+            ->assertStatus(200)->json();
+
+        $this->assertEquals(80000.0, $data['total_paye']);
+        $this->assertEquals('soldé', $data['recap_echeances'][0]['statut']);
+        $this->assertCount(1, $data['paiements']);
+    }
+
+    /** @test */
+    public function impayes_ignore_paiement_cinetpay_en_attente(): void
+    {
+        Paiement::create([
+            'eleve_id'        => $this->eleve->id,
+            'scolarite_id'    => $this->scolarite->id,
+            'montant_paye'    => 80000,
+            'date_paiement'   => '2026-10-01',
+            'mode_paiement'   => 'autre',
+            'transaction_id'  => 'SCOL-TEST-PENDING-2',
+            'statut_cinetpay' => 'pending',
+        ]);
+
+        // Sans le correctif, cet élève disparaîtrait de la liste des impayés
+        // alors qu'il n'a rien réellement payé.
+        $response = $this->getJson('/api/impayes');
+
+        $response->assertStatus(200)
+                 ->assertJsonPath('count', 1)
+                 ->assertJsonPath('data.0.total_paye', 0)
+                 ->assertJsonPath('data.0.statut', 'impayé');
+    }
+
+    /** @test */
     public function export_csv_retourne_un_fichier_csv(): void
     {
         Paiement::create([

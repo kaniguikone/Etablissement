@@ -268,7 +268,7 @@ const Accueil = () => {
             .catch(() => setErreur('Impossible de charger les statistiques.'));
     }, [periodeIds]);
 
-    const modeLabel    = { especes: 'Espèces', cheque: 'Chèque', virement: 'Virement', autre: 'Autre' };
+    const modeLabel    = { especes: 'Espèces', cheque: 'Chèque', virement: 'Virement', cinetpay: 'CinetPay', autre: 'Autre' };
     const today        = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     const tauxNotes    = stats?.taux_saisie_notes ?? 0;
     const couleurNotes = tauxNotes >= 80 ? 'success' : tauxNotes >= 50 ? 'warning' : 'danger';

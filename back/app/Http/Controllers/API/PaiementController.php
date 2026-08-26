@@ -43,9 +43,10 @@ class PaiementController extends Controller
             ->orderBy('date_echeance')
             ->get();
 
-        // Paiements effectués par cet élève
+        // Paiements effectués par cet élève (tentatives CinetPay non abouties exclues)
         $paiements = Paiement::with('scolarite')
             ->where('eleve_id', $eleveId)
+            ->confirmes()
             ->orderBy('date_paiement', 'desc')
             ->get();
 
@@ -87,6 +88,7 @@ class PaiementController extends Controller
         $eleveIds = Eleve::whereHas('classe', fn($q) => $q->where('niveau_id', $niveauId))->pluck('id');
 
         $paiementsParEleve = Paiement::whereIn('eleve_id', $eleveIds)
+            ->confirmes()
             ->select('eleve_id', \Illuminate\Support\Facades\DB::raw('sum(montant_paye) as total_paye'))
             ->groupBy('eleve_id')
             ->pluck('total_paye', 'eleve_id');
@@ -229,8 +231,9 @@ class PaiementController extends Controller
         }
         $eleves = $eleveQuery->orderBy('nom_eleve')->get();
 
-        // Paiements existants
+        // Paiements existants (tentatives CinetPay non abouties exclues)
         $paiements = Paiement::whereIn('eleve_id', $eleves->pluck('id'))
+            ->confirmes()
             ->get()->groupBy(fn($p) => $p->eleve_id . '_' . $p->scolarite_id);
 
         $lignes = [];
@@ -303,9 +306,10 @@ class PaiementController extends Controller
 
         $eleves = $query->with('classe.niveau.scolarites')->orderBy('nom_eleve')->get();
 
-        // Pré-charger les paiements de tous les élèves en une seule requête
+        // Pré-charger les paiements de tous les élèves en une seule requête (tentatives CinetPay non abouties exclues)
         $eleveIds = $eleves->pluck('id');
         $paiementsParEleve = Paiement::whereIn('eleve_id', $eleveIds)
+            ->confirmes()
             ->select('eleve_id', \Illuminate\Support\Facades\DB::raw('sum(montant_paye) as total_paye'))
             ->groupBy('eleve_id')
             ->pluck('total_paye', 'eleve_id');
@@ -344,6 +348,7 @@ class PaiementController extends Controller
     public function exportCsv(Request $request)
     {
         $query = Paiement::with(['eleve.classe.niveau', 'scolarite'])
+            ->confirmes()
             ->orderBy('date_paiement', 'desc');
 
         if ($request->filled('search')) {

@@ -5,7 +5,7 @@ import Pagination from '../shared/Pagination';
 import { useToast } from '../../context/ToastContext';
 import { useConfirm } from '../../context/ConfirmContext';
 
-const MODES = { especes: 'Espèces', cheque: 'Chèque', virement: 'Virement', autre: 'Autre' };
+const MODES = { especes: 'Espèces', cheque: 'Chèque', virement: 'Virement', cinetpay: 'CinetPay', autre: 'Autre' };
 const fmtDate = (d) => d ? d.slice(0, 10).split('-').reverse().join('/') : '—';
 
 const telechargerFichier = async (apiUrl, nomFichier, type = 'application/octet-stream') => {

@@ -83,7 +83,7 @@ class StatistiquesController extends Controller
                 ->join('eleves', 'eleves.classe_id', '=', 'classes.id')
                 ->sum('scolarites.montant_echeance');
 
-            $totalEncaisse = (float) Paiement::sum('montant_paye');
+            $totalEncaisse = (float) Paiement::confirmes()->sum('montant_paye');
             $montantRestant = max(0, $totalDu - $totalEncaisse);
 
             $data['taux_recouvrement_global'] = $totalDu > 0
@@ -215,11 +215,12 @@ class StatistiquesController extends Controller
             $nbEleves      = $eleveIds->count();
             $montantTotal  = $niveau->scolarites->sum('montant_echeance');
             $totalDu       = $montantTotal * $nbEleves;
-            $totalEncaisse = (float) Paiement::whereIn('eleve_id', $eleveIds)->sum('montant_paye');
+            $totalEncaisse = (float) Paiement::whereIn('eleve_id', $eleveIds)->confirmes()->sum('montant_paye');
             $taux          = $totalDu > 0 ? round(($totalEncaisse / $totalDu) * 100, 1) : 0;
 
             // Élèves à jour = ont payé au moins autant que le montant total dû
             $paiementsParEleve = Paiement::whereIn('eleve_id', $eleveIds)
+                ->confirmes()
                 ->select('eleve_id', DB::raw('SUM(montant_paye) as total_paye'))
                 ->groupBy('eleve_id')->get()->keyBy('eleve_id');
 
@@ -250,7 +251,7 @@ class StatistiquesController extends Controller
                 $nbEleves      = $eleveIds->count();
                 $totalDu       = $ech->montant_echeance * $nbEleves;
                 $totalEncaisse = (float) Paiement::whereIn('eleve_id', $eleveIds)
-                    ->where('scolarite_id', $ech->id)->sum('montant_paye');
+                    ->where('scolarite_id', $ech->id)->confirmes()->sum('montant_paye');
                 $taux = $totalDu > 0 ? round(($totalEncaisse / $totalDu) * 100, 1) : 0;
 
                 return [

@@ -38,4 +38,15 @@ class Paiement extends Model
     {
         return $this->belongsTo(Scolarites::class);
     }
+
+    /**
+     * Exclut les tentatives de paiement CinetPay non abouties (pending/failed).
+     * Un paiement manuel (statut_cinetpay = null) est toujours considéré confirmé.
+     */
+    public function scopeConfirmes($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereNull('statut_cinetpay')->orWhere('statut_cinetpay', 'paid');
+        });
+    }
 }

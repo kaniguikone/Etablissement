@@ -14,6 +14,7 @@ class PaiementFraisAnnexe extends Model
     protected $fillable = [
         'eleve_id', 'frais_annexe_id', 'montant_paye',
         'date_paiement', 'mode_paiement', 'reference_paiement', 'remarque',
+        'transaction_id', 'statut_cinetpay', 'payment_url',
     ];
 
     protected $casts = [
@@ -29,5 +30,16 @@ class PaiementFraisAnnexe extends Model
     public function fraisAnnexe()
     {
         return $this->belongsTo(FraisAnnexe::class);
+    }
+
+    /**
+     * Exclut les tentatives de paiement CinetPay non abouties (pending/failed).
+     * Un paiement manuel (statut_cinetpay = null) est toujours considéré confirmé.
+     */
+    public function scopeConfirmes($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereNull('statut_cinetpay')->orWhere('statut_cinetpay', 'paid');
+        });
     }
 }

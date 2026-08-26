@@ -105,10 +105,11 @@ class DashboardController extends Controller
                 ->join('eleves', 'eleves.classe_id', '=', 'classes.id')
                 ->sum('scolarites.montant_echeance');
 
-            $totalEncaisse    = (float) Paiement::sum('montant_paye');
+            $totalEncaisse    = (float) Paiement::confirmes()->sum('montant_paye');
             $tauxRecouvrement = $totalDu > 0 ? round(($totalEncaisse / $totalDu) * 100, 1) : 0;
 
-            $elevesAvecPaiements = Paiement::select('eleve_id', DB::raw('sum(montant_paye) as total_paye'))
+            $elevesAvecPaiements = Paiement::confirmes()
+                ->select('eleve_id', DB::raw('sum(montant_paye) as total_paye'))
                 ->groupBy('eleve_id')->get()->keyBy('eleve_id');
 
             // Calcul en SQL : pour chaque niveau, montant dû = sum(scolarites) * nb_élèves
@@ -133,6 +134,7 @@ class DashboardController extends Controller
             $data['eleves_en_retard']   = $elevesEnRetard;
 
             $data['derniers_paiements'] = Paiement::with(['eleve:id,nom_eleve,prenoms_eleve', 'scolarite:id,libelle_echeance'])
+                ->confirmes()
                 ->orderBy('date_paiement', 'desc')->limit(5)->get()
                 ->map(fn($p) => [
                     'eleve'    => $p->eleve?->nom_eleve . ' ' . $p->eleve?->prenoms_eleve,

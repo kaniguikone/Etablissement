@@ -84,7 +84,7 @@
         'activite' => 'Activité parascolaire',
         'autre'    => 'Autre',
     ];
-    $modes = ['especes'=>'Espèces','cheque'=>'Chèque','virement'=>'Virement','autre'=>'Autre'];
+    $modes = ['especes'=>'Espèces','cheque'=>'Chèque','virement'=>'Virement','cinetpay'=>'CinetPay','autre'=>'Autre'];
     $frais = $paiement->fraisAnnexe;
     $eleve = $paiement->eleve;
 

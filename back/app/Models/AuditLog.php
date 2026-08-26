@@ -40,7 +40,7 @@ class AuditLog extends Model
 
         static::create([
             'user_id'        => $user->id,
-            'user_nom'       => $user->name,
+            'user_nom'       => static::nomAffichable($user),
             'action'         => $action,
             'auditable_type' => class_basename($model),
             'auditable_id'   => $model->getKey(),
@@ -48,5 +48,25 @@ class AuditLog extends Model
             'new_values'     => $new ?: null,
             'ip_address'     => request()->ip(),
         ]);
+    }
+
+    /**
+     * Nom affichable de l'utilisateur audité. Le modèle User (staff) a un
+     * attribut 'name' ; Parents et Enseignant n'en ont pas (nom_parent/nom_enseignant
+     * + prénom séparés) — d'où ce repli générique plutôt que de planter sur user_nom.
+     */
+    private static function nomAffichable($user): string
+    {
+        if (isset($user->name)) {
+            return $user->name;
+        }
+        if (isset($user->nom_parent)) {
+            return trim(($user->prenom_parent ?? '') . ' ' . $user->nom_parent);
+        }
+        if (isset($user->nom_enseignant)) {
+            return trim(($user->prenoms_enseignant ?? '') . ' ' . $user->nom_enseignant);
+        }
+
+        return class_basename($user) . ' #' . $user->id;
     }
 }

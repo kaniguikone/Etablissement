@@ -270,7 +270,9 @@ Les frais annexes permettent de facturer des charges complémentaires à la scol
 - Liste de tous les élèves ayant un solde non nul sur des frais obligatoires
 
 ### Paiement mobile (CinetPay)
-Les parents peuvent payer depuis l'application mobile via Mobile Money (Orange Money, MTN MoMo, Wave). Le paiement est enregistré automatiquement.
+Les parents peuvent payer une échéance de scolarité ou un frais annexe directement depuis l'application mobile via Mobile Money (Orange Money, MTN MoMo, Wave) — bouton **Payer en ligne** sur l'écran Scolarités ou Frais annexes de l'enfant concerné. Le paiement est confirmé automatiquement (webhook CinetPay) et un reçu est disponible dès validation ; une transaction restée sans confirmation est revérifiée automatiquement en arrière-plan.
+
+Le même bouton **Payer en ligne** est aussi disponible côté back-office (fiche paiements de l'élève, écran Frais annexes) pour initier un paiement en ligne au nom d'un parent présent au bureau, en plus de la saisie manuelle habituelle.
 
 ### Tableau des impayés scolarité
 *Menu : Finances → Impayés*

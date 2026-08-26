@@ -59,21 +59,29 @@ class ImportEleveTest extends TestCase
         $this->assertDatabaseMissing('eleves', ['matricule_eleve' => 'EL001']);
     }
 
-    /** @test */
-    public function import_rejette_une_valeur_de_handicap_hors_enum(): void
+    /**
+     * Le modèle élèves utilise une colonne O/N par type de handicap (M à S,
+     * voir ImportEleveController::HANDICAPS), pas un champ texte libre validé
+     * contre une liste — une valeur non reconnue dans une de ces colonnes est
+     * donc simplement ignorée (ni erreur, ni handicap enregistré), pas rejetée.
+     * @test
+     */
+    public function import_ignore_une_valeur_non_reconnue_dans_une_colonne_handicap(): void
     {
         $niveau = $this->creerNiveau('6ème', '6e');
         $classe = $this->creerClasse($niveau->id, '6ème A', '6eA');
 
         $fichier = $this->fichierImport([
-            ['ELV200', 'TRAORE', 'Awa', 'F', '01/01/2010', 'Abidjan', 'Ivoirienne', 'Cocody', '6eA', '', '', 'N', 'mental', ''],
+            // M(moteur)='mental' — ni 'O' ni 'N', doit être traité comme "non coché"
+            ['ELV200', 'TRAORE', 'Awa', 'F', '01/01/2010', 'Abidjan', 'Ivoirienne', 'Cocody', '6eA', '', '', 'N', 'mental', 'N', 'N', 'N', 'N', 'N', 'N', ''],
         ]);
 
         $response = $this->postJson('/api/eleves/import', ['fichier' => $fichier]);
 
-        $response->assertStatus(200)->assertJsonPath('inseres', 0);
-        $response->assertJsonPath('erreurs.0.ligne', 3);
-        $this->assertDatabaseMissing('eleves', ['matricule_eleve' => 'ELV200']);
+        $response->assertStatus(200)->assertJsonPath('inseres', 1);
+        $eleve = Eleve::where('matricule_eleve', 'ELV200')->first();
+        $this->assertNotNull($eleve);
+        $this->assertNull($eleve->types_handicap);
     }
 
     /** @test */
@@ -83,7 +91,8 @@ class ImportEleveTest extends TestCase
         $classe = $this->creerClasse($niveau->id, '6ème A', '6eA');
 
         $fichier = $this->fichierImport([
-            ['ELV201', 'TRAORE', 'Awa', 'F', '01/01/2010', 'Abidjan', 'Ivoirienne', 'Cocody', '6eA', '', '', 'N', 'albinisme', ''],
+            // Colonnes M..S = moteur, malvoyant, malentendant, albinisme, nanisme, begayement, autiste
+            ['ELV201', 'TRAORE', 'Awa', 'F', '01/01/2010', 'Abidjan', 'Ivoirienne', 'Cocody', '6eA', '', '', 'N', 'N', 'N', 'N', 'O', 'N', 'N', 'N', ''],
         ]);
 
         $response = $this->postJson('/api/eleves/import', ['fichier' => $fichier]);

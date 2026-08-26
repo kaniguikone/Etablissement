@@ -254,8 +254,7 @@ class ApiService {
     required num montant,
     required String returnUrl,
   }) async {
-    final response = await _dio.post(ApiConfig.initierPaiement, data: {
-      'eleve_id':     eleveId,
+    final response = await _dio.post(ApiConfig.initierPaiement(eleveId), data: {
       'scolarite_id': scolariteId,
       'montant':      montant,
       'return_url':   returnUrl,
@@ -263,9 +262,38 @@ class ApiService {
     return response.data as Map<String, dynamic>;
   }
 
+  Future<Map<String, dynamic>> initierPaiementFrais({
+    required int eleveId,
+    required int fraisAnnexeId,
+    required num montant,
+    required String returnUrl,
+  }) async {
+    final response = await _dio.post(ApiConfig.initierPaiementFrais(eleveId), data: {
+      'frais_annexe_id': fraisAnnexeId,
+      'montant':         montant,
+      'return_url':      returnUrl,
+    });
+    return response.data as Map<String, dynamic>;
+  }
+
   Future<Map<String, dynamic>> statutPaiement(String transactionId) async {
     final response = await _dio.get(ApiConfig.statutPaiement(transactionId));
     return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getFraisAnnexes(int eleveId) async {
+    final response = await _dio.get(ApiConfig.parentFraisAnnexes(eleveId));
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<List<int>> getFraisAnnexeRecuPdf(int paiementId) async {
+    final response = await _dio.get(
+      ApiConfig.parentFraisAnnexeRecu(paiementId),
+      options: Options(responseType: ResponseType.bytes),
+    );
+    final data = response.data;
+    if (data is List<int>) return data;
+    return (data as List).cast<int>();
   }
 
   Future<String> getProchainCode(String base) async {
