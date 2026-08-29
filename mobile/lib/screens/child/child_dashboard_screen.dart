@@ -4,13 +4,10 @@ import '../../theme/app_theme.dart';
 import '../../widgets/dashboard_card.dart';
 import 'notes_screen.dart';
 import 'assiduites_screen.dart';
-import 'scolarites_screen.dart';
-import 'frais_annexes_screen.dart';
+import 'scolarites_frais_screen.dart';
 import 'enseignants_screen.dart';
 import 'informations_screen.dart';
 import 'emploi_du_temps_screen.dart';
-import '../messagerie/conversations_screen.dart';
-import '../rdv/rdv_parent_screen.dart';
 
 class ChildDashboardScreen extends StatelessWidget {
   final Eleve eleve;
@@ -40,15 +37,9 @@ class ChildDashboardScreen extends StatelessWidget {
       ),
       _DashItem(
         icon: Icons.payment_outlined,
-        label: 'Scolarités',
+        label: 'Scolarités & Frais',
         color: const Color(0xFF00897B),
-        screen: ScolaritesScreen(eleve: eleve),
-      ),
-      _DashItem(
-        icon: Icons.checklist_outlined,
-        label: 'Frais annexes',
-        color: const Color(0xFF6D4C41),
-        screen: FraisAnnexesScreen(eleve: eleve),
+        screen: ScolaritesFraisScreen(eleve: eleve),
       ),
       _DashItem(
         icon: Icons.calendar_today_outlined,
@@ -61,18 +52,6 @@ class ChildDashboardScreen extends StatelessWidget {
         label: 'Mes Professeurs',
         color: const Color(0xFF0277BD),
         screen: EnseignantsScreen(eleve: eleve),
-      ),
-      const _DashItem(
-        icon: Icons.chat_outlined,
-        label: 'Messages',
-        color: Color(0xFF00796B),
-        screen: ConversationsScreen(prefix: 'parent'),
-      ),
-      _DashItem(
-        icon: Icons.event_available_outlined,
-        label: 'Rendez-vous',
-        color: const Color(0xFFE65100),
-        screen: RdvParentScreen(eleve: eleve),
       ),
     ];
 

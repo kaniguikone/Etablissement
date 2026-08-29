@@ -115,16 +115,16 @@ Un élève sans photo uploadée affiche une icône cassée dans certains écrans
 2. Télécharger le bulletin PDF → vérifier qu'une visionneuse s'ouvre (voir [point de vigilance 2.1](#21-ouverture-des-pdf-sur-mobile-android))
 
 ### 4.3 Scolarités, frais annexes et reçu de paiement
-1. **Scolarités** → onglet **Échéances** (montrer les versements à venir, bouton **Payer en ligne** qui ouvre CinetPay), onglet **Paiements** (historique)
-2. **Frais annexes** : même principe pour les frais complémentaires (tenue, manuels, examens…)
+1. Ouvrir la tuile **Scolarités & Frais** → onglet **Scolarités** (sous-onglets **Échéances** — versements à venir, bouton **Payer en ligne** qui ouvre CinetPay — et **Paiements**, historique)
+2. Onglet **Frais annexes** : même principe pour les frais complémentaires (tenue, manuels, examens…), avec ses propres sous-onglets Frais/Paiements
 3. Télécharger un reçu PDF → même vérification que ci-dessus
 4. Si vous démontrez un paiement en direct : utiliser le mode sandbox CinetPay (voir [2.4](#24-emails-et-paiement-cinetpay)) pour ne pas engager de fonds réels, et prévoir de revenir dans l'app taper **Vérifier** après le paiement (pas de retour automatique dans l'app, le navigateur externe affiche la page de confirmation web).
 
 ### 4.4 Autres écrans utiles selon le profil du client
 - **Assiduité** : historique des absences/retards avec notification automatique
 - **Emploi du temps** : vue personnelle de l'enfant
-- **Messages** : échange avec un enseignant
-- **Rendez-vous** : réservation d'un créneau avec un enseignant
+
+> Les tuiles Messages et Rendez-vous ont été retirées du tableau de bord élève (portail parent) — ne pas les chercher en démo mobile côté parent. Sans impact côté enseignant, qui garde ses propres onglets Messages et RDV.
 
 ---
 

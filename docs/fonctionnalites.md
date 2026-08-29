@@ -145,10 +145,10 @@ Application complète de gestion scolaire en architecture multi-tenant, permetta
 - Suivi des assiduités par enfant
 - Consultation de l'emploi du temps
 - Historique des paiements avec **téléchargement des reçus PDF**
-- **Paiement en ligne** via CinetPay (scolarité et frais annexes)
-- Messagerie avec les enseignants
-- Réservation de créneaux de rendez-vous avec les enseignants
+- **Paiement en ligne** via CinetPay (scolarité et frais annexes, regroupés sous un même écran "Scolarités & Frais")
 - Notifications push (bulletins, devoirs, sanctions, messages)
+
+> La messagerie et la réservation de rendez-vous avec les enseignants existent côté code mais ne sont plus exposées dans le tableau de bord élève du portail parent (retirées de la navigation, comme le module Inscriptions — voir `guide-demo-et-tests-e2e.md`).
 
 ---
 

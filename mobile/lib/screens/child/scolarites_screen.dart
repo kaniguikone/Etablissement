@@ -9,15 +9,29 @@ import '../../utils/pdf_downloader.dart';
 import '../../widgets/cinetpay_verification_sheet.dart';
 import '../../widgets/loading_error_widget.dart';
 
-class ScolaritesScreen extends StatefulWidget {
+class ScolaritesScreen extends StatelessWidget {
   final Eleve eleve;
   const ScolaritesScreen({super.key, required this.eleve});
 
   @override
-  State<ScolaritesScreen> createState() => _ScolaritesScreenState();
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(title: const Text('Scolarités')),
+        body: ScolaritesBody(eleve: eleve),
+      );
 }
 
-class _ScolaritesScreenState extends State<ScolaritesScreen> {
+/// Contenu de l'écran Scolarités, sans Scaffold/AppBar propre — réutilisable
+/// tel quel (voir [ScolaritesScreen]) ou intégré dans un onglet plus large
+/// (voir ScolaritesFraisScreen).
+class ScolaritesBody extends StatefulWidget {
+  final Eleve eleve;
+  const ScolaritesBody({super.key, required this.eleve});
+
+  @override
+  State<ScolaritesBody> createState() => _ScolaritesBodyState();
+}
+
+class _ScolaritesBodyState extends State<ScolaritesBody> {
   final _api = ApiService();
 
   // ── Échéances ──
@@ -129,33 +143,30 @@ class _ScolaritesScreenState extends State<ScolaritesScreen> {
 
     return DefaultTabController(
       length: 2,
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Scolarités')),
-        body: Column(
-          children: [
-            const Material(
-              color: Colors.white,
-              elevation: 1,
-              child: TabBar(
-                labelColor: Color(0xFF00897B),
-                unselectedLabelColor: Colors.grey,
-                indicatorColor: Color(0xFF00897B),
-                tabs: [
-                  Tab(icon: Icon(Icons.schedule_outlined), text: 'Échéances'),
-                  Tab(icon: Icon(Icons.receipt_long_outlined), text: 'Paiements'),
-                ],
-              ),
+      child: Column(
+        children: [
+          const Material(
+            color: Colors.white,
+            elevation: 1,
+            child: TabBar(
+              labelColor: Color(0xFF00897B),
+              unselectedLabelColor: Colors.grey,
+              indicatorColor: Color(0xFF00897B),
+              tabs: [
+                Tab(icon: Icon(Icons.schedule_outlined), text: 'Échéances'),
+                Tab(icon: Icon(Icons.receipt_long_outlined), text: 'Paiements'),
+              ],
             ),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _buildEcheances(total),
-                  _buildPaiements(),
-                ],
-              ),
+          ),
+          Expanded(
+            child: TabBarView(
+              children: [
+                _buildEcheances(total),
+                _buildPaiements(),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

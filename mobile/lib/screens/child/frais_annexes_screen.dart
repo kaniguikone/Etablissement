@@ -8,15 +8,29 @@ import '../../utils/pdf_downloader.dart';
 import '../../widgets/cinetpay_verification_sheet.dart';
 import '../../widgets/loading_error_widget.dart';
 
-class FraisAnnexesScreen extends StatefulWidget {
+class FraisAnnexesScreen extends StatelessWidget {
   final Eleve eleve;
   const FraisAnnexesScreen({super.key, required this.eleve});
 
   @override
-  State<FraisAnnexesScreen> createState() => _FraisAnnexesScreenState();
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(title: const Text('Frais annexes')),
+        body: FraisAnnexesBody(eleve: eleve),
+      );
 }
 
-class _FraisAnnexesScreenState extends State<FraisAnnexesScreen> {
+/// Contenu de l'écran Frais annexes, sans Scaffold/AppBar propre —
+/// réutilisable tel quel (voir [FraisAnnexesScreen]) ou intégré dans un
+/// onglet plus large (voir ScolaritesFraisScreen).
+class FraisAnnexesBody extends StatefulWidget {
+  final Eleve eleve;
+  const FraisAnnexesBody({super.key, required this.eleve});
+
+  @override
+  State<FraisAnnexesBody> createState() => _FraisAnnexesBodyState();
+}
+
+class _FraisAnnexesBodyState extends State<FraisAnnexesBody> {
   final _api = ApiService();
 
   List<FraisAnnexeRecap>       _recap     = [];
@@ -104,30 +118,27 @@ class _FraisAnnexesScreenState extends State<FraisAnnexesScreen> {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Frais annexes')),
-        body: Column(
-          children: [
-            const Material(
-              color: Colors.white,
-              elevation: 1,
-              child: TabBar(
-                labelColor: Color(0xFF6D4C41),
-                unselectedLabelColor: Colors.grey,
-                indicatorColor: Color(0xFF6D4C41),
-                tabs: [
-                  Tab(icon: Icon(Icons.checklist_outlined), text: 'Frais'),
-                  Tab(icon: Icon(Icons.receipt_long_outlined), text: 'Paiements'),
-                ],
-              ),
+      child: Column(
+        children: [
+          const Material(
+            color: Colors.white,
+            elevation: 1,
+            child: TabBar(
+              labelColor: Color(0xFF6D4C41),
+              unselectedLabelColor: Colors.grey,
+              indicatorColor: Color(0xFF6D4C41),
+              tabs: [
+                Tab(icon: Icon(Icons.checklist_outlined), text: 'Frais'),
+                Tab(icon: Icon(Icons.receipt_long_outlined), text: 'Paiements'),
+              ],
             ),
-            Expanded(
-              child: TabBarView(
-                children: [_buildRecap(), _buildPaiements()],
-              ),
+          ),
+          Expanded(
+            child: TabBarView(
+              children: [_buildRecap(), _buildPaiements()],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
