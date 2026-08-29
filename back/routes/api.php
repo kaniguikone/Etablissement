@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\DemandeAccesController;
 use App\Http\Controllers\API\ParentCentralController;
+use App\Http\Controllers\API\UnifiedAuthController;
 use App\Http\Controllers\API\SuperAdmin\SuperAdminAuthController;
 use App\Http\Controllers\API\SuperAdmin\TarifsLicenceController;
 use App\Http\Controllers\API\SuperAdmin\TenantController;
@@ -36,6 +37,9 @@ Route::post('/demande-acces', [DemandeAccesController::class, 'store']);
 Route::post('/parent/login',            [ParentCentralController::class, 'login']);
 Route::get('/parent/valider-matricule', [ParentCentralController::class, 'validerMatricule']);
 Route::post('/parent/inscription',      [ParentCentralController::class, 'inscrire']);
+
+// ─── Auth mobile unifiée (parent + enseignant, cross-tenant) ──────────────────
+Route::post('/mobile/login', [UnifiedAuthController::class, 'login']);
 
 // ─── Recherche publique d'établissements (onboarding mobile) ─────────────────
 Route::get('/etablissements/recherche',   [TenantController::class, 'recherche']);

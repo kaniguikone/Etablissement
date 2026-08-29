@@ -239,6 +239,7 @@ class _EleveCard extends StatelessWidget {
           backgroundImage: eleve.photoUrl != null
               ? NetworkImage(eleve.photoUrl!)
               : null,
+          onBackgroundImageError: eleve.photoUrl != null ? (_, __) {} : null,
           child: eleve.photoUrl == null
               ? Text(
                   eleve.nom.isNotEmpty ? eleve.nom[0].toUpperCase() : '?',

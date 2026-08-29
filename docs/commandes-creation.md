@@ -136,6 +136,20 @@ php artisan tenants:fresh --tenants=lycee-demo
 
 ---
 
+## Comptes multi-établissements (diagnostic)
+
+Liste les parents ayant des enfants dans plusieurs établissements et les enseignants qui enseignent dans plusieurs établissements (utile pour vérifier le fonctionnement du compte central unifié).
+
+```bash
+php artisan comptes:multi-etablissements
+php artisan comptes:multi-etablissements --role=parent
+php artisan comptes:multi-etablissements --role=enseignant
+php artisan comptes:multi-etablissements --tous    # inclut les liens non actifs (en_attente, inactif...)
+php artisan comptes:multi-etablissements --json    # sortie JSON
+```
+
+---
+
 ## Nettoyage de la base centrale
 
 En cas d'incohérence (tenants supprimés mais domains/groups restants) :

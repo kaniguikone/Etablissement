@@ -43,7 +43,7 @@ class AuthService {
   Future<void> logout() async {
     final role = await StorageService.getRole();
     try {
-      if (role == 'enseignant') {
+      if (role == 'enseignant' || role == 'enseignant_central') {
         await _api.logoutEnseignant();
       } else {
         await _api.logout();

@@ -79,10 +79,10 @@ class ApiService {
     StorageService.saveToken(ecole.token);
   }
 
-  // ─── Auth mobile unifiée ─────────────────────────────────────────────────────
+  // ─── Auth mobile unifiée (route centrale, cross-tenant) ─────────────────────
 
   Future<Map<String, dynamic>> loginUnifie(String numero, String password) async {
-    final response = await _dio.post(ApiConfig.mobileLogin, data: {
+    final response = await _centralDio.post(ApiConfig.mobileLogin, data: {
       'numero': numero,
       'password': password,
     });
@@ -518,7 +518,7 @@ class ApiService {
     return response.data as Map<String, dynamic>;
   }
 
-  // Instance Dio dédiée à l'API centrale publique (onboarding, pas de token)
+  // Instance Dio dédiée à l'API centrale publique (login unifié, onboarding, pas de token)
   static final Dio _centralDio = Dio(BaseOptions(
     baseUrl: ApiConfig.centralBaseUrl,
     connectTimeout: ApiConfig.connectTimeout,

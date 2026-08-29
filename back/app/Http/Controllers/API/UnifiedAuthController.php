@@ -17,7 +17,7 @@ class UnifiedAuthController extends Controller
 {
     /**
      * Connexion unifiée — retourne tous les rôles actifs du compte central.
-     * POST /mobile/login  (route tenant, mais CentralUser pointe toujours sur la DB centrale)
+     * POST /mobile/login  (route centrale, cross-tenant)
      */
     public function login(Request $request): JsonResponse
     {

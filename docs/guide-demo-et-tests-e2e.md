@@ -102,11 +102,13 @@ Un élève sans photo uploadée affiche une icône cassée dans certains écrans
 
 ## 4. Parcours portail parent (mobile)
 
-*Connexion : ouvrir l'app → "Je suis parent" → numéro de téléphone + mot de passe du compte de démo.*
+*Connexion : ouvrir l'app → écran de connexion unique (numéro de téléphone + mot de passe du compte de démo). Aucune sélection d'établissement préalable n'est demandée — la reconnaissance se fait automatiquement à la connexion.*
 
 ### 4.1 Connexion et sélection de l'enfant
 1. Se connecter → écran "Mes enfants"
 2. Sélectionner un enfant avec des données complètes (photo, notes, paiements)
+
+> **Argument de vente** : si le parent a des enfants dans plusieurs établissements de la plateforme, ils apparaissent tous dans "Mes enfants" en une seule connexion, sans manipulation supplémentaire — le choix d'établissement lui est totalement transparent.
 
 ### 4.2 Notes et bulletin
 1. **Notes & Bulletin** → montrer les notes par matière
@@ -128,12 +130,13 @@ Un élève sans photo uploadée affiche une icône cassée dans certains écrans
 
 ## 5. Parcours portail enseignant (mobile)
 
-*Connexion : ouvrir l'app → "Je suis enseignant" → numéro de téléphone + mot de passe.*
+*Connexion : ouvrir l'app → écran de connexion unique (même écran que le parent) → numéro de téléphone + mot de passe.*
 
-1. **Tableau de bord** : classes du jour, devoirs à venir
-2. **Devoirs** → saisir des notes pour une classe → *argument fort* : mentionner que la saisie fonctionne aussi **hors connexion**, avec synchronisation automatique au retour du réseau (pertinent pour les zones à connectivité instable)
-3. **Présence** → faire l'appel pour une séance
-4. **Emploi du temps** : vue personnelle
+1. Si l'enseignant enseigne dans **plusieurs établissements** de la plateforme, un écran "Choisissez votre établissement" s'affiche juste après la connexion — il sélectionne celui qu'il veut consulter. *Argument de vente* : une seule identité, un seul mot de passe, quel que soit le nombre d'écoles. Il peut changer d'établissement à tout moment via l'icône ⇄ dans la barre du haut (les données de l'onglet actif se rechargent automatiquement).
+2. **Tableau de bord** : classes du jour, devoirs à venir
+3. **Devoirs** → saisir des notes pour une classe → *argument fort* : mentionner que la saisie fonctionne aussi **hors connexion**, avec synchronisation automatique au retour du réseau (pertinent pour les zones à connectivité instable)
+4. **Présence** → faire l'appel pour une séance
+5. **Emploi du temps** : vue personnelle
 
 ---
 

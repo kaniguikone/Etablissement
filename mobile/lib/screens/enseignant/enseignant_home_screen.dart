@@ -196,7 +196,13 @@ class _EnseignantHomeScreenState extends State<EnseignantHomeScreen> {
           ),
         ],
       ),
-      body: IndexedStack(index: _index, children: _screens),
+      // Reclé sur l'établissement actif : force la reconstruction complète des
+      // onglets (et leur rechargement de données) au changement d'école.
+      body: IndexedStack(
+        key: ValueKey(auth.ecoleActive?.tenantId),
+        index: _index,
+        children: _screens,
+      ),
       floatingActionButton: _index == 1
           ? FloatingActionButton(
               onPressed: () async {

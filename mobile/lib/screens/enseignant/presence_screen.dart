@@ -448,6 +448,7 @@ class _ElevePresenceTile extends StatelessWidget {
             radius: 20,
             backgroundColor: Colors.white,
             backgroundImage: photoUrl != null ? NetworkImage(photoUrl!) : null,
+            onBackgroundImageError: photoUrl != null ? (_, __) {} : null,
             child: photoUrl == null
                 ? Text(nom.isNotEmpty ? nom[0].toUpperCase() : '?',
                     style: TextStyle(color: _borderColor, fontWeight: FontWeight.bold))

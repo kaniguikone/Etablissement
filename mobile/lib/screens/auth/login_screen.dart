@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/etablissement_provider.dart';
-import '../../services/api_service.dart';
 import '../../services/storage_service.dart';
 import '../../theme/app_theme.dart';
 import '../onboarding/onboarding_screen.dart';
@@ -87,64 +85,27 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final etablissement = context.watch<EtablissementProvider>().info;
-
     return Scaffold(
       backgroundColor: _headerColor,
       body: SafeArea(
         child: Column(
           children: [
-            // ── En-tête établissement ──
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 24, 28),
+            // ── En-tête générique ──
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 32, 16, 28),
               child: Column(
                 children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: TextButton.icon(
-                      icon: const Icon(Icons.swap_horiz,
-                          size: 18, color: Colors.white70),
-                      label: const Text(
-                        'Changer d\'établissement',
-                        style: TextStyle(color: Colors.white70, fontSize: 12),
-                      ),
-                      onPressed: _changerEtablissement,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  if (etablissement?.logoUrl != null)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        etablissement!.logoUrl!,
-                        height: 64,
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => const Icon(
-                          Icons.school_outlined, size: 60, color: Colors.white,
-                        ),
-                      ),
-                    )
-                  else
-                    const Icon(Icons.school_outlined,
-                        size: 60, color: Colors.white),
-                  const SizedBox(height: 12),
+                  Icon(Icons.school_rounded, size: 60, color: Colors.white),
+                  SizedBox(height: 12),
                   Text(
-                    etablissement?.nom ?? 'Suivi Scolaire',
-                    style: const TextStyle(
+                    'Suivi Scolaire',
+                    style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  if (etablissement?.slogan != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      etablissement!.slogan!,
-                      style: const TextStyle(color: Colors.white60, fontSize: 12),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -264,12 +225,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 16),
                         Center(
                           child: TextButton(
-                            onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const InscriptionParentScreen(),
-                              ),
-                            ),
+                            onPressed: _ouvrirInscription,
                             child: RichText(
                               text: TextSpan(
                                 style: TextStyle(fontSize: 13, color: Colors.grey[600]),
@@ -299,17 +255,25 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _changerEtablissement() async {
-    await StorageService.clearServerUrl();
-    ApiService().resetBaseUrl();
-    if (!mounted) return;
-    Navigator.pushReplacement(
+  // L'inscription autonome se fait au sein d'un établissement précis (pour
+  // valider le matricule de l'élève) : si aucun n'est encore configuré sur
+  // l'appareil, on le fait choisir avant d'ouvrir le formulaire.
+  void _ouvrirInscription() {
+    if (StorageService.getCachedServerUrl() != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const InscriptionParentScreen()),
+      );
+      return;
+    }
+
+    Navigator.push(
       context,
       MaterialPageRoute(
         builder: (ctx) => OnboardingScreen(
           onSetupComplete: () => Navigator.pushReplacement(
             ctx,
-            MaterialPageRoute(builder: (_) => const LoginScreen()),
+            MaterialPageRoute(builder: (_) => const InscriptionParentScreen()),
           ),
         ),
       ),

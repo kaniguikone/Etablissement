@@ -4,10 +4,10 @@ import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/etablissement_provider.dart';
 import 'providers/notification_provider.dart';
+import 'screens/auth/enseignant_ecole_choice_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home/children_list_screen.dart';
 import 'screens/enseignant/enseignant_home_screen.dart';
-import 'screens/onboarding/onboarding_screen.dart';
 import 'services/api_service.dart';
 import 'services/storage_service.dart';
 import 'theme/app_theme.dart';
@@ -132,27 +132,16 @@ class _AuthGateState extends State<_AuthGate> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
 
-    // Aucun serveur configuré → écran d'onboarding
-    if (StorageService.getCachedServerUrl() == null) {
-      return OnboardingScreen(
-        onSetupComplete: () async {
-          final auth = context.read<AuthProvider>();
-          await auth.checkAuth();
-          if (!mounted) return;
-          _initNotifications();
-          setState(() {});
-        },
-      );
-    }
-
     return switch (auth.status) {
       AuthStatus.unknown => const Scaffold(
           body: Center(child: CircularProgressIndicator()),
         ),
       AuthStatus.unauthenticated => const LoginScreen(),
-      AuthStatus.authenticated   => auth.isEnseignant
-          ? const EnseignantHomeScreen()
-          : const ChildrenListScreen(),
+      AuthStatus.authenticated   => auth.choixEcoleRequis
+          ? const EnseignantEcoleChoiceScreen()
+          : (auth.isEnseignant
+              ? const EnseignantHomeScreen()
+              : const ChildrenListScreen()),
     };
   }
 }

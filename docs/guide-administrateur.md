@@ -167,7 +167,7 @@ Un parent peut avoir plusieurs enfants dans l'établissement (jusqu'à 2 parents
 ### Inscription autonome du parent depuis l'app mobile
 Le parent peut créer son propre compte sans que vous interveniez au préalable :
 
-1. Il ouvre l'application mobile → **« Je suis parent »** → **« Créer un compte »**
+1. Il ouvre l'application mobile → écran de connexion → lien **« S'inscrire »** (l'application lui demande de retrouver son établissement — par nom/adresse ou code MENET — uniquement à cette étape)
 2. Il saisit le **matricule de son enfant** — l'application affiche le nom et la classe pour confirmation
 3. Il renseigne ses informations (nom, prénom, téléphone, mot de passe, lien de parenté)
 4. La demande vous parvient dans : *Menu : Parents → Demandes d'accès*

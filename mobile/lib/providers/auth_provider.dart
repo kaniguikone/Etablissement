@@ -32,9 +32,10 @@ class AuthProvider extends ChangeNotifier {
   bool       _sessionExpiree = false;
 
   // ── Session centrale multi-écoles ────────────────────────────────────────
-  List<EcoleSession> _ecoles      = [];
-  int                _ecoleIndex  = 0;
-  bool               _isCentral   = false;
+  List<EcoleSession> _ecoles           = [];
+  int                _ecoleIndex       = 0;
+  bool               _isCentral        = false;
+  bool               _choixEcoleRequis = false;
 
   AuthStatus         get status         => _status;
   UserRole?          get role           => _role;
@@ -47,6 +48,7 @@ class AuthProvider extends ChangeNotifier {
   bool               get isEnseignant   => _role == UserRole.enseignant;
   bool               get isParent       => _role == UserRole.parent;
   bool               get isCentral      => _isCentral;
+  bool               get choixEcoleRequis => _choixEcoleRequis;
   List<EcoleSession> get ecoles         => _ecoles;
   EcoleSession?      get ecoleActive    => _ecoles.isEmpty ? null : _ecoles[_ecoleIndex];
 
@@ -61,7 +63,7 @@ class AuthProvider extends ChangeNotifier {
 
   AuthProvider() {
     ApiService.onUnauthorized = () {
-      _resetState();
+      _resetState(expire: true);
       notifyListeners();
       navigatorKey.currentState?.popUntil((route) => route.isFirst);
     };
@@ -128,6 +130,13 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> choisirRole(String role, Map<String, dynamic> roleData) async {
     await _appliquerSession(role, roleData);
+  }
+
+  /// Valide le choix d'établissement affiché après une connexion enseignant
+  /// multi-écoles (voir [choixEcoleRequis]).
+  void confirmerChoixEcole() {
+    _choixEcoleRequis = false;
+    notifyListeners();
   }
 
   Future<void> switchEcole(int index) async {
@@ -208,6 +217,10 @@ class AuthProvider extends ChangeNotifier {
     _id         = userData['id']        as int?;
     _status     = AuthStatus.authenticated;
 
+    // Un enseignant dans plusieurs établissements doit choisir explicitement
+    // celui qu'il consulte avant d'accéder à son espace.
+    _choixEcoleRequis = role == 'enseignant_central' && ecoles.length > 1;
+
     await StorageService.saveRole(role);
     await StorageService.saveSessionCentrale({
       'identity': {
@@ -271,16 +284,17 @@ class AuthProvider extends ChangeNotifier {
     _id     = int.tryParse(info['id'] ?? '');
   }
 
-  void _resetState() {
+  void _resetState({bool expire = false}) {
     _status         = AuthStatus.unauthenticated;
-    _sessionExpiree = true;
+    _sessionExpiree = expire;
     _role           = null;
     _nom            = null;
     _prenom         = null;
     _numero         = null;
     _id             = null;
-    _isCentral      = false;
-    _ecoles         = [];
-    _ecoleIndex     = 0;
+    _isCentral        = false;
+    _ecoles           = [];
+    _ecoleIndex       = 0;
+    _choixEcoleRequis = false;
   }
 }

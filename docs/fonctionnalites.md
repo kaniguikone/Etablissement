@@ -313,6 +313,9 @@ Application complète de gestion scolaire en architecture multi-tenant, permetta
 - Identité unique par numéro de téléphone, indépendante des établissements
 - Un parent ou un enseignant présent dans plusieurs établissements (ou dans un groupe scolaire) n'a **qu'un seul compte** à retenir, relié à chaque établissement séparément
 - Évite la recréation d'un compte à chaque nouvel établissement rattaché
+- **Connexion mobile unique, sans sélection d'établissement préalable** : l'app ouvre directement sur l'écran de connexion (numéro + mot de passe), sans passer par un choix d'école — la reconnaissance multi-établissements se fait automatiquement à l'authentification
+- **Parent** : accès transparent — tous ses enfants apparaissent en une seule connexion, quel que soit leur établissement
+- **Enseignant** : s'il enseigne dans plusieurs établissements, un écran de choix s'affiche juste après la connexion ; il peut changer d'établissement à tout moment depuis son espace
 
 ### Module SaaS billing
 - Gestion des **abonnements** par établissement — montant négocié au cas par cas (pas de plans fixes), tarif licence/élève affiché à titre indicatif sur la page publique

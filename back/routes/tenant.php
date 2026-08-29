@@ -59,7 +59,6 @@ use App\Http\Controllers\API\AppreciationController;
 use App\Http\Controllers\API\MotDePasseController;
 use App\Http\Controllers\API\ReleveAnnuelController;
 use App\Http\Controllers\API\TableauClasseController;
-use App\Http\Controllers\API\UnifiedAuthController;
 use App\Http\Controllers\API\AuditController;
 use App\Http\Controllers\API\RapportMinistereController;
 use App\Http\Controllers\API\FraisAnnexeController;
@@ -85,9 +84,6 @@ Route::middleware([
 
     // ─── Auth back-office ────────────────────────────────────────────────────
     Route::post('/login',  [AuthController::class, 'login']);
-
-    // ─── Auth mobile unifiée (parent + enseignant en un seul appel) ──────────
-    Route::post('/mobile/login', [UnifiedAuthController::class, 'login']);
 
     // ─── Inscription parent (public) ──────────────────────────────────────────
     Route::get('/mobile/parent/valider-matricule/{matricule}', [ParentRegistrationController::class, 'validerMatricule']);
