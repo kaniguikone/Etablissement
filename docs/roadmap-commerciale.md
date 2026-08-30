@@ -1,6 +1,6 @@
 # Roadmap commerciale — Application de gestion scolaire
 
-> Document de référence — Mis à jour le 2026-08-26
+> Document de référence — Mis à jour le 2026-08-30
 > Synthèse de l'analyse experte (2026-04-30) et de l'état réel du code
 
 ---
@@ -34,6 +34,7 @@
 | **Paiement mobile en ligne (CinetPay)**                              | **Complet** — scolarité et frais annexes, portail parent et back-office, webhook + réconciliation automatique |
 | **Export comptable structuré**                                      | **Complet** — Excel 3 feuilles (OHADA) + FEC/CSV SAGE                             |
 | **Module SaaS billing**                                             | **Complet** — dashboard super-admin, abonnements, factures PDF                    |
+| **Modules activables par établissement/groupe**                     | **Complet** — backoffice opérateur, catalogue calqué sur le menu, résolution en cascade établissement > groupe > défaut, appliqué au menu et à l'API |
 | **Documentation in-app et aide contextuelle**                       | **Complet** — panneau "?" contextuel, gestion BDD, 27 articles pré-rédigés        |
 | Statistiques avancées (KPIs, classements, évolution inter-périodes) | Complet                                                                           |
 | Gestion des remplacements d'enseignants                             | Complet                                                                           |
@@ -212,7 +213,7 @@ Les données d'enfants mineurs sont ultra-sensibles. Même si la réglementation
 
 **Livré :** 11 fonctionnalités sur 17 (hors démo et monitoring, désormais partiels plutôt qu'à faire) — **Restant :** ~14-20 jours de développement
 
-*Hors ce tableau de priorités initial, plusieurs chantiers non prévus à l'origine ont également été livrés depuis : page d'accueil publique, gestion des demandes d'accès et de la tarification, compte central unifié parent/enseignant, mot de passe initial obligatoire, isolation des sessions par espace, import Excel en masse (5 flux), type d'établissement obligatoire — voir le tableau « Ce qui est livré et opérationnel » ci-dessus.*
+*Hors ce tableau de priorités initial, plusieurs chantiers non prévus à l'origine ont également été livrés depuis : page d'accueil publique, gestion des demandes d'accès et de la tarification, compte central unifié parent/enseignant, mot de passe initial obligatoire, isolation des sessions par espace, import Excel en masse (5 flux), type d'établissement obligatoire, modules activables par établissement/groupe — voir le tableau « Ce qui est livré et opérationnel » ci-dessus.*
 
 **1.4 Monitoring — détail du partiel (2026-08-16) :** le code est livré (`sentry/sentry-laravel` + `@sentry/react` intégrés, route `/up` de Laravel exposée pour le health check). Reste à faire, hors périmètre code — voir `docs/guide-deploiement.md` §8 : créer les projets Sentry (backend + frontend) et renseigner les DSN en production, créer un compte UptimeRobot et pointer un moniteur sur `/up`.
 

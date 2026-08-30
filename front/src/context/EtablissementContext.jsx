@@ -15,8 +15,10 @@ export const EtablissementProvider = ({ children }) => {
     // Appelé depuis ParametresEtablissement après une mise à jour
     const rafraichir = (data) => setEtablissement(data);
 
+    const modulesActifs = etablissement?.modules_actifs ?? null;
+
     return (
-        <EtablissementContext.Provider value={{ etablissement, rafraichir }}>
+        <EtablissementContext.Provider value={{ etablissement, rafraichir, modulesActifs }}>
             {children}
         </EtablissementContext.Provider>
     );

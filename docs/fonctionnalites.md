@@ -306,6 +306,7 @@ Application complète de gestion scolaire en architecture multi-tenant, permetta
 - **Gestion des demandes d'accès** entrantes (validation, rejet, suivi)
 - **Tarifs & Licences** : configuration des tranches tarifaires indicatives et simulateur de coût
 - **Modèles d'établissement** : gestion des templates de pré-remplissage pédagogique (lycée, collège, primaire, lycée complet)
+- **Modules activables** : sélection, par établissement ou par groupe entier, des modules et sous-modules inclus dans l'abonnement (voir section 14)
 - **Générateur de données** : outil de seed pour peupler rapidement un tenant (démonstration, tests)
 - Gestion des versions de l'application mobile (versionning, URL de téléchargement, mise à jour forcée)
 
@@ -350,3 +351,12 @@ Application complète de gestion scolaire en architecture multi-tenant, permetta
 - Masquage automatique des menus et routes selon les permissions de l'utilisateur connecté
 - Isolation complète des données entre établissements (multi-tenant)
 - **Journal d'audit** : toutes les actions sensibles sont tracées et non modifiables
+
+### Modules activables par établissement ou par groupe
+
+Second axe de contrôle d'accès, indépendant des permissions de rôle ci-dessus : le **super-admin** décide, depuis le backoffice opérateur (`/superadmin/modules`), quels modules et sous-modules sont inclus dans l'abonnement d'un établissement — ou d'un groupe entier, appliqué par défaut à tous ses établissements membres.
+
+- Catalogue calqué sur les groupes et sous-menus de la sidebar (élèves, enseignants, parents, pédagogie, finances, communication, administration, paramétrage, statistiques…)
+- Résolution en cascade : **override établissement** > **override groupe** > **valeur par défaut du catalogue**
+- Un menu ou une route n'est accessible que si le module est actif **et** que l'utilisateur a la permission de rôle requise (les deux axes se combinent)
+- Appliqué à la fois côté interface (menu et routes React) et côté API (middleware `module:<slug>`)

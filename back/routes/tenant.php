@@ -232,7 +232,7 @@ Route::middleware([
         // Lecture des années scolaires accessible à tous les utilisateurs authentifiés
         Route::get('/annees-scolaires', [ArchivageController::class, 'index']);
 
-        Route::middleware('permission:pedagogie_saisie,pedagogie_pilotage,finances_caisse,finances_gestion')->group(function () {
+        Route::middleware(['permission:pedagogie_saisie,pedagogie_pilotage,finances_caisse,finances_gestion', 'module:pedagogie_saisie,pedagogie_pilotage,finances_caisse,finances_gestion'])->group(function () {
             Route::get('/stats/synthese',     [StatistiquesController::class, 'synthese']);
             Route::get('/stats/presences',    [StatistiquesController::class, 'presences']);
             Route::get('/stats/moyennes',     [StatistiquesController::class, 'moyennes']);
@@ -242,7 +242,7 @@ Route::middleware([
             Route::get('/stats/enseignants',  [StatistiquesController::class, 'enseignants']);
         });
 
-        Route::middleware('permission:finances_caisse,finances_gestion')->group(function () {
+        Route::middleware(['permission:finances_caisse,finances_gestion', 'module:finances_caisse,finances_gestion'])->group(function () {
             Route::get('/echeancier', [PaiementController::class, 'echeancier']);
         });
 
@@ -267,7 +267,7 @@ Route::middleware([
         Route::get('/classes/{id}',          [ClasseController::class,    'show']);
 
         Route::get('/salles', [SalleController::class, 'index']);
-        Route::middleware('permission:parametrage')->group(function () {
+        Route::middleware(['permission:parametrage', 'module:parametrage'])->group(function () {
             Route::post('/salles',              [SalleController::class, 'store']);
             Route::get('/salles/{id}',          [SalleController::class, 'show']);
             Route::put('/salles/{id}',          [SalleController::class, 'update']);
@@ -279,7 +279,7 @@ Route::middleware([
         Route::get('/templates',              [SelfTemplateController::class, 'index']);
         Route::post('/self/apply-template',   [SelfTemplateController::class, 'appliquer']);
 
-        Route::middleware('permission:parametrage')->group(function () {
+        Route::middleware(['permission:parametrage', 'module:parametrage'])->group(function () {
             Route::put('/etablissement',        [EtablissementController::class, 'update']);
             Route::post('/etablissement/logo',  [EtablissementController::class, 'uploadLogo']);
 
@@ -311,7 +311,7 @@ Route::middleware([
             Route::post('/classes',        [ClasseController::class, 'store']);
         });
 
-        Route::middleware('permission:inscriptions')->group(function () {
+        Route::middleware(['permission:inscriptions', 'module:inscriptions'])->group(function () {
             Route::get('/inscriptions',               [InscriptionController::class, 'index']);
             Route::get('/inscriptions/{id}',          [InscriptionController::class, 'show']);
             Route::post('/inscriptions/directe',      [InscriptionController::class, 'directe']);
@@ -319,7 +319,7 @@ Route::middleware([
             Route::post('/inscriptions/{id}/rejeter', [InscriptionController::class, 'rejeter']);
         });
 
-        Route::middleware('permission:eleves')->group(function () {
+        Route::middleware(['permission:eleves', 'module:eleves'])->group(function () {
             Route::get('/eleves/export',           [EleveController::class, 'exportCsv']);
             Route::get('/eleves/import/template',  [ImportEleveController::class, 'template']);
             Route::post('/eleves/import',          [ImportEleveController::class, 'import']);
@@ -332,7 +332,7 @@ Route::middleware([
             Route::get('/attestation/{eleveId}/scolarite/pdf', [AttestationPdfController::class, 'scolarite']);
         });
 
-        Route::middleware('permission:enseignants')->group(function () {
+        Route::middleware(['permission:enseignants', 'module:enseignants'])->group(function () {
             Route::apiResource('enseignants',    EnseignantController::class);
             Route::get('/enseignantsTout',                        [EnseignantController::class, 'listeenseignants']);
             Route::get('/enseignantClasse/{id}',                  [EnseignantController::class, 'enseignantClasse']);
@@ -345,7 +345,7 @@ Route::middleware([
             Route::delete('/enseignants/{id}/tokens',             [EnseignantController::class, 'revoquerTokens']);
         });
 
-        Route::middleware('permission:parents')->group(function () {
+        Route::middleware(['permission:parents', 'module:parents'])->group(function () {
             Route::apiResource('parents', ParentController::class);
             Route::delete('/parents/{id}/tokens',                     [ParentController::class,             'revoquerTokens']);
             Route::get('/parents/demandes',                           [ParentRegistrationController::class, 'demandes']);
@@ -355,7 +355,7 @@ Route::middleware([
             Route::put('/etablissement/parent-payment-mode',          [ParentRegistrationController::class, 'configurerMode']);
         });
 
-        Route::middleware('permission:pedagogie_saisie')->group(function () {
+        Route::middleware(['permission:pedagogie_saisie', 'module:pedagogie_saisie'])->group(function () {
             Route::get('/remplacements/dashboard',  [RemplacementController::class, 'dashboard']);
             Route::get('/remplacements',            [RemplacementController::class, 'index']);
             Route::post('/remplacements',           [RemplacementController::class, 'store']);
@@ -364,7 +364,7 @@ Route::middleware([
             Route::delete('/remplacements/{id}',    [RemplacementController::class, 'destroy']);
         });
 
-        Route::middleware('permission:pedagogie_saisie')->group(function () {
+        Route::middleware(['permission:pedagogie_saisie', 'module:pedagogie_saisie'])->group(function () {
             Route::get('/volumesHoraires/restant/{classe_id}', [VolumeHoraireController::class, 'restantClasse'])->where('classe_id', '[0-9]+');
 
             Route::apiResource('emploiDuTemps', EmploiDuTempsController::class);
@@ -392,24 +392,24 @@ Route::middleware([
             Route::post('/notesSauvegarder/{id}', [NoteController::class, 'sauvegarder']);
         });
 
-        Route::middleware('permission:parametrage')->group(function () {
+        Route::middleware(['permission:parametrage', 'module:parametrage'])->group(function () {
             Route::post('/rapport-ministere', [RapportMinistereController::class, 'telecharger']);
         });
 
         // ─── Statistiques générales (formulaire MENET) ───────────────────────
-        Route::middleware('permission:pedagogie_pilotage,parametrage')->group(function () {
+        Route::middleware(['permission:pedagogie_pilotage,parametrage', 'module:pedagogie_pilotage,parametrage'])->group(function () {
             Route::get('/stats-generales',               [StatsGeneralesController::class, 'donnees']);
             Route::get('/stats-generales/export-excel',  [StatsGeneralesController::class, 'exportExcel']);
             Route::get('/stats-generales/export-pdf',    [StatsGeneralesController::class, 'exportPdf']);
             Route::post('/stats-generales/examens',      [StatsGeneralesController::class, 'upsertExamen']);
         });
 
-        Route::middleware('permission:finances_gestion')->group(function () {
+        Route::middleware(['permission:finances_gestion', 'module:finances_gestion'])->group(function () {
             Route::get('/export-comptable/apercu', [ExportComptableController::class, 'apercu']);
             Route::get('/export-comptable',        [ExportComptableController::class, 'export']);
         });
 
-        Route::middleware('permission:pedagogie_pilotage')->group(function () {
+        Route::middleware(['permission:pedagogie_pilotage', 'module:pedagogie_pilotage'])->group(function () {
             Route::get('/volumesHoraires/conformite',        [VolumeHoraireController::class, 'conformite']);
             Route::get('/volumesHoraires/chargeEnseignants', [VolumeHoraireController::class, 'chargeEnseignants']);
 
@@ -432,7 +432,7 @@ Route::middleware([
             Route::get('/moyennes-classe/{classeId}/{periodeId}',       [NoteController::class,         'moyennesClasse']);
         });
 
-        Route::middleware('permission:finances_gestion')->group(function () {
+        Route::middleware(['permission:finances_gestion', 'module:finances_gestion'])->group(function () {
             Route::apiResource('scolarites',         ScolariteController::class);
             Route::get('/scolaritesNiveau/{id}',     [ScolariteController::class, 'ScolaritesNiveau']);
             Route::get('/scolarites/import/template',[ImportScolariteController::class, 'template']);
@@ -447,14 +447,14 @@ Route::middleware([
             Route::apiResource('frais-annexes',          FraisAnnexeController::class)->except(['show']);
         });
 
-        Route::middleware('permission:finances_caisse,finances_gestion')->group(function () {
+        Route::middleware(['permission:finances_caisse,finances_gestion', 'module:finances_caisse,finances_gestion'])->group(function () {
             Route::post('/paiements-frais-annexes',           [FraisAnnexeController::class, 'enregistrerPaiement']);
             Route::delete('/paiements-frais-annexes/{id}',    [FraisAnnexeController::class, 'supprimerPaiement']);
             Route::get('/paiements-frais-annexes/{id}/recu',  [FraisAnnexeController::class, 'recu']);
             Route::post('/paiements-frais-annexes/initier',   [CinetPayController::class,    'initierFraisAnnexe']);
         });
 
-        Route::middleware('permission:finances_caisse,finances_gestion')->group(function () {
+        Route::middleware(['permission:finances_caisse,finances_gestion', 'module:finances_caisse,finances_gestion'])->group(function () {
             Route::get('/paiements/export',                    [PaiementController::class,  'exportCsv']);
             Route::post('/paiements/initier',                  [CinetPayController::class,  'initier']);
             Route::get('/paiements/statut/{transactionId}',    [CinetPayController::class,  'statut']);
@@ -464,25 +464,25 @@ Route::middleware([
             Route::get('/paiements/{id}/recu',                 [PaiementController::class,  'recu']);
         });
 
-        Route::middleware('permission:communication')->group(function () {
+        Route::middleware(['permission:communication', 'module:communication'])->group(function () {
             Route::apiResource('informations', InformationsController::class);
             Route::get('/messages',                   [MessageController::class, 'indexAdmin']);
             Route::get('/messages/conversation/{a}/{b}', [MessageController::class, 'filAdmin']);
         });
 
-        Route::middleware('permission:pedagogie_saisie,pedagogie_pilotage,communication')->group(function () {
+        Route::middleware(['permission:pedagogie_saisie,pedagogie_pilotage,communication', 'module:pedagogie_saisie,pedagogie_pilotage,communication'])->group(function () {
             Route::get('/rdv/reservations',           [RdvController::class, 'toutesReservations']);
             Route::get('/rdv/creneaux',               [RdvController::class, 'tousCreneaux']);
         });
 
         Route::get('/calendrier',         [CalendrierController::class, 'index']);
-        Route::middleware('permission:pedagogie_saisie,parametrage')->group(function () {
+        Route::middleware(['permission:pedagogie_saisie,parametrage', 'module:pedagogie_saisie,parametrage'])->group(function () {
             Route::post('/calendrier',        [CalendrierController::class, 'store']);
             Route::put('/calendrier/{id}',    [CalendrierController::class, 'update']);
             Route::delete('/calendrier/{id}', [CalendrierController::class, 'destroy']);
         });
 
-        Route::middleware('permission:eleves,pedagogie_saisie')->group(function () {
+        Route::middleware(['permission:eleves,pedagogie_saisie', 'module:eleves,pedagogie_saisie'])->group(function () {
             Route::get('/sanctions',                    [SanctionController::class, 'index']);
             Route::get('/sanctions/eleve/{eleveId}',    [SanctionController::class, 'parEleve']);
             Route::post('/sanctions',                   [SanctionController::class, 'store']);
@@ -492,12 +492,12 @@ Route::middleware([
             Route::post('/sanctions/{id}/notifier',     [SanctionController::class, 'notifier']);
         });
 
-        Route::middleware('permission:sante')->group(function () {
+        Route::middleware(['permission:sante', 'module:sante'])->group(function () {
             Route::get('/sante-eleves/{eleveId}', [SanteEleveController::class, 'show']);
             Route::put('/sante-eleves/{eleveId}', [SanteEleveController::class, 'update']);
         });
 
-        Route::middleware('permission:parametrage')->group(function () {
+        Route::middleware(['permission:parametrage', 'module:parametrage'])->group(function () {
             Route::post('/annees-scolaires',                         [ArchivageController::class, 'store']);
             Route::post('/annees-scolaires/init-nouvelle-annee',     [ArchivageController::class, 'initNouvelleAnnee']);
             Route::get('/annees-scolaires/{id}',                     [ArchivageController::class, 'show']);
@@ -513,7 +513,7 @@ Route::middleware([
         Route::post('/seeder/lancer',          [SeederController::class, 'lancer']);
         Route::get('/seeder/status/{jobId}',   [SeederController::class, 'statut']);
 
-        Route::middleware('permission:utilisateurs')->group(function () {
+        Route::middleware(['permission:utilisateurs', 'module:utilisateurs'])->group(function () {
             Route::get('/utilisateurs',                    [UserController::class, 'index']);
             Route::post('/utilisateurs',                   [UserController::class, 'store']);
             Route::put('/utilisateurs/{user}',             [UserController::class, 'update']);

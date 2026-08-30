@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 const ITEMS = [
     { to: '/superadmin/demandes',    icon: 'fas fa-inbox',       label: "Demandes d'accès" },
     { to: '/superadmin/abonnements', icon: 'fas fa-credit-card', label: 'Abonnements' },
+    { to: '/superadmin/modules',     icon: 'fas fa-puzzle-piece',label: 'Modules' },
     { to: '/superadmin/tarifs',      icon: 'fas fa-tags',        label: 'Tarifs & Licences' },
     { to: '/superadmin/templates',   icon: 'fas fa-layer-group', label: "Modèles d'établissement" },
     { to: '/superadmin/rgpd',        icon: 'fas fa-user-shield', label: 'RGPD & Conformité' },

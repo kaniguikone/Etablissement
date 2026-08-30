@@ -1,8 +1,10 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useEtablissement } from '../../context/EtablissementContext';
 
-const PrivateRoute = ({ children, permissions, superOnly }) => {
+const PrivateRoute = ({ children, permissions, modules, superOnly }) => {
     const { user, peutAcceder, estGroupe, estSuperAdmin } = useAuth();
+    const { modulesActifs } = useEtablissement();
     const location = useLocation();
 
     if (!user) {
@@ -39,6 +41,20 @@ const PrivateRoute = ({ children, permissions, superOnly }) => {
                     <i className="fas fa-ban text-danger" style={{ fontSize: 64 }} />
                     <h4 className="mt-3">Accès refusé</h4>
                     <p className="text-muted">Vous n'avez pas les droits pour accéder à cette page.</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Tant que /etablissement n'a pas répondu, modulesActifs est null : on laisse passer
+    // (évite un refus d'accès erroné pendant le chargement initial).
+    if (modules && modulesActifs && !modules.some(m => modulesActifs.includes(m))) {
+        return (
+            <div className="page-wrapper d-flex align-items-center justify-content-center" style={{ minHeight: '60vh' }}>
+                <div className="text-center">
+                    <i className="fas fa-lock text-danger" style={{ fontSize: 64 }} />
+                    <h4 className="mt-3">Module non disponible</h4>
+                    <p className="text-muted">Ce module n'est pas inclus dans l'abonnement de votre établissement.</p>
                 </div>
             </div>
         );

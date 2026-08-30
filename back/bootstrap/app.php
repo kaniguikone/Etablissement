@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission'     => \App\Http\Middleware\CheckRole::class,
             'tenant.active'  => \App\Http\Middleware\CheckTenantActive::class,
             'account.type'   => \App\Http\Middleware\EnsureAccountType::class,
+            'module'         => \App\Http\Middleware\EnsureModuleActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

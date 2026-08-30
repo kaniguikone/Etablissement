@@ -9,6 +9,7 @@ use App\Http\Controllers\API\SuperAdmin\TarifsLicenceController;
 use App\Http\Controllers\API\SuperAdmin\TenantController;
 use App\Http\Controllers\API\SuperAdmin\RgpdController;
 use App\Http\Controllers\API\SuperAdmin\AbonnementSaasController;
+use App\Http\Controllers\API\SuperAdmin\ModuleController;
 use App\Http\Controllers\API\Group\GroupAuthController;
 use App\Http\Controllers\API\Group\GroupDashboardController;
 use App\Http\Controllers\API\Group\GroupTenantController;
@@ -126,4 +127,12 @@ Route::middleware(['auth:sanctum', 'account.type:App\Models\SuperAdmin'])->prefi
     // ── Seed (dev) ────────────────────────────────────────────────────────────
     Route::post('/seeder/lancer',               [SeederController::class, 'lancerCentral']);
     Route::get('/seeder/status/{jobId}',        [SeederController::class, 'statutCentral']);
+
+    // ── Modules activables (établissement / groupe) ──────────────────────────
+    Route::get('/modules',                       [ModuleController::class, 'index']);
+    Route::get('/groupes',                       [ModuleController::class, 'groupes']);
+    Route::get('/tenants/{id}/modules',          [ModuleController::class, 'pourTenant']);
+    Route::put('/tenants/{id}/modules',          [ModuleController::class, 'updateTenant']);
+    Route::get('/groupes/{id}/modules',          [ModuleController::class, 'pourGroupe']);
+    Route::put('/groupes/{id}/modules',          [ModuleController::class, 'updateGroupe']);
 });

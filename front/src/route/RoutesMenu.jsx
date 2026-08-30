@@ -122,6 +122,7 @@ const ImpayesFraisAnnexes = lazy(() => import('../components/fraisannexes/Impaye
 const FraisAnnexeEleve = lazy(() => import('../components/fraisannexes/FraisAnnexeEleve'));
 const ExportComptable = lazy(() => import('../components/comptabilite/ExportComptable'));
 const GestionAbonnements = lazy(() => import('../components/superadmin/GestionAbonnements'));
+const GestionModules = lazy(() => import('../components/superadmin/GestionModules'));
 const DemandesAcces = lazy(() => import('../components/superadmin/DemandesAcces'));
 const ConfigTarifs = lazy(() => import('../components/superadmin/ConfigTarifs'));
 const ConfigRgpd = lazy(() => import('../components/superadmin/ConfigRgpd'));
@@ -202,6 +203,7 @@ const RoutesMenu = () => (
             <Route path="/superadmin/templates"         element={<PrivateRoute superOnly><GestionTemplatesSuperAdmin /></PrivateRoute>} />
             <Route path="/superadmin/templates/:type"   element={<PrivateRoute superOnly><EditionTemplate basePath="/superadmin" /></PrivateRoute>} />
             <Route path="/superadmin/rgpd"              element={<PrivateRoute superOnly><ConfigRgpd /></PrivateRoute>} />
+            <Route path="/superadmin/modules"           element={<PrivateRoute superOnly><GestionModules /></PrivateRoute>} />
 
             {/* ── Espace Groupe Scolaire ─────────────────────────────────── */}
             <Route path="/groupe"                  element={<PrivateRoute><DashboardGroupe /></PrivateRoute>} />
@@ -223,141 +225,141 @@ const RoutesMenu = () => (
             <Route path="/Notifications" element={<PrivateRoute><Notifications /></PrivateRoute>} />
 
             {/* Archivage */}
-            <Route path="/Archivage" element={<PrivateRoute permissions={R_PARAM}><ArchivageWizard /></PrivateRoute>} />
+            <Route path="/Archivage" element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.archivage']}><ArchivageWizard /></PrivateRoute>} />
 
             {/* Seed (dev) */}
             <Route path="/superadmin/seeder" element={<PrivateRoute superOnly><SeederInterface /></PrivateRoute>} />
 
             {/* Statistiques */}
-            <Route path="/Statistiques"     element={<PrivateRoute permissions={R_STATS}><Statistiques /></PrivateRoute>} />
-            <Route path="/StatsGenerales"   element={<PrivateRoute permissions={['pedagogie_pilotage','parametrage']}><StatsGenerales /></PrivateRoute>} />
+            <Route path="/Statistiques"     element={<PrivateRoute permissions={R_STATS} modules={['statistiques.tableaux_bord']}><Statistiques /></PrivateRoute>} />
+            <Route path="/StatsGenerales"   element={<PrivateRoute permissions={['pedagogie_pilotage','parametrage']} modules={['statistiques.stats_generales']}><StatsGenerales /></PrivateRoute>} />
 
             {/* Paramétrage */}
-            <Route path="/Etablissement"  element={<PrivateRoute permissions={R_PARAM}><ParametresEtablissement /></PrivateRoute>} />
-            <Route path="/VolumeHoraire"  element={<PrivateRoute permissions={R_PARAM}><VolumeHoraire /></PrivateRoute>} />
-            <Route path="/Niveaux"           element={<PrivateRoute permissions={R_PARAM}><ListeNiveaux /></PrivateRoute>} />
-            <Route path="/NouveauNiveau"     element={<PrivateRoute permissions={R_PARAM}><NouveauNiveau /></PrivateRoute>} />
-            <Route path="/DetailsNiveau/:id" element={<PrivateRoute permissions={R_PARAM}><DetailsNiveau /></PrivateRoute>} />
+            <Route path="/Etablissement"  element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.etablissement']}><ParametresEtablissement /></PrivateRoute>} />
+            <Route path="/VolumeHoraire"  element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.volume_horaire']}><VolumeHoraire /></PrivateRoute>} />
+            <Route path="/Niveaux"           element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.niveaux']}><ListeNiveaux /></PrivateRoute>} />
+            <Route path="/NouveauNiveau"     element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.niveaux']}><NouveauNiveau /></PrivateRoute>} />
+            <Route path="/DetailsNiveau/:id" element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.niveaux']}><DetailsNiveau /></PrivateRoute>} />
 
-            <Route path="/Classes"           element={<PrivateRoute permissions={R_PARAM}><ListeClasses /></PrivateRoute>} />
-            <Route path="/NouvelleClasse"    element={<PrivateRoute permissions={R_PARAM}><NouvelleClasse /></PrivateRoute>} />
-            <Route path="/DetailsClasse/:id" element={<PrivateRoute permissions={R_PARAM}><DetailsClasse /></PrivateRoute>} />
+            <Route path="/Classes"           element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.classes']}><ListeClasses /></PrivateRoute>} />
+            <Route path="/NouvelleClasse"    element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.classes']}><NouvelleClasse /></PrivateRoute>} />
+            <Route path="/DetailsClasse/:id" element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.classes']}><DetailsClasse /></PrivateRoute>} />
 
-            <Route path="/Matieres"           element={<PrivateRoute permissions={R_PARAM}><ListeMatieres /></PrivateRoute>} />
-            <Route path="/NouvelleMatiere"    element={<PrivateRoute permissions={R_PARAM}><NouvelleMatiere /></PrivateRoute>} />
-            <Route path="/DetailsMatiere/:id" element={<PrivateRoute permissions={R_PARAM}><DetailsMatiere /></PrivateRoute>} />
-            <Route path="/ConfigMatieres"     element={<PrivateRoute permissions={R_PARAM}><ConfigurationMatieres /></PrivateRoute>} />
+            <Route path="/Matieres"           element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.matieres']}><ListeMatieres /></PrivateRoute>} />
+            <Route path="/NouvelleMatiere"    element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.matieres']}><NouvelleMatiere /></PrivateRoute>} />
+            <Route path="/DetailsMatiere/:id" element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.matieres']}><DetailsMatiere /></PrivateRoute>} />
+            <Route path="/ConfigMatieres"     element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.config_matieres']}><ConfigurationMatieres /></PrivateRoute>} />
 
-            <Route path="/Series"                element={<PrivateRoute permissions={R_PARAM}><ListeSeries /></PrivateRoute>} />
-            <Route path="/TypeDevoirs"           element={<PrivateRoute permissions={R_PARAM}><ListeTypeDevoirs /></PrivateRoute>} />
-            <Route path="/NouveauTypeDevoir"     element={<PrivateRoute permissions={R_PARAM}><NouveauTypeDevoir /></PrivateRoute>} />
-            <Route path="/DetailsTypeDevoir/:id" element={<PrivateRoute permissions={R_PARAM}><DetailsTypeDevoir /></PrivateRoute>} />
+            <Route path="/Series"                element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.series']}><ListeSeries /></PrivateRoute>} />
+            <Route path="/TypeDevoirs"           element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.type_devoirs']}><ListeTypeDevoirs /></PrivateRoute>} />
+            <Route path="/NouveauTypeDevoir"     element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.type_devoirs']}><NouveauTypeDevoir /></PrivateRoute>} />
+            <Route path="/DetailsTypeDevoir/:id" element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.type_devoirs']}><DetailsTypeDevoir /></PrivateRoute>} />
 
-            <Route path="/Periodes"           element={<PrivateRoute permissions={R_PARAM}><ListePeriodes /></PrivateRoute>} />
-            <Route path="/NouvellePeriode"    element={<PrivateRoute permissions={R_PARAM}><NouvellePeriode /></PrivateRoute>} />
-            <Route path="/DetailsPeriode/:id" element={<PrivateRoute permissions={R_PARAM}><DetailsPeriode /></PrivateRoute>} />
+            <Route path="/Periodes"           element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.periodes']}><ListePeriodes /></PrivateRoute>} />
+            <Route path="/NouvellePeriode"    element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.periodes']}><NouvellePeriode /></PrivateRoute>} />
+            <Route path="/DetailsPeriode/:id" element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.periodes']}><DetailsPeriode /></PrivateRoute>} />
 
             {/* Inscriptions */}
-            <Route path="/Inscriptions"          element={<PrivateRoute permissions={R_INSCRIP}><ListeInscriptions /></PrivateRoute>} />
-            <Route path="/Inscriptions/:id"      element={<PrivateRoute permissions={R_INSCRIP}><DetailsInscription /></PrivateRoute>} />
+            <Route path="/Inscriptions"          element={<PrivateRoute permissions={R_INSCRIP} modules={['inscriptions']}><ListeInscriptions /></PrivateRoute>} />
+            <Route path="/Inscriptions/:id"      element={<PrivateRoute permissions={R_INSCRIP} modules={['inscriptions']}><DetailsInscription /></PrivateRoute>} />
 
             {/* Personnes */}
-            <Route path="/Eleves"              element={<PrivateRoute permissions={R_ELEVES}><ListeEleves /></PrivateRoute>} />
-            <Route path="/NouvelEleve"         element={<PrivateRoute permissions={R_ELEVES}><NouvelEleve /></PrivateRoute>} />
-            <Route path="/DetailsEleve/:id"    element={<PrivateRoute permissions={R_ELEVES}><DetailsEleve /></PrivateRoute>} />
-            <Route path="/Attestations"        element={<PrivateRoute permissions={R_ELEVES}><Attestation /></PrivateRoute>} />
-            <Route path="/Sanctions"           element={<PrivateRoute permissions={R_ELEVES}><ListeSanctions /></PrivateRoute>} />
-            <Route path="/NouvelleSanction"    element={<PrivateRoute permissions={R_ELEVES}><FormSanction /></PrivateRoute>} />
-            <Route path="/DetailsSanction/:id" element={<PrivateRoute permissions={R_ELEVES}><FormSanction /></PrivateRoute>} />
-            <Route path="/SanctionsEleve/:id"  element={<PrivateRoute permissions={R_ELEVES}><SanctionsEleve /></PrivateRoute>} />
-            <Route path="/SanteEleve/:id"      element={<PrivateRoute permissions={R_SANTE}><SanteEleve /></PrivateRoute>} />
+            <Route path="/Eleves"              element={<PrivateRoute permissions={R_ELEVES} modules={['eleves.liste']}><ListeEleves /></PrivateRoute>} />
+            <Route path="/NouvelEleve"         element={<PrivateRoute permissions={R_ELEVES} modules={['eleves.nouveau']}><NouvelEleve /></PrivateRoute>} />
+            <Route path="/DetailsEleve/:id"    element={<PrivateRoute permissions={R_ELEVES} modules={['eleves.liste']}><DetailsEleve /></PrivateRoute>} />
+            <Route path="/Attestations"        element={<PrivateRoute permissions={R_ELEVES} modules={['eleves.attestations']}><Attestation /></PrivateRoute>} />
+            <Route path="/Sanctions"           element={<PrivateRoute permissions={R_ELEVES} modules={['eleves.sanctions']}><ListeSanctions /></PrivateRoute>} />
+            <Route path="/NouvelleSanction"    element={<PrivateRoute permissions={R_ELEVES} modules={['eleves.sanctions']}><FormSanction /></PrivateRoute>} />
+            <Route path="/DetailsSanction/:id" element={<PrivateRoute permissions={R_ELEVES} modules={['eleves.sanctions']}><FormSanction /></PrivateRoute>} />
+            <Route path="/SanctionsEleve/:id"  element={<PrivateRoute permissions={R_ELEVES} modules={['eleves.sanctions']}><SanctionsEleve /></PrivateRoute>} />
+            <Route path="/SanteEleve/:id"      element={<PrivateRoute permissions={R_SANTE} modules={['sante']}><SanteEleve /></PrivateRoute>} />
 
-            <Route path="/ConseilClasse" element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE}><ConseilClasse /></PrivateRoute>} />
+            <Route path="/ConseilClasse" element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE} modules={['pedagogie_pilotage.conseil_classe']}><ConseilClasse /></PrivateRoute>} />
 
-            <Route path="/Enseignants"            element={<PrivateRoute permissions={R_ENSEIGNANTS}><ListeEnseignants /></PrivateRoute>} />
-            <Route path="/NouvelEnseignant"       element={<PrivateRoute permissions={R_ENSEIGNANTS}><NouvelEnseignant /></PrivateRoute>} />
-            <Route path="/DetailsEnseignant/:id"  element={<PrivateRoute permissions={R_ENSEIGNANTS}><DetailsEnseignant /></PrivateRoute>} />
-            <Route path="/ProfsParMatiere"        element={<PrivateRoute permissions={R_ENSEIGNANTS}><ListeProfsParMatiere /></PrivateRoute>} />
+            <Route path="/Enseignants"            element={<PrivateRoute permissions={R_ENSEIGNANTS} modules={['enseignants.liste']}><ListeEnseignants /></PrivateRoute>} />
+            <Route path="/NouvelEnseignant"       element={<PrivateRoute permissions={R_ENSEIGNANTS} modules={['enseignants.nouveau']}><NouvelEnseignant /></PrivateRoute>} />
+            <Route path="/DetailsEnseignant/:id"  element={<PrivateRoute permissions={R_ENSEIGNANTS} modules={['enseignants.liste']}><DetailsEnseignant /></PrivateRoute>} />
+            <Route path="/ProfsParMatiere"        element={<PrivateRoute permissions={R_ENSEIGNANTS} modules={['enseignants.profs_matiere']}><ListeProfsParMatiere /></PrivateRoute>} />
 
-            <Route path="/Parents"               element={<PrivateRoute permissions={R_PARENTS}><ListeParents /></PrivateRoute>} />
-            <Route path="/NouveauParent"         element={<PrivateRoute permissions={R_PARENTS}><NouveauParent /></PrivateRoute>} />
-            <Route path="/DetailsParent/:id"     element={<PrivateRoute permissions={R_PARENTS}><DetailsParent /></PrivateRoute>} />
-            <Route path="/DemandesParents"       element={<PrivateRoute permissions={R_PARENTS}><DemandesParents /></PrivateRoute>} />
+            <Route path="/Parents"               element={<PrivateRoute permissions={R_PARENTS} modules={['parents.liste']}><ListeParents /></PrivateRoute>} />
+            <Route path="/NouveauParent"         element={<PrivateRoute permissions={R_PARENTS} modules={['parents.nouveau']}><NouveauParent /></PrivateRoute>} />
+            <Route path="/DetailsParent/:id"     element={<PrivateRoute permissions={R_PARENTS} modules={['parents.liste']}><DetailsParent /></PrivateRoute>} />
+            <Route path="/DemandesParents"       element={<PrivateRoute permissions={R_PARENTS} modules={['parents.demandes']}><DemandesParents /></PrivateRoute>} />
 
             {/* Salles */}
-            <Route path="/Salles"            element={<PrivateRoute permissions={R_PARAM}><ListeSalles /></PrivateRoute>} />
-            <Route path="/NouvelleSalle"     element={<PrivateRoute permissions={R_PARAM}><FormSalle /></PrivateRoute>} />
-            <Route path="/DetailsSalle/:id"  element={<PrivateRoute permissions={R_PARAM}><FormSalle /></PrivateRoute>} />
-            <Route path="/PlanningSalle/:id" element={<PrivateRoute permissions={R_PARAM}><PlanningSalle /></PrivateRoute>} />
+            <Route path="/Salles"            element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.salles']}><ListeSalles /></PrivateRoute>} />
+            <Route path="/NouvelleSalle"     element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.salles']}><FormSalle /></PrivateRoute>} />
+            <Route path="/DetailsSalle/:id"  element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.salles']}><FormSalle /></PrivateRoute>} />
+            <Route path="/PlanningSalle/:id" element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.salles']}><PlanningSalle /></PrivateRoute>} />
 
             {/* Remplacements */}
-            <Route path="/Remplacements"           element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><ListeRemplacements /></PrivateRoute>} />
-            <Route path="/NouveauRemplacement"     element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><FormRemplacement /></PrivateRoute>} />
-            <Route path="/DetailsRemplacement/:id" element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><FormRemplacement /></PrivateRoute>} />
+            <Route path="/Remplacements"           element={<PrivateRoute permissions={R_PEDAGO_SAISIE} modules={['pedagogie_saisie.remplacements']}><ListeRemplacements /></PrivateRoute>} />
+            <Route path="/NouveauRemplacement"     element={<PrivateRoute permissions={R_PEDAGO_SAISIE} modules={['pedagogie_saisie.remplacements']}><FormRemplacement /></PrivateRoute>} />
+            <Route path="/DetailsRemplacement/:id" element={<PrivateRoute permissions={R_PEDAGO_SAISIE} modules={['pedagogie_saisie.remplacements']}><FormRemplacement /></PrivateRoute>} />
 
             {/* Messagerie */}
-            <Route path="/Messagerie" element={<PrivateRoute permissions={R_COMM}><Messagerie /></PrivateRoute>} />
+            <Route path="/Messagerie" element={<PrivateRoute permissions={R_COMM} modules={['communication.messagerie']}><Messagerie /></PrivateRoute>} />
 
             {/* RDV parents-profs */}
-            <Route path="/RDV" element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><GestionCreneauxRdv /></PrivateRoute>} />
+            <Route path="/RDV" element={<PrivateRoute permissions={R_PEDAGO_SAISIE} modules={['communication.rdv']}><GestionCreneauxRdv /></PrivateRoute>} />
 
             {/* Pédagogie — saisie */}
-            <Route path="/EmploiDuTemps"            element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><ListeEmploiDuTemps /></PrivateRoute>} />
-            <Route path="/NouvelEmploiDuTemps"      element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><NouvelEmploiDuTemps /></PrivateRoute>} />
-            <Route path="/DetailsEmploiDuTemps/:id" element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><DetailsEmploiDuTemps /></PrivateRoute>} />
+            <Route path="/EmploiDuTemps"            element={<PrivateRoute permissions={R_PEDAGO_SAISIE} modules={['pedagogie_saisie.emploi_du_temps']}><ListeEmploiDuTemps /></PrivateRoute>} />
+            <Route path="/NouvelEmploiDuTemps"      element={<PrivateRoute permissions={R_PEDAGO_SAISIE} modules={['pedagogie_saisie.emploi_du_temps']}><NouvelEmploiDuTemps /></PrivateRoute>} />
+            <Route path="/DetailsEmploiDuTemps/:id" element={<PrivateRoute permissions={R_PEDAGO_SAISIE} modules={['pedagogie_saisie.emploi_du_temps']}><DetailsEmploiDuTemps /></PrivateRoute>} />
 
-            <Route path="/Assiduites"           element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><ListeAssiduites /></PrivateRoute>} />
-            <Route path="/FeuillePresence"      element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><FeuillePresence /></PrivateRoute>} />
-            <Route path="/DetailsAssiduite/:id" element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><DetailsAssiduite /></PrivateRoute>} />
+            <Route path="/Assiduites"           element={<PrivateRoute permissions={R_PEDAGO_SAISIE} modules={['pedagogie_saisie.assiduites']}><ListeAssiduites /></PrivateRoute>} />
+            <Route path="/FeuillePresence"      element={<PrivateRoute permissions={R_PEDAGO_SAISIE} modules={['pedagogie_saisie.assiduites']}><FeuillePresence /></PrivateRoute>} />
+            <Route path="/DetailsAssiduite/:id" element={<PrivateRoute permissions={R_PEDAGO_SAISIE} modules={['pedagogie_saisie.assiduites']}><DetailsAssiduite /></PrivateRoute>} />
 
-            <Route path="/Devoirs"           element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><ListeDevoirs /></PrivateRoute>} />
-            <Route path="/NouveauDevoir"     element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><NouveauDevoir /></PrivateRoute>} />
-            <Route path="/DetailsDevoir/:id" element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><DetailsDevoir /></PrivateRoute>} />
-            <Route path="/SaisieNotes/:id"   element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><SaisieNotes /></PrivateRoute>} />
+            <Route path="/Devoirs"           element={<PrivateRoute permissions={R_PEDAGO_SAISIE} modules={['pedagogie_saisie.devoirs']}><ListeDevoirs /></PrivateRoute>} />
+            <Route path="/NouveauDevoir"     element={<PrivateRoute permissions={R_PEDAGO_SAISIE} modules={['pedagogie_saisie.devoirs']}><NouveauDevoir /></PrivateRoute>} />
+            <Route path="/DetailsDevoir/:id" element={<PrivateRoute permissions={R_PEDAGO_SAISIE} modules={['pedagogie_saisie.devoirs']}><DetailsDevoir /></PrivateRoute>} />
+            <Route path="/SaisieNotes/:id"   element={<PrivateRoute permissions={R_PEDAGO_SAISIE} modules={['pedagogie_saisie.devoirs']}><SaisieNotes /></PrivateRoute>} />
 
-            <Route path="/GestionChapitres" element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><GestionChapitres /></PrivateRoute>} />
-            <Route path="/Calendrier"       element={<PrivateRoute permissions={R_PEDAGO_SAISIE}><CalendrierScolaire /></PrivateRoute>} />
+            <Route path="/GestionChapitres" element={<PrivateRoute permissions={R_PEDAGO_SAISIE} modules={['pedagogie_saisie.programme']}><GestionChapitres /></PrivateRoute>} />
+            <Route path="/Calendrier"       element={<PrivateRoute permissions={R_PEDAGO_SAISIE} modules={['pedagogie_saisie.calendrier']}><CalendrierScolaire /></PrivateRoute>} />
 
             {/* Pédagogie — pilotage */}
-            <Route path="/Bulletins"        element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE}><Bulletin /></PrivateRoute>} />
+            <Route path="/Bulletins"        element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE} modules={['pedagogie_pilotage.bulletins']}><Bulletin /></PrivateRoute>} />
             <Route path="/RapportMinistere" element={<PrivateRoute permissions={R_STATS}><RapportMinistere /></PrivateRoute>} />
-            <Route path="/SuiviProgressions" element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE}><SuiviProgressions /></PrivateRoute>} />
-            <Route path="/ConformiteEdt"     element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE}><ConformiteEdt /></PrivateRoute>} />
-            <Route path="/ChargeEnseignants" element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE}><ChargeEnseignants /></PrivateRoute>} />
+            <Route path="/SuiviProgressions" element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE} modules={['pedagogie_pilotage.suivi_progressions']}><SuiviProgressions /></PrivateRoute>} />
+            <Route path="/ConformiteEdt"     element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE} modules={['pedagogie_pilotage.conformite_edt']}><ConformiteEdt /></PrivateRoute>} />
+            <Route path="/ChargeEnseignants" element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE} modules={['pedagogie_pilotage.charge_enseignants']}><ChargeEnseignants /></PrivateRoute>} />
 
             {/* Finances — gestion */}
-            <Route path="/Scolarites"           element={<PrivateRoute permissions={R_FINANCES_GESTION}><ListeScolarites /></PrivateRoute>} />
-            <Route path="/NouvelleScolarite"    element={<PrivateRoute permissions={R_FINANCES_GESTION}><NouvelleScolarite /></PrivateRoute>} />
-            <Route path="/DetailsScolarite/:id" element={<PrivateRoute permissions={R_FINANCES_GESTION}><DetailsScolarite /></PrivateRoute>} />
-            <Route path="/Impayes"              element={<PrivateRoute permissions={R_FINANCES_GESTION}><TableauImpayes /></PrivateRoute>} />
-            <Route path="/FraisAnnexes"         element={<PrivateRoute permissions={R_FINANCES_GESTION}><FraisAnnexesConfig /></PrivateRoute>} />
-            <Route path="/ImpayesFraisAnnexes"  element={<PrivateRoute permissions={R_FINANCES_GESTION}><ImpayesFraisAnnexes /></PrivateRoute>} />
-            <Route path="/FraisAnnexeEleve/:eleveId" element={<PrivateRoute permissions={R_FINANCES_CAISSE}><FraisAnnexeEleve /></PrivateRoute>} />
-            <Route path="/ExportComptable"       element={<PrivateRoute permissions={R_FINANCES_GESTION}><ExportComptable /></PrivateRoute>} />
+            <Route path="/Scolarites"           element={<PrivateRoute permissions={R_FINANCES_GESTION} modules={['finances_gestion.scolarites']}><ListeScolarites /></PrivateRoute>} />
+            <Route path="/NouvelleScolarite"    element={<PrivateRoute permissions={R_FINANCES_GESTION} modules={['finances_gestion.scolarites']}><NouvelleScolarite /></PrivateRoute>} />
+            <Route path="/DetailsScolarite/:id" element={<PrivateRoute permissions={R_FINANCES_GESTION} modules={['finances_gestion.scolarites']}><DetailsScolarite /></PrivateRoute>} />
+            <Route path="/Impayes"              element={<PrivateRoute permissions={R_FINANCES_GESTION} modules={['finances_gestion.impayes']}><TableauImpayes /></PrivateRoute>} />
+            <Route path="/FraisAnnexes"         element={<PrivateRoute permissions={R_FINANCES_GESTION} modules={['finances_gestion.frais_annexes']}><FraisAnnexesConfig /></PrivateRoute>} />
+            <Route path="/ImpayesFraisAnnexes"  element={<PrivateRoute permissions={R_FINANCES_GESTION} modules={['finances_gestion.impayes_frais_annexes']}><ImpayesFraisAnnexes /></PrivateRoute>} />
+            <Route path="/FraisAnnexeEleve/:eleveId" element={<PrivateRoute permissions={R_FINANCES_CAISSE} modules={['finances_gestion.frais_annexes']}><FraisAnnexeEleve /></PrivateRoute>} />
+            <Route path="/ExportComptable"       element={<PrivateRoute permissions={R_FINANCES_GESTION} modules={['finances_gestion.export_comptable']}><ExportComptable /></PrivateRoute>} />
 
             {/* Finances — caisse */}
-            <Route path="/Paiements"           element={<PrivateRoute permissions={R_FINANCES_CAISSE}><ListePaiements /></PrivateRoute>} />
-            <Route path="/NouveauPaiement"     element={<PrivateRoute permissions={R_FINANCES_CAISSE}><NouveauPaiement /></PrivateRoute>} />
-            <Route path="/DetailsPaiement/:id" element={<PrivateRoute permissions={R_FINANCES_CAISSE}><DetailsPaiement /></PrivateRoute>} />
-            <Route path="/RecapPaiements"      element={<PrivateRoute permissions={R_FINANCES_CAISSE}><RecapPaiements /></PrivateRoute>} />
-            <Route path="/PaiementsEleve/:id"  element={<PrivateRoute permissions={R_FINANCES_CAISSE}><PaiementsEleve /></PrivateRoute>} />
+            <Route path="/Paiements"           element={<PrivateRoute permissions={R_FINANCES_CAISSE} modules={['finances_caisse.historique']}><ListePaiements /></PrivateRoute>} />
+            <Route path="/NouveauPaiement"     element={<PrivateRoute permissions={R_FINANCES_CAISSE} modules={['finances_caisse.nouveau_paiement']}><NouveauPaiement /></PrivateRoute>} />
+            <Route path="/DetailsPaiement/:id" element={<PrivateRoute permissions={R_FINANCES_CAISSE} modules={['finances_caisse.historique']}><DetailsPaiement /></PrivateRoute>} />
+            <Route path="/RecapPaiements"      element={<PrivateRoute permissions={R_FINANCES_CAISSE} modules={['finances_caisse.recap']}><RecapPaiements /></PrivateRoute>} />
+            <Route path="/PaiementsEleve/:id"  element={<PrivateRoute permissions={R_FINANCES_CAISSE} modules={['finances_caisse.historique']}><PaiementsEleve /></PrivateRoute>} />
             <Route path="/PaiementRetour"      element={<PrivateRoute permissions={R_FINANCES_CAISSE}><PaiementRetour /></PrivateRoute>} />
-            <Route path="/Echeancier"          element={<PrivateRoute permissions={R_FINANCES_CAISSE}><Echeancier /></PrivateRoute>} />
+            <Route path="/Echeancier"          element={<PrivateRoute permissions={R_FINANCES_CAISSE} modules={['finances_caisse.echeancier']}><Echeancier /></PrivateRoute>} />
 
             {/* Communication */}
-            <Route path="/Informations"            element={<PrivateRoute permissions={R_COMM}><ListeInformations /></PrivateRoute>} />
-            <Route path="/NouvelleInformation"     element={<PrivateRoute permissions={R_COMM}><NouvelleInformation /></PrivateRoute>} />
-            <Route path="/DetailsInformation/:id"  element={<PrivateRoute permissions={R_COMM}><DetailsInformation /></PrivateRoute>} />
+            <Route path="/Informations"            element={<PrivateRoute permissions={R_COMM} modules={['communication.informations']}><ListeInformations /></PrivateRoute>} />
+            <Route path="/NouvelleInformation"     element={<PrivateRoute permissions={R_COMM} modules={['communication.informations']}><NouvelleInformation /></PrivateRoute>} />
+            <Route path="/DetailsInformation/:id"  element={<PrivateRoute permissions={R_COMM} modules={['communication.informations']}><DetailsInformation /></PrivateRoute>} />
 
             {/* Administration */}
-            <Route path="/Utilisateurs"          element={<PrivateRoute permissions={['utilisateurs']}><ListeUtilisateurs /></PrivateRoute>} />
-            <Route path="/NouvelUtilisateur"     element={<PrivateRoute permissions={['utilisateurs']}><NouvelUtilisateur /></PrivateRoute>} />
-            <Route path="/Utilisateurs/:id"      element={<PrivateRoute permissions={['utilisateurs']}><NouvelUtilisateur /></PrivateRoute>} />
-            <Route path="/Roles"                 element={<PrivateRoute permissions={['utilisateurs']}><ListeRoles /></PrivateRoute>} />
-            <Route path="/Roles/nouveau"         element={<PrivateRoute permissions={['utilisateurs']}><NouveauRole /></PrivateRoute>} />
-            <Route path="/Roles/:id"             element={<PrivateRoute permissions={['utilisateurs']}><NouveauRole /></PrivateRoute>} />
-            <Route path="/Documentation"  element={<PrivateRoute permissions={R_ADMIN}><GestionDocumentation /></PrivateRoute>} />
-            <Route path="/AuditLogs"             element={<PrivateRoute permissions={['utilisateurs']}><AuditLogs /></PrivateRoute>} />
+            <Route path="/Utilisateurs"          element={<PrivateRoute permissions={['utilisateurs']} modules={['utilisateurs.utilisateurs']}><ListeUtilisateurs /></PrivateRoute>} />
+            <Route path="/NouvelUtilisateur"     element={<PrivateRoute permissions={['utilisateurs']} modules={['utilisateurs.utilisateurs']}><NouvelUtilisateur /></PrivateRoute>} />
+            <Route path="/Utilisateurs/:id"      element={<PrivateRoute permissions={['utilisateurs']} modules={['utilisateurs.utilisateurs']}><NouvelUtilisateur /></PrivateRoute>} />
+            <Route path="/Roles"                 element={<PrivateRoute permissions={['utilisateurs']} modules={['utilisateurs.roles']}><ListeRoles /></PrivateRoute>} />
+            <Route path="/Roles/nouveau"         element={<PrivateRoute permissions={['utilisateurs']} modules={['utilisateurs.roles']}><NouveauRole /></PrivateRoute>} />
+            <Route path="/Roles/:id"             element={<PrivateRoute permissions={['utilisateurs']} modules={['utilisateurs.roles']}><NouveauRole /></PrivateRoute>} />
+            <Route path="/Documentation"  element={<PrivateRoute permissions={R_ADMIN} modules={['utilisateurs.documentation']}><GestionDocumentation /></PrivateRoute>} />
+            <Route path="/AuditLogs"             element={<PrivateRoute permissions={['utilisateurs']} modules={['utilisateurs.audit_logs']}><AuditLogs /></PrivateRoute>} />
 
             {/* 404 — page non trouvée */}
             <Route path="*" element={

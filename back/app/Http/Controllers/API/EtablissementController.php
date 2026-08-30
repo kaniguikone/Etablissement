@@ -15,7 +15,12 @@ class EtablissementController extends Controller
      */
     public function show()
     {
-        return response()->json(Etablissement::firstOrCreate([], ['nom' => 'Mon Établissement']));
+        $etablissement = Etablissement::firstOrCreate([], ['nom' => 'Mon Établissement']);
+
+        return response()->json([
+            ...$etablissement->toArray(),
+            'modules_actifs' => tenant() ? tenant()->modulesActifs() : [],
+        ]);
     }
 
     /**
