@@ -40,6 +40,7 @@ use App\Http\Controllers\API\VolumeHoraireController;
 use App\Http\Controllers\API\PlageHoraireController;
 use App\Http\Controllers\API\EnseignantIndisponibiliteController;
 use App\Http\Controllers\API\EdtDiagnosticController;
+use App\Http\Controllers\API\EdtContrainteController;
 use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\ArchivageController;
 use App\Http\Controllers\API\CalendrierController;
@@ -439,6 +440,11 @@ Route::middleware([
         Route::middleware(['permission:pedagogie_pilotage', 'module:pedagogie_pilotage'])->group(function () {
             Route::get('/volumesHoraires/conformite',        [VolumeHoraireController::class, 'conformite']);
             Route::get('/volumesHoraires/chargeEnseignants', [VolumeHoraireController::class, 'chargeEnseignants']);
+
+            // Contrôle d'un emploi du temps contre les règles MENET (chantier EDT — Lot 1)
+            Route::get('/edt/contraintes',        [EdtContrainteController::class, 'index']);
+            Route::put('/edt/contraintes/{code}', [EdtContrainteController::class, 'update']);
+            Route::get('/edt/controle',           [EdtContrainteController::class, 'controle']);
 
             Route::get('/bulletin/{eleveId}/{periodeId}',                          [NoteController::class,        'bulletin']);
             Route::get('/bulletin/{eleveId}/{periodeId}/pdf',                      [BulletinPdfController::class, 'telecharger']);

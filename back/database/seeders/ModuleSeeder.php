@@ -50,6 +50,7 @@ class ModuleSeeder extends Seeder
                 ['slug' => 'pedagogie_pilotage.conformite_edt',     'label' => 'Conformité EDT'],
                 ['slug' => 'pedagogie_pilotage.charge_enseignants', 'label' => 'Charge enseignants'],
                 ['slug' => 'pedagogie_pilotage.diagnostic_edt',     'label' => 'Diagnostic EDT'],
+                ['slug' => 'pedagogie_pilotage.controle_edt',       'label' => 'Contrôle EDT'],
             ]],
             ['slug' => 'finances_caisse', 'label' => 'Caisse', 'enfants' => [
                 ['slug' => 'finances_caisse.nouveau_paiement', 'label' => 'Nouveau paiement'],

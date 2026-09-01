@@ -94,6 +94,7 @@ const GROUPES = [
             { to: '/ConformiteEdt',     icon: 'fas fa-balance-scale', label: 'Conformité EDT',           moduleSlug: 'pedagogie_pilotage.conformite_edt' },
             { to: '/ChargeEnseignants', icon: 'fas fa-user-clock',    label: 'Charge enseignants',       moduleSlug: 'pedagogie_pilotage.charge_enseignants' },
             { to: '/DiagnosticEdt',     icon: 'fas fa-clipboard-list', label: 'Diagnostic EDT',          moduleSlug: 'pedagogie_pilotage.diagnostic_edt' },
+            { to: '/ControleEdt',       icon: 'fas fa-clipboard-check', label: 'Contrôle EDT',           moduleSlug: 'pedagogie_pilotage.controle_edt' },
         ],
     },
 

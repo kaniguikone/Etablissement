@@ -31,6 +31,7 @@ const ROUTE_MODULE = {
     '/NouvelEmploiDuTemps':   'emploi_du_temps',
     '/GrilleHoraire':         'parametrage',
     '/DiagnosticEdt':         'parametrage',
+    '/ControleEdt':           'emploi_du_temps',
     '/Indisponibilites':      'enseignants',
     '/Sanctions':             'sanctions',
     '/FormSanction':          'sanctions',

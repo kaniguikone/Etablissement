@@ -217,6 +217,7 @@ class TemplateService
         (new \Database\Seeders\MatiereFamilleSeeder)->run();
         (new \Database\Seeders\PlageHoraireSeeder)->run();
         (new \Database\Seeders\SeanceTypeSeeder)->run();
+        (new \Database\Seeders\EdtContrainteSeeder)->run();
         $stats['plages_horaires'] = \App\Models\PlageHoraire::count();
         $stats['seances_types']   = \App\Models\SeanceType::count();
 

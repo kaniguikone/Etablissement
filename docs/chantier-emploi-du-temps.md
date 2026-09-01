@@ -7,6 +7,11 @@
 > - Moteur : **microservice de résolution (Python + Google OR-Tools CP-SAT)** appelé en asynchrone par Laravel.
 > - Périmètre cible : **tous les niveaux** (1er cycle 6e→3e et 2nd cycle 2nde→Tle, toutes séries), y compris groupes LV2, dédoublements et quinzaine.
 > - Livraison par lots successifs, chacun apportant une valeur autonome.
+>
+> **Avancement :**
+> - **Lot 0 — Paramétrage** : ✅ livré (branche `feat/edt-lot0-parametrage`). Détail : `docs/chantier-edt-lot0.md`.
+> - **Lot 1 — Catalogue de contraintes + validateur** : ✅ livré (branche `feat/edt-lot1-contraintes`). Table `edt_contraintes` (13 dures + 5 souples), service `App\Services\Edt\Validateur`, endpoint `GET /edt/controle`, écran `/ControleEdt`. Différé au Lot 4 : contraintes groupes parallèles (D15), quinzaine (D16), tandem PC/SVT contigu sans récré (D8, seul « même jour » fait), souples S3/S4/S6/S8/S10.
+> - Lots 2 à 5 : à faire.
 
 ---
 
