@@ -51,10 +51,18 @@ class Generateur
 
     private array $placements = [];      // besoin_id => placement
 
+    /** @var int[] besoin_id des créneaux verrouillés (ne bougent pas) */
+    private array $fixes = [];
+
     private array $diagnostic = [];
 
     /**
-     * @param  array{jours?:string[], classe_ids?:int[]}  $params
+     * Génère une proposition d'emploi du temps.
+     *
+     * $params : jours (string[]), classe_ids (int[]), creneaux_fixes (array de
+     * créneaux verrouillés à conserver tels quels — régénération partielle,
+     * chantier EDT Lot 3).
+     *
      * @return array{creneaux:array, score:int, diagnostic:array}
      */
     public function generer(array $params = []): array
@@ -65,6 +73,7 @@ class Generateur
         $this->chargerGrille();
         $this->chargerIndispos();
         $this->construireBesoins($params['classe_ids'] ?? null);
+        $this->preplacerFixes($params['creneaux_fixes'] ?? []);
 
         if (empty($this->besoins)) {
             return ['creneaux' => [], 'score' => 0, 'diagnostic' => $this->diagnostic + $this->stats(0)];
@@ -86,6 +95,7 @@ class Generateur
                 'jour' => $pl['jour'],
                 'heure_debut' => $pl['heure_debut'],
                 'heure_fin' => $pl['heure_fin'],
+                'verrouille' => in_array($besoinId, $this->fixes, true),
             ];
         }
 
@@ -198,6 +208,52 @@ class Generateur
         }
     }
 
+    /**
+     * Pré-place les créneaux verrouillés (régénération partielle) : le besoin
+     * correspondant est fixé à son emplacement et ne sera plus déplacé.
+     */
+    private function preplacerFixes(array $creneauxFixes): void
+    {
+        // Index des besoins libres par (classe_id, matiere_id)
+        $parCle = [];
+        foreach ($this->besoins as $b) {
+            $parCle[$b['classe_id'].'_'.$b['matiere_id']][] = $b['id'];
+        }
+
+        foreach ($creneauxFixes as $fixe) {
+            $cle = $fixe['classe_id'].'_'.$fixe['matiere_id'];
+            $besoinId = array_shift($parCle[$cle]);
+            if ($besoinId === null) {
+                continue; // plus de besoin à consommer (volume déjà couvert)
+            }
+            $besoin = $this->besoins[$besoinId];
+
+            $jour = $fixe['jour'];
+            $plages = $this->plagesJour[$jour] ?? [];
+            $debut = substr($fixe['heure_debut'], 0, 5);
+            $i = null;
+            foreach ($plages as $idx => $p) {
+                if (substr($p->heure_debut, 0, 5) === $debut) {
+                    $i = $idx;
+                    break;
+                }
+            }
+            if ($i === null || $i + $besoin['nb_plages'] > count($plages)) {
+                continue;
+            }
+            $tranche = array_slice($plages, $i, $besoin['nb_plages']);
+            $cand = [
+                'jour' => $jour,
+                'plages' => array_map(fn ($p) => $p->id, $tranche),
+                'heure_debut' => substr($tranche[0]->heure_debut, 0, 5),
+                'heure_fin' => substr(end($tranche)->heure_fin, 0, 5),
+                'salle_id' => $fixe['salle_id'] ?: null,
+            ];
+            $this->poser($besoin, $cand);
+            $this->fixes[] = $besoinId;
+        }
+    }
+
     // ── Placement ──────────────────────────────────────────────────────────
 
     private function trierBesoins(): void
@@ -225,6 +281,9 @@ class Generateur
     private function placementGlouton(): void
     {
         foreach ($this->besoins as $besoin) {
+            if (isset($this->placements[$besoin['id']])) {
+                continue; // déjà pré-placé (créneau verrouillé)
+            }
             $meilleur = null;
             $meilleurScore = INF;
 
@@ -257,7 +316,7 @@ class Generateur
             shuffle($ordre);
             $bouge = false;
             foreach ($ordre as $besoinId) {
-                if (! isset($this->placements[$besoinId])) {
+                if (! isset($this->placements[$besoinId]) || in_array($besoinId, $this->fixes, true)) {
                     continue;
                 }
                 $besoin = $this->besoins[$besoinId];

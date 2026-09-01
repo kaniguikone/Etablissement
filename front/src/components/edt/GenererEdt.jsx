@@ -5,8 +5,20 @@ import { useConfirm } from '../../context/ConfirmContext';
 
 const JOURS = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
 
+const telechargerPdf = async (url, nom, toast) => {
+    try {
+        const r = await api.get(url, { responseType: 'blob', timeout: 120000 });
+        const blobUrl = URL.createObjectURL(new Blob([r.data], { type: 'application/pdf' }));
+        const a = document.createElement('a');
+        a.href = blobUrl; a.download = nom; a.click();
+        URL.revokeObjectURL(blobUrl);
+    } catch {
+        toast.error('Export PDF impossible.');
+    }
+};
+
 /**
- * Génération automatique des emplois du temps (chantier EDT — Lot 2).
+ * Génération automatique des emplois du temps (chantier EDT — Lots 2 & 3).
  */
 const GenererEdt = () => {
     const { toast } = useToast();
@@ -18,9 +30,14 @@ const GenererEdt = () => {
     const [enCours, setEnCours] = useState(false);
     const [detail, setDetail] = useState(null);
     const [classeAffichee, setClasseAffichee] = useState('');
+    const [plagesRef, setPlagesRef] = useState([]);
+    const [edite, setEdite] = useState(null); // créneau en cours d'édition
 
     const charger = () => api.get('/edt/generations').then((r) => setScenarios(r.data)).catch(() => {});
-    useEffect(() => { charger(); }, []);
+    useEffect(() => {
+        charger();
+        api.get('/edt/grille-reference').then((r) => setPlagesRef(r.data)).catch(() => {});
+    }, []);
 
     const lancer = () => {
         if (jours.length === 0) { toast.error('Choisissez au moins un jour.'); return; }
@@ -37,7 +54,40 @@ const GenererEdt = () => {
             .finally(() => setEnCours(false));
     };
 
-    const voir = (id) => api.get(`/edt/generations/${id}`).then((r) => { setDetail(r.data); setClasseAffichee(''); }).catch(() => toast.error('Chargement impossible.'));
+    const voir = (id) => api.get(`/edt/generations/${id}`).then((r) => { setDetail(r.data); setClasseAffichee(''); setEdite(null); }).catch(() => toast.error('Chargement impossible.'));
+
+    const regenerer = async (id) => {
+        if (!await confirmer('Régénérer un nouveau scénario en conservant les créneaux verrouillés ?')) return;
+        setEnCours(true);
+        api.post(`/edt/generations/${id}/regenerer`)
+            .then((r) => { toast.success('Nouveau scénario généré.'); setDetail(r.data); charger(); })
+            .catch((err) => toast.error(err.response?.data?.message || 'Régénération impossible.'))
+            .finally(() => setEnCours(false));
+    };
+
+    const patchCreneau = (patch) => {
+        if (!edite || !detail) return;
+        api.patch(`/edt/generations/${detail.generation.id}/creneaux/${edite.id}`, patch)
+            .then((r) => {
+                if (r.data?.conflits?.length) {
+                    toast.error('Conflit : ' + r.data.conflits.join(' · '));
+                } else {
+                    toast.success('Créneau mis à jour.');
+                }
+                voir(detail.generation.id);
+            })
+            .catch(() => toast.error('Modification impossible.'));
+    };
+
+    const supprimerCreneau = async () => {
+        if (!edite || !detail) return;
+        if (!await confirmer('Retirer ce cours du scénario ?')) return;
+        api.delete(`/edt/generations/${detail.generation.id}/creneaux/${edite.id}`)
+            .then(() => { toast.success('Cours retiré.'); voir(detail.generation.id); })
+            .catch(() => toast.error('Suppression impossible.'));
+    };
+
+    const exportRef = () => (detail?.generation?.statut === 'publie' ? 'officiel' : detail?.generation?.id);
 
     const publier = async (id) => {
         if (!await confirmer("Publier ce scénario ? L'emploi du temps actuel sera archivé et remplacé.")) return;
@@ -109,11 +159,28 @@ const GenererEdt = () => {
                                 <span className="badge bg-light text-dark me-1">{diag.nb_placees ?? 0} / {diag.nb_besoins ?? 0} séances placées</span>
                                 {detail.generation.duree_ms != null && <span className="badge bg-light text-dark">{Math.round(detail.generation.duree_ms / 100) / 10}s</span>}
                             </div>
-                            {detail.generation.statut !== 'publie' && (
-                                <button className="btn btn-success btn-sm" onClick={() => publier(detail.generation.id)}>
-                                    Publier ce scénario
+                            <div className="d-flex gap-2 flex-wrap">
+                                {detail.generation.statut !== 'publie' && detail.generation.statut !== 'archive' && (
+                                    <>
+                                        <button className="btn btn-outline-secondary btn-sm" onClick={() => regenerer(detail.generation.id)} disabled={enCours}>
+                                            Régénérer (garder les verrouillés)
+                                        </button>
+                                        <button className="btn btn-success btn-sm" onClick={() => publier(detail.generation.id)}>
+                                            Publier ce scénario
+                                        </button>
+                                    </>
+                                )}
+                                <button className="btn btn-outline-primary btn-sm"
+                                    onClick={() => telechargerPdf(`/edt/${exportRef()}/pdf/classes`, 'edt-toutes-classes.pdf', toast)}>
+                                    PDF — toutes les classes
                                 </button>
-                            )}
+                                {classeAffichee && grilleClasse[0] && (
+                                    <button className="btn btn-outline-primary btn-sm"
+                                        onClick={() => telechargerPdf(`/edt/${exportRef()}/pdf/classe/${grilleClasse[0].classe_id}`, `edt-${classeAffichee}.pdf`, toast)}>
+                                        PDF — {classeAffichee}
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
                         <div className="row g-2 mt-1">
@@ -164,11 +231,54 @@ const GenererEdt = () => {
 
                         {/* Aperçu par classe */}
                         <div className="mt-3">
-                            <select className="form-select form-select-sm" style={{ maxWidth: 260 }}
-                                value={classeAffichee} onChange={(e) => setClasseAffichee(e.target.value)}>
-                                <option value="">Aperçu d&apos;une classe…</option>
-                                {classes.map((c) => <option key={c} value={c}>{c}</option>)}
-                            </select>
+                            <div className="d-flex align-items-center gap-2 flex-wrap">
+                                <select className="form-select form-select-sm" style={{ maxWidth: 260 }}
+                                    value={classeAffichee} onChange={(e) => { setClasseAffichee(e.target.value); setEdite(null); }}>
+                                    <option value="">Aperçu d&apos;une classe…</option>
+                                    {classes.map((c) => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                                {classeAffichee && detail.generation.statut !== 'archive' && (
+                                    <small className="text-muted">Cliquez sur un cours pour le déplacer / verrouiller.</small>
+                                )}
+                            </div>
+
+                            {edite && (
+                                <div className="border rounded p-2 my-2 bg-light">
+                                    <div className="d-flex justify-content-between align-items-center mb-2">
+                                        <strong>{edite.matiere?.libelle_matiere} — {edite.enseignant?.nom_enseignant}</strong>
+                                        <button className="btn-close btn-sm" onClick={() => setEdite(null)} />
+                                    </div>
+                                    <div className="row g-2 align-items-end">
+                                        <div className="col-auto">
+                                            <label className="form-label small mb-0">Jour</label>
+                                            <select className="form-select form-select-sm" defaultValue={edite.jour}
+                                                onChange={(e) => patchCreneau({ jour: e.target.value })}>
+                                                {JOURS.map((j) => <option key={j} value={j} className="text-capitalize">{j}</option>)}
+                                            </select>
+                                        </div>
+                                        <div className="col-auto">
+                                            <label className="form-label small mb-0">Créneau</label>
+                                            <select className="form-select form-select-sm" defaultValue={edite.plage_horaire_id || ''}
+                                                onChange={(e) => patchCreneau({ plage_horaire_id: Number(e.target.value) })}>
+                                                <option value="">—</option>
+                                                {plagesRef
+                                                    .filter((p) => p.jour === edite.jour || p.jour === null)
+                                                    .map((p) => <option key={p.id} value={p.id}>{p.libelle} · {p.heure_debut.slice(0, 5)}–{p.heure_fin.slice(0, 5)}</option>)}
+                                            </select>
+                                        </div>
+                                        <div className="col-auto">
+                                            <div className="form-check">
+                                                <input className="form-check-input" type="checkbox" id="verrou" defaultChecked={!!edite.verrouille}
+                                                    onChange={(e) => patchCreneau({ verrouille: e.target.checked })} />
+                                                <label className="form-check-label small" htmlFor="verrou">Verrouiller</label>
+                                            </div>
+                                        </div>
+                                        <div className="col-auto">
+                                            <button className="btn btn-outline-danger btn-sm" onClick={supprimerCreneau}>Retirer</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             {horaires.length > 0 && (
                                 <div className="table-responsive mt-2">
@@ -190,9 +300,11 @@ const GenererEdt = () => {
                                                         {JOURS.filter((j) => jours.includes(j) || grilleClasse.some((c) => c.jour === j)).map((j) => {
                                                             const c = grilleClasse.find((x) => x.jour === j && x.heure_debut.slice(0, 5) === debut);
                                                             if (!c) return <td key={j} />;
+                                                            const modifiable = detail.generation.statut !== 'archive';
                                                             return (
-                                                                <td key={j} style={{ background: c.matiere?.couleur || '#eee' }}>
-                                                                    <strong>{c.matiere?.abbr_matiere}</strong><br />
+                                                                <td key={j} style={{ background: c.matiere?.couleur || '#eee', cursor: modifiable ? 'pointer' : 'default', outline: edite?.id === c.id ? '2px solid #0d6efd' : 'none' }}
+                                                                    onClick={() => modifiable && setEdite(c)}>
+                                                                    <strong>{c.matiere?.abbr_matiere}</strong>{c.verrouille && ' 🔒'}<br />
                                                                     <small>{c.enseignant?.nom_enseignant}</small>
                                                                     {c.salle && <><br /><small className="text-muted">{c.salle.nom}</small></>}
                                                                 </td>

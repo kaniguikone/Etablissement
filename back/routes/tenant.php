@@ -42,6 +42,7 @@ use App\Http\Controllers\API\EnseignantIndisponibiliteController;
 use App\Http\Controllers\API\EdtDiagnosticController;
 use App\Http\Controllers\API\EdtContrainteController;
 use App\Http\Controllers\API\EdtGenerationController;
+use App\Http\Controllers\API\EdtPdfController;
 use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\ArchivageController;
 use App\Http\Controllers\API\CalendrierController;
@@ -454,6 +455,17 @@ Route::middleware([
             Route::get('/edt/generations/{id}',       [EdtGenerationController::class, 'show'])->where('id', '[0-9]+');
             Route::post('/edt/generations/{id}/publier', [EdtGenerationController::class, 'publier'])->where('id', '[0-9]+');
             Route::delete('/edt/generations/{id}',    [EdtGenerationController::class, 'destroy'])->where('id', '[0-9]+');
+
+            // Édition assistée d'un scénario (chantier EDT — Lot 3)
+            Route::post('/edt/generations/{id}/regenerer',                [EdtGenerationController::class, 'regenerer'])->where('id', '[0-9]+');
+            Route::patch('/edt/generations/{id}/creneaux/{creneauId}',    [EdtGenerationController::class, 'patchCreneau'])->where(['id' => '[0-9]+', 'creneauId' => '[0-9]+']);
+            Route::delete('/edt/generations/{id}/creneaux/{creneauId}',   [EdtGenerationController::class, 'destroyCreneau'])->where(['id' => '[0-9]+', 'creneauId' => '[0-9]+']);
+
+            // Exports PDF (chantier EDT — Lot 3) — ref = "officiel" ou id de scénario
+            Route::get('/edt/{ref}/pdf/classe/{classeId}',         [EdtPdfController::class, 'classe'])->where(['ref' => 'officiel|[0-9]+', 'classeId' => '[0-9]+']);
+            Route::get('/edt/{ref}/pdf/classes',                   [EdtPdfController::class, 'toutesClasses'])->where('ref', 'officiel|[0-9]+');
+            Route::get('/edt/{ref}/pdf/enseignant/{enseignantId}', [EdtPdfController::class, 'enseignant'])->where(['ref' => 'officiel|[0-9]+', 'enseignantId' => '[0-9]+']);
+            Route::get('/edt/{ref}/pdf/salle/{salleId}',           [EdtPdfController::class, 'salle'])->where(['ref' => 'officiel|[0-9]+', 'salleId' => '[0-9]+']);
 
             Route::get('/bulletin/{eleveId}/{periodeId}',                          [NoteController::class,        'bulletin']);
             Route::get('/bulletin/{eleveId}/{periodeId}/pdf',                      [BulletinPdfController::class, 'telecharger']);
