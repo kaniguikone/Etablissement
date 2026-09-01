@@ -11,7 +11,8 @@
 > **Avancement :**
 > - **Lot 0 — Paramétrage** : ✅ livré (branche `feat/edt-lot0-parametrage`). Détail : `docs/chantier-edt-lot0.md`.
 > - **Lot 1 — Catalogue de contraintes + validateur** : ✅ livré (branche `feat/edt-lot1-contraintes`). Table `edt_contraintes` (13 dures + 5 souples), service `App\Services\Edt\Validateur`, endpoint `GET /edt/controle`, écran `/ControleEdt`. Différé au Lot 4 : contraintes groupes parallèles (D15), quinzaine (D16), tandem PC/SVT contigu sans récré (D8, seul « même jour » fait), souples S3/S4/S6/S8/S10.
-> - Lots 2 à 5 : à faire.
+> - **Lot 2 — Générateur v1** : ✅ livré (branche `feat/edt-lot2-generateur`). **Choix : heuristique 100 % PHP** (glouton + amélioration locale) plutôt que microservice OR-Tools, pour livrer sans dépendance d'infra ; le moteur est isolé derrière `App\Services\Edt\Generateur` et reste remplaçable. Table `edt_generations` + `emploi_du_temps.generation_id`/`verrouille`, **global scope `officiel`** sur `EmploiDuTemps` (les scénarios sont invisibles des portails), génération synchrone, endpoints `/edt/generations` (CRUD + `publier`), écran `/GenererEdt`. Différé au Lot 3 : drag & drop, verrouillage/régénération partielle, comparaison de scénarios, exports PDF ; au Lot 4 : groupes/quinzaine ; file d'attente si les gros lycées le justifient.
+> - Lots 3 à 5 : à faire.
 
 ---
 

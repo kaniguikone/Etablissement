@@ -41,6 +41,7 @@ use App\Http\Controllers\API\PlageHoraireController;
 use App\Http\Controllers\API\EnseignantIndisponibiliteController;
 use App\Http\Controllers\API\EdtDiagnosticController;
 use App\Http\Controllers\API\EdtContrainteController;
+use App\Http\Controllers\API\EdtGenerationController;
 use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\ArchivageController;
 use App\Http\Controllers\API\CalendrierController;
@@ -445,6 +446,14 @@ Route::middleware([
             Route::get('/edt/contraintes',        [EdtContrainteController::class, 'index']);
             Route::put('/edt/contraintes/{code}', [EdtContrainteController::class, 'update']);
             Route::get('/edt/controle',           [EdtContrainteController::class, 'controle']);
+
+            // Génération automatique (chantier EDT — Lot 2)
+            Route::get('/edt/grille-reference',        [EdtGenerationController::class, 'grilleReference']);
+            Route::get('/edt/generations',            [EdtGenerationController::class, 'index']);
+            Route::post('/edt/generations',           [EdtGenerationController::class, 'store']);
+            Route::get('/edt/generations/{id}',       [EdtGenerationController::class, 'show'])->where('id', '[0-9]+');
+            Route::post('/edt/generations/{id}/publier', [EdtGenerationController::class, 'publier'])->where('id', '[0-9]+');
+            Route::delete('/edt/generations/{id}',    [EdtGenerationController::class, 'destroy'])->where('id', '[0-9]+');
 
             Route::get('/bulletin/{eleveId}/{periodeId}',                          [NoteController::class,        'bulletin']);
             Route::get('/bulletin/{eleveId}/{periodeId}/pdf',                      [BulletinPdfController::class, 'telecharger']);
