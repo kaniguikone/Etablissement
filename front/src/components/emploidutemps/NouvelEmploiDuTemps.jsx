@@ -17,22 +17,26 @@ const NouvelEmploiDuTemps = () => {
     const [niveauId, setNiveauId]                     = useState('');
     const [classes, setClasses]                       = useState([]);
     const [combos, setCombos]                         = useState([]);
+    const [plages, setPlages]                         = useState([]);
+    const [salles, setSalles]                         = useState([]);
     const [chargement, setChargement]                 = useState(false);
     const [chargementCombos, setChargementCombos]     = useState(false);
     const [restant, setRestant]                       = useState(null); // heures restantes à placer
 
     const [form, setForm] = useState({
-        classe_id:     classeIdInit.current,
-        matiere_id:    '',
-        enseignant_id: '',
-        jour:          '',
-        heure_debut:   '',
-        heure_fin:     '',
+        classe_id:        classeIdInit.current,
+        matiere_id:       '',
+        enseignant_id:    '',
+        salle_id:         '',
+        jour:             '',
+        plage_horaire_id: '',
     });
 
-    // Au montage : charger les niveaux + détecter le niveau si classe pré-remplie
+    // Au montage : charger les niveaux, la grille horaire, les salles + détecter le niveau si classe pré-remplie
     useEffect(() => {
         api.get('/niveaux').then((r) => setNiveaux(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
+        api.get('/plages-horaires').then((r) => setPlages(r.data.filter((p) => p.type === 'cours'))).catch(() => {});
+        api.get('/salles', { params: { actif: true } }).then((r) => setSalles(r.data)).catch(() => {});
         if (classeIdInit.current) {
             api.get(`/niveauClasse/${classeIdInit.current}`)
                 .then((r) => { if (r.data?.niveau_id) setNiveauId(String(r.data.niveau_id)); })
@@ -59,7 +63,7 @@ const NouvelEmploiDuTemps = () => {
         }).catch(() => toast.error('Erreur de chargement des données.'));
     }, [niveauId]);
 
-    // Quand la classe change, charger les paires matière+enseignant + heures restantes
+    // Quand la classe change, charger les paires matière+enseignant + heures restantes + salle attitrée
     useEffect(() => {
         if (!form.classe_id) { setCombos([]); setRestant(null); return; }
         setChargementCombos(true);
@@ -70,6 +74,10 @@ const NouvelEmploiDuTemps = () => {
         api.get(`/volumesHoraires/restant/${form.classe_id}`)
             .then((r) => setRestant(r.data))
             .catch(() => setRestant(null));
+        // Pré-remplit la salle avec la salle attitrée de la classe
+        api.get(`/niveauClasse/${form.classe_id}`)
+            .then((r) => { if (r.data?.salle_id) setForm((prev) => ({ ...prev, salle_id: String(r.data.salle_id) })); })
+            .catch(() => {});
     }, [form.classe_id]);
 
     // Quand la matière change, réinitialiser l'enseignant
@@ -86,6 +94,12 @@ const NouvelEmploiDuTemps = () => {
     // Enseignants filtrés par la matière choisie
     const enseignantsDisponibles = combos.filter((c) => String(c.matiere_id) === String(form.matiere_id));
 
+    // Plages de cours du jour sélectionné (celles marquées ce jour + celles « tous les jours »)
+    const plagesDuJour = form.jour
+        ? plages.filter((p) => p.jour === form.jour || p.jour === null)
+            .sort((a, b) => a.heure_debut.localeCompare(b.heure_debut))
+        : [];
+
     const soumettre = (continuer) => {
         setChargement(true);
         api.post('/emploiDuTemps', form)
@@ -93,12 +107,12 @@ const NouvelEmploiDuTemps = () => {
                 toast.success('Créneau ajouté.');
                 if (continuer) {
                     setForm((prev) => ({
-                        classe_id:     prev.classe_id,
-                        matiere_id:    '',
-                        enseignant_id: '',
-                        jour:          '',
-                        heure_debut:   '',
-                        heure_fin:     '',
+                        classe_id:        prev.classe_id,
+                        matiere_id:       '',
+                        enseignant_id:    '',
+                        salle_id:         prev.salle_id,
+                        jour:             '',
+                        plage_horaire_id: '',
                     }));
                     setChargement(false);
                 } else {
@@ -274,7 +288,7 @@ const NouvelEmploiDuTemps = () => {
                                 className="form-select form-select-sm"
                                 name="jour"
                                 value={form.jour}
-                                onChange={(e) => setForm((prev) => ({ ...prev, jour: e.target.value }))}
+                                onChange={(e) => setForm((prev) => ({ ...prev, jour: e.target.value, plage_horaire_id: '' }))}
                                 required
                             >
                                 <option value="">Sélectionner un jour</option>
@@ -285,47 +299,64 @@ const NouvelEmploiDuTemps = () => {
                         </div>
                     )}
 
-                    {/* Heure début */}
+                    {/* Plage horaire (grille de l'établissement) */}
                     {!aucuneMatiere && (
                         <div className="col-md-4">
-                            <label className="form-label">Heure début *</label>
-                            <input
-                                type="time"
-                                className="form-control form-control-sm"
-                                name="heure_debut"
-                                value={form.heure_debut}
-                                onChange={(e) => setForm((prev) => ({ ...prev, heure_debut: e.target.value }))}
+                            <label className="form-label">Créneau *</label>
+                            <select
+                                className="form-select form-select-sm"
+                                name="plage_horaire_id"
+                                value={form.plage_horaire_id}
+                                onChange={(e) => setForm((prev) => ({ ...prev, plage_horaire_id: e.target.value }))}
                                 required
-                            />
+                                disabled={!form.jour}
+                            >
+                                <option value="">
+                                    {form.jour ? 'Sélectionner un créneau' : '— Choisir d\'abord un jour —'}
+                                </option>
+                                {plagesDuJour.map((p) => (
+                                    <option key={p.id} value={p.id}>
+                                        {p.libelle} · {p.heure_debut.slice(0, 5)}–{p.heure_fin.slice(0, 5)}
+                                    </option>
+                                ))}
+                            </select>
+                            {form.jour && plagesDuJour.length === 0 && (
+                                <small className="text-danger">
+                                    Aucune plage définie pour ce jour. <Link to="/GrilleHoraire">Configurer la grille</Link>
+                                </small>
+                            )}
                         </div>
                     )}
 
-                    {/* Heure fin */}
+                    {/* Salle (pré-remplie avec la salle attitrée de la classe) */}
                     {!aucuneMatiere && (
                         <div className="col-md-4">
-                            <label className="form-label">Heure fin *</label>
-                            <input
-                                type="time"
-                                className="form-control form-control-sm"
-                                name="heure_fin"
-                                value={form.heure_fin}
-                                onChange={(e) => setForm((prev) => ({ ...prev, heure_fin: e.target.value }))}
-                                required
-                            />
+                            <label className="form-label">Salle</label>
+                            <select
+                                className="form-select form-select-sm"
+                                name="salle_id"
+                                value={form.salle_id}
+                                onChange={(e) => setForm((prev) => ({ ...prev, salle_id: e.target.value }))}
+                            >
+                                <option value="">— Aucune —</option>
+                                {salles.map((s) => (
+                                    <option key={s.id} value={s.id}>{s.nom}{s.capacite ? ` (${s.capacite} pl.)` : ''}</option>
+                                ))}
+                            </select>
                         </div>
                     )}
 
                     {/* Boutons */}
                     {!aucuneMatiere && (
                         <div className="col-12 mb-3 d-flex gap-2">
-                            <button type="submit" className="btn btn-primary btn-sm" disabled={chargement || !form.enseignant_id}>
+                            <button type="submit" className="btn btn-primary btn-sm" disabled={chargement || !form.enseignant_id || !form.plage_horaire_id}>
                                 {chargement && <span className="spinner-border spinner-border-sm me-2" />}
                                 Enregistrer
                             </button>
                             <button
                                 type="button"
                                 className="btn btn-success btn-sm"
-                                disabled={chargement || !form.enseignant_id}
+                                disabled={chargement || !form.enseignant_id || !form.plage_horaire_id}
                                 onClick={() => soumettre(true)}
                             >
                                 {chargement && <span className="spinner-border spinner-border-sm me-2" />}

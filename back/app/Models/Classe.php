@@ -14,7 +14,7 @@ class Classe extends Model
 
     protected $fillable = [
         'num_classe', 'nom_classe', 'abbr_classe', 'niveau_id', 'serie_id',
-        'salle_classe', 'effectif_max_classe', 'professeur_principal_id',
+        'salle_classe', 'salle_id', 'effectif_max_classe', 'professeur_principal_id',
     ];
 
     public function eleves()
@@ -30,6 +30,12 @@ class Classe extends Model
     public function serie()
     {
         return $this->belongsTo(\App\Models\Serie::class);
+    }
+
+    /** Salle attitrée (les élèves ne se déplacent pas — cf. chantier EDT). */
+    public function salle()
+    {
+        return $this->belongsTo(Salle::class);
     }
 
     public function professeurPrincipal()

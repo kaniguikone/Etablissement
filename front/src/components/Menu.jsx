@@ -48,6 +48,7 @@ const GROUPES = [
             { to: '/Enseignants',      icon: 'fas fa-list',           label: 'Liste des enseignants', moduleSlug: 'enseignants.liste' },
             { to: '/NouvelEnseignant', icon: 'fas fa-user-plus',      label: 'Ajouter un enseignant', moduleSlug: 'enseignants.nouveau' },
             { to: '/ProfsParMatiere',  icon: 'fas fa-book-open',      label: 'Profs par matière',     moduleSlug: 'enseignants.profs_matiere' },
+            { to: '/Indisponibilites', icon: 'fas fa-user-clock',     label: 'Indisponibilités',      moduleSlug: 'enseignants.indisponibilites' },
         ],
     },
 
@@ -92,6 +93,7 @@ const GROUPES = [
             { to: '/ConseilClasse',     icon: 'fas fa-gavel',         label: 'Conseil de classe',        moduleSlug: 'pedagogie_pilotage.conseil_classe' },
             { to: '/ConformiteEdt',     icon: 'fas fa-balance-scale', label: 'Conformité EDT',           moduleSlug: 'pedagogie_pilotage.conformite_edt' },
             { to: '/ChargeEnseignants', icon: 'fas fa-user-clock',    label: 'Charge enseignants',       moduleSlug: 'pedagogie_pilotage.charge_enseignants' },
+            { to: '/DiagnosticEdt',     icon: 'fas fa-clipboard-list', label: 'Diagnostic EDT',          moduleSlug: 'pedagogie_pilotage.diagnostic_edt' },
         ],
     },
 
@@ -168,6 +170,7 @@ const GROUPES = [
             { to: '/Periodes',      icon: 'fas fa-calendar-alt', label: 'Périodes',              moduleSlug: 'parametrage.periodes' },
             { to: '/Salles',        icon: 'fas fa-door-open',    label: 'Salles',                moduleSlug: 'parametrage.salles' },
             { to: '/VolumeHoraire', icon: 'fas fa-clock',        label: 'Volumes horaires',      moduleSlug: 'parametrage.volume_horaire' },
+            { to: '/GrilleHoraire', icon: 'fas fa-table',        label: 'Grille horaire',        moduleSlug: 'parametrage.grille_horaire' },
             { to: '/Archivage',     icon: 'fas fa-archive',      label: 'Archivage fin d\'année',moduleSlug: 'parametrage.archivage' },
         ],
     },

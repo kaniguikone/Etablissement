@@ -67,6 +67,7 @@ class DatabaseSeeder extends Seeder
                 'description_matiere' => Str::slug($libelle),
             ]);
         }
+        $this->call(MatiereFamilleSeeder::class);
 
         // ── Niveaux ──────────────────────────────────────────────────────────
         $niveaux = [
@@ -339,6 +340,8 @@ class DatabaseSeeder extends Seeder
         $this->call(EtablissementSeeder::class);
         $this->call(AdminSeeder::class);
         $this->call(ClasseEnseignantMatiereSeeder::class);
+        $this->call(PlageHoraireSeeder::class);
+        $this->call(SeanceTypeSeeder::class);
         $this->call(EmploiDuTempsSeeder::class);
         $this->call(DevoirNoteAssiduitesSeeder::class);
         $this->call(PaiementSeeder::class);

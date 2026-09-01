@@ -110,6 +110,9 @@ const ParametresEtablissement = lazy(() => import('../components/etablissement/P
 const VolumeHoraire = lazy(() => import('../components/volumes/VolumeHoraire'));
 const ConformiteEdt = lazy(() => import('../components/volumes/ConformiteEdt'));
 const ChargeEnseignants = lazy(() => import('../components/volumes/ChargeEnseignants'));
+const GrilleHoraire = lazy(() => import('../components/grille/GrilleHoraire'));
+const DiagnosticEdt = lazy(() => import('../components/edt/DiagnosticEdt'));
+const Indisponibilites = lazy(() => import('../components/enseignant/Indisponibilites'));
 
 const ListeUtilisateurs = lazy(() => import('../components/utilisateurs/ListeUtilisateurs'));
 const NouvelUtilisateur = lazy(() => import('../components/utilisateurs/NouvelUtilisateur'));
@@ -237,6 +240,7 @@ const RoutesMenu = () => (
             {/* Paramétrage */}
             <Route path="/Etablissement"  element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.etablissement']}><ParametresEtablissement /></PrivateRoute>} />
             <Route path="/VolumeHoraire"  element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.volume_horaire']}><VolumeHoraire /></PrivateRoute>} />
+            <Route path="/GrilleHoraire"  element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.grille_horaire']}><GrilleHoraire /></PrivateRoute>} />
             <Route path="/Niveaux"           element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.niveaux']}><ListeNiveaux /></PrivateRoute>} />
             <Route path="/NouveauNiveau"     element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.niveaux']}><NouveauNiveau /></PrivateRoute>} />
             <Route path="/DetailsNiveau/:id" element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.niveaux']}><DetailsNiveau /></PrivateRoute>} />
@@ -280,6 +284,7 @@ const RoutesMenu = () => (
             <Route path="/NouvelEnseignant"       element={<PrivateRoute permissions={R_ENSEIGNANTS} modules={['enseignants.nouveau']}><NouvelEnseignant /></PrivateRoute>} />
             <Route path="/DetailsEnseignant/:id"  element={<PrivateRoute permissions={R_ENSEIGNANTS} modules={['enseignants.liste']}><DetailsEnseignant /></PrivateRoute>} />
             <Route path="/ProfsParMatiere"        element={<PrivateRoute permissions={R_ENSEIGNANTS} modules={['enseignants.profs_matiere']}><ListeProfsParMatiere /></PrivateRoute>} />
+            <Route path="/Indisponibilites"       element={<PrivateRoute permissions={R_ENSEIGNANTS} modules={['enseignants.indisponibilites']}><Indisponibilites /></PrivateRoute>} />
 
             <Route path="/Parents"               element={<PrivateRoute permissions={R_PARENTS} modules={['parents.liste']}><ListeParents /></PrivateRoute>} />
             <Route path="/NouveauParent"         element={<PrivateRoute permissions={R_PARENTS} modules={['parents.nouveau']}><NouveauParent /></PrivateRoute>} />
@@ -326,6 +331,7 @@ const RoutesMenu = () => (
             <Route path="/SuiviProgressions" element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE} modules={['pedagogie_pilotage.suivi_progressions']}><SuiviProgressions /></PrivateRoute>} />
             <Route path="/ConformiteEdt"     element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE} modules={['pedagogie_pilotage.conformite_edt']}><ConformiteEdt /></PrivateRoute>} />
             <Route path="/ChargeEnseignants" element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE} modules={['pedagogie_pilotage.charge_enseignants']}><ChargeEnseignants /></PrivateRoute>} />
+            <Route path="/DiagnosticEdt"     element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE} modules={['pedagogie_pilotage.diagnostic_edt']}><DiagnosticEdt /></PrivateRoute>} />
 
             {/* Finances — gestion */}
             <Route path="/Scolarites"           element={<PrivateRoute permissions={R_FINANCES_GESTION} modules={['finances_gestion.scolarites']}><ListeScolarites /></PrivateRoute>} />

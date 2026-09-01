@@ -111,7 +111,22 @@ class HelpArticleSeeder extends Seeder
             [
                 'module' => 'emploi_du_temps', 'categorie' => 'tutoriel', 'ordre' => 1,
                 'titre'  => 'Créer et modifier un emploi du temps',
-                'contenu'=> "Pour créer l'emploi du temps d'une classe :\n\n1. Allez dans **Emploi du temps → Nouvel emploi du temps**\n2. Sélectionnez la **classe**\n3. Ajoutez les créneaux : jour, heure de début, heure de fin, matière, enseignant, salle\n4. Enregistrez\n\n**Vérification des conflits :** Le système détecte automatiquement si un enseignant ou une salle est déjà occupé sur le même créneau.\n\n**Conformité volume horaire :** Allez dans **Paramétrage → Volume horaire → Conformité** pour vérifier que chaque matière atteint le nombre d'heures réglementaire.",
+                'contenu'=> "Pour créer l'emploi du temps d'une classe :\n\n1. Allez dans **Emploi du temps → Nouvel emploi du temps**\n2. Sélectionnez la **classe**\n3. Ajoutez les créneaux : jour, **créneau de la grille horaire**, matière, enseignant, salle\n4. Enregistrez\n\n**Grille horaire :** les créneaux proposés proviennent de la grille de l'établissement (Paramétrage → Grille horaire). La salle est pré-remplie avec la salle attitrée de la classe.\n\n**Vérification des conflits :** Le système détecte automatiquement si un enseignant ou une salle est déjà occupé sur le même créneau.\n\n**Conformité volume horaire :** Allez dans **Paramétrage → Volume horaire → Conformité** pour vérifier que chaque matière atteint le nombre d'heures réglementaire.",
+            ],
+            [
+                'module' => 'parametrage', 'categorie' => 'prise_en_main', 'ordre' => 10,
+                'titre'  => 'Définir la grille horaire de l\'établissement',
+                'contenu'=> "La grille horaire décrit la semaine type : plages de cours, récréations et pause méridienne. Elle sert de base à tous les emplois du temps.\n\n**Pour la configurer :**\n1. Allez dans **Paramétrage → Grille horaire**\n2. Ajoutez chaque plage : libellé, jour, heure de début, heure de fin, type (cours / récréation / pause)\n3. Une plage sans jour s'applique à tous les jours ouvrés\n4. Utilisez **Recopier un jour** pour dupliquer rapidement une journée type\n\n**Astuce :** une séance de 2 h occupe deux plages de cours consécutives. Prévoyez des plages de durée régulière (≈ 55 min).",
+            ],
+            [
+                'module' => 'parametrage', 'categorie' => 'faq', 'ordre' => 11,
+                'titre'  => 'Suis-je prêt pour générer les emplois du temps ?',
+                'contenu'=> "Le menu **Pilotage pédagogique → Diagnostic EDT** vérifie automatiquement que tout le paramétrage nécessaire est en place :\n\n- Grille horaire définie\n- Familles renseignées pour toutes les matières (Paramétrage → Config. matières/niveaux)\n- Salle attitrée pour chaque classe\n- Capacité des salles suffisante\n- Enseignants affectés à toutes les matières du programme\n- Découpage des volumes horaires en séances (Paramétrage → Volumes horaires)\n- Indisponibilités des vacataires renseignées\n\nChaque point non satisfait renvoie un lien direct vers l'écran à corriger.",
+            ],
+            [
+                'module' => 'enseignants', 'categorie' => 'tutoriel', 'ordre' => 4,
+                'titre'  => 'Renseigner les indisponibilités d\'un enseignant',
+                'contenu'=> "Les indisponibilités indiquent les créneaux où un enseignant ne peut pas (bloquant) ou préfère ne pas (préférence) assurer de cours — utile pour les vacataires et les temps partiels.\n\n**Pour les saisir :**\n1. Allez dans **Enseignants → Indisponibilités**\n2. Choisissez l'enseignant\n3. Ajoutez un créneau : jour, heure de début, heure de fin, type, motif\n\nCes contraintes seront respectées lors de la génération automatique des emplois du temps.",
             ],
 
             // ── SANCTIONS ─────────────────────────────────────────────────────

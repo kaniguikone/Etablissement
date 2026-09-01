@@ -37,6 +37,9 @@ use App\Http\Controllers\API\StatistiquesController;
 use App\Http\Controllers\API\ChapitreMatiereController;
 use App\Http\Controllers\API\EtablissementController;
 use App\Http\Controllers\API\VolumeHoraireController;
+use App\Http\Controllers\API\PlageHoraireController;
+use App\Http\Controllers\API\EnseignantIndisponibiliteController;
+use App\Http\Controllers\API\EdtDiagnosticController;
 use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\ArchivageController;
 use App\Http\Controllers\API\CalendrierController;
@@ -250,6 +253,7 @@ Route::middleware([
 
         Route::get('/niveaux',      [NiveauController::class, 'index']);
         Route::get('/niveaux/{id}', [NiveauController::class, 'show']);
+        Route::get('/matieres/familles',     [MatiereController::class,   'familles']);
         Route::get('/matieres',              [MatiereController::class,   'index']);
         Route::get('/typeDevoirs',           [TypeDevoirController::class,'index']);
         Route::get('/periodes',              [PeriodeController::class,   'index']);
@@ -287,6 +291,23 @@ Route::middleware([
             Route::post('/volumesHoraires',              [VolumeHoraireController::class, 'store']);
             Route::put('/volumesHoraires/{id}',          [VolumeHoraireController::class, 'update'])->where('id', '[0-9]+');
             Route::delete('/volumesHoraires/{id}',       [VolumeHoraireController::class, 'destroy'])->where('id', '[0-9]+');
+
+            // Grille horaire de l'établissement (chantier EDT — Lot 0.2)
+            Route::get('/plages-horaires',                 [PlageHoraireController::class, 'index']);
+            Route::post('/plages-horaires',                [PlageHoraireController::class, 'store']);
+            Route::post('/plages-horaires/dupliquer-jour', [PlageHoraireController::class, 'dupliquerJour']);
+            Route::put('/plages-horaires/{id}',            [PlageHoraireController::class, 'update'])->where('id', '[0-9]+');
+            Route::delete('/plages-horaires/{id}',         [PlageHoraireController::class, 'destroy'])->where('id', '[0-9]+');
+
+            // Séances-types : découpage des volumes horaires en séances (chantier EDT — Lot 0.4)
+            Route::get('/seances-types/{niveau_id}',          [VolumeHoraireController::class, 'seancesParNiveau'])->where('niveau_id', '[0-9]+');
+            Route::post('/seances-types',                     [VolumeHoraireController::class, 'storeSeance']);
+            Route::put('/seances-types/{id}',                 [VolumeHoraireController::class, 'updateSeance'])->where('id', '[0-9]+');
+            Route::delete('/seances-types/{id}',              [VolumeHoraireController::class, 'destroySeance'])->where('id', '[0-9]+');
+            Route::post('/seances-types/generer/{niveau_id}', [VolumeHoraireController::class, 'genererSeancesDepuisVolume'])->where('niveau_id', '[0-9]+');
+
+            // Diagnostic de complétude du paramétrage EDT (chantier EDT — Lot 0.6)
+            Route::get('/edt/diagnostic-prerequis',       [EdtDiagnosticController::class, 'index']);
 
             // Configuration matières / niveaux / classes
             Route::get('/config-matieres',                          [ConfigurationMatieresController::class, 'index']);
@@ -343,6 +364,12 @@ Route::middleware([
             Route::get('/affectations/import/template',           [ImportAffectationController::class, 'template']);
             Route::post('/affectations/import',                   [ImportAffectationController::class, 'import']);
             Route::delete('/enseignants/{id}/tokens',             [EnseignantController::class, 'revoquerTokens']);
+
+            // Indisponibilités des enseignants (chantier EDT — Lot 0.5)
+            Route::get('/indisponibilites',                       [EnseignantIndisponibiliteController::class, 'index']);
+            Route::get('/enseignants/{id}/indisponibilites',      [EnseignantIndisponibiliteController::class, 'parEnseignant'])->where('id', '[0-9]+');
+            Route::post('/enseignants/{id}/indisponibilites',     [EnseignantIndisponibiliteController::class, 'store'])->where('id', '[0-9]+');
+            Route::delete('/indisponibilites/{id}',               [EnseignantIndisponibiliteController::class, 'destroy'])->where('id', '[0-9]+');
         });
 
         Route::middleware(['permission:parents', 'module:parents'])->group(function () {

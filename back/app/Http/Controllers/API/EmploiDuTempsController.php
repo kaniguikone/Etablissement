@@ -4,11 +4,58 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\EmploiDuTemps;
+use App\Models\PlageHoraire;
 use Illuminate\Http\Request;
 
 class EmploiDuTempsController extends Controller
 {
     private const JOURS = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+
+    private const CHAMPS = [
+        'classe_id', 'matiere_id', 'enseignant_id', 'salle_id',
+        'plage_horaire_id', 'jour', 'heure_debut', 'heure_fin',
+    ];
+
+    /**
+     * Règles de validation communes store/update. La saisie passe désormais par
+     * une plage de la grille (plage_horaire_id) ; les heures libres restent
+     * acceptées pour compatibilité (mobile, imports).
+     */
+    private function regles(): array
+    {
+        return [
+            'classe_id'        => 'required|exists:classes,id',
+            'matiere_id'       => 'required|exists:matieres,id',
+            'enseignant_id'    => 'required|exists:enseignants,id',
+            'salle_id'         => 'nullable|exists:salles,id',
+            'plage_horaire_id' => 'nullable|exists:plages_horaires,id',
+            'jour'             => 'required|in:'.implode(',', self::JOURS),
+            'heure_debut'      => 'required_without:plage_horaire_id|nullable|date_format:H:i',
+            'heure_fin'        => ['required_without:plage_horaire_id', 'nullable', 'date_format:H:i', function ($attr, $val, $fail) {
+                if ($val !== null && $val <= request('heure_debut')) {
+                    $fail("L'heure de fin doit être après l'heure de début.");
+                }
+            }],
+        ];
+    }
+
+    /**
+     * Si une plage de la grille est fournie, en dérive heure_debut / heure_fin
+     * (qui restent la source de vérité en base).
+     */
+    private function resoudrePlage(Request $request): void
+    {
+        if (! $request->filled('plage_horaire_id')) {
+            return;
+        }
+        $plage = PlageHoraire::find($request->plage_horaire_id);
+        if ($plage) {
+            $request->merge([
+                'heure_debut' => substr($plage->heure_debut, 0, 5),
+                'heure_fin'   => substr($plage->heure_fin, 0, 5),
+            ]);
+        }
+    }
 
     public function index()
     {
@@ -92,19 +139,8 @@ class EmploiDuTempsController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'classe_id'    => 'required|exists:classes,id',
-            'matiere_id'   => 'required|exists:matieres,id',
-            'enseignant_id'=> 'required|exists:enseignants,id',
-            'salle_id'     => 'nullable|exists:salles,id',
-            'jour'         => 'required|in:lundi,mardi,mercredi,jeudi,vendredi,samedi',
-            'heure_debut'  => 'required|date_format:H:i',
-            'heure_fin'    => ['required', 'date_format:H:i', function ($attr, $val, $fail) use ($request) {
-                if ($val <= $request->heure_debut) {
-                    $fail("L'heure de fin doit être après l'heure de début.");
-                }
-            }],
-        ]);
+        $request->validate($this->regles());
+        $this->resoudrePlage($request);
 
         $erreurs = $this->detecterChevauchements(
             $request->jour,
@@ -122,9 +158,7 @@ class EmploiDuTempsController extends Controller
             ], 422);
         }
 
-        $creneau = EmploiDuTemps::create($request->only([
-            'classe_id', 'matiere_id', 'enseignant_id', 'salle_id', 'jour', 'heure_debut', 'heure_fin',
-        ]));
+        $creneau = EmploiDuTemps::create($request->only(self::CHAMPS));
 
         return response()->json($creneau->load(['classe', 'matiere', 'enseignant', 'salle']), 201);
     }
@@ -139,19 +173,8 @@ class EmploiDuTempsController extends Controller
     {
         $creneau = EmploiDuTemps::findOrFail($id);
 
-        $request->validate([
-            'classe_id'    => 'required|exists:classes,id',
-            'matiere_id'   => 'required|exists:matieres,id',
-            'enseignant_id'=> 'required|exists:enseignants,id',
-            'salle_id'     => 'nullable|exists:salles,id',
-            'jour'         => 'required|in:lundi,mardi,mercredi,jeudi,vendredi,samedi',
-            'heure_debut'  => 'required|date_format:H:i',
-            'heure_fin'    => ['required', 'date_format:H:i', function ($attr, $val, $fail) use ($request) {
-                if ($val <= $request->heure_debut) {
-                    $fail("L'heure de fin doit être après l'heure de début.");
-                }
-            }],
-        ]);
+        $request->validate($this->regles());
+        $this->resoudrePlage($request);
 
         $erreurs = $this->detecterChevauchements(
             $request->jour,
@@ -170,9 +193,7 @@ class EmploiDuTempsController extends Controller
             ], 422);
         }
 
-        $creneau->update($request->only([
-            'classe_id', 'matiere_id', 'enseignant_id', 'salle_id', 'jour', 'heure_debut', 'heure_fin',
-        ]));
+        $creneau->update($request->only(self::CHAMPS));
 
         return response()->json($creneau->load(['classe', 'matiere', 'enseignant', 'salle']));
     }

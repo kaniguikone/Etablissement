@@ -15,6 +15,7 @@ class EmploiDuTemps extends Model
         'matiere_id',
         'enseignant_id',
         'salle_id',
+        'plage_horaire_id',
         'jour',
         'heure_debut',
         'heure_fin',
@@ -39,5 +40,10 @@ class EmploiDuTemps extends Model
     public function salle()
     {
         return $this->belongsTo(Salle::class);
+    }
+
+    public function plageHoraire()
+    {
+        return $this->belongsTo(PlageHoraire::class, 'plage_horaire_id');
     }
 }

@@ -8,9 +8,12 @@ use App\Models\EmploiDuTemps;
 use App\Models\Enseignant;
 use App\Models\Matiere;
 use App\Models\Niveau;
+use App\Models\NiveauMatiere;
+use App\Models\SeanceType;
 use App\Models\VolumeHoraire;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class VolumeHoraireController extends Controller
 {
@@ -270,6 +273,135 @@ class VolumeHoraireController extends Controller
             'classe'   => ['id' => $classe->id, 'nom' => $classe->nom_classe, 'niveau' => $classe->niveau?->nom_niveau],
             'matieres' => $matieres,
         ]);
+    }
+
+    // ── Séances-types : découpage des volumes en séances — chantier EDT Lot 0.4 ──
+
+    /**
+     * Matières du programme d'un niveau (et série optionnelle) avec leur
+     * découpage en séances et l'écart au volume horaire.
+     * GET /seances-types/{niveau_id}?serie_id=
+     */
+    public function seancesParNiveau(int $niveauId, Request $request)
+    {
+        $niveau  = Niveau::findOrFail($niveauId);
+        $serieId = $request->query('serie_id') ?: null;
+
+        $niveauMatieres = NiveauMatiere::with(['matiere:id,libelle_matiere,abbr_matiere,famille,couleur', 'seancesTypes'])
+            ->where('niveau_id', $niveauId)
+            ->where('serie_id', $serieId)
+            ->get();
+
+        $volumes = VolumeHoraire::where('niveau_id', $niveauId)->pluck('heures_semaine', 'matiere_id');
+
+        $matieres = $niveauMatieres->map(function (NiveauMatiere $nm) use ($volumes) {
+            $prevu = (float) ($volumes[$nm->matiere_id] ?? 0);
+            $place = round($nm->seancesTypes->sum(fn (SeanceType $s) => $s->heures_semaine), 2);
+
+            return [
+                'niveau_matiere_id' => $nm->id,
+                'matiere'           => $nm->matiere?->libelle_matiere,
+                'matiere_abbr'      => $nm->matiere?->abbr_matiere,
+                'famille'           => $nm->matiere?->famille,
+                'couleur'           => $nm->matiere?->couleur,
+                'heures_prevues'    => $prevu,
+                'heures_seances'    => $place,
+                'ecart'             => round($place - $prevu, 2),
+                'seances'           => $nm->seancesTypes->map(fn (SeanceType $s) => [
+                    'id'            => $s->id,
+                    'duree_minutes' => $s->duree_minutes,
+                    'nb_seances'    => $s->nb_seances,
+                    'frequence'     => $s->frequence,
+                    'tandem_code'   => $s->tandem_code,
+                    'ordre'         => $s->ordre,
+                ])->values(),
+            ];
+        })->values();
+
+        return response()->json([
+            'niveau'   => ['id' => $niveau->id, 'nom' => $niveau->nom_niveau],
+            'serie_id' => $serieId ? (int) $serieId : null,
+            'matieres' => $matieres,
+        ]);
+    }
+
+    public function storeSeance(Request $request)
+    {
+        $seance = SeanceType::create($this->validerSeance($request));
+
+        return response()->json($seance, 201);
+    }
+
+    public function updateSeance(Request $request, int $id)
+    {
+        $seance = SeanceType::findOrFail($id);
+        $seance->update($this->validerSeance($request, $seance->niveau_matiere_id));
+
+        return response()->json($seance);
+    }
+
+    public function destroySeance(int $id)
+    {
+        SeanceType::findOrFail($id)->delete();
+
+        return response()->json(null, 204);
+    }
+
+    /**
+     * Pré-remplit les séances d'un niveau : pour chaque matière sans séance,
+     * crée nb séances de 55 min = volume horaire arrondi.
+     * POST /seances-types/generer/{niveau_id}?serie_id=
+     */
+    public function genererSeancesDepuisVolume(int $niveauId, Request $request)
+    {
+        $serieId = $request->query('serie_id') ?: null;
+        $volumes = VolumeHoraire::where('niveau_id', $niveauId)->pluck('heures_semaine', 'matiere_id');
+
+        $niveauMatieres = NiveauMatiere::where('niveau_id', $niveauId)
+            ->where('serie_id', $serieId)
+            ->withCount('seancesTypes')
+            ->get();
+
+        $crees = 0;
+        foreach ($niveauMatieres as $nm) {
+            if ($nm->seances_types_count > 0) {
+                continue;
+            }
+            $heures = (int) round((float) ($volumes[$nm->matiere_id] ?? 0));
+            if ($heures < 1) {
+                continue;
+            }
+            SeanceType::create([
+                'niveau_matiere_id' => $nm->id,
+                'duree_minutes'     => 55,
+                'nb_seances'        => $heures,
+                'frequence'         => 'hebdomadaire',
+                'ordre'             => 0,
+            ]);
+            $crees++;
+        }
+
+        return response()->json(['message' => "{$crees} découpage(s) créé(s).", 'crees' => $crees]);
+    }
+
+    private function validerSeance(Request $request, ?int $niveauMatiereFixe = null): array
+    {
+        $rules = [
+            'duree_minutes' => 'required|integer|min:30|max:240',
+            'nb_seances'    => 'required|integer|min:1|max:20',
+            'frequence'     => ['nullable', Rule::in(SeanceType::FREQUENCES)],
+            'tandem_code'   => 'nullable|string|max:20',
+            'ordre'         => 'nullable|integer|min:0|max:50',
+        ];
+        if ($niveauMatiereFixe === null) {
+            $rules['niveau_matiere_id'] = 'required|exists:niveau_matieres,id';
+        }
+
+        $data = $request->validate($rules);
+        $data['niveau_matiere_id'] = $niveauMatiereFixe ?? $data['niveau_matiere_id'];
+        $data['frequence'] ??= 'hebdomadaire';
+
+        return $data;
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────────────
