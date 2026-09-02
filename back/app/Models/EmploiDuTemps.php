@@ -19,6 +19,8 @@ class EmploiDuTemps extends Model
         'plage_horaire_id',
         'generation_id',
         'verrouille',
+        'groupe_id',
+        'semaine',
         'jour',
         'heure_debut',
         'heure_fin',
@@ -66,5 +68,10 @@ class EmploiDuTemps extends Model
     public function generation()
     {
         return $this->belongsTo(EdtGeneration::class, 'generation_id');
+    }
+
+    public function groupe()
+    {
+        return $this->belongsTo(GroupePedagogique::class, 'groupe_id');
     }
 }

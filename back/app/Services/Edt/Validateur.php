@@ -33,6 +33,7 @@ class Validateur
         'SALLE_ATTITREE' => 'salleAttitree',
         'VOLUME_HORAIRE' => 'volumeHoraire',
         'TANDEM_MEME_JOUR' => 'tandemMemeJour',
+        'GROUPES_PARALLELES' => 'groupesParalleles',
         'REPARTITION_SEMAINE' => 'repartitionSemaine',
         'PAS_5H_EFFORT' => 'pas5hEffort',
         'TROUS_ENSEIGNANT' => 'trousEnseignant',
@@ -98,6 +99,8 @@ class Validateur
             'volumes' => VolumeHoraire::get()->groupBy('niveau_id'),
             'indispos' => EnseignantIndisponibilite::whereIn('enseignant_id', $creneaux->pluck('enseignant_id')->unique())
                 ->get()->groupBy('enseignant_id'),
+            'groupes' => \App\Models\GroupePedagogique::whereIn('id', $creneaux->pluck('groupe_id')->filter()->unique())
+                ->get()->keyBy('id'),
         ];
     }
 
@@ -114,6 +117,21 @@ class Validateur
         $bf = $this->hhmm(is_array($b) ? $b['heure_fin'] : $b->heure_fin);
 
         return $ad < $bf && $af > $bd;
+    }
+
+    /** Deux créneaux en semaines opposées (A vs B) ne se gênent pas. */
+    private function semainesCompatibles(object $a, object $b): bool
+    {
+        $sa = $a->semaine ?? 'toutes';
+        $sb = $b->semaine ?? 'toutes';
+
+        return $sa !== 'toutes' && $sb !== 'toutes' && $sa !== $sb;
+    }
+
+    /** Groupes parallèles d'une même classe (LV2, dédoublement) : cours simultanés normaux. */
+    private function memeGroupeParallele(object $a, object $b): bool
+    {
+        return $a->groupe_id && $b->groupe_id && $a->groupe_id !== $b->groupe_id;
     }
 
     private function dureeHeures(object $c): float
@@ -180,7 +198,10 @@ class Validateur
             $liste = $groupe->values();
             for ($i = 0; $i < $liste->count(); $i++) {
                 for ($j = $i + 1; $j < $liste->count(); $j++) {
-                    if ($liste[$i]->jour === $liste[$j]->jour && $this->chevauche($liste[$i], $liste[$j])) {
+                    if ($liste[$i]->jour === $liste[$j]->jour
+                        && $this->chevauche($liste[$i], $liste[$j])
+                        && ! $this->semainesCompatibles($liste[$i], $liste[$j])
+                        && ! $this->memeGroupeParallele($liste[$i], $liste[$j])) {
                         $c = $liste[$i];
                         $violations[] = [
                             'message' => $message($c),
@@ -418,6 +439,37 @@ class Validateur
                     'message' => "{$this->nomClasse($classe->first())} : Physique-Chimie et SVT ne sont jamais le même jour",
                     'classe' => $this->nomClasse($classe->first()),
                 ];
+            }
+        }
+
+        return $violations;
+    }
+
+    /**
+     * Les groupes parallèles d'une même classe (même parallele_code) doivent
+     * être placés sur le même créneau (la classe se scinde en même temps).
+     */
+    private function groupesParalleles(Collection $creneaux, array $ctx, array $p): array
+    {
+        $violations = [];
+        $avecGroupe = $creneaux->filter(fn ($c) => $c->groupe_id && isset($ctx['groupes'][$c->groupe_id]));
+
+        $blocs = $avecGroupe->groupBy(fn ($c) => $c->classe_id.'|'.$ctx['groupes'][$c->groupe_id]->parallele_code);
+        foreach ($blocs as $bloc) {
+            $nbGroupes = $bloc->pluck('groupe_id')->unique()->count();
+            if ($nbGroupes < 2) {
+                continue;
+            }
+            foreach ($bloc->groupBy(fn ($c) => $c->jour.' '.$this->hhmm($c->heure_debut)) as $instant => $cs) {
+                if ($cs->pluck('groupe_id')->unique()->count() < $nbGroupes) {
+                    $c = $cs->first();
+                    $g = $ctx['groupes'][$c->groupe_id];
+                    $violations[] = [
+                        'message' => "{$this->nomClasse($c)} · {$g->parallele_code} : groupes désynchronisés le {$instant}",
+                        'jour' => $c->jour,
+                        'classe' => $this->nomClasse($c),
+                    ];
+                }
             }
         }
 

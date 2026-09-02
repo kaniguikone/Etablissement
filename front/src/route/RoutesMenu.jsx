@@ -114,6 +114,7 @@ const GrilleHoraire = lazy(() => import('../components/grille/GrilleHoraire'));
 const DiagnosticEdt = lazy(() => import('../components/edt/DiagnosticEdt'));
 const ControleEdt = lazy(() => import('../components/edt/ControleEdt'));
 const GenererEdt = lazy(() => import('../components/edt/GenererEdt'));
+const GroupesPedagogiques = lazy(() => import('../components/edt/GroupesPedagogiques'));
 const Indisponibilites = lazy(() => import('../components/enseignant/Indisponibilites'));
 
 const ListeUtilisateurs = lazy(() => import('../components/utilisateurs/ListeUtilisateurs'));
@@ -336,6 +337,7 @@ const RoutesMenu = () => (
             <Route path="/DiagnosticEdt"     element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE} modules={['pedagogie_pilotage.diagnostic_edt']}><DiagnosticEdt /></PrivateRoute>} />
             <Route path="/ControleEdt"       element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE} modules={['pedagogie_pilotage.controle_edt']}><ControleEdt /></PrivateRoute>} />
             <Route path="/GenererEdt"        element={<PrivateRoute permissions={R_PEDAGO_PILOTAGE} modules={['pedagogie_pilotage.generer_edt']}><GenererEdt /></PrivateRoute>} />
+            <Route path="/GroupesPedagogiques" element={<PrivateRoute permissions={R_PARAM} modules={['parametrage.groupes_pedagogiques']}><GroupesPedagogiques /></PrivateRoute>} />
 
             {/* Finances — gestion */}
             <Route path="/Scolarites"           element={<PrivateRoute permissions={R_FINANCES_GESTION} modules={['finances_gestion.scolarites']}><ListeScolarites /></PrivateRoute>} />

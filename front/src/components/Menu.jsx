@@ -173,6 +173,7 @@ const GROUPES = [
             { to: '/Salles',        icon: 'fas fa-door-open',    label: 'Salles',                moduleSlug: 'parametrage.salles' },
             { to: '/VolumeHoraire', icon: 'fas fa-clock',        label: 'Volumes horaires',      moduleSlug: 'parametrage.volume_horaire' },
             { to: '/GrilleHoraire', icon: 'fas fa-table',        label: 'Grille horaire',        moduleSlug: 'parametrage.grille_horaire' },
+            { to: '/GroupesPedagogiques', icon: 'fas fa-users',  label: 'Groupes pédagogiques',  moduleSlug: 'parametrage.groupes_pedagogiques' },
             { to: '/Archivage',     icon: 'fas fa-archive',      label: 'Archivage fin d\'année',moduleSlug: 'parametrage.archivage' },
         ],
     },

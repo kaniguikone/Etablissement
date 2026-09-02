@@ -33,6 +33,7 @@ const ROUTE_MODULE = {
     '/DiagnosticEdt':         'parametrage',
     '/ControleEdt':           'emploi_du_temps',
     '/GenererEdt':            'emploi_du_temps',
+    '/GroupesPedagogiques':   'parametrage',
     '/Indisponibilites':      'enseignants',
     '/Sanctions':             'sanctions',
     '/FormSanction':          'sanctions',

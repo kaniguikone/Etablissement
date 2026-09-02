@@ -248,6 +248,8 @@ class EdtGenerationController extends Controller
                     'enseignant_id' => $c['enseignant_id'],
                     'salle_id' => $c['salle_id'],
                     'plage_horaire_id' => $c['plage_horaire_id'],
+                    'groupe_id' => $c['groupe_id'] ?? null,
+                    'semaine' => $c['semaine'] ?? 'toutes',
                     'jour' => $c['jour'],
                     'heure_debut' => $c['heure_debut'],
                     'heure_fin' => $c['heure_fin'],

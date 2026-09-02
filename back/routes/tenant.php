@@ -39,6 +39,7 @@ use App\Http\Controllers\API\EtablissementController;
 use App\Http\Controllers\API\VolumeHoraireController;
 use App\Http\Controllers\API\PlageHoraireController;
 use App\Http\Controllers\API\EnseignantIndisponibiliteController;
+use App\Http\Controllers\API\GroupePedagogiqueController;
 use App\Http\Controllers\API\EdtDiagnosticController;
 use App\Http\Controllers\API\EdtContrainteController;
 use App\Http\Controllers\API\EdtGenerationController;
@@ -301,6 +302,12 @@ Route::middleware([
             Route::post('/plages-horaires/dupliquer-jour', [PlageHoraireController::class, 'dupliquerJour']);
             Route::put('/plages-horaires/{id}',            [PlageHoraireController::class, 'update'])->where('id', '[0-9]+');
             Route::delete('/plages-horaires/{id}',         [PlageHoraireController::class, 'destroy'])->where('id', '[0-9]+');
+
+            // Groupes pédagogiques : LV2, dédoublements (chantier EDT — Lot 4)
+            Route::get('/groupes-pedagogiques',         [GroupePedagogiqueController::class, 'index']);
+            Route::post('/groupes-pedagogiques',        [GroupePedagogiqueController::class, 'store']);
+            Route::put('/groupes-pedagogiques/{id}',    [GroupePedagogiqueController::class, 'update'])->where('id', '[0-9]+');
+            Route::delete('/groupes-pedagogiques/{id}', [GroupePedagogiqueController::class, 'destroy'])->where('id', '[0-9]+');
 
             // Séances-types : découpage des volumes horaires en séances (chantier EDT — Lot 0.4)
             Route::get('/seances-types/{niveau_id}',          [VolumeHoraireController::class, 'seancesParNiveau'])->where('niveau_id', '[0-9]+');

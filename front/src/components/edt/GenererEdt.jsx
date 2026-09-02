@@ -298,15 +298,23 @@ const GenererEdt = () => {
                                                     <tr key={h}>
                                                         <td className="bg-light fw-bold">{debut}<br /><small>{fin}</small></td>
                                                         {JOURS.filter((j) => jours.includes(j) || grilleClasse.some((c) => c.jour === j)).map((j) => {
-                                                            const c = grilleClasse.find((x) => x.jour === j && x.heure_debut.slice(0, 5) === debut);
-                                                            if (!c) return <td key={j} />;
+                                                            const cs = grilleClasse.filter((x) => x.jour === j && x.heure_debut.slice(0, 5) === debut);
+                                                            if (cs.length === 0) return <td key={j} />;
                                                             const modifiable = detail.generation.statut !== 'archive';
+                                                            const c0 = cs[0];
                                                             return (
-                                                                <td key={j} style={{ background: c.matiere?.couleur || '#eee', cursor: modifiable ? 'pointer' : 'default', outline: edite?.id === c.id ? '2px solid #0d6efd' : 'none' }}
-                                                                    onClick={() => modifiable && setEdite(c)}>
-                                                                    <strong>{c.matiere?.abbr_matiere}</strong>{c.verrouille && ' 🔒'}<br />
-                                                                    <small>{c.enseignant?.nom_enseignant}</small>
-                                                                    {c.salle && <><br /><small className="text-muted">{c.salle.nom}</small></>}
+                                                                <td key={j} style={{ background: cs.length > 1 ? '#f3e8ff' : (c0.matiere?.couleur || '#eee') }}>
+                                                                    {cs.map((c) => (
+                                                                        <div key={c.id}
+                                                                            style={{ cursor: modifiable ? 'pointer' : 'default', outline: edite?.id === c.id ? '2px solid #0d6efd' : 'none', borderTop: cs.length > 1 ? '1px dashed #aaa' : 'none' }}
+                                                                            onClick={() => modifiable && setEdite(c)}>
+                                                                            <strong>{c.matiere?.abbr_matiere}</strong>
+                                                                            {c.verrouille && ' 🔒'}
+                                                                            {c.semaine && c.semaine !== 'toutes' && <span className="badge bg-dark ms-1">{c.semaine}</span>}
+                                                                            <br /><small>{c.enseignant?.nom_enseignant}</small>
+                                                                            {c.salle && <> · <small className="text-muted">{c.salle.nom}</small></>}
+                                                                        </div>
+                                                                    ))}
                                                                 </td>
                                                             );
                                                         })}

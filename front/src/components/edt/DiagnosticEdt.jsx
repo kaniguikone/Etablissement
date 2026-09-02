@@ -10,6 +10,7 @@ const LIBELLES = {
     capacite:      { titre: 'Capacité des salles', lien: '/Salles', action: 'Vérifier les salles' },
     affectations:  { titre: 'Affectations enseignants', lien: '/ProfsParMatiere', action: 'Compléter les affectations' },
     seances:       { titre: 'Découpage en séances', lien: '/VolumeHoraire', action: 'Définir les séances' },
+    groupes:       { titre: 'Groupes pédagogiques (LV2, dédoublements)', lien: '/GroupesPedagogiques', action: 'Configurer les groupes' },
     indispos:      { titre: 'Indisponibilités enseignants', lien: '/Indisponibilites', action: 'Renseigner les indisponibilités' },
 };
 

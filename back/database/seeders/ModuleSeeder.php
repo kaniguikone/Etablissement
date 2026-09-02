@@ -89,6 +89,7 @@ class ModuleSeeder extends Seeder
                 ['slug' => 'parametrage.salles',          'label' => 'Salles'],
                 ['slug' => 'parametrage.volume_horaire',  'label' => 'Volumes horaires'],
                 ['slug' => 'parametrage.grille_horaire',  'label' => 'Grille horaire'],
+                ['slug' => 'parametrage.groupes_pedagogiques', 'label' => 'Groupes pédagogiques'],
                 ['slug' => 'parametrage.archivage',       'label' => "Archivage fin d'année"],
             ]],
             ['slug' => 'statistiques', 'label' => 'Statistiques', 'enfants' => [

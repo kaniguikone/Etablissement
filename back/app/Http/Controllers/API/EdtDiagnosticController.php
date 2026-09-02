@@ -25,6 +25,7 @@ class EdtDiagnosticController extends Controller
             $this->bloc('capacite', ...$this->capacite()),
             $this->bloc('affectations', ...$this->affectations()),
             $this->bloc('seances', ...$this->seances()),
+            $this->bloc('groupes', ...$this->groupes()),
             $this->bloc('indispos', ...$this->indispos()),
         ];
 
@@ -113,6 +114,21 @@ class EdtDiagnosticController extends Controller
         return $sansSeance === 0
             ? [true, 'Découpage en séances défini pour tout le programme']
             : [false, "{$sansSeance}/{$total} matière(s) du programme sans découpage en séances"];
+    }
+
+    private function groupes(): array
+    {
+        $total = \App\Models\GroupePedagogique::count();
+        if ($total === 0) {
+            return [true, 'Aucun groupe (LV2 / dédoublement) — facultatif'];
+        }
+        $sansProf = \App\Models\GroupePedagogique::whereNull('enseignant_id')
+            ->with('classe:id,nom_classe')->get();
+
+        return $sansProf->isEmpty()
+            ? [true, "{$total} groupe(s) configuré(s)"]
+            : [false, $sansProf->count().' groupe(s) sans enseignant : '
+                .$sansProf->map(fn ($g) => "{$g->classe?->nom_classe} · {$g->libelle}")->take(5)->implode(', ')];
     }
 
     private function indispos(): array

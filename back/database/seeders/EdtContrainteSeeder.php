@@ -30,6 +30,7 @@ class EdtContrainteSeeder extends Seeder
         ['SALLE_ATTITREE',       'Les élèves ne se déplacent pas : cours dans la salle attitrée de la classe (hors salle spécialisée)', 'dure', 20],
         ['VOLUME_HORAIRE',       'Le volume horaire réglementaire de chaque matière doit être respecté', 'dure', 30, ['tolerance_heures' => 0.5]],
         ['TANDEM_MEME_JOUR',     'Le tandem Physique-Chimie / SVT est placé le même jour', 'dure', 25],
+        ['GROUPES_PARALLELES',   'Les groupes d\'une même classe (LV2, dédoublement) sont enseignés en même temps', 'dure', 40],
 
         // ── Contraintes souples ─────────────────────────────────────────────
         ['REPARTITION_SEMAINE',  'Répartir les heures d\'une matière sur toute la semaine', 'souple', 5],

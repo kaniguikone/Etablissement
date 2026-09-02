@@ -38,6 +38,12 @@ class Classe extends Model
         return $this->belongsTo(Salle::class);
     }
 
+    /** Groupes pédagogiques (LV2, dédoublements) — chantier EDT Lot 4. */
+    public function groupesPedagogiques()
+    {
+        return $this->hasMany(GroupePedagogique::class);
+    }
+
     public function professeurPrincipal()
     {
         return $this->belongsTo(Enseignant::class, 'professeur_principal_id');
