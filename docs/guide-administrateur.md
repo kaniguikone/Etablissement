@@ -82,9 +82,9 @@ Les niveaux (6ème, 5ème, 2nde…) et leurs classes (6ème A, 6ème B…) sont 
 Configurez vos types d'évaluations : Devoir Surveillé, Interrogation, Examen, etc., avec leur coefficient.
 
 ### Salles et volumes horaires
-*Menu : Paramétrage → Salles / Volumes horaires*
+*Menu : Paramétrage → Salles / Volumes & séances*
 
-Ajoutez les salles de classe pour la gestion des emplois du temps et éviter les conflits de planning. Le menu **Volumes horaires** permet de définir le nombre d'heures attendu par matière et par classe, comparé ensuite à l'emploi du temps réel (voir *Conformité EDT*, section 6).
+Ajoutez les salles pour la gestion des emplois du temps et éviter les conflits de planning ; indiquez leur type (classe, laboratoire, salle informatique, gymnase) et leur capacité. Le menu **Volumes & séances** permet de définir le nombre d'heures attendu par matière et par niveau, puis de le **découper en séances** (ex. `2h + 1h + 1h`, quinzaine, 1h30) — base de la génération automatique et du contrôle de conformité (section 6, *Emploi du temps*).
 
 ### Passage de classe (fin d'année)
 *Menu : Paramétrage → Archivage fin d'année*
@@ -186,11 +186,43 @@ Chaque demande indique : nom du parent, matricule de l'élève concerné, date d
 ## 6. Pédagogie
 
 ### Emploi du temps
-*Menu : Pédagogie → Emploi du temps*
+*Menu : **Emploi du temps** (menu latéral dédié)*
 
-Créez les créneaux en sélectionnant : classe, matière, enseignant, salle, jour, heure de début et fin.
+**a) Paramétrer (une fois par an)**
 
-> Le système vérifie automatiquement les conflits de salle et d'enseignant.
+1. **Grille horaire** : définissez la semaine type (plages de cours, récréations, pause méridienne). Le bouton « Recopier un jour » évite de tout ressaisir.
+2. **Groupes pédagogiques** (si besoin) : déclarez les groupes LV2 (Allemand / Espagnol) et les dédoublements. Les groupes partageant le même « code parallèle » seront placés au même moment.
+3. **Indisponibilités profs** : renseignez les créneaux bloqués des vacataires et temps partiels.
+4. Complétez par ailleurs, dans *Paramétrage* : **Volumes & séances** (découpage des heures en séances), **Config. matières/niveaux** (familles de matières), **Salles** (+ salle attitrée sur la fiche de chaque classe).
+5. **Diagnostic** : lance une vérification complète du paramétrage — chaque point rouge renvoie vers l'écran à corriger.
+
+**b) Générer**
+
+*Menu : Emploi du temps → Générer les EDT*
+
+1. Nommez le scénario, choisissez les jours ouvrés, cliquez **Générer** (quelques secondes).
+2. Le résultat affiche le nombre de séances placées, les conflits éventuels et un aperçu par classe.
+3. Générez plusieurs scénarios et comparez leur score.
+4. **Publier** un scénario remplace l'emploi du temps officiel (l'ancien est archivé et récupérable ; les enseignants sont notifiés).
+
+**c) Retoucher**
+
+- Dans l'aperçu par classe, cliquez sur un cours pour le **déplacer** (jour / créneau) ou le **verrouiller** 🔒.
+- « Régénérer (garder les verrouillés) » relance la génération en conservant les parties verrouillées.
+- **Exports PDF** : par classe, toutes les classes (grille au code couleur MENET).
+
+**d) Saisie manuelle** (alternative à la génération)
+
+*Menu : Emploi du temps → Emplois du temps → + Ajouter un créneau*
+
+Créez les créneaux un par un en sélectionnant : classe, matière, enseignant, **créneau de la grille** (la salle est pré-remplie avec la salle attitrée de la classe).
+
+> Le système vérifie automatiquement les conflits de salle, d'enseignant et de classe (en tenant compte de la semaine A/B et des groupes).
+
+### Contrôle qualité (règles MENET)
+*Menu : Emploi du temps → Contrôle (règles MENET)*
+
+Vérifie l'emploi du temps publié contre les règles de confection MENET : EPS hors heures chaudes, Physique-Chimie et SVT en laboratoire, deux heures consécutives d'Histoire-Géo, capacité des salles, indisponibilités, volume horaire, équilibre de la semaine, groupes parallèles… Deux niveaux : **violations bloquantes** et **points d'amélioration** (pondérables). Dépliez « Régler les contraintes » pour activer/désactiver les règles souples selon les habitudes de l'établissement.
 
 ### Assiduité
 *Menu : Pédagogie → Assiduité*
@@ -221,10 +253,10 @@ Le bulletin inclut les appréciations par matière saisies par les enseignants, 
 
 Enregistrez les appréciations générales par classe et, au dernier conseil de l'année, la décision de passage de chaque élève.
 
-### Conformité EDT et charge enseignants
-*Menu : Pilotage pédagogique → Conformité EDT / Charge enseignants*
+### Conformité volume horaire et charge enseignants
+*Menu : Emploi du temps → Conformité volume horaire · Pilotage pédagogique → Charge enseignants*
 
-Comparez l'emploi du temps réellement planifié aux volumes horaires définis en paramétrage (*Conformité EDT*), et suivez la charge horaire et l'avancement du programme de chaque enseignant (*Charge enseignants*).
+Comparez l'emploi du temps réellement planifié aux volumes horaires définis en paramétrage (*Conformité volume horaire*), et suivez la charge horaire et l'avancement du programme de chaque enseignant (*Charge enseignants*).
 
 ### Progression du programme
 *Menu : Pédagogie → Programme*

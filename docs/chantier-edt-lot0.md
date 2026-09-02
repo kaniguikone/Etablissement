@@ -1,14 +1,14 @@
 # Lot 0 — Paramétrage (fondations de la génération d'EDT)
 
-> Plan d'implémentation détaillé — Créé le 2026-08-31
-> Préalable : `docs/chantier-emploi-du-temps.md` (cadrage validé).
-> Ce lot est **purement additif** : aucune régression sur la saisie manuelle actuelle, aucune colonne existante supprimée ou renommée.
+> Plan d'implémentation détaillé — Créé le 2026-08-31 · **Livré et fusionné dans `main` le 2026-09-02** (avec les Lots 1 à 4, commit `be1efbf`).
+> Préalable : `docs/chantier-emploi-du-temps.md`.
+> Ce lot est **purement additif** : aucune régression sur la saisie manuelle, aucune colonne existante supprimée ou renommée.
 
 ---
 
-## 0. État d'avancement (2026-08-31)
+## 0. État d'avancement — ✅ livré
 
-Branche `feat/edt-lot0-parametrage`. **Non committé** (commit global prévu à la fin).
+Fusionné dans `main` (branche d'origine `feat/edt-lot0-parametrage`, puis empilement des Lots 1-4).
 
 | Sous-lot | Backend + tests | Frontend | Statut |
 | --- | --- | --- | --- |

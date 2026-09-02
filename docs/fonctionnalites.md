@@ -56,11 +56,30 @@ Application complète de gestion scolaire en architecture multi-tenant, permetta
 
 ## 2. Emploi du temps
 
-- Création et modification des emplois du temps par classe
-- **Détection automatique des chevauchements** (salle, enseignant, classe)
-- Suivi des volumes horaires par matière et par enseignant
-- Vérification de conformité entre l'EDT réel et les volumes horaires définis
-- **Export PDF** des emplois du temps
+Regroupé dans un menu latéral dédié **Emploi du temps**.
+
+### Paramétrage
+- **Grille horaire** de l'établissement (plages de cours, récréations, pause méridienne), éditable et recopiable d'un jour à l'autre
+- **Familles de matières** + code couleur MENET (pour appliquer les règles pédagogiques malgré la granularité fine des matières)
+- **Salle attitrée** par classe + contrôle de capacité, type de salle requis par matière (labo, salle info, gymnase)
+- **Découpage des volumes horaires en séances** (`2h + 1h + 1h`, quinzaine, 1h30)
+- **Groupes pédagogiques** : LV2 (Allemand / Espagnol), dédoublements — les groupes d'un même code parallèle sont enseignés simultanément
+- **Indisponibilités des enseignants** (vacataires, temps partiel)
+- **Diagnostic de complétude** : vérifie en un écran que tout le paramétrage nécessaire est en place
+
+### Génération automatique
+- **Génération d'un emploi du temps complet** à partir du paramétrage (moteur heuristique interne), en quelques secondes
+- Gestion des **séances doubles**, des **groupes parallèles**, de la **quinzaine** (semaine A / semaine B), des **salles spécialisées**
+- Plusieurs **scénarios** générés et comparables ; publication en un clic (l'ancien EDT est archivé et récupérable ; les enseignants sont notifiés)
+- Les scénarios non publiés restent **invisibles des portails**
+
+### Édition et contrôle
+- Création et modification manuelle des créneaux (choix d'un créneau de la grille, salle pré-remplie)
+- Retouche d'un scénario : déplacer un cours, **verrouiller** les parties satisfaisantes puis **régénérer le reste**
+- **Détection automatique des chevauchements** (salle, enseignant, classe), consciente de la semaine A/B et des groupes
+- **Contrôle qualité vs règles MENET** : ~19 règles (EPS hors heures chaudes, salles spécialisées PC/SVT, heures consécutives, capacité, indisponibilités, volume horaire, équilibre de la semaine…), activables et pondérables par établissement
+- Vérification de conformité entre l'EDT réel et les volumes horaires définis ; suivi de la charge horaire des enseignants
+- **Export PDF** (grille au code couleur MENET) : par classe, toutes les classes, par enseignant, par salle
 - Consultation dans les portails enseignant, parent et élève
 
 ---

@@ -19,8 +19,8 @@
 | Tableau des impayés + export CSV                                    | Complet                                                                           |
 | Échéancier de paiement (tranches)                                   | Complet                                                                           |
 | Archivage fin d'année + rollback                                    | Complet                                                                           |
-| Emploi du temps avec détection des conflits                         | Complet                                                                           |
-| Gestion des salles                                                  | Complet                                                                           |
+| **Emploi du temps — génération automatique + contrôle MENET**       | **Complet** — paramétrage (grille, séances, groupes LV2/dédoublements, indisponibilités), génération auto d'un EDT complet (séances doubles, quinzaine A/B, salles spécialisées), scénarios comparables + publication, édition assistée (verrouillage + régénération partielle), contrôle vs ~19 règles MENET, exports PDF (classe/prof/salle), menu latéral dédié |
+| Gestion des salles                                                  | Complet — type (classe/labo/salle info/gymnase) + capacité, salle attitrée par classe |
 | Calendrier scolaire (vacances, événements)                          | Complet                                                                           |
 | Sanctions / comportement élèves                                     | Complet                                                                           |
 | Notifications in-app (cloche + badge, 6 déclencheurs)               | Complet                                                                           |
@@ -57,7 +57,7 @@
 | **Import Excel en masse** (élèves, enseignants, affectations, scolarités, notes) | **Complet** — 5 flux avec gestion d'erreurs ligne par ligne                |
 | **Type d'établissement obligatoire**                                 | **Complet** — condition la génération du bulletin/relevé et le pré-remplissage pédagogique |
 | Mode hors-ligne mobile (présences **et notes**)                     | Complet (sync auto)                                                               |
-| **122 tests automatisés**                                           | **Complet** — couverture frais annexes, export, documentation, stats MENET, portail parent, imports Excel, paiement mobile CinetPay |
+| **170 tests automatisés**                                           | **Complet** — couverture frais annexes, export, documentation, stats MENET, portail parent, imports Excel, paiement mobile CinetPay, chantier emploi du temps (paramétrage, validateur, générateur, groupes) |
 
 ---
 
@@ -228,7 +228,7 @@ Les données d'enfants mineurs sont ultra-sensibles. Même si la réglementation
 - Intégration CinetPay (paiement mobile money natif, scolarité et frais annexes, depuis l'app parent ou le back-office)
 - Bulletins PDF avec appréciations et décisions du conseil
 - Archivage fin d'année avec rollback
-- Emploi du temps avec détection de conflits
+- **Génération automatique des emplois du temps** (paramétrage MENET, groupes LV2 / dédoublements, quinzaine, contrôle des règles de confection, exports PDF) — rare sur le marché local
 - **Notifications email automatiques** (bulletin, absence, sanction, relance)
 - **Journal d'audit complet** (traçabilité de toutes les modifications sensibles)
 - **Rapport statistique Ministère PDF** (auto-génération — argument de vente unique)
@@ -238,7 +238,7 @@ Les données d'enfants mineurs sont ultra-sensibles. Même si la réglementation
 - **Export comptable OHADA** (Excel 3 feuilles + FEC SAGE — zéro ressaisie)
 - **Module SaaS billing** (abonnements, factures, dashboard super-admin)
 - **Documentation in-app contextuelle** (aide par module, 27 articles pré-rédigés)
-- 122 tests automatisés
+- 170 tests automatisés
 - Templates de démarrage rapide (mise en service en moins d'une heure)
 - **Page d'accueil publique avec entonnoir commercial** (demande d'accès → validation → tarification, sans intervention manuelle par email)
 - **Compte central unifié parent/enseignant** (une seule identité pour accéder à plusieurs établissements, y compris dans un groupe scolaire)

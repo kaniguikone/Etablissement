@@ -1,9 +1,10 @@
 # Chantier — Génération automatique des emplois du temps
 
-> Document de cadrage — Créé le 2026-08-31
-> À valider avant tout développement. Source : note MENET-FP/DPFC/DEEP « Confection de l'emploi du temps » (session août 2022) + état réel du code.
+> Document de cadrage — Créé le 2026-08-31 · **Chantier livré et fusionné dans `main` le 2026-09-02** (commit `be1efbf`).
+> Source : note MENET-FP/DPFC/DEEP « Confection de l'emploi du temps » (session août 2022).
+> Ce document reste la référence d'architecture ; le fonctionnement utilisateur est décrit dans `guide-administrateur.md` §6 et `fonctionnalites.md` §2.
 >
-> **Décisions déjà prises :**
+> **Décisions prises :**
 > - Moteur : **microservice de résolution (Python + Google OR-Tools CP-SAT)** appelé en asynchrone par Laravel.
 > - Périmètre cible : **tous les niveaux** (1er cycle 6e→3e et 2nd cycle 2nde→Tle, toutes séries), y compris groupes LV2, dédoublements et quinzaine.
 > - Livraison par lots successifs, chacun apportant une valeur autonome.
