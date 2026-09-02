@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, useParams, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
+import ChampsEdtMatiere from './ChampsEdtMatiere';
 
 const DetailsMatiere = () => {
     const { toast } = useToast();
@@ -11,6 +12,10 @@ const DetailsMatiere = () => {
         abbr_matiere: '',
         libelle_matiere: '',
         description_matiere: '',
+        famille: '',
+        couleur: '',
+        salle_type_requis: '',
+        effort_soutenu: false,
     });
 
     useEffect(() => {
@@ -21,6 +26,10 @@ const DetailsMatiere = () => {
                     abbr_matiere: m.abbr_matiere || '',
                     libelle_matiere: m.libelle_matiere || '',
                     description_matiere: m.description_matiere || '',
+                    famille: m.famille || '',
+                    couleur: m.couleur || '',
+                    salle_type_requis: m.salle_type_requis || '',
+                    effort_soutenu: !!m.effort_soutenu,
                 });
             })
             .catch(() => toast.error('Impossible de charger les données de cette matière.'));
@@ -63,6 +72,7 @@ const DetailsMatiere = () => {
                             <label className="form-label">Description</label>
                             <textarea className="form-control" name="description_matiere" value={form.description_matiere} onChange={handleChange} rows={3} required />
                         </div>
+                        <ChampsEdtMatiere form={form} setForm={setForm} />
                     </fieldset>
                     <div className="d-flex justify-content-end mb-3 gap-2">
                         <NavLink to="/Matieres" className="btn btn-secondary">Retour</NavLink>

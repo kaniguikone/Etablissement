@@ -72,7 +72,6 @@ const GROUPES = [
         moduleSlug: 'pedagogie_saisie',
         items: [
             { to: '/Calendrier',       icon: 'fas fa-calendar-alt',    label: 'Calendrier scolaire', moduleSlug: 'pedagogie_saisie.calendrier' },
-            { to: '/EmploiDuTemps',    icon: 'fas fa-calendar-week',   label: 'Emploi du temps',     moduleSlug: 'pedagogie_saisie.emploi_du_temps' },
             { to: '/Assiduites',       icon: 'fas fa-clipboard-check', label: 'Assiduités',          moduleSlug: 'pedagogie_saisie.assiduites' },
             { to: '/Devoirs',          icon: 'fas fa-file-alt',        label: 'Devoirs / Notes',     moduleSlug: 'pedagogie_saisie.devoirs' },
             { to: '/GestionChapitres', icon: 'fas fa-book-open',       label: 'Programme',           moduleSlug: 'pedagogie_saisie.programme' },
@@ -90,8 +89,26 @@ const GROUPES = [
             { to: '/Bulletins',         icon: 'fas fa-file-pdf',      label: 'Bulletins',                moduleSlug: 'pedagogie_pilotage.bulletins' },
             { to: '/SuiviProgressions', icon: 'fas fa-tasks',         label: 'Suivi des progressions',   moduleSlug: 'pedagogie_pilotage.suivi_progressions' },
             { to: '/ConseilClasse',     icon: 'fas fa-gavel',         label: 'Conseil de classe',        moduleSlug: 'pedagogie_pilotage.conseil_classe' },
-            { to: '/ConformiteEdt',     icon: 'fas fa-balance-scale', label: 'Conformité EDT',           moduleSlug: 'pedagogie_pilotage.conformite_edt' },
             { to: '/ChargeEnseignants', icon: 'fas fa-user-clock',    label: 'Charge enseignants',       moduleSlug: 'pedagogie_pilotage.charge_enseignants' },
+        ],
+    },
+
+    // ── Emploi du temps ──────────────────────────────────────────────────────
+    // Regroupe le cycle complet de montage des EDT ; les entrées gardent leur
+    // slug de module d'origine (aucun impact sur l'activation par établissement).
+    {
+        label: 'Emploi du temps',
+        icon: 'fas fa-calendar-week',
+        permissions: ['pedagogie_pilotage', 'pedagogie_saisie', 'parametrage', 'enseignants'],
+        items: [
+            { to: '/GrilleHoraire',       icon: 'fas fa-table',          label: 'Grille horaire',          moduleSlug: 'parametrage.grille_horaire' },
+            { to: '/GroupesPedagogiques', icon: 'fas fa-users',          label: 'Groupes pédagogiques',    moduleSlug: 'parametrage.groupes_pedagogiques' },
+            { to: '/Indisponibilites',    icon: 'fas fa-user-clock',     label: 'Indisponibilités profs',  moduleSlug: 'enseignants.indisponibilites' },
+            { to: '/DiagnosticEdt',       icon: 'fas fa-clipboard-list', label: 'Diagnostic',              moduleSlug: 'pedagogie_pilotage.diagnostic_edt' },
+            { to: '/GenererEdt',          icon: 'fas fa-magic',          label: 'Générer les EDT',         moduleSlug: 'pedagogie_pilotage.generer_edt' },
+            { to: '/EmploiDuTemps',       icon: 'fas fa-calendar-week',  label: 'Emplois du temps',        moduleSlug: 'pedagogie_saisie.emploi_du_temps' },
+            { to: '/ControleEdt',         icon: 'fas fa-clipboard-check', label: 'Contrôle (règles MENET)', moduleSlug: 'pedagogie_pilotage.controle_edt' },
+            { to: '/ConformiteEdt',       icon: 'fas fa-balance-scale',  label: 'Conformité volume horaire', moduleSlug: 'pedagogie_pilotage.conformite_edt' },
         ],
     },
 
@@ -167,7 +184,7 @@ const GROUPES = [
             { to: '/TypeDevoirs',   icon: 'fas fa-tags',           label: 'Types de devoirs',    moduleSlug: 'parametrage.type_devoirs' },
             { to: '/Periodes',      icon: 'fas fa-calendar-alt', label: 'Périodes',              moduleSlug: 'parametrage.periodes' },
             { to: '/Salles',        icon: 'fas fa-door-open',    label: 'Salles',                moduleSlug: 'parametrage.salles' },
-            { to: '/VolumeHoraire', icon: 'fas fa-clock',        label: 'Volumes horaires',      moduleSlug: 'parametrage.volume_horaire' },
+            { to: '/VolumeHoraire', icon: 'fas fa-clock',        label: 'Volumes & séances',     moduleSlug: 'parametrage.volume_horaire' },
             { to: '/Archivage',     icon: 'fas fa-archive',      label: 'Archivage fin d\'année',moduleSlug: 'parametrage.archivage' },
         ],
     },

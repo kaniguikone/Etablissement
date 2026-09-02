@@ -28,6 +28,7 @@ class ModuleSeeder extends Seeder
                 ['slug' => 'enseignants.liste',        'label' => 'Liste des enseignants'],
                 ['slug' => 'enseignants.nouveau',       'label' => 'Ajouter un enseignant'],
                 ['slug' => 'enseignants.profs_matiere', 'label' => 'Profs par matière'],
+                ['slug' => 'enseignants.indisponibilites', 'label' => 'Indisponibilités'],
             ]],
             ['slug' => 'parents', 'label' => 'Parents', 'enfants' => [
                 ['slug' => 'parents.liste',   'label' => 'Liste des parents'],
@@ -48,6 +49,9 @@ class ModuleSeeder extends Seeder
                 ['slug' => 'pedagogie_pilotage.conseil_classe',     'label' => 'Conseil de classe'],
                 ['slug' => 'pedagogie_pilotage.conformite_edt',     'label' => 'Conformité EDT'],
                 ['slug' => 'pedagogie_pilotage.charge_enseignants', 'label' => 'Charge enseignants'],
+                ['slug' => 'pedagogie_pilotage.diagnostic_edt',     'label' => 'Diagnostic EDT'],
+                ['slug' => 'pedagogie_pilotage.generer_edt',        'label' => 'Générer les EDT'],
+                ['slug' => 'pedagogie_pilotage.controle_edt',       'label' => 'Contrôle EDT'],
             ]],
             ['slug' => 'finances_caisse', 'label' => 'Caisse', 'enfants' => [
                 ['slug' => 'finances_caisse.nouveau_paiement', 'label' => 'Nouveau paiement'],
@@ -84,6 +88,8 @@ class ModuleSeeder extends Seeder
                 ['slug' => 'parametrage.periodes',        'label' => 'Périodes'],
                 ['slug' => 'parametrage.salles',          'label' => 'Salles'],
                 ['slug' => 'parametrage.volume_horaire',  'label' => 'Volumes horaires'],
+                ['slug' => 'parametrage.grille_horaire',  'label' => 'Grille horaire'],
+                ['slug' => 'parametrage.groupes_pedagogiques', 'label' => 'Groupes pédagogiques'],
                 ['slug' => 'parametrage.archivage',       'label' => "Archivage fin d'année"],
             ]],
             ['slug' => 'statistiques', 'label' => 'Statistiques', 'enfants' => [

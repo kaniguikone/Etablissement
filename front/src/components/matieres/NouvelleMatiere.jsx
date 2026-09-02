@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
+import ChampsEdtMatiere from './ChampsEdtMatiere';
 
 const NouvelleMatiere = () => {
     const { toast } = useToast();
@@ -10,6 +11,10 @@ const NouvelleMatiere = () => {
         abbr_matiere: '',
         libelle_matiere: '',
         description_matiere: '',
+        famille: '',
+        couleur: '',
+        salle_type_requis: '',
+        effort_soutenu: false,
     });
 
     const handleChange = (e) => {
@@ -49,6 +54,7 @@ const NouvelleMatiere = () => {
                             <label className="form-label">Description</label>
                             <textarea className="form-control" name="description_matiere" value={form.description_matiere} onChange={handleChange} rows={3} required />
                         </div>
+                        <ChampsEdtMatiere form={form} setForm={setForm} />
                     </fieldset>
                     <div className="d-flex justify-content-end mb-3 gap-2">
                         <NavLink to="/Matieres" className="btn btn-secondary">Annuler</NavLink>

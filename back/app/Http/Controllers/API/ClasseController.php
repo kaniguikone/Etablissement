@@ -42,6 +42,7 @@ class ClasseController extends Controller
             'nom_classe'  => 'required',
             'abbr_classe' => 'required',
             'niveau_id'   => 'required|exists:niveaux,id',
+            'salle_id'    => 'nullable|exists:salles,id',
         ]);
 
         $classe = Classe::create([
@@ -51,6 +52,7 @@ class ClasseController extends Controller
             'niveau_id'               => $request->niveau_id,
             'serie_id'                => $request->serie_id ?: null,
             'salle_classe'            => $request->salle_classe,
+            'salle_id'                => $request->salle_id ?: null,
             'effectif_max_classe'     => $request->effectif_max_classe,
             'professeur_principal_id' => $request->professeur_principal_id ?: null,
         ]);
@@ -65,6 +67,7 @@ class ClasseController extends Controller
             'nom_classe'  => 'required',
             'abbr_classe' => 'required',
             'niveau_id'   => 'required|exists:niveaux,id',
+            'salle_id'    => 'nullable|exists:salles,id',
         ]);
 
         DB::table('classes')->where('id', $id)->update([
@@ -74,6 +77,7 @@ class ClasseController extends Controller
             'niveau_id'               => $request->niveau_id,
             'serie_id'                => $request->serie_id ?: null,
             'salle_classe'            => $request->salle_classe,
+            'salle_id'                => $request->salle_id ?: null,
             'effectif_max_classe'     => $request->effectif_max_classe ?: null,
             'professeur_principal_id' => $request->professeur_principal_id ?: null,
         ]);

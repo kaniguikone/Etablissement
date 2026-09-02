@@ -111,7 +111,37 @@ class HelpArticleSeeder extends Seeder
             [
                 'module' => 'emploi_du_temps', 'categorie' => 'tutoriel', 'ordre' => 1,
                 'titre'  => 'Créer et modifier un emploi du temps',
-                'contenu'=> "Pour créer l'emploi du temps d'une classe :\n\n1. Allez dans **Emploi du temps → Nouvel emploi du temps**\n2. Sélectionnez la **classe**\n3. Ajoutez les créneaux : jour, heure de début, heure de fin, matière, enseignant, salle\n4. Enregistrez\n\n**Vérification des conflits :** Le système détecte automatiquement si un enseignant ou une salle est déjà occupé sur le même créneau.\n\n**Conformité volume horaire :** Allez dans **Paramétrage → Volume horaire → Conformité** pour vérifier que chaque matière atteint le nombre d'heures réglementaire.",
+                'contenu'=> "Pour créer l'emploi du temps d'une classe :\n\n1. Allez dans **Emploi du temps → Nouvel emploi du temps**\n2. Sélectionnez la **classe**\n3. Ajoutez les créneaux : jour, **créneau de la grille horaire**, matière, enseignant, salle\n4. Enregistrez\n\n**Grille horaire :** les créneaux proposés proviennent de la grille de l'établissement (Paramétrage → Grille horaire). La salle est pré-remplie avec la salle attitrée de la classe.\n\n**Vérification des conflits :** Le système détecte automatiquement si un enseignant ou une salle est déjà occupé sur le même créneau.\n\n**Conformité volume horaire :** Allez dans **Paramétrage → Volume horaire → Conformité** pour vérifier que chaque matière atteint le nombre d'heures réglementaire.",
+            ],
+            [
+                'module' => 'parametrage', 'categorie' => 'prise_en_main', 'ordre' => 10,
+                'titre'  => 'Définir la grille horaire de l\'établissement',
+                'contenu'=> "La grille horaire décrit la semaine type : plages de cours, récréations et pause méridienne. Elle sert de base à tous les emplois du temps.\n\n**Pour la configurer :**\n1. Allez dans **Paramétrage → Grille horaire**\n2. Ajoutez chaque plage : libellé, jour, heure de début, heure de fin, type (cours / récréation / pause)\n3. Une plage sans jour s'applique à tous les jours ouvrés\n4. Utilisez **Recopier un jour** pour dupliquer rapidement une journée type\n\n**Astuce :** une séance de 2 h occupe deux plages de cours consécutives. Prévoyez des plages de durée régulière (≈ 55 min).",
+            ],
+            [
+                'module' => 'emploi_du_temps', 'categorie' => 'prise_en_main', 'ordre' => 3,
+                'titre'  => 'Générer automatiquement les emplois du temps',
+                'contenu'=> "Le menu **Pilotage pédagogique → Générer les EDT** construit un emploi du temps complet à partir du paramétrage.\n\n**Avant de lancer :** vérifiez le **Diagnostic EDT** (grille horaire, familles de matières, salles attitrées, affectations, découpage en séances, indisponibilités).\n\n**Fonctionnement :**\n1. Donnez un nom au scénario, choisissez les jours ouvrés, cliquez sur **Générer** (quelques secondes)\n2. Le résultat affiche le nombre de séances placées, les conflits éventuels et un aperçu par classe\n3. Vous pouvez générer **plusieurs scénarios** et les comparer\n4. **Publier** un scénario remplace l'emploi du temps officiel (l'ancien est archivé et récupérable) — les enseignants sont notifiés\n\n**Retoucher un scénario :** dans l'aperçu par classe, cliquez sur un cours pour le **déplacer** (jour / créneau) ou le **verrouiller** 🔒. « Régénérer (garder les verrouillés) » relance la génération en conservant les parties verrouillées.\n\n**Exports PDF :** boutons « PDF — toutes les classes » et « PDF — <classe> » (grille au code couleur MENET).\n\n**Anomalies possibles :** matière sans enseignant affecté, séance impossible à placer (pas assez de créneaux ou de salles). Elles sont listées dans le détail du scénario.",
+            ],
+            [
+                'module' => 'emploi_du_temps', 'categorie' => 'tutoriel', 'ordre' => 4,
+                'titre'  => 'Contrôler un emploi du temps (règles MENET)',
+                'contenu'=> "Le menu **Pilotage pédagogique → Contrôle EDT** vérifie l'emploi du temps existant contre les règles de confection MENET.\n\n**Deux niveaux de résultat :**\n- **Violations bloquantes** : conflits d'enseignant / de salle / de classe, salle spécialisée manquante (Physique-Chimie et SVT en labo), EPS entre 10 h et 16 h, deux heures consécutives d'Histoire-Géo, capacité de salle insuffisante, cours sur une indisponibilité, volume horaire non respecté.\n- **Points d'amélioration** (pondérables) : matière concentrée sur un seul jour, 5 heures d'affilée de matières exigeantes en 6e/5e, heures creuses des enseignants, journées déséquilibrées.\n\n**Réglages :** dépliez « Régler les contraintes » pour activer/désactiver les règles souples et ajuster leur poids selon les habitudes de l'établissement. Les règles bloquantes ne sont pas désactivables.",
+            ],
+            [
+                'module' => 'parametrage', 'categorie' => 'prise_en_main', 'ordre' => 12,
+                'titre'  => 'Groupes pédagogiques : LV2 et dédoublements',
+                'contenu'=> "**Paramétrage → Groupes pédagogiques.** Quand une classe se scinde pour une matière — LV2 (Allemand / Espagnol), dédoublement de langue ou de sciences — déclarez les groupes ici.\n\n**Principe :** les groupes qui partagent le même **code parallèle** (ex. « LV2 ») sont enseignés **en même temps** ; le générateur les place sur le même créneau, dans des salles et avec des enseignants différents, et la classe n'a aucun autre cours à ce moment.\n\n**Pour chaque groupe :** code parallèle, libellé, matière, enseignant, effectif, nombre de séances par semaine (laisser vide = déduit du volume horaire du niveau), fréquence (chaque semaine ou semaine A / B pour la quinzaine).\n\nLe **Diagnostic EDT** signale les groupes sans enseignant.",
+            ],
+            [
+                'module' => 'parametrage', 'categorie' => 'faq', 'ordre' => 11,
+                'titre'  => 'Suis-je prêt pour générer les emplois du temps ?',
+                'contenu'=> "Le menu **Pilotage pédagogique → Diagnostic EDT** vérifie automatiquement que tout le paramétrage nécessaire est en place :\n\n- Grille horaire définie\n- Familles renseignées pour toutes les matières (Paramétrage → Config. matières/niveaux)\n- Salle attitrée pour chaque classe\n- Capacité des salles suffisante\n- Enseignants affectés à toutes les matières du programme\n- Découpage des volumes horaires en séances (Paramétrage → Volumes horaires)\n- Indisponibilités des vacataires renseignées\n\nChaque point non satisfait renvoie un lien direct vers l'écran à corriger.",
+            ],
+            [
+                'module' => 'enseignants', 'categorie' => 'tutoriel', 'ordre' => 4,
+                'titre'  => 'Renseigner les indisponibilités d\'un enseignant',
+                'contenu'=> "Les indisponibilités indiquent les créneaux où un enseignant ne peut pas (bloquant) ou préfère ne pas (préférence) assurer de cours — utile pour les vacataires et les temps partiels.\n\n**Pour les saisir :**\n1. Allez dans **Enseignants → Indisponibilités**\n2. Choisissez l'enseignant\n3. Ajoutez un créneau : jour, heure de début, heure de fin, type, motif\n\nCes contraintes seront respectées lors de la génération automatique des emplois du temps.",
             ],
 
             // ── SANCTIONS ─────────────────────────────────────────────────────

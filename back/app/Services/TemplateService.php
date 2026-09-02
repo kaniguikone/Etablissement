@@ -45,6 +45,8 @@ class TemplateService
             'periodes'       => 0,
             'niveau_matieres'=> 0,
             'volumes_horaires'=> 0,
+            'plages_horaires' => 0,
+            'seances_types'   => 0,
         ];
 
         tenancy()->initialize(Tenant::findOrFail($tenantId));
@@ -208,6 +210,16 @@ class TemplateService
                 }
             }
         });
+
+        // Paramétrage emploi du temps (chantier EDT — Lot 0.6) : familles de
+        // matières, grille horaire type et découpage des volumes en séances.
+        // Seeders idempotents : sans effet si déjà configuré.
+        (new \Database\Seeders\MatiereFamilleSeeder)->run();
+        (new \Database\Seeders\PlageHoraireSeeder)->run();
+        (new \Database\Seeders\SeanceTypeSeeder)->run();
+        (new \Database\Seeders\EdtContrainteSeeder)->run();
+        $stats['plages_horaires'] = \App\Models\PlageHoraire::count();
+        $stats['seances_types']   = \App\Models\SeanceType::count();
 
         tenancy()->end();
 

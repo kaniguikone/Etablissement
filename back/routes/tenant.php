@@ -37,6 +37,13 @@ use App\Http\Controllers\API\StatistiquesController;
 use App\Http\Controllers\API\ChapitreMatiereController;
 use App\Http\Controllers\API\EtablissementController;
 use App\Http\Controllers\API\VolumeHoraireController;
+use App\Http\Controllers\API\PlageHoraireController;
+use App\Http\Controllers\API\EnseignantIndisponibiliteController;
+use App\Http\Controllers\API\GroupePedagogiqueController;
+use App\Http\Controllers\API\EdtDiagnosticController;
+use App\Http\Controllers\API\EdtContrainteController;
+use App\Http\Controllers\API\EdtGenerationController;
+use App\Http\Controllers\API\EdtPdfController;
 use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\ArchivageController;
 use App\Http\Controllers\API\CalendrierController;
@@ -250,6 +257,7 @@ Route::middleware([
 
         Route::get('/niveaux',      [NiveauController::class, 'index']);
         Route::get('/niveaux/{id}', [NiveauController::class, 'show']);
+        Route::get('/matieres/familles',     [MatiereController::class,   'familles']);
         Route::get('/matieres',              [MatiereController::class,   'index']);
         Route::get('/typeDevoirs',           [TypeDevoirController::class,'index']);
         Route::get('/periodes',              [PeriodeController::class,   'index']);
@@ -287,6 +295,29 @@ Route::middleware([
             Route::post('/volumesHoraires',              [VolumeHoraireController::class, 'store']);
             Route::put('/volumesHoraires/{id}',          [VolumeHoraireController::class, 'update'])->where('id', '[0-9]+');
             Route::delete('/volumesHoraires/{id}',       [VolumeHoraireController::class, 'destroy'])->where('id', '[0-9]+');
+
+            // Grille horaire de l'établissement (chantier EDT — Lot 0.2)
+            Route::get('/plages-horaires',                 [PlageHoraireController::class, 'index']);
+            Route::post('/plages-horaires',                [PlageHoraireController::class, 'store']);
+            Route::post('/plages-horaires/dupliquer-jour', [PlageHoraireController::class, 'dupliquerJour']);
+            Route::put('/plages-horaires/{id}',            [PlageHoraireController::class, 'update'])->where('id', '[0-9]+');
+            Route::delete('/plages-horaires/{id}',         [PlageHoraireController::class, 'destroy'])->where('id', '[0-9]+');
+
+            // Groupes pédagogiques : LV2, dédoublements (chantier EDT — Lot 4)
+            Route::get('/groupes-pedagogiques',         [GroupePedagogiqueController::class, 'index']);
+            Route::post('/groupes-pedagogiques',        [GroupePedagogiqueController::class, 'store']);
+            Route::put('/groupes-pedagogiques/{id}',    [GroupePedagogiqueController::class, 'update'])->where('id', '[0-9]+');
+            Route::delete('/groupes-pedagogiques/{id}', [GroupePedagogiqueController::class, 'destroy'])->where('id', '[0-9]+');
+
+            // Séances-types : découpage des volumes horaires en séances (chantier EDT — Lot 0.4)
+            Route::get('/seances-types/{niveau_id}',          [VolumeHoraireController::class, 'seancesParNiveau'])->where('niveau_id', '[0-9]+');
+            Route::post('/seances-types',                     [VolumeHoraireController::class, 'storeSeance']);
+            Route::put('/seances-types/{id}',                 [VolumeHoraireController::class, 'updateSeance'])->where('id', '[0-9]+');
+            Route::delete('/seances-types/{id}',              [VolumeHoraireController::class, 'destroySeance'])->where('id', '[0-9]+');
+            Route::post('/seances-types/generer/{niveau_id}', [VolumeHoraireController::class, 'genererSeancesDepuisVolume'])->where('niveau_id', '[0-9]+');
+
+            // Diagnostic de complétude du paramétrage EDT (chantier EDT — Lot 0.6)
+            Route::get('/edt/diagnostic-prerequis',       [EdtDiagnosticController::class, 'index']);
 
             // Configuration matières / niveaux / classes
             Route::get('/config-matieres',                          [ConfigurationMatieresController::class, 'index']);
@@ -343,6 +374,12 @@ Route::middleware([
             Route::get('/affectations/import/template',           [ImportAffectationController::class, 'template']);
             Route::post('/affectations/import',                   [ImportAffectationController::class, 'import']);
             Route::delete('/enseignants/{id}/tokens',             [EnseignantController::class, 'revoquerTokens']);
+
+            // Indisponibilités des enseignants (chantier EDT — Lot 0.5)
+            Route::get('/indisponibilites',                       [EnseignantIndisponibiliteController::class, 'index']);
+            Route::get('/enseignants/{id}/indisponibilites',      [EnseignantIndisponibiliteController::class, 'parEnseignant'])->where('id', '[0-9]+');
+            Route::post('/enseignants/{id}/indisponibilites',     [EnseignantIndisponibiliteController::class, 'store'])->where('id', '[0-9]+');
+            Route::delete('/indisponibilites/{id}',               [EnseignantIndisponibiliteController::class, 'destroy'])->where('id', '[0-9]+');
         });
 
         Route::middleware(['permission:parents', 'module:parents'])->group(function () {
@@ -412,6 +449,30 @@ Route::middleware([
         Route::middleware(['permission:pedagogie_pilotage', 'module:pedagogie_pilotage'])->group(function () {
             Route::get('/volumesHoraires/conformite',        [VolumeHoraireController::class, 'conformite']);
             Route::get('/volumesHoraires/chargeEnseignants', [VolumeHoraireController::class, 'chargeEnseignants']);
+
+            // Contrôle d'un emploi du temps contre les règles MENET (chantier EDT — Lot 1)
+            Route::get('/edt/contraintes',        [EdtContrainteController::class, 'index']);
+            Route::put('/edt/contraintes/{code}', [EdtContrainteController::class, 'update']);
+            Route::get('/edt/controle',           [EdtContrainteController::class, 'controle']);
+
+            // Génération automatique (chantier EDT — Lot 2)
+            Route::get('/edt/grille-reference',        [EdtGenerationController::class, 'grilleReference']);
+            Route::get('/edt/generations',            [EdtGenerationController::class, 'index']);
+            Route::post('/edt/generations',           [EdtGenerationController::class, 'store']);
+            Route::get('/edt/generations/{id}',       [EdtGenerationController::class, 'show'])->where('id', '[0-9]+');
+            Route::post('/edt/generations/{id}/publier', [EdtGenerationController::class, 'publier'])->where('id', '[0-9]+');
+            Route::delete('/edt/generations/{id}',    [EdtGenerationController::class, 'destroy'])->where('id', '[0-9]+');
+
+            // Édition assistée d'un scénario (chantier EDT — Lot 3)
+            Route::post('/edt/generations/{id}/regenerer',                [EdtGenerationController::class, 'regenerer'])->where('id', '[0-9]+');
+            Route::patch('/edt/generations/{id}/creneaux/{creneauId}',    [EdtGenerationController::class, 'patchCreneau'])->where(['id' => '[0-9]+', 'creneauId' => '[0-9]+']);
+            Route::delete('/edt/generations/{id}/creneaux/{creneauId}',   [EdtGenerationController::class, 'destroyCreneau'])->where(['id' => '[0-9]+', 'creneauId' => '[0-9]+']);
+
+            // Exports PDF (chantier EDT — Lot 3) — ref = "officiel" ou id de scénario
+            Route::get('/edt/{ref}/pdf/classe/{classeId}',         [EdtPdfController::class, 'classe'])->where(['ref' => 'officiel|[0-9]+', 'classeId' => '[0-9]+']);
+            Route::get('/edt/{ref}/pdf/classes',                   [EdtPdfController::class, 'toutesClasses'])->where('ref', 'officiel|[0-9]+');
+            Route::get('/edt/{ref}/pdf/enseignant/{enseignantId}', [EdtPdfController::class, 'enseignant'])->where(['ref' => 'officiel|[0-9]+', 'enseignantId' => '[0-9]+']);
+            Route::get('/edt/{ref}/pdf/salle/{salleId}',           [EdtPdfController::class, 'salle'])->where(['ref' => 'officiel|[0-9]+', 'salleId' => '[0-9]+']);
 
             Route::get('/bulletin/{eleveId}/{periodeId}',                          [NoteController::class,        'bulletin']);
             Route::get('/bulletin/{eleveId}/{periodeId}/pdf',                      [BulletinPdfController::class, 'telecharger']);

@@ -44,4 +44,10 @@ class Enseignant extends Authenticatable
     {
         return DB::table('classe_enseignant_matiere')->where('enseignant_id', $this->id);
     }
+
+    /** Créneaux d'indisponibilité (vacataires, temps partiel — cf. chantier EDT). */
+    public function indisponibilites()
+    {
+        return $this->hasMany(EnseignantIndisponibilite::class);
+    }
 }

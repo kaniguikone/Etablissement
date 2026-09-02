@@ -128,4 +128,24 @@ class EmploiDuTempsTest extends TestCase
         $this->deleteJson("/api/emploiDuTemps/{$creneau->id}")->assertStatus(204);
         $this->assertDatabaseMissing('emploi_du_temps', ['id' => $creneau->id]);
     }
+
+    /** @test */
+    public function creation_via_plage_horaire_derive_les_heures(): void
+    {
+        $plage = \App\Models\PlageHoraire::create([
+            'libelle' => 'M1', 'jour' => 'lundi', 'heure_debut' => '07:30', 'heure_fin' => '08:25', 'type' => 'cours',
+        ]);
+
+        $this->postJson('/api/emploiDuTemps', [
+            'classe_id'        => $this->classe->id,
+            'matiere_id'       => $this->matiere->id,
+            'enseignant_id'    => $this->enseignant->id,
+            'jour'             => 'lundi',
+            'plage_horaire_id' => $plage->id,
+        ])->assertStatus(201);
+
+        $creneau = EmploiDuTemps::where('plage_horaire_id', $plage->id)->firstOrFail();
+        $this->assertSame('07:30', substr($creneau->heure_debut, 0, 5));
+        $this->assertSame('08:25', substr($creneau->heure_fin, 0, 5));
+    }
 }

@@ -15,6 +15,12 @@ class Salle extends Model
         return $this->hasMany(EmploiDuTemps::class);
     }
 
+    /** Classes dont c'est la salle attitrée. */
+    public function classesAttitrees()
+    {
+        return $this->hasMany(Classe::class);
+    }
+
     public function scopeActives($query)
     {
         return $query->where('actif', true);

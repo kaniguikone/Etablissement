@@ -2,6 +2,7 @@
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 import { useConfirm } from '../../context/ConfirmContext';
+import SeancesTypes from './SeancesTypes';
 
 const VolumeHoraire = () => {
     const { toast }     = useToast();
@@ -9,6 +10,7 @@ const VolumeHoraire = () => {
 
     const [niveaux,  setNiveaux]  = useState([]);
     const [matieres, setMatieres] = useState([]);
+    const [series,   setSeries]   = useState([]);
     const [niveauId, setNiveauId] = useState('');
     const [volumes,  setVolumes]  = useState([]);
     const [chargement, setChargement] = useState(false);
@@ -20,6 +22,7 @@ const VolumeHoraire = () => {
     useEffect(() => {
         api.get('/niveaux').then((r) => setNiveaux(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
         api.get('/matieres').then((r) => setMatieres(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
+        api.get('/config-matieres').then((r) => setSeries(r.data.series ?? [])).catch(() => {});
     }, []);
 
     useEffect(() => {
@@ -194,6 +197,8 @@ const VolumeHoraire = () => {
                                 </div>
                             </div>
                         </div>
+
+                        <SeancesTypes niveauId={niveauId} series={series} />
                     </>
                 )}
             </div>

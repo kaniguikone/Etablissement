@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
@@ -37,17 +37,19 @@ const NouvelleClasse = () => {
     const [niveaux, setNiveaux]         = useState([]);
     const [enseignants, setEnseignants] = useState([]);
     const [series, setSeries]           = useState([]);
+    const [salles, setSalles]           = useState([]);
     const [classesNiveau, setClassesNiveau] = useState([]); // classes existantes du niveau
     const [nomModifie, setNomModifie]   = useState(false);
     const [form, setForm] = useState({
         num_classe: '', nom_classe: '', abbr_classe: '', niveau_id: '', serie_id: '',
-        salle_classe: '', effectif_max_classe: '', professeur_principal_id: '',
+        salle_classe: '', salle_id: '', effectif_max_classe: '', professeur_principal_id: '',
     });
 
     useEffect(() => {
         api.get('/niveaux').then(r => setNiveaux(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
         api.get('/enseignantsTout').then(r => setEnseignants(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
         api.get('/config-matieres').then(r => setSeries(r.data.series ?? [])).catch(() => {});
+        api.get('/salles', { params: { actif: true } }).then(r => setSalles(r.data)).catch(() => {});
     }, []);
 
     // Recalcule le prochain numéro selon niveau + série
@@ -180,7 +182,19 @@ const NouvelleClasse = () => {
 
                         {/* ── Autres champs ── */}
                         <div className="col-md-4">
-                            <label className="form-label">Salle</label>
+                            <label className="form-label">Salle attitrée <span className="text-muted">(emploi du temps)</span></label>
+                            <select className="form-select form-select-sm" name="salle_id"
+                                value={form.salle_id} onChange={handleChange}>
+                                <option value="">— Aucune —</option>
+                                {salles.map(s => (
+                                    <option key={s.id} value={s.id}>
+                                        {s.nom}{s.capacite ? ` (${s.capacite} pl.)` : ''}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="col-md-4">
+                            <label className="form-label">Salle <span className="text-muted">(libellé libre)</span></label>
                             <input type="text" className="form-control form-control-sm" name="salle_classe"
                                 value={form.salle_classe} onChange={handleChange} placeholder="Ex: Salle A1" />
                         </div>
@@ -189,7 +203,7 @@ const NouvelleClasse = () => {
                             <input type="number" className="form-control form-control-sm" name="effectif_max_classe"
                                 value={form.effectif_max_classe} onChange={handleChange} min="1" />
                         </div>
-                        <div className="col-md-8">
+                        <div className="col-md-12">
                             <label className="form-label">Professeur principal</label>
                             <select className="form-select form-select-sm" name="professeur_principal_id"
                                 value={form.professeur_principal_id} onChange={handleChange}>
