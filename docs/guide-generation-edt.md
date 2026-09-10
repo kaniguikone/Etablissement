@@ -1,6 +1,8 @@
 # Guide — Générer automatiquement les emplois du temps
 
 > Pour le directeur des études / l'administrateur.
+> Checklist courte, à imprimer. Pour le vocabulaire, un parcours détaillé et les
+> situations concrètes, voir le [Guide complet](emploi-du-temps-guide-complet.md).
 > Mis à jour le 2026-09-02.
 
 L'application construit un emploi du temps complet à partir de votre paramétrage,
