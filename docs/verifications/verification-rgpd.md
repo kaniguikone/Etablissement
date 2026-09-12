@@ -94,7 +94,7 @@ tenancy()->initialize(\App\Models\Tenant::find('<id-du-tenant>'));
 echo \Illuminate\Support\Facades\DB::table('users')->whereNotNull('telephone')->first()->telephone;
 "
 ```
-Le résultat doit ressembler à un long texte encodé en base64 (illisible), **pas** à un numéro de téléphone classique. Si un numéro de téléphone est encore lisible en clair dans une colonne censée être chiffrée, il faut relancer `php artisan rgpd:chiffrer-donnees-existantes` (voir `docs/guide-deploiement.md` §9).
+Le résultat doit ressembler à un long texte encodé en base64 (illisible), **pas** à un numéro de téléphone classique. Si un numéro de téléphone est encore lisible en clair dans une colonne censée être chiffrée, il faut relancer `php artisan rgpd:chiffrer-donnees-existantes` (voir `docs/guides/guide-deploiement.md` §9).
 
 - [ ] `users.telephone` : blob chiffré en base, numéro lisible via l'app
 - [ ] `etablissement.telephone` / `telephone2` : idem

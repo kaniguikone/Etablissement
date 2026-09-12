@@ -349,7 +349,7 @@ php artisan rgpd:chiffrer-donnees-existantes
 
 Cette commande chiffre les téléphones `User`/`Etablissement`/`DemandeAcces` déjà en base (le cast Eloquent `encrypted` ne chiffre que ce qui est écrit *après* son activation — les données existantes doivent être migrées explicitement, sans quoi leur lecture échouerait). À exécuter après `tenants:migrate` (élargissement des colonnes) et avant de considérer la fonctionnalité opérationnelle en production.
 
-**Limites connues (périmètre volontairement restreint, voir `docs/roadmap-commerciale.md` §3.4) :** `numero_parent` et `telephone_enseignant` restent en clair (identifiants de connexion) ; l'anonymisation d'un parent ne déprovisionne pas son profil `CentralUser` cross-établissements.
+**Limites connues (périmètre volontairement restreint, voir `docs/produit/roadmap-commerciale.md` §3.4) :** `numero_parent` et `telephone_enseignant` restent en clair (identifiants de connexion) ; l'anonymisation d'un parent ne déprovisionne pas son profil `CentralUser` cross-établissements.
 
 ---
 

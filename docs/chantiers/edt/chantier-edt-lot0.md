@@ -1,7 +1,7 @@
 # Lot 0 — Paramétrage (fondations de la génération d'EDT)
 
 > Plan d'implémentation détaillé — Créé le 2026-08-31 · **Livré et fusionné dans `main` le 2026-09-02** (avec les Lots 1 à 4, commit `be1efbf`).
-> Préalable : `docs/chantier-emploi-du-temps.md`.
+> Préalable : `docs/chantiers/edt/chantier-emploi-du-temps.md`.
 > Ce lot est **purement additif** : aucune régression sur la saisie manuelle, aucune colonne existante supprimée ou renommée.
 
 ---
@@ -379,7 +379,7 @@ Réutilise la logique de `VolumeHoraireController::conformite` pour les affectat
 - [ ] Écran `/DiagnosticEdt` liste correctement les manques sur un établissement partiellement configuré.
 - [ ] `npm run lint` (front) clean ; `location.key` géré sur les nouvelles listes (cf. `project_classes_fix`).
 - [ ] Aucune colonne existante supprimée/renommée ; `salle_classe` toujours lisible.
-- [ ] Section « Lot 0 » ajoutée à `docs/chantier-emploi-du-temps.md` avec le statut ✅.
+- [ ] Section « Lot 0 » ajoutée à `docs/chantiers/edt/chantier-emploi-du-temps.md` avec le statut ✅.
 - [ ] 1 article d'aide in-app par nouvel écran (`HelpArticleSeeder`).
 
 ---

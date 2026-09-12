@@ -27,7 +27,7 @@ class AdminSeeder extends Seeder
                 // Liste explicite (comme les autres rôles ci-dessous) plutôt qu'un raccourci
                 // "toutes sauf X" : une future permission ajoutée à Role::PERMISSIONS ne doit
                 // jamais se retrouver accordée ici par accident (ex. budget_validation, qui
-                // reste un pouvoir distinct de budget_gestion — cf. docs/chantier-budget.md).
+                // reste un pouvoir distinct de budget_gestion — cf. docs/chantiers/budget/chantier-budget.md).
                 'permissions' => [
                     'parametrage', 'inscriptions', 'eleves', 'sante', 'enseignants', 'parents',
                     'pedagogie_saisie', 'pedagogie_pilotage', 'finances_caisse', 'finances_gestion',

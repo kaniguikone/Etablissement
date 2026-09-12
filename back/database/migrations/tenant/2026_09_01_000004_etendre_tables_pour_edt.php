@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 
 /**
  * Extensions additives des tables existantes pour le chantier « génération
- * d'emploi du temps » — Lot 0 (cf. docs/chantier-edt-lot0.md, décision C4 :
+ * d'emploi du temps » — Lot 0 (cf. docs/chantiers/edt/chantier-edt-lot0.md, décision C4 :
  * un seul ALTER groupé plutôt que six migrations add_x_to_y).
  *
  *  - matieres       : famille (regroupement MENET), couleur de fiche,

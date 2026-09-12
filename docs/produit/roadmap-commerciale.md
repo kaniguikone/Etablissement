@@ -215,7 +215,7 @@ Les données d'enfants mineurs sont ultra-sensibles. Même si la réglementation
 
 *Hors ce tableau de priorités initial, plusieurs chantiers non prévus à l'origine ont également été livrés depuis : page d'accueil publique, gestion des demandes d'accès et de la tarification, compte central unifié parent/enseignant, mot de passe initial obligatoire, isolation des sessions par espace, import Excel en masse (5 flux), type d'établissement obligatoire, modules activables par établissement/groupe — voir le tableau « Ce qui est livré et opérationnel » ci-dessus.*
 
-**1.4 Monitoring — détail du partiel (2026-08-16) :** le code est livré (`sentry/sentry-laravel` + `@sentry/react` intégrés, route `/up` de Laravel exposée pour le health check). Reste à faire, hors périmètre code — voir `docs/guide-deploiement.md` §8 : créer les projets Sentry (backend + frontend) et renseigner les DSN en production, créer un compte UptimeRobot et pointer un moniteur sur `/up`.
+**1.4 Monitoring — détail du partiel (2026-08-16) :** le code est livré (`sentry/sentry-laravel` + `@sentry/react` intégrés, route `/up` de Laravel exposée pour le health check). Reste à faire, hors périmètre code — voir `docs/guides/guide-deploiement.md` §8 : créer les projets Sentry (backend + frontend) et renseigner les DSN en production, créer un compte UptimeRobot et pointer un moniteur sur `/up`.
 
 ---
 

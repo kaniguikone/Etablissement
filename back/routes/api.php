@@ -76,7 +76,7 @@ Route::middleware(['auth:sanctum', 'account.type:App\Models\GroupAdmin'])->prefi
 
     // ── Budget (chantier gestion du budget) ────────────────────────────────
     // Lecture ouverte à tout GroupAdmin du groupe ; approuver/rejeter/déléguer
-    // exigent la permission budget_validation (ou super) — cf. docs/chantier-budget.md §3.2.
+    // exigent la permission budget_validation (ou super) — cf. docs/chantiers/budget/chantier-budget.md §3.2.
     Route::get('/budget/dotations', [GroupBudgetController::class, 'index']);
     Route::get('/budget/dashboard', [GroupBudgetController::class, 'dashboard']);
 

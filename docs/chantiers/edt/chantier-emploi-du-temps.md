@@ -10,7 +10,7 @@
 > - Livraison par lots successifs, chacun apportant une valeur autonome.
 >
 > **Avancement :**
-> - **Lot 0 — Paramétrage** : ✅ livré (branche `feat/edt-lot0-parametrage`). Détail : `docs/chantier-edt-lot0.md`.
+> - **Lot 0 — Paramétrage** : ✅ livré (branche `feat/edt-lot0-parametrage`). Détail : `docs/chantiers/edt/chantier-edt-lot0.md`.
 > - **Lot 1 — Catalogue de contraintes + validateur** : ✅ livré (branche `feat/edt-lot1-contraintes`). Table `edt_contraintes` (13 dures + 5 souples), service `App\Services\Edt\Validateur`, endpoint `GET /edt/controle`, écran `/ControleEdt`. Différé au Lot 4 : contraintes groupes parallèles (D15), quinzaine (D16), tandem PC/SVT contigu sans récré (D8, seul « même jour » fait), souples S3/S4/S6/S8/S10.
 > - **Lot 2 — Générateur v1** : ✅ livré (branche `feat/edt-lot2-generateur`). **Choix : heuristique 100 % PHP** (glouton + amélioration locale) plutôt que microservice OR-Tools, pour livrer sans dépendance d'infra ; le moteur est isolé derrière `App\Services\Edt\Generateur` et reste remplaçable. Table `edt_generations` + `emploi_du_temps.generation_id`/`verrouille`, **global scope `officiel`** sur `EmploiDuTemps` (les scénarios sont invisibles des portails), génération synchrone, endpoints `/edt/generations` (CRUD + `publier`), écran `/GenererEdt`.
 > - **Lot 3 — Édition assistée + exports** : ✅ livré (branche `feat/edt-lot3-edition`). Régénération partielle (`creneaux_fixes` dans le Generateur), retouche d'un scénario (`PATCH`/`DELETE` créneau + détection des conflits), exports PDF classe / toutes classes / enseignant / salle (code couleur MENET, `EdtPdfController` + `resources/views/edt/grille.blade.php`), notification des enseignants à la publication, écran `/GenererEdt` enrichi (cellules cliquables, panneau d'édition). Différé : comparaison côte à côte de scénarios (le score + le contrôle suffisent pour l'instant), file d'attente si gros lycées.
@@ -293,7 +293,7 @@ Deux options :
   - entrée : plages, séances à placer, salles, affectations, indisponibilités, créneaux verrouillés, contraintes actives + poids, `time_limit_s`.
   - sortie : `{ statut, score, creneaux: [...], non_places: [...], explications: [...] }`.
 - **Robustesse** : timeout configurable (ex. 60–180 s), renvoie la **meilleure solution partielle** trouvée même si l'optimum n'est pas prouvé.
-- **Déploiement** : même VPS que l'API, port interne non exposé publiquement, appelé via `http://127.0.0.1:8090`. Ajout à `docker-compose` / systemd + au `docs/guide-deploiement.md`.
+- **Déploiement** : même VPS que l'API, port interne non exposé publiquement, appelé via `http://127.0.0.1:8090`. Ajout à `docker-compose` / systemd + au `docs/guides/guide-deploiement.md`.
 
 ### 6.2 Fallback PHP
 

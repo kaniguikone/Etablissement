@@ -98,5 +98,5 @@ Des routes personnalisées existent pour les filtres : `/elevesClasse/{id}`, `/c
 - `src/components/parents/DemandesParents.jsx` : validation admin des demandes d'accès parent
 - `src/components/stats/StatsGenerales.jsx` : formulaire MENET 14 sections + exports
 - Écrans emploi du temps : `edt/GenererEdt.jsx`, `edt/ControleEdt.jsx`, `edt/DiagnosticEdt.jsx`, `edt/GroupesPedagogiques.jsx`, `grille/GrilleHoraire.jsx`, `enseignant/Indisponibilites.jsx`, `volumes/SeancesTypes.jsx` — regroupés dans la sidebar sous le groupe « Emploi du temps » de `Menu.jsx`
-- Chantier EDT documenté : `docs/chantier-emploi-du-temps.md` (architecture) et `docs/chantier-edt-lot0.md`
-- Écrans budget (tenant) : `budget/BudgetDemandes.jsx`, `budget/BudgetDepenses.jsx`, `budget/BudgetTableauBord.jsx`, `budget/BudgetCategories.jsx` — groupe « Budget » de `Menu.jsx`. Écran groupe : `groupe/BudgetGroupe.jsx` (liste consolidée + délégation, dans `MenuGroupe.jsx`). Chantier budget documenté : `docs/chantier-budget.md`.
+- Chantier EDT documenté : `docs/chantiers/edt/chantier-emploi-du-temps.md` (architecture) et `docs/chantiers/edt/chantier-edt-lot0.md`
+- Écrans budget (tenant) : `budget/BudgetDemandes.jsx`, `budget/BudgetDepenses.jsx`, `budget/BudgetTableauBord.jsx`, `budget/BudgetCategories.jsx` — groupe « Budget » de `Menu.jsx`. Écran groupe : `groupe/BudgetGroupe.jsx` (liste consolidée + délégation, dans `MenuGroupe.jsx`). Chantier budget documenté : `docs/chantiers/budget/chantier-budget.md`.
