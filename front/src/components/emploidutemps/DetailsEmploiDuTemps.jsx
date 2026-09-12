@@ -13,6 +13,7 @@ const DetailsEmploiDuTemps = () => {
     const [classes, setClasses]         = useState([]);
     const [matieres, setMatieres]       = useState([]);
     const [enseignants, setEnseignants] = useState([]);
+    const [enseignantsFiltres, setEnseignantsFiltres] = useState([]);
     const [chargement, setChargement]   = useState(false);
 
     const [form, setForm] = useState({
@@ -24,11 +25,24 @@ const DetailsEmploiDuTemps = () => {
         heure_fin:     '',
     });
 
+    // Enseignants filtrés sur la matière choisie (repli sur la liste complète
+    // si personne n'est encore affecté à cette matière).
+    const chargerEnseignantsMatiere = (matiereId, enseignants_) => {
+        if (!matiereId) { setEnseignantsFiltres([]); return; }
+        api.get(`/matiereEnseignants/${matiereId}`)
+            .then((r) => setEnseignantsFiltres(r.data.length ? r.data : enseignants_))
+            .catch(() => setEnseignantsFiltres(enseignants_));
+    };
+
     useEffect(() => {
         api.get('/classesTout').then((r) => setClasses(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
         api.get('/matieres').then((r) => setMatieres(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
-        api.get('/enseignantsTout').then((r) => setEnseignants(r.data)).catch(() => toast.error('Erreur de chargement des données.'));
-        api.get(`/emploiDuTemps/${id}`).then((r) => {
+
+        const toutEnseignants = api.get('/enseignantsTout')
+            .then((r) => { setEnseignants(r.data); return r.data; })
+            .catch(() => { toast.error('Erreur de chargement des données.'); return []; });
+
+        api.get(`/emploiDuTemps/${id}`).then(async (r) => {
             const c = r.data;
             setForm({
                 classe_id:     String(c.classe_id),
@@ -38,10 +52,22 @@ const DetailsEmploiDuTemps = () => {
                 heure_debut:   c.heure_debut.slice(0, 5),
                 heure_fin:     c.heure_fin.slice(0, 5),
             });
+            const tousLesEnseignants = await toutEnseignants;
+            api.get(`/matiereEnseignants/${c.matiere_id}`)
+                .then((r2) => setEnseignantsFiltres(r2.data.length ? r2.data : tousLesEnseignants))
+                .catch(() => setEnseignantsFiltres(tousLesEnseignants));
         }).catch(() => toast.error('Impossible de charger le créneau.'));
     }, [id]);
 
-    const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        if (name === 'matiere_id') {
+            setForm((f) => ({ ...f, matiere_id: value, enseignant_id: '' }));
+            chargerEnseignantsMatiere(value, enseignants);
+            return;
+        }
+        setForm((f) => ({ ...f, [name]: value }));
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -86,9 +112,9 @@ const DetailsEmploiDuTemps = () => {
 
                     <div className="col-md-4">
                         <label className="form-label">Enseignant *</label>
-                        <select className="form-select form-select-sm" name="enseignant_id" value={form.enseignant_id} onChange={handleChange} required>
+                        <select className="form-select form-select-sm" name="enseignant_id" value={form.enseignant_id} onChange={handleChange} required disabled={!form.matiere_id}>
                             <option value="">Sélectionner</option>
-                            {enseignants.map((e) => (
+                            {enseignantsFiltres.map((e) => (
                                 <option key={e.id} value={e.id}>
                                     {e.nom_enseignant} {e.prenoms_enseignant}
                                 </option>

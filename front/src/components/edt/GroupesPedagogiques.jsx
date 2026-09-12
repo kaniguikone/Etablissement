@@ -22,6 +22,7 @@ const GroupesPedagogiques = () => {
     const [classeId, setClasseId] = useState('');
     const [matieres, setMatieres] = useState([]);
     const [enseignants, setEnseignants] = useState([]);
+    const [enseignantsFiltres, setEnseignantsFiltres] = useState([]);
     const [groupes, setGroupes] = useState([]);
     const [form, setForm] = useState(formInitial);
     const [editId, setEditId] = useState(null);
@@ -31,6 +32,16 @@ const GroupesPedagogiques = () => {
         api.get('/matieres').then((r) => setMatieres(r.data)).catch(() => {});
         api.get('/enseignantsTout').then((r) => setEnseignants(r.data)).catch(() => {});
     }, []);
+
+    // Enseignants filtrés sur la matière choisie (repli sur la liste complète
+    // si personne n'est encore affecté à cette matière — même logique que
+    // l'affectation classe/matière/enseignant).
+    const chargerEnseignantsMatiere = (matiereId) => {
+        if (!matiereId) { setEnseignantsFiltres([]); return; }
+        api.get(`/matiereEnseignants/${matiereId}`)
+            .then((r) => setEnseignantsFiltres(r.data.length ? r.data : enseignants))
+            .catch(() => setEnseignantsFiltres(enseignants));
+    };
 
     useEffect(() => {
         setClasses([]); setClasseId('');
@@ -68,6 +79,7 @@ const GroupesPedagogiques = () => {
             parallele_code: g.parallele_code, effectif: g.effectif || '', nb_seances: g.nb_seances || '',
             duree_minutes: g.duree_minutes || 55, semaine: g.semaine || 'toutes',
         });
+        chargerEnseignantsMatiere(g.matiere_id);
     };
 
     const supprimer = async (g) => {
@@ -147,7 +159,11 @@ const GroupesPedagogiques = () => {
                             <div className="col-md-3">
                                 <label className="form-label small">Matière *</label>
                                 <select className="form-select form-select-sm" value={form.matiere_id} required
-                                    onChange={(e) => setForm((f) => ({ ...f, matiere_id: e.target.value }))}>
+                                    onChange={(e) => {
+                                        const matiereId = e.target.value;
+                                        setForm((f) => ({ ...f, matiere_id: matiereId, enseignant_id: '' }));
+                                        chargerEnseignantsMatiere(matiereId);
+                                    }}>
                                     <option value="">—</option>
                                     {matieres.map((m) => <option key={m.id} value={m.id}>{m.libelle_matiere}</option>)}
                                 </select>
@@ -155,9 +171,12 @@ const GroupesPedagogiques = () => {
                             <div className="col-md-3">
                                 <label className="form-label small">Enseignant</label>
                                 <select className="form-select form-select-sm" value={form.enseignant_id}
+                                    disabled={!form.matiere_id}
                                     onChange={(e) => setForm((f) => ({ ...f, enseignant_id: e.target.value }))}>
-                                    <option value="">—</option>
-                                    {enseignants.map((en) => <option key={en.id} value={en.id}>{en.nom_enseignant} {en.prenoms_enseignant}</option>)}
+                                    <option value="">{form.matiere_id ? '—' : 'Choisir d\'abord une matière'}</option>
+                                    {(form.matiere_id ? enseignantsFiltres : []).map((en) => (
+                                        <option key={en.id} value={en.id}>{en.nom_enseignant} {en.prenoms_enseignant}</option>
+                                    ))}
                                 </select>
                             </div>
                             <div className="col-md-1">
