@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useEtablissement } from '../../context/EtablissementContext';
 import api from '../../api/axios';
 
 // Vrai si on est sur le domaine central (localhost pur ou domaine racine en prod)
@@ -12,9 +13,12 @@ const estDomaineCentral = () => {
 
 const LoginPage = () => {
     const { connexion, connexionEnseignant, connexionGroupe, connexionSuperAdmin } = useAuth();
+    const { etablissement } = useEtablissement();
     const navigate = useNavigate();
 
     const domaineCentral = estDomaineCentral();
+    // Logo de l'établissement, disponible sur un sous-domaine tenant (route publique /etablissement)
+    const logoEtab = !domaineCentral ? etablissement?.logo_url : null;
     const [mode, setMode]         = useState(domaineCentral ? 'group' : 'school'); // 'school' | 'group'
     const [email, setEmail]       = useState('');
     const [password, setPassword] = useState('');
@@ -122,14 +126,22 @@ const LoginPage = () => {
 
                     {/* En-tête */}
                     <div className="text-center mb-4">
-                        <div style={{
-                            width: 64, height: 64, borderRadius: '50%',
-                            background: '#1a56a0', display: 'inline-flex',
-                            alignItems: 'center', justifyContent: 'center', marginBottom: 12,
-                        }}>
-                            <i className={`fas ${mode === 'group' ? 'fa-layer-group' : 'fa-school'} text-white`} style={{ fontSize: 26 }} />
-                        </div>
-                        <h4 className="fw-bold mb-1">Suivi Scolaire</h4>
+                        {logoEtab ? (
+                            <img
+                                src={logoEtab}
+                                alt={etablissement?.nom || 'Logo établissement'}
+                                style={{ maxWidth: 120, maxHeight: 80, objectFit: 'contain', marginBottom: 12 }}
+                            />
+                        ) : (
+                            <div style={{
+                                width: 64, height: 64, borderRadius: '50%',
+                                background: '#1a56a0', display: 'inline-flex',
+                                alignItems: 'center', justifyContent: 'center', marginBottom: 12,
+                            }}>
+                                <i className={`fas ${mode === 'group' ? 'fa-layer-group' : 'fa-school'} text-white`} style={{ fontSize: 26 }} />
+                            </div>
+                        )}
+                        <h4 className="fw-bold mb-1">{logoEtab ? etablissement.nom : 'Suivi Scolaire'}</h4>
                         <p className="text-muted small">
                             {domaineCentral ? 'Espace Groupe Scolaire' : 'Espace Administration'}
                         </p>
