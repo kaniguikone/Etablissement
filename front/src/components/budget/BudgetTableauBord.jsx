@@ -13,6 +13,7 @@ export default function BudgetTableauBord() {
     const [solde, setSolde]     = useState(null);
     const [dashboard, setDashboard] = useState(null);
     const [chargement, setChargement] = useState(true);
+    const [exporting, setExporting] = useState('');
 
     useEffect(() => {
         api.get('/annees-scolaires').then(r => {
@@ -35,6 +36,32 @@ export default function BudgetTableauBord() {
 
     const totalCategories = (dashboard?.par_categorie ?? []).reduce((s, c) => s + c.total, 0);
     const totalMois = (dashboard?.par_mois ?? []).reduce((max, m) => Math.max(max, m.total), 0);
+    const anneeLibelle = annees.find(a => String(a.id) === anneeId)?.libelle ?? 'annee';
+
+    const exporter = async (format) => {
+        if (!anneeId) return;
+        setExporting(format);
+        try {
+            const endpoint = format === 'excel' ? '/budget/export-excel' : '/budget/rapport-pdf';
+            const ext      = format === 'excel' ? '.xlsx' : '.pdf';
+            const mime     = format === 'excel'
+                ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                : 'application/pdf';
+
+            const response = await api.get(`${endpoint}?annee_scolaire_id=${anneeId}`, { responseType: 'blob', timeout: 60000 });
+
+            const url  = URL.createObjectURL(new Blob([response.data], { type: mime }));
+            const a    = document.createElement('a');
+            a.href     = url;
+            a.download = `budget_${format === 'excel' ? 'depenses' : 'rapport'}_${anneeLibelle}${ext}`;
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch {
+            toast.error("Erreur lors de l'export.");
+        } finally {
+            setExporting('');
+        }
+    };
 
     return (
         <div className="container-fluid py-4">
@@ -43,9 +70,17 @@ export default function BudgetTableauBord() {
                     <h4 className="mb-0">Tableau de bord budget</h4>
                     <small className="text-muted">Suivi de l&apos;enveloppe budgétaire de l&apos;établissement</small>
                 </div>
-                <select className="form-select form-select-sm" style={{ width: 200 }} value={anneeId} onChange={e => setAnneeId(e.target.value)}>
-                    {annees.map(a => <option key={a.id} value={a.id}>{a.libelle}</option>)}
-                </select>
+                <div className="d-flex align-items-center gap-2">
+                    <select className="form-select form-select-sm" style={{ width: 200 }} value={anneeId} onChange={e => setAnneeId(e.target.value)}>
+                        {annees.map(a => <option key={a.id} value={a.id}>{a.libelle}</option>)}
+                    </select>
+                    <button className="btn btn-outline-success btn-sm" disabled={!anneeId || exporting} onClick={() => exporter('excel')} title="Exporter le registre des dépenses (Excel)">
+                        {exporting === 'excel' ? <span className="spinner-border spinner-border-sm" /> : <><i className="fas fa-file-excel me-1" />Excel</>}
+                    </button>
+                    <button className="btn btn-outline-danger btn-sm" disabled={!anneeId || exporting} onClick={() => exporter('pdf')} title="Exporter le rapport budgétaire (PDF)">
+                        {exporting === 'pdf' ? <span className="spinner-border spinner-border-sm" /> : <><i className="fas fa-file-pdf me-1" />PDF</>}
+                    </button>
+                </div>
             </div>
 
             {chargement ? (

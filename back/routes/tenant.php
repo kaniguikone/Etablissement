@@ -528,6 +528,8 @@ Route::middleware([
             Route::get('/budget/categories-depense', [BudgetCategorieDepenseController::class, 'index']);
             Route::get('/budget/solde',          [BudgetDepenseController::class, 'solde']);
             Route::get('/budget/dashboard',      [BudgetDepenseController::class, 'dashboard']);
+            Route::get('/budget/export-excel',   [BudgetDepenseController::class, 'exportExcel']);
+            Route::get('/budget/rapport-pdf',    [BudgetDepenseController::class, 'rapportPdf']);
         });
 
         Route::middleware(['permission:budget_gestion', 'module:budget_gestion'])->group(function () {
