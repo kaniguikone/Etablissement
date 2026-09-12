@@ -28,6 +28,8 @@ class Role extends Model
         'finances_gestion'   => 'Finances — gestion (scolarités, impayés, échéancier)',
         'communication'      => 'Communication (informations)',
         'utilisateurs'       => 'Gestion des utilisateurs et des rôles',
+        'budget_gestion'     => 'Budget — gestion (demande de dotation, saisie des dépenses)',
+        'budget_validation'  => 'Budget — validation (approbation/rejet des demandes de dotation)',
     ];
 
     public function users()

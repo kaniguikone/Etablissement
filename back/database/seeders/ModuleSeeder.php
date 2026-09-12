@@ -66,6 +66,12 @@ class ModuleSeeder extends Seeder
                 ['slug' => 'finances_gestion.impayes_frais_annexes','label' => 'Impayés frais annexes'],
                 ['slug' => 'finances_gestion.export_comptable',     'label' => 'Export comptable'],
             ]],
+            ['slug' => 'budget_gestion', 'label' => 'Budget', 'enfants' => [
+                ['slug' => 'budget_gestion.demandes',     'label' => 'Demandes de budget'],
+                ['slug' => 'budget_gestion.depenses',     'label' => 'Dépenses'],
+                ['slug' => 'budget_gestion.tableau_bord', 'label' => 'Tableau de bord budget'],
+                ['slug' => 'budget_gestion.categories',   'label' => 'Catégories de dépenses'],
+            ]],
             ['slug' => 'communication', 'label' => 'Communication', 'enfants' => [
                 ['slug' => 'communication.informations', 'label' => 'Informations'],
                 ['slug' => 'communication.messagerie',   'label' => 'Messagerie'],

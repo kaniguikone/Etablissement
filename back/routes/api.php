@@ -13,6 +13,7 @@ use App\Http\Controllers\API\SuperAdmin\ModuleController;
 use App\Http\Controllers\API\Group\GroupAuthController;
 use App\Http\Controllers\API\Group\GroupDashboardController;
 use App\Http\Controllers\API\Group\GroupTenantController;
+use App\Http\Controllers\API\Group\GroupBudgetController;
 use App\Http\Controllers\API\Group\TemplateController;
 use App\Http\Controllers\API\SuperAdmin\SuperAdminTemplateController;
 use App\Http\Controllers\API\SeederController;
@@ -72,6 +73,19 @@ Route::middleware(['auth:sanctum', 'account.type:App\Models\GroupAdmin'])->prefi
     Route::get('/templates/{type}',                               [TemplateController::class, 'show']);
     Route::put('/templates/{type}',                               [TemplateController::class, 'update']);
     Route::post('/ecoles/{tenantId}/apply-template',              [TemplateController::class, 'appliquer']);
+
+    // ── Budget (chantier gestion du budget) ────────────────────────────────
+    // Lecture ouverte à tout GroupAdmin du groupe ; approuver/rejeter/déléguer
+    // exigent la permission budget_validation (ou super) — cf. docs/chantier-budget.md §3.2.
+    Route::get('/budget/dotations', [GroupBudgetController::class, 'index']);
+    Route::get('/budget/dashboard', [GroupBudgetController::class, 'dashboard']);
+
+    Route::middleware('group.permission:budget_validation')->group(function () {
+        Route::put('/ecoles/{tenantId}/budget/dotations/{id}/approuver', [GroupBudgetController::class, 'approuver']);
+        Route::put('/ecoles/{tenantId}/budget/dotations/{id}/rejeter',   [GroupBudgetController::class, 'rejeter']);
+        Route::get('/ecoles/{tenantId}/budget/delegables',               [GroupBudgetController::class, 'delegables']);
+        Route::put('/ecoles/{tenantId}/budget/delegation',               [GroupBudgetController::class, 'toggleDelegation']);
+    });
 });
 
 // ─── Auth Super-Admin ────────────────────────────────────────────────────────

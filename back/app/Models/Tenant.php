@@ -32,6 +32,9 @@ class Tenant extends BaseTenant implements TenantWithDatabase
             'actif',
             'date_expiration',
             'group_id',
+            'budget_delegation_active',
+            'budget_delegue_user_id',
+            'budget_delegue_nom',
         ];
     }
 
@@ -80,9 +83,10 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     }
 
     protected $casts = [
-        'actif'           => 'boolean',
-        'date_expiration' => 'date:Y-m-d',
-        'data'            => 'array',
+        'actif'                     => 'boolean',
+        'date_expiration'           => 'date:Y-m-d',
+        'data'                      => 'array',
+        'budget_delegation_active'  => 'boolean',
     ];
 
     protected $fillable = [
@@ -96,6 +100,9 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         'actif',
         'date_expiration',
         'group_id',
+        'budget_delegation_active',
+        'budget_delegue_user_id',
+        'budget_delegue_nom',
     ];
 
     // Forcer la clé primaire en string non auto-incrémentée

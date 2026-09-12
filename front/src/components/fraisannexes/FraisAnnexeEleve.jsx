@@ -19,7 +19,7 @@ export default function FraisAnnexeEleve() {
     const { eleveId }           = useParams();
     const navigate              = useNavigate();
     const { toast }             = useToast();
-    const { confirm }           = useConfirm();
+    const { confirmer }         = useConfirm();
     const [annees, setAnnees]   = useState([]);
     const [annee, setAnnee]     = useState('');
     const [data, setData]       = useState(null);
@@ -83,9 +83,8 @@ export default function FraisAnnexeEleve() {
     };
 
     const supprimerPaiement = async (p) => {
-        const ok = await confirm(
-            `Supprimer ce paiement de ${Number(p.montant_paye).toLocaleString('fr-FR')} FCFA ?`,
-            'Cette action est irréversible.'
+        const ok = await confirmer(
+            `Supprimer ce paiement de ${Number(p.montant_paye).toLocaleString('fr-FR')} FCFA ? Cette action est irréversible.`
         );
         if (!ok) return;
         try {

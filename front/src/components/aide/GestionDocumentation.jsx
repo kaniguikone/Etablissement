@@ -23,7 +23,7 @@ const FORM_VIDE = {
 
 export default function GestionDocumentation() {
     const { toast }               = useToast();
-    const { confirm }             = useConfirm();
+    const { confirmer }           = useConfirm();
     const [articles, setArticles] = useState([]);
     const [modules, setModules]   = useState({});
     const [filtreModule, setFiltreModule] = useState('');
@@ -98,7 +98,7 @@ export default function GestionDocumentation() {
     };
 
     const supprimer = async (a) => {
-        const ok = await confirm(`Supprimer « ${a.titre} » ?`, 'Cette action est irréversible.');
+        const ok = await confirmer(`Supprimer « ${a.titre} » ? Cette action est irréversible.`);
         if (!ok) return;
         try {
             await api.delete(`/help/${a.id}`);

@@ -124,6 +124,11 @@ const NouveauRole = lazy(() => import('../components/roles/NouveauRole'));
 const AuditLogs = lazy(() => import('../components/audit/AuditLogs'));
 const RapportMinistere = lazy(() => import('../components/rapports/RapportMinistere'));
 const FraisAnnexesConfig = lazy(() => import('../components/fraisannexes/FraisAnnexesConfig'));
+const BudgetDemandes    = lazy(() => import('../components/budget/BudgetDemandes'));
+const BudgetDepenses    = lazy(() => import('../components/budget/BudgetDepenses'));
+const BudgetCategories  = lazy(() => import('../components/budget/BudgetCategories'));
+const BudgetTableauBord = lazy(() => import('../components/budget/BudgetTableauBord'));
+const BudgetGroupe      = lazy(() => import('../components/groupe/BudgetGroupe'));
 const ImpayesFraisAnnexes = lazy(() => import('../components/fraisannexes/ImpayesFraisAnnexes'));
 const FraisAnnexeEleve = lazy(() => import('../components/fraisannexes/FraisAnnexeEleve'));
 const ExportComptable = lazy(() => import('../components/comptabilite/ExportComptable'));
@@ -164,6 +169,7 @@ const R_PEDAGO_SAISIE    = ['pedagogie_saisie'];
 const R_PEDAGO_PILOTAGE  = ['pedagogie_pilotage'];
 const R_FINANCES_CAISSE  = ['finances_caisse', 'finances_gestion'];
 const R_FINANCES_GESTION = ['finances_gestion'];
+const R_BUDGET            = ['budget_gestion', 'budget_validation'];
 const R_COMM             = ['communication'];
 const R_ADMIN            = ['utilisateurs'];
 
@@ -220,6 +226,7 @@ const RoutesMenu = () => (
             <Route path="/groupe/eleves"          element={<PrivateRoute><ActivitesEleves /></PrivateRoute>} />
             <Route path="/groupe/templates"           element={<PrivateRoute><GestionTemplates /></PrivateRoute>} />
             <Route path="/groupe/templates/:type"     element={<PrivateRoute><EditionTemplate /></PrivateRoute>} />
+            <Route path="/groupe/budget"              element={<PrivateRoute><BudgetGroupe /></PrivateRoute>} />
 
             {/* Tableau de bord */}
             <Route path="/accueil" element={<PrivateRoute><Accueil /></PrivateRoute>} />
@@ -348,6 +355,12 @@ const RoutesMenu = () => (
             <Route path="/ImpayesFraisAnnexes"  element={<PrivateRoute permissions={R_FINANCES_GESTION} modules={['finances_gestion.impayes_frais_annexes']}><ImpayesFraisAnnexes /></PrivateRoute>} />
             <Route path="/FraisAnnexeEleve/:eleveId" element={<PrivateRoute permissions={R_FINANCES_CAISSE} modules={['finances_gestion.frais_annexes']}><FraisAnnexeEleve /></PrivateRoute>} />
             <Route path="/ExportComptable"       element={<PrivateRoute permissions={R_FINANCES_GESTION} modules={['finances_gestion.export_comptable']}><ExportComptable /></PrivateRoute>} />
+
+            {/* Budget */}
+            <Route path="/BudgetDemandes"    element={<PrivateRoute permissions={R_BUDGET} modules={['budget_gestion.demandes']}><BudgetDemandes /></PrivateRoute>} />
+            <Route path="/BudgetDepenses"    element={<PrivateRoute permissions={R_BUDGET} modules={['budget_gestion.depenses']}><BudgetDepenses /></PrivateRoute>} />
+            <Route path="/BudgetTableauBord" element={<PrivateRoute permissions={R_BUDGET} modules={['budget_gestion.tableau_bord']}><BudgetTableauBord /></PrivateRoute>} />
+            <Route path="/BudgetCategories"  element={<PrivateRoute permissions={R_BUDGET} modules={['budget_gestion.categories']}><BudgetCategories /></PrivateRoute>} />
 
             {/* Finances — caisse */}
             <Route path="/Paiements"           element={<PrivateRoute permissions={R_FINANCES_CAISSE} modules={['finances_caisse.historique']}><ListePaiements /></PrivateRoute>} />

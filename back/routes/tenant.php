@@ -70,6 +70,9 @@ use App\Http\Controllers\API\AuditController;
 use App\Http\Controllers\API\RapportMinistereController;
 use App\Http\Controllers\API\FraisAnnexeController;
 use App\Http\Controllers\API\ExportComptableController;
+use App\Http\Controllers\API\BudgetDotationController;
+use App\Http\Controllers\API\BudgetDepenseController;
+use App\Http\Controllers\API\BudgetCategorieDepenseController;
 use App\Http\Controllers\API\HelpArticleController;
 use App\Http\Controllers\API\ParentRegistrationController;
 use App\Http\Controllers\API\StatsGeneralesController;
@@ -513,6 +516,42 @@ Route::middleware([
             Route::delete('/paiements-frais-annexes/{id}',    [FraisAnnexeController::class, 'supprimerPaiement']);
             Route::get('/paiements-frais-annexes/{id}/recu',  [FraisAnnexeController::class, 'recu']);
             Route::post('/paiements-frais-annexes/initier',   [CinetPayController::class,    'initierFraisAnnexe']);
+        });
+
+        // ── Budget (chantier gestion du budget de l'établissement) ─────────────
+        // Lecture ouverte aux deux permissions ; les actions d'écriture sont
+        // scindées ci-dessous (demande/dépense = budget_gestion, validation = budget_validation).
+        Route::middleware(['permission:budget_gestion,budget_validation', 'module:budget_gestion'])->group(function () {
+            Route::get('/budget/dotations',      [BudgetDotationController::class, 'index']);
+            Route::get('/budget/peut-valider',   [BudgetDotationController::class, 'peutValider']);
+            Route::get('/budget/depenses',       [BudgetDepenseController::class, 'index']);
+            Route::get('/budget/categories-depense', [BudgetCategorieDepenseController::class, 'index']);
+            Route::get('/budget/solde',          [BudgetDepenseController::class, 'solde']);
+            Route::get('/budget/dashboard',      [BudgetDepenseController::class, 'dashboard']);
+        });
+
+        Route::middleware(['permission:budget_gestion', 'module:budget_gestion'])->group(function () {
+            Route::post('/budget/dotations',              [BudgetDotationController::class, 'store']);
+            Route::put('/budget/dotations/{id}',           [BudgetDotationController::class, 'update']);
+            Route::delete('/budget/dotations/{id}',        [BudgetDotationController::class, 'destroy']);
+            Route::put('/budget/dotations/{id}/soumettre', [BudgetDotationController::class, 'soumettre']);
+
+            Route::apiResource('/budget/depenses', BudgetDepenseController::class)->except(['index', 'show']);
+        });
+
+        Route::middleware(['permission:budget_validation', 'module:budget_gestion'])->group(function () {
+            Route::post('/budget/categories-depense',        [BudgetCategorieDepenseController::class, 'store']);
+            Route::put('/budget/categories-depense/{id}',    [BudgetCategorieDepenseController::class, 'update']);
+            Route::delete('/budget/categories-depense/{id}', [BudgetCategorieDepenseController::class, 'destroy']);
+        });
+
+        // Approbation/rejet : pas de middleware permission:budget_validation ici — l'établissement
+        // peut appartenir à un groupe, auquel cas c'est l'identité exacte de la personne désignée
+        // par la DG (tenants.budget_delegue_user_id) qui autorise l'action, pas un rôle local.
+        // Le contrôleur fait toute la vérification (BudgetDotationController::refuserSiApprobationNonAutorisee).
+        Route::middleware(['module:budget_gestion'])->group(function () {
+            Route::put('/budget/dotations/{id}/approuver', [BudgetDotationController::class, 'approuver']);
+            Route::put('/budget/dotations/{id}/rejeter',   [BudgetDotationController::class, 'rejeter']);
         });
 
         Route::middleware(['permission:finances_caisse,finances_gestion', 'module:finances_caisse,finances_gestion'])->group(function () {

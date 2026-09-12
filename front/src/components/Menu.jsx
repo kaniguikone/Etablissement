@@ -141,6 +141,20 @@ const GROUPES = [
         ],
     },
 
+    // ── Budget ────────────────────────────────────────────────────────────────
+    {
+        label: 'Budget',
+        icon: 'fas fa-hand-holding-usd',
+        permissions: ['budget_gestion', 'budget_validation'],
+        moduleSlug: 'budget_gestion',
+        items: [
+            { to: '/BudgetDemandes',     icon: 'fas fa-file-invoice-dollar', label: 'Demandes de budget', moduleSlug: 'budget_gestion.demandes' },
+            { to: '/BudgetDepenses',     icon: 'fas fa-money-check-alt',     label: 'Dépenses',            moduleSlug: 'budget_gestion.depenses' },
+            { to: '/BudgetTableauBord',  icon: 'fas fa-chart-pie',           label: 'Tableau de bord',     moduleSlug: 'budget_gestion.tableau_bord' },
+            { to: '/BudgetCategories',   icon: 'fas fa-tags',                label: 'Catégories de dépenses', moduleSlug: 'budget_gestion.categories' },
+        ],
+    },
+
     // ── Communication ────────────────────────────────────────────────────────
     {
         label: 'Communication',

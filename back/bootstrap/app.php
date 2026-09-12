@@ -16,10 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->prepend(\Illuminate\Http\Middleware\HandleCors::class);
         $middleware->alias([
-            'permission'     => \App\Http\Middleware\CheckRole::class,
-            'tenant.active'  => \App\Http\Middleware\CheckTenantActive::class,
-            'account.type'   => \App\Http\Middleware\EnsureAccountType::class,
-            'module'         => \App\Http\Middleware\EnsureModuleActive::class,
+            'permission'       => \App\Http\Middleware\CheckRole::class,
+            'tenant.active'    => \App\Http\Middleware\CheckTenantActive::class,
+            'account.type'     => \App\Http\Middleware\EnsureAccountType::class,
+            'module'           => \App\Http\Middleware\EnsureModuleActive::class,
+            'group.permission' => \App\Http\Middleware\CheckGroupPermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

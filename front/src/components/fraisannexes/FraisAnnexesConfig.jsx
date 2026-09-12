@@ -29,7 +29,7 @@ const VIDE = { nom: '', categorie: 'autre', montant: '', annee: '', niveau_id: '
 
 export default function FraisAnnexesConfig() {
     const { toast }         = useToast();
-    const { confirm }       = useConfirm();
+    const { confirmer }     = useConfirm();
     const [frais, setFrais] = useState([]);
     const [niveaux, setNiveaux] = useState([]);
     const [annees, setAnnees]   = useState([]);
@@ -117,7 +117,7 @@ export default function FraisAnnexesConfig() {
     };
 
     const supprimer = async (f) => {
-        const ok = await confirm(`Supprimer « ${f.nom} » ?`, 'Cette action est irréversible.');
+        const ok = await confirmer(`Supprimer « ${f.nom} » ? Cette action est irréversible.`);
         if (!ok) return;
         try {
             await api.delete(`/frais-annexes/${f.id}`);

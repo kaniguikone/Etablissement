@@ -60,6 +60,8 @@ Les entités principales sont : `Eleve`, `SanteEleve`, `Enseignant`, `Classe`, `
 
 Entités emploi du temps (chantier EDT, `back/app/Services/Edt/`) : `PlageHoraire` (grille horaire), `SeanceType` (découpage des volumes, rattaché à `NiveauMatiere`), `EnseignantIndisponibilite`, `EdtContrainte` (catalogue des règles MENET), `EdtGeneration` (scénario généré), `GroupePedagogique` (LV2 / dédoublements). Services : `Generateur` (heuristique de génération, isolé et remplaçable), `Validateur` (contrôle vs règles MENET).
 
+Entités budget (chantier budget, tenant) : `BudgetDotation` (demande → octroi, statuts `brouillon`/`soumise`/`approuvee`/`rejetee`, `validee_par_type` polymorphe `group_admin`/`user`), `BudgetDepense` (imputée à l'enveloppe de l'année scolaire, solde calculé à la volée via `BudgetDepense::soldeDisponible()`, jamais stocké), `BudgetCategorieDepense` (référentiel). Côté central (hors tenant) : `Tenant.budget_delegation_active`/`budget_delegue_user_id`/`budget_delegue_nom` (délégation d'approbation nominative par la DG de groupe) et `GroupAdmin.super`/`permissions` (permissions de groupe, catalogue `GroupAdmin::PERMISSIONS`). Contrôleur central `GroupBudgetController` (`back/app/Http/Controllers/API/Group/`) pour la vue consolidée multi-établissements.
+
 Relations clés :
 - Un `Eleve` appartient à une `Classe`, peut avoir un `Parents` et une fiche `SanteEleve` (1-1)
 - Une `Classe` appartient à un `Niveau` et peut avoir plusieurs `Enseignant` ; `salle_id` = salle attitrée
@@ -82,6 +84,8 @@ Routes statistiques : `/stats/generales`, `/stats/generales/export-excel`, `/sta
 
 Routes emploi du temps : `/plages-horaires`, `/groupes-pedagogiques`, `/seances-types/{niveau_id}`, `/enseignants/{id}/indisponibilites`, `/edt/diagnostic-prerequis`, `/edt/contraintes` (+ `PUT {code}`), `/edt/controle`, `/edt/generations` (CRUD + `/{id}/publier`, `/{id}/regenerer`, `/{id}/creneaux/{cid}`), `/edt/{ref}/pdf/...` (`ref` = `officiel` ou id de scénario).
 
+Routes budget : `/budget/dotations` (CRUD + `/{id}/soumettre`, `/{id}/approuver`, `/{id}/rejeter`, `/peut-valider`), `/budget/depenses` (CRUD + upload justificatif), `/budget/categories-depense`, `/budget/solde`, `/budget/dashboard`. Côté groupe (`back/routes/api.php`, préfixe `/api/group`, middleware `account.type:App\Models\GroupAdmin`) : `/budget/dotations`, `/budget/dashboard`, `/ecoles/{tenantId}/budget/dotations/{id}/approuver|rejeter`, `/ecoles/{tenantId}/budget/delegables`, `/ecoles/{tenantId}/budget/delegation`.
+
 Des routes personnalisées existent pour les filtres : `/elevesClasse/{id}`, `/classesNiveaux/{id}`, `/classeEnseignants/{id}`, etc.
 
 ## Structure du frontend
@@ -95,3 +99,4 @@ Des routes personnalisées existent pour les filtres : `/elevesClasse/{id}`, `/c
 - `src/components/stats/StatsGenerales.jsx` : formulaire MENET 14 sections + exports
 - Écrans emploi du temps : `edt/GenererEdt.jsx`, `edt/ControleEdt.jsx`, `edt/DiagnosticEdt.jsx`, `edt/GroupesPedagogiques.jsx`, `grille/GrilleHoraire.jsx`, `enseignant/Indisponibilites.jsx`, `volumes/SeancesTypes.jsx` — regroupés dans la sidebar sous le groupe « Emploi du temps » de `Menu.jsx`
 - Chantier EDT documenté : `docs/chantier-emploi-du-temps.md` (architecture) et `docs/chantier-edt-lot0.md`
+- Écrans budget (tenant) : `budget/BudgetDemandes.jsx`, `budget/BudgetDepenses.jsx`, `budget/BudgetTableauBord.jsx`, `budget/BudgetCategories.jsx` — groupe « Budget » de `Menu.jsx`. Écran groupe : `groupe/BudgetGroupe.jsx` (liste consolidée + délégation, dans `MenuGroupe.jsx`). Chantier budget documenté : `docs/chantier-budget.md`.

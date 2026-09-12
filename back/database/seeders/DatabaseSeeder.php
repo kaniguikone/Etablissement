@@ -357,6 +357,7 @@ class DatabaseSeeder extends Seeder
         $this->call(SanctionSeeder::class);
         $this->call(GroupSeeder::class);
         $this->call(ModuleSeeder::class);
+        $this->call(BudgetCategorieDepenseSeeder::class);
         $this->call(HelpArticleSeeder::class);
         $this->call(EdtContrainteSeeder::class);
     }
