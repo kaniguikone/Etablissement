@@ -255,12 +255,13 @@ cours ordinaires ressortent **sans salle**.
 
 ### Étape 4 — Ranger les matières par famille
 
-**Où :** Paramétrage → **Config. matières/niveaux** → bloc « Affectation rapide
-des familles »
+**Où :** Paramétrage → **Matières** → ouvrez la fiche de chaque matière
+(champ **Famille**, tout en bas du formulaire)
 
 **Ce que vous faites :** vous attribuez une **famille** à chaque matière
 (Français, Maths, Histoire-Géographie, Physique-Chimie, SVT, EPS, Anglais,
-LV2…).
+LV2…), **une matière à la fois** — il n'existe pas d'écran pour le faire en
+une seule fois pour toutes les matières.
 
 **Pourquoi :** c'est la famille qui porte les règles (EPS hors heures chaudes,
 Histoire-Géo jamais deux heures de suite, tandem PC/SVT) et la couleur sur les
@@ -567,8 +568,8 @@ PRÉPARER (une fois par an, par établissement)
  1. Grille horaire           Emploi du temps → Grille horaire
  2. Salles                   Paramétrage → Salles
  3. Salle attitrée + effectif Paramétrage → Classes
- 4. Familles de matières     Paramétrage → Config. matières/niveaux
- 5. Matières particulières   Paramétrage → Matières
+ 4. Familles de matières     Paramétrage → Matières → fiche de chaque matière
+ 5. Matières particulières   Paramétrage → Matières → fiche de chaque matière
  6. Volumes & séances        Paramétrage → Volumes & séances
  7. Affectations             Enseignants → Affectations
  8. Groupes (si LV2/dédoubl.) Emploi du temps → Groupes pédagogiques

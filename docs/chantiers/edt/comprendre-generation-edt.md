@@ -392,11 +392,13 @@ Pour **chaque classe** :
 > Commande utile pour rapprocher salles et classes existantes :
 > `php artisan edt:reconcilier-salles` (simulation) puis `--apply`.
 
-#### 5.0.3 Familles de matières — *Paramétrage → Config. matières/niveaux*
+#### 5.0.3 Familles de matières — *Paramétrage → Matières → fiche de la matière*
 
-Bloc **« Affectation rapide des familles »**. Chaque matière **doit** avoir une
-famille parmi : Français, Mathématiques, Histoire-Géographie, Anglais, LV2,
-Philosophie, Physique-Chimie, SVT, EPS, EDHC, Arts / Éduc. musicale, TIC…
+Champ **Famille** (section « Paramétrage emploi du temps » du formulaire, réglage
+**une matière à la fois** — il n'y a pas d'écran de saisie groupée). Chaque
+matière **doit** avoir une famille parmi : Français, Mathématiques,
+Histoire-Géographie, Anglais, LV2, Philosophie, Physique-Chimie, SVT, EPS,
+EDHC, Arts / Éduc. musicale, TIC…
 
 La **famille** porte :
 
@@ -563,7 +565,7 @@ Aucune action, aucune écriture — juste un contrôle.
 | Bloc | Vert quand… | Rouge = aller corriger… |
 | --- | --- | --- |
 | Grille horaire | ≥ 4 plages de cours | *Grille horaire* |
-| Familles de matières | Toutes les matières ont une famille | *Config. matières/niveaux* |
+| Familles de matières | Toutes les matières ont une famille | *Matières → fiche de la matière* |
 | Salles attitrées | Toutes les classes ont une `salle_id` | *Classes → fiche* |
 | Capacité des salles | Salle ≥ effectif pour chaque classe | *Salles* ou *Classes* |
 | Affectations enseignants | Aucune matière **obligatoire** sans prof | *Enseignants → Affectations* |
@@ -678,8 +680,8 @@ une séance). C'est la version « tableau de bord » de la règle `VOLUME_HORAIR
 1. Grille horaire            (semaine type : plages cours / récré / pause)
 2. Salles                    (+ type + capacité)
 3. Classes                   (salle attitrée + effectif)
-4. Familles de matières      (Config. matières/niveaux)
-5. Matières                  (type de salle requis + effort soutenu)
+4. Familles de matières      (Matières → fiche, une matière à la fois)
+5. Matières                  (même fiche : type de salle requis + effort soutenu)
 6. Volumes & séances         (volume → découpage en séances-types)
 7. Affectations              (chaque (classe, matière) → un prof)
 8. Groupes pédagogiques      (si LV2 / dédoublements)

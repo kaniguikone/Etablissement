@@ -12,7 +12,7 @@ Fusionné dans `main` (branche d'origine `feat/edt-lot0-parametrage`, puis empil
 
 | Sous-lot | Backend + tests | Frontend | Statut |
 | --- | --- | --- | --- |
-| 0.1 Familles + couleur MENET | ✅ (`/matieres/familles`, `MatiereFamilleSeeder`) | ✅ `ChampsEdtMatiere` sur les formulaires matière | ✅ (assistant en masse `/ConfigMatieres` → couvert par `db:seed --class=MatiereFamilleSeeder`) |
+| 0.1 Familles + couleur MENET | ✅ (`/matieres/familles`, `MatiereFamilleSeeder`) | ✅ `ChampsEdtMatiere` sur les formulaires matière (une matière à la fois) | ✅ pour la saisie manuelle ; ⚠️ assistant en masse sur `/ConfigMatieres` **non construit** — descopé au profit du seul `MatiereFamilleSeeder` (voir note 2026-09-13 plus bas) |
 | 0.2 Grille horaire | ✅ `PlageHoraireController` | ✅ `/GrilleHoraire` | ✅ |
 | 0.3 Salle attitrée | ✅ `classes.salle_id` + commande `edt:reconcilier-salles` | ✅ select dans les 2 formulaires classe | ✅ |
 | 0.4 Séances-types | ✅ endpoints + `generer` + `SeanceTypeSeeder` | ✅ `SeancesTypes` sous `/VolumeHoraire` | ✅ |
@@ -106,15 +106,18 @@ Table de correspondance famille → couleur MENET (note P3) :
 **Backend** : `MatiereController::store/update` acceptent les 4 champs. Nouveau `MatiereController::familles()` → `GET /matieres/familles` (référentiel pour les selects).
 
 **Front** :
-- Formulaire matière (`/Matieres`) : select Famille (pré-remplit la couleur, modifiable), select Type de salle requis, case « effort soutenu ».
-- `/ConfigMatieres` : bloc « Affectation rapide des familles » — liste des matières sans famille, suggestion automatique par `abbr_matiere` (`CFR/OTG/OFR→francais`, `SPC/SPHY→pc`, `MATHS→maths`, `HG→hist_geo`, `SVT→svt`, `ANG→anglais`, `ESP/ALL→lv2`, `EPS→eps`, `PHILO→philo`, `EDHC→edhc`, `ARTS/MUS/EM/TM→arts_em`, `TIC→tic`), validation en un clic.
+- Formulaire matière (`/Matieres` → fiche) : select Famille (pré-remplit la couleur, modifiable), select Type de salle requis, case « effort soutenu ». Réglage **une matière à la fois**.
+- ⚠️ **Correction (2026-09-13) :** le bloc « Affectation rapide des familles » prévu ci-dessous sur `/ConfigMatieres` (liste des matières sans famille + suggestion en un clic) **n'a finalement pas été construit côté front** — seul le `MatiereFamilleSeeder` (backend) fait cette suggestion en masse, à la mise en place d'un tenant. Un directeur qui veut ranger ses matières par famille après coup doit le faire fiche par fiche. Voir `docs/chantiers/edt/emploi-du-temps-guide-complet.md` (Étape 4) pour la procédure réelle.
 
 **Seeder** (tenants existants) : `MatiereFamilleSeeder` — applique le mapping par `abbr_matiere`, laisse `null` si ambigu.
 
-**Tests** :
-- `matiere_accepte_famille_et_couleur`
-- `familles_endpoint_retourne_le_referentiel`
-- `config_matieres_suggere_les_familles_par_abbr`
+**Tests** (voir `back/tests/Feature/MatiereEdtTest.php`, 6 tests) :
+- `creation_matiere_sans_champs_edt_reste_possible`
+- `creation_matiere_avec_champs_edt`
+- `famille_invalide_rejetee`
+- `mise_a_jour_ajoute_les_champs_edt`
+- `endpoint_familles_retourne_le_referentiel`
+- `seeder_familles_deduit_la_famille_depuis_abbr`
 
 ---
 
