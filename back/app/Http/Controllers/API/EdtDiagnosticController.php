@@ -8,6 +8,7 @@ use App\Models\EnseignantIndisponibilite;
 use App\Models\Matiere;
 use App\Models\NiveauMatiere;
 use App\Models\PlageHoraire;
+use App\Models\VolumeHoraire;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -105,15 +106,31 @@ class EdtDiagnosticController extends Controller
 
     private function seances(): array
     {
-        $total = NiveauMatiere::count();
-        if ($total === 0) {
+        $tousNM = NiveauMatiere::withCount('seancesTypes')->get(['id', 'niveau_id', 'matiere_id']);
+        if ($tousNM->isEmpty()) {
             return [false, 'Aucun programme (niveau/matières) configuré'];
         }
-        $sansSeance = NiveauMatiere::doesntHave('seancesTypes')->count();
+
+        $volumes = VolumeHoraire::get(['niveau_id', 'matiere_id', 'heures_semaine'])
+            ->keyBy(fn ($v) => $v->niveau_id.'_'.$v->matiere_id);
+
+        // Une matière à volume horaire nul (ex. « Conduite », notée sur le
+        // bulletin mais jamais programmée) n'a rien à découper en séances —
+        // le générateur l'ignore aussi silencieusement (cf.
+        // Generateur::construireBesoins, qui passe les matières < 1 h/semaine).
+        $aProgrammer = $tousNM->filter(
+            fn ($nm) => (float) ($volumes->get($nm->niveau_id.'_'.$nm->matiere_id)?->heures_semaine ?? 0) >= 1
+        );
+
+        if ($aProgrammer->isEmpty()) {
+            return [true, 'Aucune matière à volume horaire non nul dans le programme'];
+        }
+
+        $sansSeance = $aProgrammer->where('seances_types_count', 0)->count();
 
         return $sansSeance === 0
             ? [true, 'Découpage en séances défini pour tout le programme']
-            : [false, "{$sansSeance}/{$total} matière(s) du programme sans découpage en séances"];
+            : [false, "{$sansSeance}/{$aProgrammer->count()} matière(s) du programme sans découpage en séances"];
     }
 
     private function groupes(): array

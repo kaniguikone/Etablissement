@@ -245,4 +245,35 @@ class EdtParametrageTest extends TestCase
         $diag = $this->getJson('/api/edt/diagnostic-prerequis')->assertStatus(200);
         $this->assertTrue($diag->json('pret'), 'Diagnostic devrait être prêt : '.json_encode($diag->json('blocs')));
     }
+
+    /**
+     * Une matière à volume horaire nul (ex. « Conduite », notée sur le bulletin
+     * mais jamais programmée) n'a rien à découper en séances : le diagnostic ne
+     * doit pas la compter, comme le générateur qui l'ignore silencieusement.
+     */
+    /** @test */
+    public function diagnostic_seances_ignore_les_matieres_a_volume_nul(): void
+    {
+        $niveau = Niveau::create(['nom_niveau' => '6ème', 'abbr_niveau' => '6e']);
+        $conduite = Matiere::create(['abbr_matiere' => 'CDT', 'libelle_matiere' => 'Conduite', 'description_matiere' => 'x']);
+        $nm = NiveauMatiere::create(['niveau_id' => $niveau->id, 'matiere_id' => $conduite->id, 'obligatoire' => true, 'coefficient' => 1]);
+        VolumeHoraire::create(['niveau_id' => $niveau->id, 'matiere_id' => $conduite->id, 'heures_semaine' => 0, 'semaines_annee' => 32]);
+
+        $diag = $this->getJson('/api/edt/diagnostic-prerequis')->assertStatus(200);
+        $bloc = collect($diag->json('blocs'))->firstWhere('code', 'seances');
+        $this->assertTrue($bloc['ok'], 'Une matière à 0 h/semaine ne devrait pas bloquer le diagnostic : '.$bloc['detail']);
+
+        // Si en revanche elle a un vrai volume, elle doit être comptée.
+        VolumeHoraire::where(['niveau_id' => $niveau->id, 'matiere_id' => $conduite->id])->update(['heures_semaine' => 1]);
+        $diag = $this->getJson('/api/edt/diagnostic-prerequis')->assertStatus(200);
+        $bloc = collect($diag->json('blocs'))->firstWhere('code', 'seances');
+        $this->assertFalse($bloc['ok']);
+        $this->assertStringContainsString('1/1', $bloc['detail']);
+
+        // Et si on lui définit un découpage, le diagnostic redevient vert.
+        \App\Models\SeanceType::create(['niveau_matiere_id' => $nm->id, 'duree_minutes' => 55, 'nb_seances' => 1]);
+        $diag = $this->getJson('/api/edt/diagnostic-prerequis')->assertStatus(200);
+        $bloc = collect($diag->json('blocs'))->firstWhere('code', 'seances');
+        $this->assertTrue($bloc['ok']);
+    }
 }
