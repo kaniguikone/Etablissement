@@ -59,16 +59,22 @@ Puis, pour **chaque classe** (*Paramétrage → Classes → fiche de la classe*)
 
 ### 3. Familles de matières
 
-*Menu : **Paramétrage → Matières*** → ouvrez la fiche de chaque matière
-(champ **Famille**, en bas du formulaire, section « Paramétrage emploi du temps »)
+*Menu : **Paramétrage → Matières***
 
 Chaque matière doit avoir une **famille** : Français, Mathématiques,
 Histoire-Géographie, Anglais, LV2, Philosophie, Physique-Chimie, SVT, EPS,
 EDHC, Arts/Éduc. musicale, TIC. C'est la famille qui porte les règles MENET
 (2 h consécutives, tandem PC/SVT, HG jamais 2 h…) et le **code couleur** des
-fiches. Ce réglage se fait **une matière à la fois** (pas d'écran de saisie groupée).
+fiches.
 
-Sur la même fiche, renseignez aussi :
+La liste des matières affiche une colonne **Famille**. Si plusieurs matières
+n'en ont pas encore, un bouton **« Affectation rapide des familles »**
+apparaît en haut de l'écran (avec le nombre concerné) : il ouvre un panneau qui
+suggère automatiquement une famille pour chacune (à partir de l'abréviation),
+modifiable avant d'enregistrer. Sinon, réglez le champ **Famille** sur la fiche
+de chaque matière (section « Paramétrage emploi du temps »).
+
+Sur la fiche de chaque matière, renseignez aussi :
 
 - le **type de salle requis** : Physique-Chimie et SVT → laboratoire, EPS →
   gymnase, informatique → salle info ;

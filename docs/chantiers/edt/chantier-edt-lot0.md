@@ -12,7 +12,7 @@ Fusionné dans `main` (branche d'origine `feat/edt-lot0-parametrage`, puis empil
 
 | Sous-lot | Backend + tests | Frontend | Statut |
 | --- | --- | --- | --- |
-| 0.1 Familles + couleur MENET | ✅ (`/matieres/familles`, `MatiereFamilleSeeder`) | ✅ `ChampsEdtMatiere` sur les formulaires matière (une matière à la fois) | ✅ pour la saisie manuelle ; ⚠️ assistant en masse sur `/ConfigMatieres` **non construit** — descopé au profit du seul `MatiereFamilleSeeder` (voir note 2026-09-13 plus bas) |
+| 0.1 Familles + couleur MENET | ✅ (`/matieres/familles`, `MatiereFamilleSeeder`) | ✅ `ChampsEdtMatiere` sur les formulaires matière (une matière à la fois) + ✅ assistant en masse sur `/Matieres` (colonne Famille + panneau « Affectation rapide », ajouté le 2026-09-13 — voir note plus bas) |
 | 0.2 Grille horaire | ✅ `PlageHoraireController` | ✅ `/GrilleHoraire` | ✅ |
 | 0.3 Salle attitrée | ✅ `classes.salle_id` + commande `edt:reconcilier-salles` | ✅ select dans les 2 formulaires classe | ✅ |
 | 0.4 Séances-types | ✅ endpoints + `generer` + `SeanceTypeSeeder` | ✅ `SeancesTypes` sous `/VolumeHoraire` | ✅ |
@@ -26,7 +26,7 @@ Migrations : `2026_09_01_000001..000004` (3 tables neuves + 1 ALTER groupé, col
 
 Articles d'aide in-app ajoutés (`HelpArticleSeeder`) : grille horaire, diagnostic EDT, indisponibilités + mise à jour de l'article emploi du temps. Mapping route→module dans `AideContextuelle.jsx`.
 
-**Différé (hors périmètre strict Lot 0, faible valeur) :** onglet indispos sur `DetailsEnseignant`, assistant familles intégré dans l'écran `/ConfigMatieres`, enrichissement explicite des 4 JSON de templates.
+**Différé (hors périmètre strict Lot 0, faible valeur) :** onglet indispos sur `DetailsEnseignant`, enrichissement explicite des 4 JSON de templates. (L'assistant d'affectation en masse des familles, un temps différé, a finalement été construit le 2026-09-13 — sur `/Matieres`, pas `/ConfigMatieres`, voir note plus bas.)
 
 ---
 
@@ -107,7 +107,7 @@ Table de correspondance famille → couleur MENET (note P3) :
 
 **Front** :
 - Formulaire matière (`/Matieres` → fiche) : select Famille (pré-remplit la couleur, modifiable), select Type de salle requis, case « effort soutenu ». Réglage **une matière à la fois**.
-- ⚠️ **Correction (2026-09-13) :** le bloc « Affectation rapide des familles » prévu ci-dessous sur `/ConfigMatieres` (liste des matières sans famille + suggestion en un clic) **n'a finalement pas été construit côté front** — seul le `MatiereFamilleSeeder` (backend) fait cette suggestion en masse, à la mise en place d'un tenant. Un directeur qui veut ranger ses matières par famille après coup doit le faire fiche par fiche. Voir `docs/chantiers/edt/emploi-du-temps-guide-complet.md` (Étape 4) pour la procédure réelle.
+- **Historique :** le bloc « Affectation rapide des familles » envisagé ci-dessous sur `/ConfigMatieres` n'avait finalement pas été construit lors de la livraison initiale du Lot 0 (seul `MatiereFamilleSeeder` faisait la suggestion en masse, côté backend, à la mise en place d'un tenant) — un directeur voulant ranger ses matières par famille après coup devait le faire fiche par fiche. **Ajouté le 2026-09-13**, mais sur l'écran `/Matieres` (liste des matières) plutôt que `/ConfigMatieres` : une colonne « Famille » sur la liste, et un bouton « Affectation rapide des familles » (visible seulement s'il reste des matières sans famille) qui ouvre un panneau avec suggestion automatique par abréviation, éditable, à enregistrer en un clic. Voir `docs/chantiers/edt/emploi-du-temps-guide-complet.md` (Étape 4) pour la procédure.
 
 **Seeder** (tenants existants) : `MatiereFamilleSeeder` — applique le mapping par `abbr_matiere`, laisse `null` si ambigu.
 
