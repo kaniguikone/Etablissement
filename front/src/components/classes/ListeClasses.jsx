@@ -116,12 +116,13 @@ const ListeClasses = () => {
                                 <th>Abréviation</th>
                                 <th>Niveau</th>
                                 <th>Série</th>
+                                <th>Salle</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {classes.length === 0 && (
-                                <tr><td colSpan={6} className="text-center text-muted py-3">Aucune classe trouvée.</td></tr>
+                                <tr><td colSpan={7} className="text-center text-muted py-3">Aucune classe trouvée.</td></tr>
                             )}
                             {classes.map((classe, i) => (
                                 <tr key={classe.id}>
@@ -130,6 +131,7 @@ const ListeClasses = () => {
                                     <td><span className="badge bg-light text-dark border">{classe.abbr_classe}</span></td>
                                     <td>{classe.niveau?.nom_niveau}</td>
                                     <td>{classe.serie ? <span className="badge bg-secondary">{classe.serie.nom}</span> : <span className="text-muted">—</span>}</td>
+                                    <td>{classe.salle ? classe.salle.nom : <span className="text-muted">—</span>}</td>
                                     <td>
                                         <NavLink to={`/DetailsClasse/${classe.id}`} className="btn btn-primary btn-sm me-1">Voir</NavLink>
                                         <button type="button" className="btn btn-danger btn-sm" onClick={() => supprimerClasse(classe.id)}>Supprimer</button>

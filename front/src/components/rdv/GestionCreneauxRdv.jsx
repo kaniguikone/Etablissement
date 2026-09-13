@@ -29,7 +29,7 @@ const GestionCreneauxRdv = () => {
             setReservations(r);
             setCreneaux(c);
         } catch {
-            toast('Erreur lors du chargement.', 'danger');
+            toast.error('Erreur lors du chargement.');
         } finally {
             setChargement(false);
         }

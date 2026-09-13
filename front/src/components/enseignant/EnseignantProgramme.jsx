@@ -41,7 +41,7 @@ const EnseignantProgramme = () => {
             });
             setChapitres(data);
         } catch {
-            toast('Erreur chargement programme.', 'danger');
+            toast.error('Erreur chargement programme.');
         } finally {
             setChargement(false);
         }
@@ -72,11 +72,11 @@ const EnseignantProgramme = () => {
                 periode_id: periodeId,
                 ...form,
             });
-            toast('Progression enregistrée.', 'success');
+            toast.success('Progression enregistrée.');
             setModalCh(null);
             charger();
         } catch (err) {
-            toast(err.response?.data?.message ?? 'Erreur.', 'danger');
+            toast.error(err.response?.data?.message ?? 'Erreur.');
         } finally {
             setSauvegarde(false);
         }
@@ -86,10 +86,10 @@ const EnseignantProgramme = () => {
         if (!ch.progression?.id) return;
         try {
             await api.delete(`/enseignant/progression/${ch.progression.id}`);
-            toast('Progression réinitialisée.', 'success');
+            toast.success('Progression réinitialisée.');
             charger();
         } catch {
-            toast('Erreur suppression.', 'danger');
+            toast.error('Erreur suppression.');
         }
     };
 

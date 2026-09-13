@@ -46,9 +46,9 @@ const EnseignantRdv = () => {
     const confirmerRdv = async (id) => {
         try {
             await api.post(`/enseignant/rdv/reservations/${id}/confirmer`);
-            toast('RDV confirmé.', 'success');
+            toast.success('RDV confirmé.');
             charger();
-        } catch { toast('Erreur.', 'danger'); }
+        } catch { toast.error('Erreur.'); }
     };
 
     const annulerRdv = async (id) => {
@@ -56,9 +56,9 @@ const EnseignantRdv = () => {
         if (!ok) return;
         try {
             await api.post(`/enseignant/rdv/reservations/${id}/annuler`);
-            toast('RDV annulé.', 'success');
+            toast.success('RDV annulé.');
             charger();
-        } catch { toast('Erreur.', 'danger'); }
+        } catch { toast.error('Erreur.'); }
     };
 
     const creerCreneau = async (e) => {
@@ -71,13 +71,13 @@ const EnseignantRdv = () => {
             setModalCreneau(false);
             setFormCreneau({ date_creneau: '', heure_debut: '', heure_fin: '' });
             setOnglet('creneaux');
-            toast('Créneau créé.', 'success');
+            toast.success('Créneau créé.');
         } catch (err) {
             const errors = err.response?.data?.errors;
             const msg = errors
                 ? Object.values(errors).flat().join(' ')
                 : (err.response?.data?.message ?? 'Erreur lors de la création.');
-            toast(msg, 'danger');
+            toast.error(msg);
         } finally {
             setSaving(false);
         }
@@ -90,9 +90,9 @@ const EnseignantRdv = () => {
             await api.delete(`/enseignant/rdv/creneaux/${confirmSuppr}`);
             setCreneaux(prev => prev.filter(c => c.id !== confirmSuppr));
             setConfirmSuppr(null);
-            toast('Créneau supprimé.', 'success');
+            toast.success('Créneau supprimé.');
         } catch (err) {
-            toast(err.response?.data?.message ?? 'Erreur lors de la suppression.', 'danger');
+            toast.error(err.response?.data?.message ?? 'Erreur lors de la suppression.');
         } finally {
             setSuppression(false);
         }

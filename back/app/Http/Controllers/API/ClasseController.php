@@ -13,7 +13,7 @@ class ClasseController extends Controller
 
     public function index(Request $request)
     {
-        $query = Classe::with('niveau', 'serie');
+        $query = Classe::with('niveau', 'serie', 'salle');
 
         if ($request->search) {
             $search = '%' . $request->search . '%';

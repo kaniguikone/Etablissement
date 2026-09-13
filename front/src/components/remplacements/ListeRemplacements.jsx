@@ -42,7 +42,7 @@ const ListeRemplacements = () => {
             setRemplacements(r);
             setDashboard(d);
         } catch {
-            toast('Erreur lors du chargement.', 'danger');
+            toast.error('Erreur lors du chargement.');
         } finally {
             setChargement(false);
         }
@@ -54,10 +54,10 @@ const ListeRemplacements = () => {
         if (!await confirmer('Supprimer ce remplacement ?')) return;
         try {
             await api.delete(`/remplacements/${id}`);
-            toast('Remplacement supprimé.', 'success');
+            toast.success('Remplacement supprimé.');
             charger();
         } catch {
-            toast('Erreur.', 'danger');
+            toast.error('Erreur.');
         }
     };
 

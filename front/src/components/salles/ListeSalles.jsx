@@ -29,7 +29,7 @@ const ListeSalles = () => {
             const { data } = await api.get('/salles', { params });
             setSalles(data);
         } catch {
-            toast('Erreur lors du chargement des salles.', 'danger');
+            toast.error('Erreur lors du chargement des salles.');
         } finally {
             setChargement(false);
         }
@@ -42,20 +42,20 @@ const ListeSalles = () => {
         if (!ok) return;
         try {
             await api.delete(`/salles/${salle.id}`);
-            toast('Salle supprimée.', 'success');
+            toast.success('Salle supprimée.');
             charger();
         } catch (e) {
-            toast(e.response?.data?.message || 'Erreur lors de la suppression.', 'danger');
+            toast.error(e.response?.data?.message || 'Erreur lors de la suppression.');
         }
     };
 
     const toggleActif = async (salle) => {
         try {
             await api.put(`/salles/${salle.id}`, { ...salle, actif: !salle.actif });
-            toast(`Salle ${!salle.actif ? 'activée' : 'désactivée'}.`, 'success');
+            toast.success(`Salle ${!salle.actif ? 'activée' : 'désactivée'}.`);
             charger();
         } catch {
-            toast('Erreur.', 'danger');
+            toast.error('Erreur.');
         }
     };
 

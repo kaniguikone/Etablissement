@@ -49,7 +49,7 @@ const EnseignantPresence = () => {
             data.forEach(e => { map[e.eleve_id] = e.statut ?? 'present'; });
             setStatuts(map);
         } catch {
-            toast('Erreur chargement élèves.', 'danger');
+            toast.error('Erreur chargement élèves.');
         } finally {
             setChargement(false);
         }
@@ -77,9 +77,9 @@ const EnseignantPresence = () => {
                     remarque: '',
                 })),
             });
-            toast('Présences enregistrées.', 'success');
+            toast.success('Présences enregistrées.');
         } catch {
-            toast("Erreur lors de l'enregistrement.", 'danger');
+            toast.error("Erreur lors de l'enregistrement.");
         } finally {
             setSauvegarde(false);
         }

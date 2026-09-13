@@ -1,17 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
+
+const FORM_VIDE = { nom: '', capacite: '', type: 'classe', batiment: '', actif: true };
 
 const FormSalle = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { toast } = useToast();
     const estModification = Boolean(id);
+    const nomRef = useRef(null);
 
-    const [form, setForm] = useState({
-        nom: '', capacite: '', type: 'classe', batiment: '', actif: true,
-    });
+    const [form, setForm] = useState(FORM_VIDE);
     const [erreurs, setErreurs] = useState({});
     const [chargement, setChargement] = useState(false);
     const [loading, setLoading] = useState(estModification);
@@ -26,7 +27,7 @@ const FormSalle = () => {
                 batiment: data.batiment ?? '',
                 actif: data.actif,
             }))
-            .catch(() => toast('Salle introuvable.', 'danger'))
+            .catch(() => toast.error('Salle introuvable.'))
             .finally(() => setLoading(false));
     }, [id]);
 
@@ -40,17 +41,19 @@ const FormSalle = () => {
         try {
             if (estModification) {
                 await api.put(`/salles/${id}`, payload);
-                toast('Salle modifiée avec succès.', 'success');
+                toast.success('Salle modifiée avec succès.');
+                navigate('/Salles');
             } else {
                 await api.post('/salles', payload);
-                toast('Salle créée avec succès.', 'success');
+                toast.success('Salle créée avec succès.');
+                setForm(FORM_VIDE);
+                nomRef.current?.focus();
             }
-            navigate('/Salles');
         } catch (e) {
             if (e.response?.status === 422) {
                 setErreurs(e.response.data.errors ?? {});
             } else {
-                toast(e.response?.data?.message || 'Erreur.', 'danger');
+                toast.error(e.response?.data?.message || 'Erreur.');
             }
         } finally {
             setChargement(false);
@@ -76,7 +79,7 @@ const FormSalle = () => {
                     <form onSubmit={soumettre}>
                         <div className="mb-3">
                             <label className="form-label">Nom de la salle <span className="text-danger">*</span></label>
-                            <input className={`form-control ${erreurs.nom ? 'is-invalid' : ''}`}
+                            <input ref={nomRef} className={`form-control ${erreurs.nom ? 'is-invalid' : ''}`}
                                 value={form.nom} onChange={e => set('nom', e.target.value)} placeholder="Ex : Salle A12" />
                             {erreurs.nom && <div className="invalid-feedback">{erreurs.nom[0]}</div>}
                         </div>

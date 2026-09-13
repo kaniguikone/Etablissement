@@ -13,7 +13,7 @@ const Messagerie = () => {
     useEffect(() => {
         api.get('/messages')
             .then(({ data }) => setConversations(data))
-            .catch(() => toast('Erreur lors du chargement.', 'danger'))
+            .catch(() => toast.error('Erreur lors du chargement.'))
             .finally(() => setChargement(false));
     }, []);
 
@@ -26,7 +26,7 @@ const Messagerie = () => {
             setMessages(data);
             setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
         } catch {
-            toast('Erreur.', 'danger');
+            toast.error('Erreur.');
         }
     };
 

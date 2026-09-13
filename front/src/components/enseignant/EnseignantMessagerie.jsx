@@ -15,7 +15,7 @@ const EnseignantMessagerie = () => {
     const chargerConversations = () => {
         api.get('/enseignant/messages/conversations')
             .then(({ data }) => setConversations(data))
-            .catch(() => toast('Erreur chargement.', 'danger'))
+            .catch(() => toast.error('Erreur chargement.'))
             .finally(() => setChargement(false));
     };
 
@@ -34,7 +34,7 @@ const EnseignantMessagerie = () => {
                 c === conv ? { ...c, non_lus: 0 } : c
             ));
         } catch {
-            toast('Erreur.', 'danger');
+            toast.error('Erreur.');
         }
     };
 
@@ -52,7 +52,7 @@ const EnseignantMessagerie = () => {
             await ouvrirConversation(selectee);
             chargerConversations();
         } catch {
-            toast('Erreur envoi.', 'danger');
+            toast.error('Erreur envoi.');
         } finally {
             setEnvoi(false);
         }

@@ -19,7 +19,7 @@ const DemandesParents = () => {
             setDemandes(resDemandes.data);
             setSlots(resSlots.data);
         } catch {
-            toast('Erreur lors du chargement.', 'danger');
+            toast.error('Erreur lors du chargement.');
         } finally {
             setChargement(false);
         }
@@ -31,10 +31,10 @@ const DemandesParents = () => {
         setAction(id);
         try {
             await api.post(`/parents/demandes/${id}/approuver`);
-            toast('Accès accordé.', 'success');
+            toast.success('Accès accordé.');
             charger();
         } catch (err) {
-            toast(err.response?.data?.message || 'Erreur.', 'danger');
+            toast.error(err.response?.data?.message || 'Erreur.');
         } finally {
             setAction(null);
         }
@@ -45,10 +45,10 @@ const DemandesParents = () => {
         setAction(id);
         try {
             await api.post(`/parents/demandes/${id}/rejeter`);
-            toast('Demande rejetée.', 'info');
+            toast.info('Demande rejetée.');
             charger();
         } catch {
-            toast('Erreur.', 'danger');
+            toast.error('Erreur.');
         } finally {
             setAction(null);
         }

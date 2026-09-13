@@ -56,15 +56,15 @@ const FormRemplacement = () => {
         try {
             if (estModification) {
                 await api.put(`/remplacements/${id}`, payload);
-                toast('Remplacement modifié.', 'success');
+                toast.success('Remplacement modifié.');
             } else {
                 await api.post('/remplacements', payload);
-                toast('Remplacement créé.', 'success');
+                toast.success('Remplacement créé.');
             }
             navigate('/Remplacements');
         } catch (e) {
             if (e.response?.status === 422) setErreurs(e.response.data.errors ?? {});
-            else toast(e.response?.data?.message || 'Erreur.', 'danger');
+            else toast.error(e.response?.data?.message || 'Erreur.');
         } finally {
             setChargement(false);
         }
