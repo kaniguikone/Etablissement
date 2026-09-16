@@ -117,8 +117,8 @@ const GrilleHoraire = () => {
         .filter((p) => (p.jour === jour || p.jour === null) && p.type === 'cours')
         .reduce((s, p) => s + (new Date(`1970-01-01T${p.heure_fin}`) - new Date(`1970-01-01T${p.heure_debut}`)) / 3600000, 0);
 
-    const nbCoursJour = (jour) => plages
-        .filter((p) => (p.jour === jour || p.jour === null) && p.type === 'cours').length;
+    const nbPlagesJour = (jour) => plages
+        .filter((p) => p.jour === jour || p.jour === null).length;
 
     const soumettre = (e) => {
         e.preventDefault();
@@ -470,8 +470,8 @@ const GrilleHoraire = () => {
                                         </tr>
                                     ))}
                                     <tr className="table-light">
-                                        <td className="fw-bold">Nb. de cours</td>
-                                        {JOURS.map((j) => <td key={j}>{nbCoursJour(j)}</td>)}
+                                        <td className="fw-bold">Nb. de plages</td>
+                                        {JOURS.map((j) => <td key={j}>{nbPlagesJour(j)}</td>)}
                                     </tr>
                                     <tr className="table-light">
                                         <td className="fw-bold">Heures de cours</td>
