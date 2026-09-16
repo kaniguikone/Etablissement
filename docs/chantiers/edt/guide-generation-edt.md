@@ -37,7 +37,12 @@ Grille → Salles → Familles → Séances → Affectations → (Groupes) → I
 Définissez la semaine type : plages de **cours**, **récréations** et **pause
 méridienne**, jour par jour.
 
-- Bouton **« Recopier un jour »** : duplique une journée type vers d'autres jours.
+- **« Construire une journée (ou plusieurs) d'un coup »** : décrivez la journée
+  en blocs (« 4 cours de 55 min », « récré 15 min »…) à partir d'une heure de
+  début — les heures se calculent seules, aperçu avant validation, applicable à
+  plusieurs jours cochés en même temps. Le plus rapide pour partir de zéro.
+- Bouton **« Recopier un jour »** : duplique une journée déjà construite vers d'autres jours.
+- Bouton **« Vider »** : efface un jour ou toute la grille (conserve les plages déjà utilisées par un créneau).
 - Une plage **sans jour** s'applique à tous les jours ouvrés.
 - Prévoyez des plages de durée régulière (≈ 55 min). Une séance de 2 h occupe
   deux plages contiguës ; une séance de 1 h 30 = une plage dédiée.

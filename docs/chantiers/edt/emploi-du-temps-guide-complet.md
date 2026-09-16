@@ -205,11 +205,25 @@ Un [aide-mémoire](#partie-4--aide-mémoire) d'une page termine le document.
 **Ce que vous faites :** vous saisissez, pour chaque jour ouvré, la succession
 des plages : les heures de cours, les récréations, la pause de midi.
 
-**Comment :** ajoutez les plages dans l'ordre. Pour chacune : un libellé
-(« M1 », « 8 h »), le type (*cours*, *récréation*, *pause de midi*), l'heure de
-début et l'heure de fin. Le bouton **« Recopier un jour »** duplique une journée
-type vers les autres jours — ensuite vous ajustez (mercredi plus court, samedi
-matin seulement…).
+**Le plus rapide : « Construire une journée (ou plusieurs) d'un coup ».**
+Décrivez la journée comme une suite de blocs — « 4 cours de 55 min », « récréation
+15 min », « 2 cours de 55 min », « pause méridienne 80 min », « 2 cours de 55 min » —
+avec juste l'**heure de début**. L'outil calcule toutes les heures
+automatiquement (plus besoin de taper chaque heure de début/fin), affiche un
+**aperçu** avant de valider, et peut construire **plusieurs jours cochés en même
+temps**. Une case **« Vider le(s) jour(s) avant de construire »** repart de zéro
+sur les jours choisis ; sans elle, une plage qui chevaucherait l'existant est
+simplement ignorée (pas de doublon créé).
+
+**Plage par plage, si vous préférez ajuster finement :** le formulaire
+« Ajouter une plage » reste disponible — libellé, jour, type, heure de début/fin.
+Le bouton **« Recopier un jour »** duplique une journée déjà construite vers
+d'autres jours.
+
+**Pour repartir de zéro :** le panneau **« Vider »** efface en un clic soit un
+jour précis, soit toute la grille — les plages déjà utilisées par un créneau
+existant sont automatiquement conservées et signalées, jamais supprimées à
+l'aveugle.
 
 **Conseils :**
 - des plages de cours de **durée régulière** (environ 55 min) : l'outil comprend
