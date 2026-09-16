@@ -27,6 +27,8 @@ const GrilleHoraire = () => {
     const [saving, setSaving] = useState(false);
     const [dupSource, setDupSource] = useState('');
     const [dupCibles, setDupCibles] = useState([]);
+    const [viderJour, setViderJour] = useState('');
+    const [videEnCours, setVideEnCours] = useState(false);
 
     const charger = () => {
         setChargement(true);
@@ -95,6 +97,24 @@ const GrilleHoraire = () => {
         api.post('/plages-horaires/dupliquer-jour', { source: dupSource, cibles: dupCibles })
             .then((r) => { toast.success(r.data.message); setDupSource(''); setDupCibles([]); charger(); })
             .catch((err) => toast.error(err.response?.data?.message || 'Recopie impossible.'));
+    };
+
+    const vider = async () => {
+        const cible = viderJour ? `la journée de ${viderJour}` : 'TOUTE la grille horaire (tous les jours)';
+        if (!await confirmer(`Vider ${cible} ? Les plages déjà utilisées par un créneau d'emploi du temps existant seront conservées.`)) return;
+        setVideEnCours(true);
+        api.delete('/plages-horaires/vider', { data: viderJour ? { jour: viderJour } : {} })
+            .then((r) => {
+                const { supprimees, protegees } = r.data;
+                if (protegees.length > 0) {
+                    toast.error(`${supprimees} plage(s) supprimée(s). ${protegees.length} conservée(s), déjà utilisée(s) par un créneau : ${protegees.join(', ')}.`);
+                } else {
+                    toast.success(`${supprimees} plage(s) supprimée(s).`);
+                }
+                charger();
+            })
+            .catch(() => toast.error('Erreur lors du vidage.'))
+            .finally(() => setVideEnCours(false));
     };
 
     return (
@@ -233,6 +253,29 @@ const GrilleHoraire = () => {
                                     <button type="button" className="btn btn-outline-primary btn-sm"
                                         onClick={dupliquer} disabled={!dupSource || dupCibles.length === 0}>
                                         Recopier
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Vidage */}
+                            <div className="col-lg-5">
+                                <div className="border rounded p-3">
+                                    <h6>Vider</h6>
+                                    <div className="mb-2">
+                                        <label className="form-label small">Portée</label>
+                                        <select className="form-select form-select-sm" value={viderJour}
+                                            onChange={(e) => setViderJour(e.target.value)}>
+                                            <option value="">Toute la grille (tous les jours)</option>
+                                            {JOURS.map((j) => <option key={j} value={j} className="text-capitalize">{j} uniquement</option>)}
+                                        </select>
+                                    </div>
+                                    <p className="text-muted small mb-2">
+                                        Les plages déjà utilisées par un créneau existant sont conservées et signalées.
+                                    </p>
+                                    <button type="button" className="btn btn-outline-danger btn-sm"
+                                        onClick={vider} disabled={videEnCours}>
+                                        {videEnCours && <span className="spinner-border spinner-border-sm me-1" />}
+                                        Vider {viderJour ? `le ${viderJour}` : 'toute la grille'}
                                     </button>
                                 </div>
                             </div>

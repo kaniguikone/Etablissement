@@ -303,6 +303,7 @@ Route::middleware([
             Route::get('/plages-horaires',                 [PlageHoraireController::class, 'index']);
             Route::post('/plages-horaires',                [PlageHoraireController::class, 'store']);
             Route::post('/plages-horaires/dupliquer-jour', [PlageHoraireController::class, 'dupliquerJour']);
+            Route::delete('/plages-horaires/vider',        [PlageHoraireController::class, 'vider']);
             Route::put('/plages-horaires/{id}',            [PlageHoraireController::class, 'update'])->where('id', '[0-9]+');
             Route::delete('/plages-horaires/{id}',         [PlageHoraireController::class, 'destroy'])->where('id', '[0-9]+');
 

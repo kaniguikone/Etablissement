@@ -86,6 +86,78 @@ class EdtParametrageTest extends TestCase
         $this->assertEquals(2, PlageHoraire::where('jour', 'mardi')->count());
     }
 
+    /**
+     * Reproduit un cas réel rencontré en usage : recopier deux fois vers le
+     * même jour (double clic, ou re-recopie après avoir ajouté une plage)
+     * créait silencieusement des plages en double et chevauchantes.
+     */
+    /** @test */
+    public function dupliquer_jour_deux_fois_ignore_les_doublons_au_lieu_de_les_creer(): void
+    {
+        PlageHoraire::create(['libelle' => 'M1', 'jour' => 'lundi', 'heure_debut' => '08:00', 'heure_fin' => '09:00', 'type' => 'cours']);
+
+        $this->postJson('/api/plages-horaires/dupliquer-jour', ['source' => 'lundi', 'cibles' => ['vendredi']])
+            ->assertStatus(200)->assertJsonPath('creees', 1)->assertJsonPath('ignorees', 0);
+
+        $r = $this->postJson('/api/plages-horaires/dupliquer-jour', ['source' => 'lundi', 'cibles' => ['vendredi']])
+            ->assertStatus(200);
+        $r->assertJsonPath('creees', 0)->assertJsonPath('ignorees', 1);
+
+        $this->assertEquals(1, PlageHoraire::where('jour', 'vendredi')->count(), 'Pas de doublon : une seule plage vendredi.');
+    }
+
+    /** @test */
+    public function vider_un_jour_ne_touche_pas_les_autres_jours_ni_les_plages_tous_les_jours(): void
+    {
+        PlageHoraire::create(['libelle' => 'M1', 'jour' => 'lundi', 'heure_debut' => '08:00', 'heure_fin' => '09:00', 'type' => 'cours']);
+        PlageHoraire::create(['libelle' => 'M2', 'jour' => 'mardi', 'heure_debut' => '08:00', 'heure_fin' => '09:00', 'type' => 'cours']);
+        PlageHoraire::create(['libelle' => 'Récré', 'jour' => null, 'heure_debut' => '10:00', 'heure_fin' => '10:15', 'type' => 'recreation']);
+
+        $this->deleteJson('/api/plages-horaires/vider', ['jour' => 'lundi'])
+            ->assertStatus(200)
+            ->assertJsonPath('supprimees', 1)
+            ->assertJsonPath('protegees', []);
+
+        $this->assertEquals(0, PlageHoraire::where('jour', 'lundi')->count());
+        $this->assertEquals(1, PlageHoraire::where('jour', 'mardi')->count());
+        $this->assertEquals(1, PlageHoraire::whereNull('jour')->count());
+    }
+
+    /** @test */
+    public function vider_toute_la_grille_efface_aussi_les_plages_tous_les_jours(): void
+    {
+        PlageHoraire::create(['libelle' => 'M1', 'jour' => 'lundi', 'heure_debut' => '08:00', 'heure_fin' => '09:00', 'type' => 'cours']);
+        PlageHoraire::create(['libelle' => 'Récré', 'jour' => null, 'heure_debut' => '10:00', 'heure_fin' => '10:15', 'type' => 'recreation']);
+
+        $this->deleteJson('/api/plages-horaires/vider')
+            ->assertStatus(200)
+            ->assertJsonPath('supprimees', 2);
+
+        $this->assertEquals(0, PlageHoraire::count());
+    }
+
+    /** @test */
+    public function vider_conserve_les_plages_utilisees_par_un_creneau(): void
+    {
+        $niveau = Niveau::create(['nom_niveau' => '6ème', 'abbr_niveau' => '6e']);
+        $classe = Classe::create(['num_classe' => '1', 'nom_classe' => '6e A', 'abbr_classe' => '6A', 'niveau_id' => $niveau->id]);
+        $matiere = Matiere::create(['abbr_matiere' => 'M', 'libelle_matiere' => 'Maths', 'description_matiere' => 'x']);
+        $ens = Enseignant::create(['matricule_enseignant' => 'E1', 'nom_enseignant' => 'X', 'prenoms_enseignant' => 'Y']);
+        $utilisee = PlageHoraire::create(['libelle' => 'M1', 'jour' => 'lundi', 'heure_debut' => '08:00', 'heure_fin' => '09:00', 'type' => 'cours']);
+        PlageHoraire::create(['libelle' => 'M2', 'jour' => 'lundi', 'heure_debut' => '09:00', 'heure_fin' => '10:00', 'type' => 'cours']);
+
+        \App\Models\EmploiDuTemps::create([
+            'classe_id' => $classe->id, 'matiere_id' => $matiere->id, 'enseignant_id' => $ens->id,
+            'plage_horaire_id' => $utilisee->id, 'jour' => 'lundi', 'heure_debut' => '08:00', 'heure_fin' => '09:00',
+        ]);
+
+        $r = $this->deleteJson('/api/plages-horaires/vider', ['jour' => 'lundi'])->assertStatus(200);
+
+        $r->assertJsonPath('supprimees', 1);
+        $this->assertCount(1, $r->json('protegees'));
+        $this->assertTrue(PlageHoraire::whereKey($utilisee->id)->exists(), 'La plage utilisée par un créneau doit être conservée.');
+    }
+
     // ── 0.4 Séances-types ───────────────────────────────────────────────────
 
     private function niveauMatiereAvecVolume(float $heures = 4): NiveauMatiere

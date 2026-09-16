@@ -76,6 +76,7 @@ class PlageHoraireController extends Controller
         }
 
         $creees = 0;
+        $ignorees = 0;
         foreach (array_unique($data['cibles']) as $cible) {
             if ($cible === $data['source']) {
                 continue;
@@ -84,6 +85,14 @@ class PlageHoraireController extends Controller
                 PlageHoraire::where('jour', $cible)->delete();
             }
             foreach ($sources as $s) {
+                // Sans « remplacer », ne pas dupliquer par-dessus une plage déjà
+                // là (ex. clic répété sur « Recopier ») : ça créait silencieusement
+                // des doublons qui se chevauchent, jamais détectés ensuite.
+                if ($this->chevaucheExistant(['jour' => $cible, 'heure_debut' => $s->heure_debut, 'heure_fin' => $s->heure_fin])) {
+                    $ignorees++;
+
+                    continue;
+                }
                 PlageHoraire::create([
                     'annee_scolaire_id' => $s->annee_scolaire_id,
                     'libelle' => $s->libelle,
@@ -98,7 +107,46 @@ class PlageHoraireController extends Controller
             }
         }
 
-        return response()->json(['message' => "{$creees} plage(s) recopiée(s).", 'creees' => $creees]);
+        $message = "{$creees} plage(s) recopiée(s).";
+        if ($ignorees > 0) {
+            $message .= " {$ignorees} ignorée(s) (chevauchement avec une plage déjà existante).";
+        }
+
+        return response()->json(['message' => $message, 'creees' => $creees, 'ignorees' => $ignorees]);
+    }
+
+    /**
+     * Vide un jour (ou toute la grille si `jour` est omis). Les plages déjà
+     * utilisées par un créneau d'emploi du temps sont conservées (même
+     * protection que la suppression unitaire) — le détail est renvoyé pour
+     * que l'utilisateur sache lesquelles retirer les créneaux d'abord.
+     *
+     * Les plages « tous les jours » (jour = null) ne sont retirées que lors
+     * d'un vidage complet, pas d'un vidage limité à un seul jour.
+     */
+    public function vider(Request $request)
+    {
+        $data = $request->validate([
+            'jour' => ['nullable', Rule::in(PlageHoraire::JOURS)],
+        ]);
+
+        $plages = empty($data['jour'])
+            ? PlageHoraire::all()
+            : PlageHoraire::where('jour', $data['jour'])->get();
+
+        $supprimees = 0;
+        $protegees = [];
+        foreach ($plages as $p) {
+            if (EmploiDuTemps::where('plage_horaire_id', $p->id)->exists()) {
+                $protegees[] = $p->libelle.' ('.($p->jour ?? 'tous les jours').')';
+
+                continue;
+            }
+            $p->delete();
+            $supprimees++;
+        }
+
+        return response()->json(['supprimees' => $supprimees, 'protegees' => $protegees]);
     }
 
     private function valider(Request $request): array
@@ -125,25 +173,29 @@ class PlageHoraireController extends Controller
      */
     private function verifierChevauchement(array $data, ?int $exclureId = null): void
     {
+        if ($this->chevaucheExistant($data, $exclureId)) {
+            throw new HttpResponseException(response()->json([
+                'message' => 'Cette plage en chevauche une autre sur le même créneau.',
+            ], 422));
+        }
+    }
+
+    private function chevaucheExistant(array $data, ?int $exclureId = null): bool
+    {
         $jour = $data['jour'] ?? null;
 
         $query = PlageHoraire::where('heure_debut', '<', $data['heure_fin'])
             ->where('heure_fin', '>', $data['heure_debut']);
 
-        if ($jour === null) {
-            // une plage « tous les jours » entre en conflit avec n'importe quelle plage
-        } else {
+        if ($jour !== null) {
             $query->where(fn ($q) => $q->where('jour', $jour)->orWhereNull('jour'));
         }
+        // une plage « tous les jours » (jour = null) entre en conflit avec n'importe quelle plage
 
         if ($exclureId) {
             $query->where('id', '!=', $exclureId);
         }
 
-        if ($query->exists()) {
-            throw new HttpResponseException(response()->json([
-                'message' => 'Cette plage en chevauche une autre sur le même créneau.',
-            ], 422));
-        }
+        return $query->exists();
     }
 }
