@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\EmploiDuTemps;
 use App\Models\PlageHoraire;
+use Carbon\Carbon;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -113,6 +114,103 @@ class PlageHoraireController extends Controller
         }
 
         return response()->json(['message' => $message, 'creees' => $creees, 'ignorees' => $ignorees]);
+    }
+
+    /**
+     * Construit un ou plusieurs jours d'un coup à partir d'une séquence de
+     * blocs (cours / récréation / pause méridienne), au lieu de saisir
+     * chaque plage une à une. Les heures sont calculées automatiquement à
+     * partir de `heure_debut` ; les libellés suivent la convention MENET
+     * (M1, M2… le matin, S1, S2… après la pause méridienne).
+     *
+     * Body : {
+     *   jours: ['lundi','mardi'], heure_debut: '07:30', remplacer: false,
+     *   blocs: [
+     *     {type: 'cours', nb_plages: 4, duree_minutes: 55},
+     *     {type: 'recreation', duree_minutes: 15},
+     *     {type: 'cours', nb_plages: 2, duree_minutes: 55},
+     *     {type: 'pause_midi', duree_minutes: 80},
+     *     {type: 'cours', nb_plages: 2, duree_minutes: 55},
+     *   ],
+     * }
+     */
+    public function construire(Request $request)
+    {
+        $data = $request->validate([
+            'jours' => 'required|array|min:1',
+            'jours.*' => [Rule::in(PlageHoraire::JOURS)],
+            'heure_debut' => 'required|date_format:H:i',
+            'remplacer' => 'nullable|boolean',
+            'blocs' => 'required|array|min:1',
+            'blocs.*.type' => ['required', Rule::in(PlageHoraire::TYPES)],
+            'blocs.*.duree_minutes' => 'required|integer|min:1|max:300',
+            'blocs.*.nb_plages' => 'required_if:blocs.*.type,cours|nullable|integer|min:1|max:20',
+        ]);
+
+        $creees = 0;
+        $ignorees = 0;
+
+        foreach (array_unique($data['jours']) as $jour) {
+            if ($request->boolean('remplacer')) {
+                PlageHoraire::where('jour', $jour)->delete();
+            }
+
+            $curseur = $data['heure_debut'];
+            $ordre = 1;
+            $compteurM = 0;
+            $compteurS = 0;
+            $compteurRecre = 0;
+            $apresMidi = false;
+
+            foreach ($data['blocs'] as $bloc) {
+                if ($bloc['type'] === 'cours') {
+                    for ($i = 0; $i < $bloc['nb_plages']; $i++) {
+                        $fin = Carbon::createFromFormat('H:i', $curseur)->addMinutes($bloc['duree_minutes'])->format('H:i');
+                        $libelle = $apresMidi ? 'S'.(++$compteurS) : 'M'.(++$compteurM);
+                        [$c, $ig] = $this->creerSiLibre($jour, $ordre++, $libelle, $curseur, $fin, 'cours');
+                        $creees += $c;
+                        $ignorees += $ig;
+                        $curseur = $fin;
+                    }
+
+                    continue;
+                }
+
+                $fin = Carbon::createFromFormat('H:i', $curseur)->addMinutes($bloc['duree_minutes'])->format('H:i');
+                if ($bloc['type'] === 'pause_midi') {
+                    $libelle = 'Pause méridienne';
+                    $apresMidi = true;
+                } else {
+                    $compteurRecre++;
+                    $libelle = $compteurRecre > 1 ? "Récréation {$compteurRecre}" : 'Récréation';
+                }
+                [$c, $ig] = $this->creerSiLibre($jour, $ordre++, $libelle, $curseur, $fin, $bloc['type']);
+                $creees += $c;
+                $ignorees += $ig;
+                $curseur = $fin;
+            }
+        }
+
+        $message = "{$creees} plage(s) créée(s).";
+        if ($ignorees > 0) {
+            $message .= " {$ignorees} ignorée(s) (chevauchement avec une plage déjà existante).";
+        }
+
+        return response()->json(['message' => $message, 'creees' => $creees, 'ignorees' => $ignorees]);
+    }
+
+    /** Crée la plage si elle ne chevauche rien d'existant ; sinon l'ignore. @return array{0:int,1:int} [créée, ignorée] (0 ou 1 chacun) */
+    private function creerSiLibre(string $jour, int $ordre, string $libelle, string $debut, string $fin, string $type): array
+    {
+        if ($this->chevaucheExistant(['jour' => $jour, 'heure_debut' => $debut, 'heure_fin' => $fin])) {
+            return [0, 1];
+        }
+        PlageHoraire::create([
+            'libelle' => $libelle, 'jour' => $jour, 'ordre' => $ordre,
+            'heure_debut' => $debut, 'heure_fin' => $fin, 'type' => $type,
+        ]);
+
+        return [1, 0];
     }
 
     /**

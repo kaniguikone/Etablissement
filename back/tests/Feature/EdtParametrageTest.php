@@ -107,6 +107,78 @@ class EdtParametrageTest extends TestCase
     }
 
     /** @test */
+    public function construire_une_journee_calcule_les_heures_et_les_libelles(): void
+    {
+        $r = $this->postJson('/api/plages-horaires/construire', [
+            'jours' => ['lundi'],
+            'heure_debut' => '07:30',
+            'blocs' => [
+                ['type' => 'cours', 'nb_plages' => 3, 'duree_minutes' => 55],
+                ['type' => 'recreation', 'duree_minutes' => 15],
+                ['type' => 'cours', 'nb_plages' => 2, 'duree_minutes' => 55],
+                ['type' => 'pause_midi', 'duree_minutes' => 80],
+                ['type' => 'cours', 'nb_plages' => 2, 'duree_minutes' => 55],
+            ],
+        ])->assertStatus(200);
+
+        $r->assertJsonPath('creees', 9)->assertJsonPath('ignorees', 0);
+
+        $plages = PlageHoraire::where('jour', 'lundi')->orderBy('ordre')->get();
+        $this->assertCount(9, $plages);
+        $this->assertSame(['M1', 'M2', 'M3', 'Récréation', 'M4', 'M5', 'Pause méridienne', 'S1', 'S2'], $plages->pluck('libelle')->all());
+        $this->assertSame('07:30', substr($plages[0]->heure_debut, 0, 5));
+        $this->assertSame('08:25', substr($plages[0]->heure_fin, 0, 5));
+        // 3 plages de 55 depuis 07:30 = 10:15, +15 de récré = 10:30
+        $this->assertSame('10:15', substr($plages[3]->heure_debut, 0, 5));
+        $this->assertSame('10:30', substr($plages[3]->heure_fin, 0, 5));
+        // dernière plage (S2) : deux plages de l'après-midi après la pause
+        $this->assertSame('cours', $plages->last()->type);
+        $this->assertSame('S2', $plages->last()->libelle);
+    }
+
+    /** @test */
+    public function construire_sur_plusieurs_jours_a_la_fois(): void
+    {
+        $this->postJson('/api/plages-horaires/construire', [
+            'jours' => ['lundi', 'mardi', 'mercredi'],
+            'heure_debut' => '08:00',
+            'blocs' => [['type' => 'cours', 'nb_plages' => 2, 'duree_minutes' => 60]],
+        ])->assertStatus(200)->assertJsonPath('creees', 6);
+
+        foreach (['lundi', 'mardi', 'mercredi'] as $j) {
+            $this->assertEquals(2, PlageHoraire::where('jour', $j)->count());
+        }
+    }
+
+    /** @test */
+    public function construire_avec_remplacer_vide_le_jour_avant(): void
+    {
+        PlageHoraire::create(['libelle' => 'Ancien', 'jour' => 'lundi', 'heure_debut' => '06:00', 'heure_fin' => '06:30', 'type' => 'cours']);
+
+        $this->postJson('/api/plages-horaires/construire', [
+            'jours' => ['lundi'], 'heure_debut' => '07:30', 'remplacer' => true,
+            'blocs' => [['type' => 'cours', 'nb_plages' => 1, 'duree_minutes' => 55]],
+        ])->assertStatus(200)->assertJsonPath('creees', 1);
+
+        $this->assertEquals(1, PlageHoraire::where('jour', 'lundi')->count());
+        $this->assertDatabaseMissing('plages_horaires', ['libelle' => 'Ancien']);
+    }
+
+    /** @test */
+    public function construire_sans_remplacer_ignore_les_chevauchements(): void
+    {
+        PlageHoraire::create(['libelle' => 'Existant', 'jour' => 'lundi', 'heure_debut' => '07:30', 'heure_fin' => '08:25', 'type' => 'cours']);
+
+        $r = $this->postJson('/api/plages-horaires/construire', [
+            'jours' => ['lundi'], 'heure_debut' => '07:30',
+            'blocs' => [['type' => 'cours', 'nb_plages' => 2, 'duree_minutes' => 55]],
+        ])->assertStatus(200);
+
+        $r->assertJsonPath('creees', 1)->assertJsonPath('ignorees', 1);
+        $this->assertEquals(2, PlageHoraire::where('jour', 'lundi')->count());
+    }
+
+    /** @test */
     public function vider_un_jour_ne_touche_pas_les_autres_jours_ni_les_plages_tous_les_jours(): void
     {
         PlageHoraire::create(['libelle' => 'M1', 'jour' => 'lundi', 'heure_debut' => '08:00', 'heure_fin' => '09:00', 'type' => 'cours']);
