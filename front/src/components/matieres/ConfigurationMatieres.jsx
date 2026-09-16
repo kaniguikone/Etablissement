@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import api from '../../api/axios';
+import { useConfirm } from '../../context/ConfirmContext';
 
 const COULEURS_GROUPES = ['#8b5cf6', '#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#ec4899'];
 
@@ -33,6 +34,7 @@ const LigneMatiere = ({ matiere, actif, onClick, children }) => (
 
 /* ── Étape 1 : Matières de l'établissement ─────────────────────────────────── */
 const EtapeEtablissement = ({ config, onSave }) => {
+    const { confirmer } = useConfirm();
     const [selection, setSelection] = useState(
         new Set(config.etablissementMatieres.map(Number))
     );
@@ -49,13 +51,43 @@ const EtapeEtablissement = ({ config, onSave }) => {
 
     const [erreurSave, setErreurSave] = useState('');
 
+    // Décocher une matière ici retire aussi son programme de tous les niveaux
+    // (Étape 2) — si des niveaux l'utilisent déjà, le serveur répond 409 avec
+    // le détail (impact) pour qu'on demande confirmation avant de renvoyer
+    // avec confirmer_suppression: true.
+    const enregistrerAppel = (confirmeSuppression) =>
+        api.post('/config-matieres/etablissement', {
+            matiere_ids: [...selection],
+            confirmer_suppression: confirmeSuppression,
+        });
+
     const sauvegarder = () => {
         setSaving(true);
         setErreurSave('');
-        api.post('/config-matieres/etablissement', { matiere_ids: [...selection] })
-            .then(() => onSave())
-            .catch(() => setErreurSave('Erreur lors de la sauvegarde.'))
-            .finally(() => setSaving(false));
+        enregistrerAppel(false)
+            .then(() => { onSave(); setSaving(false); })
+            .catch(async (err) => {
+                if (err.response?.status === 409 && err.response.data?.necessite_confirmation) {
+                    setSaving(false);
+                    const impact = err.response.data.impact ?? [];
+                    const detail = impact
+                        .map((i) => `${i.libelle_matiere} (${i.nb_niveaux} niveau${i.nb_niveaux > 1 ? 'x' : ''})`)
+                        .join(', ');
+                    const ok = await confirmer(
+                        `Ces matières sont déjà au programme de certains niveaux (Étape 2) et seront retirées partout, `
+                        + `y compris leur découpage en séances : ${detail}. Continuer ?`
+                    );
+                    if (!ok) return;
+                    setSaving(true);
+                    enregistrerAppel(true)
+                        .then(() => onSave())
+                        .catch(() => setErreurSave('Erreur lors de la sauvegarde.'))
+                        .finally(() => setSaving(false));
+                    return;
+                }
+                setErreurSave('Erreur lors de la sauvegarde.');
+                setSaving(false);
+            });
     };
 
     return (

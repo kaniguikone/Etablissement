@@ -69,16 +69,48 @@ class ConfigurationMatieresController extends Controller
 
     /**
      * Sauvegarde des matières enseignées dans l'établissement.
+     *
+     * Décocher une matière ici retire aussi son programme de tous les
+     * niveaux/séries (Étape 2) — sinon les deux écrans se désynchronisent :
+     * une matière absente de l'Étape 1 disparaît de la liste de l'Étape 2
+     * (filtrée sur `etablissementMatieres`) sans que sa configuration par
+     * niveau ne soit réellement supprimée, et le générateur continue de la
+     * réclamer. Cette suppression en cascade est irréversible (découpage en
+     * séances compris, via la contrainte cascadeOnDelete de niveau_matieres) :
+     * si des niveaux l'utilisent déjà, on demande confirmation avant d'agir
+     * (`confirmer_suppression`), sauf pour les autres champs enregistrés au
+     * même moment.
      */
     public function saveEtablissement(Request $request): JsonResponse
     {
         $request->validate([
-            'matiere_ids'   => 'present|array',
-            'matiere_ids.*' => 'integer|exists:matieres,id',
+            'matiere_ids'            => 'present|array',
+            'matiere_ids.*'          => 'integer|exists:matieres,id',
+            'confirmer_suppression'  => 'nullable|boolean',
         ]);
 
+        $ancien = array_map('intval', DB::table('etablissement_matieres')->pluck('matiere_id')->all());
+        $nouveau = array_map('intval', $request->matiere_ids);
+        $retirees = array_values(array_diff($ancien, $nouveau));
+
+        if (! empty($retirees) && ! $request->boolean('confirmer_suppression')) {
+            $impact = DB::table('niveau_matieres')
+                ->join('matieres', 'matieres.id', '=', 'niveau_matieres.matiere_id')
+                ->whereIn('niveau_matieres.matiere_id', $retirees)
+                ->selectRaw('matieres.id as matiere_id, matieres.libelle_matiere, count(distinct niveau_matieres.niveau_id) as nb_niveaux')
+                ->groupBy('matieres.id', 'matieres.libelle_matiere')
+                ->get();
+
+            if ($impact->isNotEmpty()) {
+                return response()->json([
+                    'necessite_confirmation' => true,
+                    'impact' => $impact,
+                ], 409);
+            }
+        }
+
         try {
-            DB::transaction(function () use ($request) {
+            DB::transaction(function () use ($request, $retirees) {
                 DB::table('etablissement_matieres')->delete();
                 foreach ($request->matiere_ids as $matiereId) {
                     DB::table('etablissement_matieres')->insert([
@@ -86,6 +118,13 @@ class ConfigurationMatieresController extends Controller
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
+                }
+
+                if (! empty($retirees)) {
+                    // Cascade sur seances_types via la contrainte cascadeOnDelete.
+                    DB::table('niveau_matieres')->whereIn('matiere_id', $retirees)->delete();
+                    DB::table('volumes_horaires')->whereIn('matiere_id', $retirees)->delete();
+                    DB::table('classe_matieres')->whereIn('matiere_id', $retirees)->delete();
                 }
             });
         } catch (\Throwable $e) {
