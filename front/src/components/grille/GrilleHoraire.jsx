@@ -117,6 +117,9 @@ const GrilleHoraire = () => {
         .filter((p) => (p.jour === jour || p.jour === null) && p.type === 'cours')
         .reduce((s, p) => s + (new Date(`1970-01-01T${p.heure_fin}`) - new Date(`1970-01-01T${p.heure_debut}`)) / 3600000, 0);
 
+    const nbCoursJour = (jour) => plages
+        .filter((p) => (p.jour === jour || p.jour === null) && p.type === 'cours').length;
+
     const soumettre = (e) => {
         e.preventDefault();
         setSaving(true);
@@ -227,44 +230,6 @@ const GrilleHoraire = () => {
 
                 {!chargement && (
                     <>
-                        <div className="table-responsive">
-                            <table className="table table-bordered text-center align-middle" style={{ fontSize: '0.85rem' }}>
-                                <thead className="table-dark">
-                                    <tr>
-                                        <th style={{ width: 110 }}>Horaire</th>
-                                        {JOURS.map((j) => <th key={j} className="text-capitalize">{j}</th>)}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {lignes.length === 0 && (
-                                        <tr><td colSpan={7} className="text-muted py-3">Aucune plage définie.</td></tr>
-                                    )}
-                                    {lignes.map(({ debut, fin }) => (
-                                        <tr key={`${debut}-${fin}`}>
-                                            <td className="fw-bold bg-light">{debut}<br /><small>{fin}</small></td>
-                                            {JOURS.map((jour) => {
-                                                const p = plagePour(jour, debut, fin);
-                                                if (!p) return <td key={jour} />;
-                                                return (
-                                                    <td key={jour} className={COULEUR_TYPE[p.type]}>
-                                                        <button type="button" className="btn btn-link btn-sm p-0 text-decoration-none" onClick={() => editer(p)}>
-                                                            {p.libelle}
-                                                        </button>
-                                                        {p.jour === null && <span className="badge bg-info ms-1">tous</span>}
-                                                        <button type="button" className="btn btn-sm text-danger p-0 ms-1" title="Supprimer" onClick={() => supprimer(p)}>✕</button>
-                                                    </td>
-                                                );
-                                            })}
-                                        </tr>
-                                    ))}
-                                    <tr className="table-light">
-                                        <td className="fw-bold">Heures de cours</td>
-                                        {JOURS.map((j) => <td key={j}>{totalHeuresJour(j).toFixed(1)} h</td>)}
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
                         {/* Construction guidée */}
                         <div className="border rounded p-3 bg-light mt-3">
                             <h6>Construire une journée (ou plusieurs) d&apos;un coup</h6>
@@ -339,7 +304,12 @@ const GrilleHoraire = () => {
 
                             {apercu.length > 0 && (
                                 <div className="mb-2">
-                                    <label className="form-label small d-block">Aperçu calculé</label>
+                                    <label className="form-label small d-block">
+                                        Aperçu calculé —{' '}
+                                        <span className="text-muted fw-normal">
+                                            {apercu.length} plage(s) au total, dont {apercu.filter((p) => p.type === 'cours').length} de cours
+                                        </span>
+                                    </label>
                                     <div className="d-flex flex-wrap gap-1">
                                         {apercu.map((p, i) => (
                                             <span key={i} className={`badge border ${COULEUR_BADGE_TYPE[p.type] || 'bg-light text-dark'}`}>
@@ -466,6 +436,49 @@ const GrilleHoraire = () => {
                                     </button>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Grille récapitulative */}
+                        <div className="table-responsive mt-3">
+                            <table className="table table-bordered text-center align-middle" style={{ fontSize: '0.85rem' }}>
+                                <thead className="table-dark">
+                                    <tr>
+                                        <th style={{ width: 110 }}>Horaire</th>
+                                        {JOURS.map((j) => <th key={j} className="text-capitalize">{j}</th>)}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {lignes.length === 0 && (
+                                        <tr><td colSpan={7} className="text-muted py-3">Aucune plage définie.</td></tr>
+                                    )}
+                                    {lignes.map(({ debut, fin }) => (
+                                        <tr key={`${debut}-${fin}`}>
+                                            <td className="fw-bold bg-light">{debut}<br /><small>{fin}</small></td>
+                                            {JOURS.map((jour) => {
+                                                const p = plagePour(jour, debut, fin);
+                                                if (!p) return <td key={jour} />;
+                                                return (
+                                                    <td key={jour} className={COULEUR_TYPE[p.type]}>
+                                                        <button type="button" className="btn btn-link btn-sm p-0 text-decoration-none" onClick={() => editer(p)}>
+                                                            {p.libelle}
+                                                        </button>
+                                                        {p.jour === null && <span className="badge bg-info ms-1">tous</span>}
+                                                        <button type="button" className="btn btn-sm text-danger p-0 ms-1" title="Supprimer" onClick={() => supprimer(p)}>✕</button>
+                                                    </td>
+                                                );
+                                            })}
+                                        </tr>
+                                    ))}
+                                    <tr className="table-light">
+                                        <td className="fw-bold">Nb. de cours</td>
+                                        {JOURS.map((j) => <td key={j}>{nbCoursJour(j)}</td>)}
+                                    </tr>
+                                    <tr className="table-light">
+                                        <td className="fw-bold">Heures de cours</td>
+                                        {JOURS.map((j) => <td key={j}>{totalHeuresJour(j).toFixed(1)} h</td>)}
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </>
                 )}
