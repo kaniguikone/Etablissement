@@ -275,17 +275,17 @@ const GrilleHoraire = () => {
                                             </select>
                                         </div>
                                         {b.type === 'cours' && (
-                                            <div style={{ width: 90 }}>
+                                            <div style={{ width: 130 }}>
                                                 <div className="input-group input-group-sm">
-                                                    <input type="number" min="1" max="20" className="form-control"
+                                                    <input type="number" min="1" max="20" className="form-control" style={{ minWidth: 50 }}
                                                         value={b.nbPlages} onChange={(e) => modifierBloc(i, { nbPlages: e.target.value })} />
                                                     <span className="input-group-text">plage(s)</span>
                                                 </div>
                                             </div>
                                         )}
-                                        <div style={{ width: 130 }}>
+                                        <div style={{ width: 150 }}>
                                             <div className="input-group input-group-sm">
-                                                <input type="number" min="1" max="300" className="form-control"
+                                                <input type="number" min="1" max="300" className="form-control" style={{ minWidth: 50 }}
                                                     value={b.dureeMinutes} onChange={(e) => modifierBloc(i, { dureeMinutes: e.target.value })} />
                                                 <span className="input-group-text">min{b.type === 'cours' ? '/plage' : ''}</span>
                                             </div>
