@@ -39,18 +39,36 @@ const GenererEdt = () => {
         api.get('/edt/grille-reference').then((r) => setPlagesRef(r.data)).catch(() => {});
     }, []);
 
+    // La génération est synchrone côté serveur et peut prendre jusqu'à 300s sur
+    // un gros lycée (cf. EdtGenerationController) — un délai réseau plus court
+    // ferait échouer la requête côté navigateur alors que le scénario finit
+    // quand même par être créé en base (constaté : "échec" affiché puis
+    // scénario bien présent après rechargement). On aligne le délai client sur
+    // la limite serveur, avec une marge.
+    const TIMEOUT_GENERATION = 320000;
+
+    // En cas d'erreur (y compris un timeout réseau), on recharge quand même la
+    // liste : si la génération a en réalité abouti côté serveur après que le
+    // navigateur a abandonné, le scénario apparaît immédiatement au lieu de
+    // nécessiter un rechargement manuel de la page.
+    const messageErreurGeneration = (err, repli) => {
+        charger();
+
+        return err._userMessage || err.response?.data?.message || repli;
+    };
+
     const lancer = () => {
         if (jours.length === 0) { toast.error('Choisissez au moins un jour.'); return; }
         setEnCours(true);
         setDetail(null);
-        api.post('/edt/generations', { libelle: libelle || undefined, jours })
+        api.post('/edt/generations', { libelle: libelle || undefined, jours }, { timeout: TIMEOUT_GENERATION })
             .then((r) => {
                 toast.success('Scénario généré.');
                 setDetail(r.data);
                 setLibelle('');
                 charger();
             })
-            .catch((err) => toast.error(err.response?.data?.message || 'La génération a échoué.'))
+            .catch((err) => toast.error(messageErreurGeneration(err, 'La génération a échoué.')))
             .finally(() => setEnCours(false));
     };
 
@@ -59,9 +77,9 @@ const GenererEdt = () => {
     const regenerer = async (id) => {
         if (!await confirmer('Régénérer un nouveau scénario en conservant les créneaux verrouillés ?')) return;
         setEnCours(true);
-        api.post(`/edt/generations/${id}/regenerer`)
+        api.post(`/edt/generations/${id}/regenerer`, undefined, { timeout: TIMEOUT_GENERATION })
             .then((r) => { toast.success('Nouveau scénario généré.'); setDetail(r.data); charger(); })
-            .catch((err) => toast.error(err.response?.data?.message || 'Régénération impossible.'))
+            .catch((err) => toast.error(messageErreurGeneration(err, 'Régénération impossible.')))
             .finally(() => setEnCours(false));
     };
 
